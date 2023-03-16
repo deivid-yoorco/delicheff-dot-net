@@ -1,0 +1,51 @@
+﻿@model PopularProductTagsModel
+@if (Model.Tags.Count > 0)
+{
+    <div class="block block-popular-tags hide-on-med-and-down">
+        <h5>@T("Products.Tags.Popular")</h5>
+        <div class="listbox">
+            <div>
+                <ul class="tags">
+                    @foreach (var item in Model.Tags)
+                    {
+                        <li><a href="@Url.RouteUrl("ProductsByTag", new { productTagId = item.Id, SeName = item.SeName })" style="font-size:@(Model.GetFontSize(item))%;">@item.Name</a></li>
+                    }
+                </ul>
+            </div>
+            @if (Model.TotalTags > Model.Tags.Count)
+            {
+                <div class="view-all">
+                    <a href="@Url.RouteUrl("ProductTagsAll")">@T("Products.Tags.Popular.ViewAll")</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="hide-on-large-only">
+        <ul class="collapsible z-depth-0">
+            <li>
+                <div class="collapsible-header">
+                    @T("Products.Tags.Popular")
+                </div>
+                <div class="collapsible-body">
+                    <div class="listbox">
+                        <div>
+                            <ul class="tags">
+                                @foreach (var item in Model.Tags)
+                                {
+                                    <li><a href="@Url.RouteUrl("ProductsByTag", new { productTagId = item.Id, SeName = item.SeName })" style="font-size:@(Model.GetFontSize(item))%;">@item.Name</a></li>
+                                }
+                            </ul>
+                        </div>
+                        @if (Model.TotalTags > Model.Tags.Count)
+                        {
+                            <div class="view-all">
+                                <a href="@Url.RouteUrl("ProductTagsAll")">@T("Products.Tags.Popular.ViewAll")</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+}

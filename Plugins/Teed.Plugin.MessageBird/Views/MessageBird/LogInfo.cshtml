@@ -1,0 +1,127 @@
+﻿@model Teed.Plugin.MessageBird.Models.MessageBirdLogModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MessageBird.Log");
+}
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Información del log
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="Log">regresar a la lista de logs</a>
+        </small>
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Administrador que envió el mensaje</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">
+                            <a href="/Admin/Customer/Edit/@Model.AdminId" target="_blank">@Model.Admin</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Cliente al que se le envió el mensaje</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">
+                            <a href="/Admin/Customer/Edit/@Model.CustomerId" target="_blank">@Model.Customer</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Número al que se envió el mensaje</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">@Model.ToNumber</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Fecha de creación del log/Fecha de envío del mensaje</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">@Model.CreatedOn.ToString("dd/MM/yyyy hh:mm:ss tt")</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Estatus</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">@Model.Status</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Id del canal de WhatsApp</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">@Model.WhatsAppChannelId</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Json de template enviado</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <pre id="hsm"></pre>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Json solicitud</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <pre id="request"></pre>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Json respuesta</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <pre id="response"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var hsm = @Html.Raw(Model.TextSent);
+        var request = @Html.Raw(Model.JsonRequest);
+        var response = @Html.Raw(Model.JsonResponse);
+        $('#hsm').html(JSON.stringify(hsm, undefined, 2));
+        $('#request').html(JSON.stringify(request, undefined, 2));
+        $('#response').html(JSON.stringify(response, undefined, 2));
+    });
+</script>

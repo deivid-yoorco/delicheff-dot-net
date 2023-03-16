@@ -1,0 +1,526 @@
+﻿@model ShoppingCartModel
+@using Nop.Core
+@using Nop.Core.Domain.Tax
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+@{
+    bool IsMoto = false;
+}
+<style>
+    .terms-of-service {
+        margin-top: 10px;
+    }
+</style>
+<div class="order-summary-content">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "order_summary_content_before" })
+    @await Html.PartialAsync("_OrderReviewData", Model.OrderReviewData)
+    @if (Model.Items.Count > 0)
+    {
+        if (Model.Warnings.Count > 0)
+        {
+            <div class="message-error">
+                <ul>
+                    @foreach (var warning in Model.Warnings)
+                    {
+                        <li style="color: #ff0000;">@warning</li>
+                    }
+                </ul>
+            </div>
+        }
+        @*we add enctype = "multipart/form-data" because "File upload" attribute control type requires it*@
+        <form asp-route="ShoppingCart" method="post" enctype="multipart/form-data" id="shopping-cart-form">
+            <input asp-for="CartInSesionJson" hidden />
+            <div class="table-wrapper hide-on-small-only">
+                <table class="cart">
+                    <colgroup>
+                        @if (Model.IsEditable)
+                        {
+                            <col width="1" />
+                        }
+                        @if (Model.ShowSku)
+                        {
+                            <col width="1" />
+                        }
+                        @if (Model.ShowProductImages)
+                        {
+                            <col width="1" />
+                        }
+                        <col />
+                        <col width="1" />
+                        <col width="1" />
+                        <col width="1" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            @if (Model.ShowSku)
+                            {
+                                <th class="sku">
+                                    @T("ShoppingCart.SKU")
+                                </th>
+                            }
+                            @if (Model.ShowProductImages)
+                            {
+                                <th class="product-picture hide-on-small-only">
+                                    @T("ShoppingCart.Image")
+                                </th>
+                                <th class="product-picture hide-on-med-and-up show-on-small" style="height: 9em;padding-top: 4em;">
+                                    @T("ShoppingCart.Image")
+                                </th>
+                            }
+                            <th class="product">
+                                @T("ShoppingCart.Product(s)")
+                            </th>
+                            @*<th class="unit-price">
+                                    @T("ShoppingCart.UnitPrice")
+                                </th>*@
+                            <th class="quantity hide-on-small-only" style="width:100px">
+                                @T("ShoppingCart.Quantity")
+                            </th>
+                            <th class="quantity hide-on-med-and-up show-on-small" style="height: 5.8em;padding-top: 2.5em;">
+                                @T("ShoppingCart.Quantity")
+                            </th>
+                            <th class="subtotal">
+                                @T("ShoppingCart.ItemTotal")
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (var item in Model.Items)
+                            {
+                                @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                {
+                                    if (!IsMoto)
+                                    {
+                                        if (item.Category.Equals("Motos"))
+                                        {
+                                            IsMoto = true;
+                                        }
+                                    }
+                                }
+                                <tr>
+                                    @if (Model.ShowSku)
+                                    {
+                                        <td class="sku">
+                                            <span class="sku-number">@item.Sku</span>
+                                        </td>
+                                    }
+                                    @if (Model.ShowProductImages)
+                                    {
+                                        <td class="product-picture">
+                                            @if (!string.IsNullOrEmpty(item.FancyDesign))
+                                            {
+                                                string src = item.FancyDesign.Split('#').ToArray()[0];
+                                                src = src.Split('#').ToArray()[0];
+                                                <img alt="@item.Picture.AlternateText" class="responsive-img" src="@src" title="@item.Picture.Title" />
+                                            }
+                                            else
+                                            {
+                                                <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                            }
+                                        </td>
+                                    }
+                                    <td class="product">
+                                        <strong>@item.ProductName</strong>
+                                        @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                        {
+                                            <div class="attributes">
+                                                @Html.Raw(item.AttributeInfo)
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.SelectedPropertyOption))
+                                        {
+                                            <div class="attributes">
+                                                @(item.SelectedPropertyOption.First().ToString().ToUpper())@(item.SelectedPropertyOption.Substring(1))
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.RecurringInfo))
+                                        {
+                                            <div class="recurring-info">
+                                                @Html.Raw(item.RecurringInfo)
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.RentalInfo))
+                                        {
+                                            <div class="rental-info">
+                                                @Html.Raw(item.RentalInfo)
+                                            </div>
+                                        }
+
+                                        @if (item.Warnings.Count > 0)
+                                        {
+                                            <div class="message-error">
+                                                <ul>
+                                                    @foreach (var warning in item.Warnings)
+                                                    {
+                                                        <li style="color:#ff0000;">@warning</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    </td>
+
+                                    <td class="quantity" style="width: 150px;">
+                                        @if (!item.Sku.Contains("Empaque-"))
+                                        {
+                                            <div class="number-input" style="margin-top:0 !important">
+                                                <select disabled class="card-select browser-default selected-qty-@item.Id" onchange="updateCartWithSelectInCart(@item.ProductId, @item.EquivalenceCoefficient, @item.WeightInterval, this, '@item.BuyingBySecondary', '@item.SelectedPropertyOption');
+                                                    registerAddOrRemoveFromSelectToCart('@item.Sku',
+                                                    '@item.ProductName',
+                                                    '@(string.Join("/", item.ProductCategoryNames))',
+                                                    '@(string.Join(",", item.ProductManufacturerNames))',
+                                                    @decimal.Parse(item.UnitPrice.Replace("$", "")),
+                                                    this)">
+                                                </select>
+                                            </div>
+                                            <script asp-location="Footer">
+                                            cartInitialSetup(@(item.Id), @item.EquivalenceCoefficient, @item.WeightInterval, @item.Quantity, '@(item.BuyingBySecondary.ToString())');
+                                            </script>
+                                        }
+                                        else
+                                        {
+                                            <input disabled value="@item.Quantity" />
+                                        }
+                                    </td>
+                                    <td class="subtotal">
+                                        <span class="product-subtotal">@item.SubTotal</span>
+                                        @if (!string.IsNullOrEmpty(item.Discount))
+                                        {
+                                            <div class="discount" style="color:#C53b36">
+                                                @T("ShoppingCart.ItemYouSave", item.Discount)
+                                            </div>
+                                            if (item.MaximumDiscountedQty.HasValue)
+                                            {
+                                                <div class="discount-additional-info">
+                                                    @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="show-on-small hide-on-med-and-up">
+                <style>
+                    .btn-flat i {
+                        font-size: 1.5rem !important;
+                    }
+
+                    .row-cards {
+                        margin-bottom: 0;
+                    }
+
+                    .cards-elements {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                </style>
+                @foreach (var item in Model.Items)
+                {
+                    if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                    {
+                        if (!IsMoto)
+                        {
+                            if (item.Category.Equals("Motos"))
+                            {
+                                IsMoto = true;
+                            }
+                        }
+                    }
+
+                    <div class="col s12 m12">
+                        <div class="card-panel">
+                            <div class="row valign-wrapper row-cards">
+                                <div class="col s3">
+                                    @if (Model.ShowProductImages)
+                                    {
+                                        <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                    }
+                                </div>
+                                <div class="col s9">
+                                    <div>
+                                        <strong>@item.ProductName</strong>
+                                        @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                        {
+                                            <div class="attributes">
+                                                @Html.Raw(item.AttributeInfo)
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.SelectedPropertyOption))
+                                        {
+                                            <div class="attributes">
+                                                @(item.SelectedPropertyOption.First().ToString().ToUpper())@(item.SelectedPropertyOption.Substring(1))
+                                            </div>
+                                        }
+                                        @if (item.Warnings.Count > 0)
+                                        {
+                                            <div class="message-error">
+                                                <ul>
+                                                    @foreach (var warning in item.Warnings)
+                                                    {
+                                                        <li style="color:#ff0000;">@warning</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="cards-elements">
+                                        <div class="col s2 center">
+                                            @if (Model.IsEditable)
+                                            {
+                                                <div class="remove-from-cart">
+                                                    @if (item.DisableRemoval)
+                                                    {
+                                                        <text>&nbsp;</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="preloader-wrapper small" id="responsive-loading-@(item.Id)" style="display:none;">
+                                                            <div class="spinner-layer">
+                                                                <div class="circle-clipper left">
+                                                                    <div class="circle"></div>
+                                                                </div><div class="gap-patch">
+                                                                    <div class="circle"></div>
+                                                                </div><div class="circle-clipper right">
+                                                                    <div class="circle"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button type="submit" class="btn-flat waves-effect waves-light teed-primary-text" name="responsiveupdatecart" id="responsive-btn-@(item.Id)" style="padding:0;">
+                                                            <i class="material-icons">delete</i>
+                                                        </button>
+                                                        <input type="checkbox" name="responsiveremovefromcart" id="responsive-remove-@(item.Id)" value="@(item.Id)" class="filled-in" style="display:none;" />
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col s6" style="text-align: center">
+
+                                            <div class="number-input" style="margin-top:0 !important;padding:0">
+                                                <select class="card-select browser-default selected-qty-@item.Id" onchange="updateCartWithSelectInCart(@item.ProductId, @item.EquivalenceCoefficient, @item.WeightInterval, this, '@item.BuyingBySecondary', '@item.SelectedPropertyOption');
+                                                    registerAddOrRemoveFromSelectToCart('@item.Sku',
+                                                    '@item.ProductName',
+                                                    '@(string.Join("/", item.ProductCategoryNames))',
+                                                    '@(string.Join(",", item.ProductManufacturerNames))',
+                                                    @decimal.Parse(item.UnitPrice.Replace("$", "")),
+                                                    this)">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col s4">
+                                            <strong>Precio: </strong><span class="product-subtotal">@item.SubTotal</span>
+                                            @if (!string.IsNullOrEmpty(item.Discount))
+                                            {
+                                                <div class="discount" style="color:#C53b36">
+                                                    @T("ShoppingCart.ItemYouSave", item.Discount)
+                                                </div>
+                                                if (item.MaximumDiscountedQty.HasValue)
+                                                {
+                                                    <div class="discount-additional-info">
+                                                        @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @foreach (var item in Model.Items)
+                {
+                    <script type="text/javascript" asp-location="Footer">
+                    $('#responsive-opt-@item.Id').change(function () {
+                        var v = $('#responsive-opt-@item.Id').val();
+                        $('#responsive-qty-@item.Id').val(v);
+
+                        var url = '@Url.Action("ResponsiveUpdateCartAjax", "ShoppingCart")';
+                        var data = $('#shopping-cart-form').serialize();
+                        $.ajax({
+                            url: url,
+                            data: data,
+                            type: 'POST',
+                            success: function (result) {
+                                location.reload();
+                            },
+                            //complete: this.resetLoadWaiting,
+                            error: function (error) {
+                                $("#error").empty();
+                                $("#error").append("Ocurrió un error inesperado.");
+                            }
+                        });
+                    });
+                    </script>
+                }
+                @foreach (var item in Model.Items)
+
+                {
+                    <script type="text/javascript" asp-location="Footer">
+                        $('#responsive-btn-@(item.Id)').click(function () {
+                            $('input[id=responsive-remove-@(item.Id)]').prop('checked', true);
+                            $('#responsive-btn-@(item.Id)').hide();
+                            $('#responsive-loading-@(item.Id)').addClass('active');
+                            $('#responsive-loading-@(item.Id)').show();
+                        });
+                    </script>
+                }
+            </div>
+            @foreach (var item in Model.Items)
+            {
+                <script type="text/javascript" asp-location="Footer">
+                    $('#opt-@item.Id').change(function () {
+                        var v = $('#opt-@item.Id').val();
+                        $('#qty-@item.Id').val(v);
+
+                        var url = '@Url.Action("UpdateCartAjax","ShoppingCart")';
+                        var data = $('#shopping-cart-form').serialize();
+                        $.ajax({
+                            url: url,
+                            data: data,
+                            type: 'POST',
+                            success: function (result) {
+                                location.reload();
+                            },
+                            //complete: this.resetLoadWaiting,
+                            error: function (error) {
+                                $("#error").empty();
+                                $("#error").append("Ocurrió un error inesperado.");
+                            }
+                        });
+                    });
+                </script>
+            }
+            @foreach (var item in Model.Items)
+            {
+                <script type="text/javascript" asp-location="Footer">
+                    $('#btn-@(item.Id)').click(function () {
+                        $('input[id=remove-@(item.Id)]').prop('checked', true);
+                        $('#btn-@(item.Id)').hide();
+                        $('#loading-@(item.Id)').addClass('active');
+                        $('#loading-@(item.Id)').show();
+                    });
+                </script>
+            }
+            @if (Model.IsEditable && Model.Items.Count > 0 && Model.DisplayTaxShippingInfo)
+            {
+                var inclTax = workContext.TaxDisplayType == TaxDisplayType.IncludingTax;
+                //tax info is already included in the price (incl/excl tax). that's why we display only shipping info here
+                //of course, you can modify appropriate locales to include VAT info there
+                <div class="tax-shipping-info">
+                    @T(inclTax ? "ShoppingCart.TaxShipping.InclTax" : "ShoppingCart.TaxShipping.ExclTax", Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("shippinginfo") }))
+                </div>
+            }
+            <div class="row section">
+                @if (Model.IsEditable)
+                {
+                    @if (string.IsNullOrEmpty(Model.MinOrderSubtotalWarning) && !Model.HideCheckoutButton)
+                    {
+                        <div class="col s12 center-align">
+                            <button type="submit" id="decline-merge-top" name="decline-merge" value="decline-merge" class="btn-large waves-effect waves-light" style="margin-top:10px;">
+                                Borrar estos productos
+                            </button>
+
+                            <button type="submit" id="merge-products-top" name="merge-products" value="merge-products" class="btn-large waves-effect waves-light" style="margin-top:10px;">
+                                Conservar estos productos
+                            </button>
+                        </div>
+                    }
+                }
+                @if (Model.IsEditable)
+                {
+                    @await Html.PartialAsync("_CheckoutAttributes", Model)
+                }
+                @await Component.InvokeAsync("SelectedCheckoutAttributes")
+            </div>
+
+        </form>
+    }
+    else
+    {
+        <div class="section">
+            <div class="card horizontal">
+                <div class="card-stacked">
+                    <div class="card-content" style="font-size:16px;">
+                        @T("ShoppingCart.CartIsEmpty")
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                @await Component.InvokeAsync("HomepageBestSellers")
+            </div>
+        </div>
+    }
+    @await Component.InvokeAsync("Widget", new { widgetZone = "order_summary_content_after" })
+</div>
+
+<script>
+    function cartInitialSetup(id, coefficient, weightInterval, qty, buyingBySec) {
+        buyingBySec = buyingBySec == "False" ? false : true;
+        var newValue = qty;
+        var select = $(".selected-qty-" + id);
+        select.empty();
+        for (var j = 0; j < select.length; j++) {
+            var type = buyingBySec || weightInterval > 0 ? "gr" : "pz";
+            var options = select[j].options;
+            if (buyingBySec && coefficient > 0) {
+                for (var i = 0; i <= 50; i++) {
+                    var value = qty;
+                    value = ((i * 1000) / coefficient).toFixed(2);
+                    if (value >= 1000) {
+                        value = (value / 1000).toFixed(2);
+                        type = " kg";
+                    }
+                    var option = new Option(value + type, i);
+                    options.add(option);
+                }
+            }
+            else if (weightInterval > 0) {
+                for (var w = 0; w <= 50; w++) {
+                    var weightValue = qty;
+                    weightValue = (w * weightInterval).toFixed(2);
+                    if (weightValue >= 1000) {
+                        weightValue = (weightValue / 1000).toFixed(2);
+                        type = " kg";
+                    }
+                    var optionWeight = new Option(weightValue + type, w);
+                    options.add(optionWeight);
+                }
+            }
+            else {
+                for (var e = 0; e <= 50; e++) {
+                    var newOption = new Option(e + " " + type, e);
+                    options.add(newOption);
+                }
+            }
+        }
+
+        $(".selected-qty-" + id).find('option[value=' + parseInt(newValue) + ']').prop('selected', true);
+    }
+
+    function updateCartWithSelectInCart(id, coefficient, weightInterval, element, buyingBySec, selectedProp) {
+        displayAjaxLoading(true);
+
+        var newValue = parseInt($(element).val());
+        var buyingBySecondary = buyingBySec == 'False' ? false : true;
+        var selectedProperty = selectedProp;
+
+        $.ajax({
+            cache: false,
+            url: '/shoppingcart/UpdateProductQty_Catalog?productId=' + id + '&buyingBySecondary=' + buyingBySecondary + '&qty=' + newValue + '&selectedPropertyOption=' + selectedProperty,
+            type: 'get',
+            success: function () {
+                location.reload();
+            },
+            error: function (e) {
+                console.log(e);
+                alert("No se pudo actualizar la cantidad");
+            }
+        });
+    }
+</script>

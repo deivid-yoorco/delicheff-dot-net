@@ -1,0 +1,160 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingRegion.ShippingZoneListModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRegion");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "ShippingRegion";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Lista de regiones
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+        <a asp-action="EditGlobal" class="btn bg-olive">
+            Modificar horario general
+        </a>
+    </div>
+</div>
+<div class="postal-messages" style="margin: 1em 1em 0 1em;">
+    @if (Model.PendingZones.Count > 0)
+    {
+        <div class="alert alert-error alert-dismissable">
+            Zonas pendientes por asignar a una región: @(string.Join(", ", Model.PendingZones.Select(x => x.ZoneName)))
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success alert-dismissable">
+            Todas las zonas se han asignado a una región.
+        </div>
+    }
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div style="margin: 1em">
+                    <span style="font-weight:bold">Limite de horario global:</span><br />
+                    <table>
+                        <tr style="text-align:right">
+                            <td>1PM - 3PM</td>
+                            <td style="width: 40px;">@(Model.GlobalScheduleSettings.Schedule1Quantity)</td>
+                        </tr>
+                        <tr style="text-align:right">
+                            <td>3PM - 5PM</td>
+                            <td style="width: 40px;">@(Model.GlobalScheduleSettings.Schedule2Quantity)</td>
+                        </tr>
+                        <tr style="text-align:right">
+                            <td>5PM - 7PM</td>
+                            <td style="width: 40px;">@(Model.GlobalScheduleSettings.Schedule3Quantity)</td>
+                        </tr>
+                        <tr style="text-align:right">
+                            <td>7PM - 9PM</td>
+                            <td style="width: 40px;">@(Model.GlobalScheduleSettings.Schedule4Quantity)</td>
+                        </tr>
+                        <tr style="font-weight: bold;text-align:right">
+                            <td>TOTAL</td>
+                            <td style="width: 40px;">@(Model.GlobalScheduleSettings.Schedule1Quantity + Model.GlobalScheduleSettings.Schedule2Quantity + Model.GlobalScheduleSettings.Schedule3Quantity + Model.GlobalScheduleSettings.Schedule4Quantity)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<span id="popupNotification"></span>
+<script>
+    $(document).ready(function () {
+        var popupNotification = $("#popupNotification").kendoNotification(
+                            {
+                                position: {
+                                    bottom: 50,
+                                    right: 50
+                                }
+            }).data("kendoNotification");
+
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: 100,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Name",
+                    title: "Nombre de región",
+                },
+                {
+                    field: "ZoneNames",
+                    title: "Zonas de la región",
+                },
+                {
+                    field: "Schedule1Quantity",
+                    title: "1PM - 3PM",
+                },
+                {
+                    field: "Schedule2Quantity",
+                    title: "3PM - 5PM",
+                },
+                {
+                    field: "Schedule3Quantity",
+                    title: "5PM - 7PM",
+                },
+                {
+                    field: "Schedule4Quantity",
+                    title: "7PM - 9PM",
+                },
+                {
+                    field: "Total",
+                    title: "TOTAL",
+                },
+                {
+                    field: "Id",
+                    title: "Editar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>Editar</a>'
+                }
+            ]
+        });
+    });
+</script>

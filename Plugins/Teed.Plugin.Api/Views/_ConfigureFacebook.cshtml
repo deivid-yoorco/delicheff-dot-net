@@ -1,0 +1,31 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Instrucciones:</strong>
+        <ul>
+            <li>Crea una nueva aplicación desde <a href="https://developers.facebook.com" target="_blank">https://developers.facebook.com</a></li>
+            <li>Luego de crearla, selecciona la opción <strong>Settings</strong> y luego <strong>Basic</strong>.</li>
+            <li>Copia y pega el <strong>App ID</strong> y el <strong>App Secret</strong> en el campo correspondiente.</li>
+        </ul>
+    </div>
+    <br /><br />
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Facebook App Id</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="FacebookAppId" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Facebook App Secret</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="FacebookAppSecret" />
+            </div>
+        </div>
+    </div>
+</div>

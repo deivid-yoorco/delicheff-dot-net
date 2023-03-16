@@ -1,0 +1,29 @@
+﻿@model Nop.Web.Areas.Admin.Models.RewardItem.RewardItemSettingViewModel
+@inject AdminAreaSettings adminAreaSettings
+@{
+    //page title
+    ViewBag.Title = T("admin.catalog.rewardsitem").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("RewardItems");
+}
+
+<form asp-controller="RewardItem" asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("admin.catalog.rewardsitem")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+        </div>
+        <div class="pull-right" style="margin-right: 10px;">
+            <a href="/Admin/RewardItem/AddProductsRewardItem" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                Agregar producto
+            </a>
+        </div>
+    </div>
+    @await Html.PartialAsync("_CreateOrUpdateRewardItem", Model)
+</form>

@@ -1,0 +1,34 @@
+﻿@model Teed.Plugin.Groceries.Components.FranchiseTextModel
+
+@if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.CentralEnLinea)
+{
+    <div class="form-group">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="control-label">Franquicia asignada</label>
+                <div title="Franquicia que será la encargada de hacer entrega de la orden" class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <span style="top: 7px;">@Model.FranchiseName</span>
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.RescuedyFranchiseName))
+    {
+        <div class="form-group">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="control-label">Franquicia que la rescató</label>
+                    <div title="Franquicia que rescató esta orden" class="ico-help">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <span style="top: 7px;">@Model.RescuedyFranchiseName</span>
+            </div>
+        </div>
+    }
+}

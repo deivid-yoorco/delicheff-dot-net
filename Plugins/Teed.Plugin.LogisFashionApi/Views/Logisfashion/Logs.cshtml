@@ -1,0 +1,173 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Nop.Core;
+@using Nop.Core.Domain.Common;
+@using Nop.Core.Infrastructure;
+@using Nop.Core.Domain.Customers;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Logisfashion";
+    Html.SetActiveMenuItemSystemName("TeedLogisfashionLog");
+    var workContext = EngineContext.Current.Resolve<IWorkContext>();
+}
+
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h2 style="margin-top:1em;">Historial de errores en API:</h2>
+                        <div id="element-grid"></div>
+                        @if (workContext.CurrentCustomer.Email == "cmartinez@teed.com.mx")
+                        {
+                            <div style="margin: 1em">
+                                <button id="clean-log" class="btn btn-primary">Clean error log</button>
+                                <span style="color:green;display:none" id="clean-log-succes">Ok!</span>
+                                <span style="color:red;display:none" id="clean-log-error">Error!</span>
+                            </div>
+                            <script>
+                                $("#clean-log").on('click', function () {
+                                    $(this).attr("disabled", true);
+                                    $("#clean-log-succes").hide();
+                                    $("#clean-log-error").hide();
+                                    $.ajax({
+                                        url: '/Admin/Logisfashion/CleanErrorLog',
+                                        method: 'GET',
+                                        success: () => {
+                                            $("#clean-log-succes").show();
+                                        },
+                                        error: () => {
+                                            $("#clean-log").attr("disabled", false);
+                                            $("#clean-log-error").show();
+                                        }
+                                    });
+                                });
+                            </script>
+                        }
+                        <h2 style="margin-top:1em;">Historial de consultas exitosas:</h2>
+                        <div id="element-successful-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListLogErrors", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "RequestType",
+                    title: "Tipo de consulta",
+                },
+                {
+                    field: "StatusCode",
+                    title: "Código de error",
+                }
+                ,
+                {
+                    field: "StatusDescription",
+                    title: "Descripción",
+                }
+            ]
+        });
+
+        $("#element-successful-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListLogSuccess", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "RequestType",
+                    title: "Tipo de consulta",
+                },
+                {
+                    field: "StatusCode",
+                    title: "Código de error",
+                }
+                ,
+                {
+                    field: "StatusDescription",
+                    title: "Descripción",
+                }
+            ]
+        });
+    });
+    </script>

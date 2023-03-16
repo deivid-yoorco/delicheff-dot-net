@@ -1,0 +1,320 @@
+﻿@using Nop.Core.Domain
+@using StackExchange.Profiling
+@using Nop.Core.Domain.Common
+@using Nop.Core.Domain.Seo
+@using Nop.Services.Events
+@using Nop.Services.Security
+@using Nop.Web.Framework.Events
+@inject CommonSettings commonSettings
+@inject IEventPublisher eventPublisher
+@inject IPermissionService permissionService
+@inject SeoSettings seoSettings
+@inject StoreInformationSettings storeInformationSettings
+@{
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/Themes/TeedMasa/Content/js/site.min.js");
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/Themes/TeedMasa/Content/js/public.js");
+
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedMasa/Content/css/site.min.css");
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedMasa/Content/css/custom.css");
+
+    if (commonSettings.RenderXuaCompatible)
+    {
+        Html.AppendHeadCustomParts($"<meta http-equiv=\"X-UA-Compatible\" content=\"{commonSettings.XuaCompatibleValue}\"/>");
+    }
+    //custom tag(s);
+    if (!string.IsNullOrEmpty(seoSettings.CustomHeadTags))
+    {
+        Html.AppendHeadCustomParts(seoSettings.CustomHeadTags);
+    }
+    var displayMiniProfiler = storeInformationSettings.DisplayMiniProfilerInPublicStore
+        && (!storeInformationSettings.DisplayMiniProfilerForAdminOnly || permissionService.Authorize(StandardPermissionProvider.AccessAdminPanel));
+    //event
+    eventPublisher.Publish(new PageRenderingEvent(this.Html));
+}
+<!DOCTYPE html>
+<html @(this.ShouldUseRtlTheme() ? Html.Raw(" dir=\"rtl\"") : null) @Html.NopPageCssClasses()>
+<head>
+    <title>@Html.NopTitle()</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <meta name="description" content="@(Html.NopMetaDescription())" />
+    <meta name="keywords" content="@(Html.NopMetaKeywords())" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Masa)
+    {
+        <meta property="og:image" content="https://www.masahouse.mx/images/masa-og-image.jpg" />
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.AsianBay)
+    {
+        <meta property="og:image" content="https://www.asian-bay.com/images/asian-og-image.jpg" />
+
+        <script>
+            (function (w, d, s, o, f, js, fjs) {
+            w['JS-Widget'] = o; w[o] = w[o] || function () { (w[o].q = w[o].q || []).push(arguments) };
+            js = d.createElement(s), fjs = d.getElementsByTagName(s)[0];
+            js.id = o; js.src = f; js.async = 1; fjs.parentNode.insertBefore(js, fjs);
+            }(window, document, 'script', 'mw', 'https://widget.meitre.com/widget.js?v=' + Date.now()));
+            mw('init', { restaurant_widget_id: 'dfeab0dd7b4d908bef6dc25e566cd7b4' });
+        </script>
+    }
+    <script>
+        dataLayer = []; //Google tag manager variable
+    </script>
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Masa)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-56QP9SF');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.AsianBay)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-TWBDXTF');</script>
+        <!-- End Google Tag Manager -->
+    }
+    @Html.NopHeadCustom()
+    @*This is used so that themes can inject content into the header*@
+    @await Html.PartialAsync("Head")
+    @await Component.InvokeAsync("Widget", new { widgetZone = "head_html_tag" })
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+
+    <script src="~/js/jquery.min.js"></script>
+
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Aldora)
+    {
+        <script type="text/javascript">
+            window.$zopim || (function (d, s) {
+                var z = $zopim = function (c) { z._.push(c) }, $ = z.s =
+                    d.createElement(s), e = d.getElementsByTagName(s)[0]; z.set = function (o) {
+                        z.set.
+                            _.push(o)
+                    }; z._ = []; z.set._ = []; $.async = !0; $.setAttribute("charset", "utf-8");
+                $.src = "https://v2.zopim.com/?4t7n3vnZFUGRjoewUrxh9vPjZeTw5WyS"; z.t = +new Date; $.
+                    type = "text/javascript"; e.parentNode.insertBefore($, e)
+            })(document, "script");
+        </script>
+        <!-- Facebook Pixel Code -->
+        @*<script>
+            !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+            n.callMethod ?
+            n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '1660429250700547');
+            fbq('track', 'PageView');
+            </script>
+            <noscript>
+            <img height="1" width="1" src="https://www.facebook.com/tr?id=1660429250700547&ev=PageView&noscript=1" />
+            </noscript>*@
+        <!-- End Facebook Pixel Code -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+    {
+        <!-- Facebook Pixel Code -->
+        <script>
+            !function (f, b, e, v, n, t, s) {
+                if (f.fbq) return; n = f.fbq = function () {
+                    n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                };
+                if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                n.queue = []; t = b.createElement(e); t.async = !0;
+                t.src = v; s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '170405757139333');
+            fbq('track', 'PageView');
+        </script>
+        <noscript>
+            <img height="1" width="1"
+             src="https://www.facebook.com/tr?id=170405757139333&ev=PageView&noscript=1" />
+        </noscript>
+        <!-- End Facebook Pixel Code -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Indigo)
+    {
+        <!-- Facebook Pixel Code -->
+        <script>
+            !function (f, b, e, v, n, t, s) {
+                if (f.fbq) return; n = f.fbq = function () {
+                    n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                };
+                if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                n.queue = []; t = b.createElement(e); t.async = !0;
+                t.src = v; s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '1775190692572782');
+            fbq('track', 'PageView');
+        </script>
+        <noscript>
+            <img height="1" width="1" style="display:none"
+             src="https://www.facebook.com/tr?id=1775190692572782&ev=PageView&noscript=1" />
+        </noscript>
+        <!-- End Facebook Pixel Code -->
+    }
+
+    @Html.NopCssFiles(this.Url, ResourceLocation.Head)
+    @Html.NopScripts(this.Url, ResourceLocation.Head)
+    @Html.NopCanonicalUrls()
+    @await Component.InvokeAsync("NewsRssHeaderLink")
+    @await Component.InvokeAsync("BlogRssHeaderLink")
+    @*Favicon - upload favicon.ico file to the root directory*@
+    @await Component.InvokeAsync("Favicon")
+    @if (displayMiniProfiler)
+    {
+        <mini-profiler />
+    }
+    @Html.NopInlineScripts(this.Url, ResourceLocation.Head)
+</head>
+<body>
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Masa)
+    {
+        <!-- Load Facebook SDK for JavaScript -->
+        <div id="fb-root"></div>
+        <script>
+            window.fbAsyncInit = function () {
+                FB.init({
+                    xfbml: true,
+                    version: 'v6.0'
+                });
+            };
+
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = 'https://connect.facebook.net/es_LA/sdk/xfbml.customerchat.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));</script>
+
+        <!-- Your customer chat code -->
+        <div class="fb-customerchat"
+         attribution=install_email
+         page_id="110141513802802"
+         logged_in_greeting="&#xa1;Hola! &#xbf;Puedo ayudarte?"
+         logged_out_greeting="&#xa1;Hola! &#xbf;Puedo ayudarte?">
+        </div>
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-56QP9SF"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.AsianBay)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215554753381" class="teed-primary phone">(55) 5475 3381</a>
+        </div>
+
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TWBDXTF"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript> <!-- End Google Tag Manager (noscript) -->
+    }
+    @RenderBody()
+    @Html.NopCssFiles(this.Url, ResourceLocation.Footer)
+    @Html.NopScripts(this.Url, ResourceLocation.Footer)
+    @Html.NopInlineScripts(this.Url, ResourceLocation.Footer)
+</body>
+</html>
+
+<style>
+    .call-us-container {
+        position: fixed;
+        bottom: 0;
+        color: white;
+        z-index: 999;
+        margin-left: 1em;
+    }
+
+        .call-us-container .phone-icon {
+            border-top-left-radius: 5px;
+            padding: 5px;
+            display: table;
+            position: absolute;
+            padding-left: 0.15em;
+        }
+
+        .call-us-container .phone {
+            border-top-right-radius: 5px;
+            padding: 5px;
+            margin-left: 1.5em;
+            display: table;
+            padding-right: 10px;
+            color: white !important;
+        }
+
+    @@media screen and (max-width: 600px) {
+        /*.zopim {
+                z-index: 996 !important;
+            }*/
+        .call-us-container {
+            z-index: 996 !important;
+        }
+    }
+
+    @@media screen and (max-width: 500px) {
+        .call-us-container {
+            position: fixed;
+            bottom: 0;
+            color: white;
+            z-index: 999;
+            margin-left: 5px;
+            margin-bottom: 15px;
+        }
+
+            .call-us-container .phone-icon {
+                border-top-left-radius: 5px;
+                padding: 5px;
+                display: table;
+                position: absolute;
+                border-bottom-left-radius: 5px;
+                padding-left: 0.2em;
+            }
+
+                .call-us-container .phone-icon .material-icons {
+                    font-size: 21px !important;
+                }
+
+            .call-us-container .phone {
+                border-top-right-radius: 5px;
+                padding: 5px;
+                margin-left: 1em;
+                display: table;
+                padding-right: 10px;
+                border-bottom-right-radius: 5px;
+                padding-left: 12px;
+            }
+    }
+</style>

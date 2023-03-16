@@ -1,0 +1,103 @@
+﻿@model string
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Incidents");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Incidents";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Lista de rutas del @Model
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="IncidentDatesList">regresar a la lista de fechas</a>
+        </small>
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("IncidentVehiclesListData", controllerName, new { date = Model }))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "FranchiseName",
+                    title: "Franquicia",
+                },
+                {
+                    field: "VehicleName",
+                    title: "Camioneta",
+                },
+                {
+                    field: "RouteName",
+                    title: "Ruta",
+                    template: (dataItem) => {
+                        if (dataItem.RouteName) {
+                            return dataItem.RouteName;
+                        }
+                        else {
+                            return "Sin ruta asignada"
+                        }
+                    }
+                },
+                {
+                    field: "IncidentsCount",
+                    title: "Cantidad de incidencias",
+                },
+                {
+                    field: "FranchiseId",
+                    title: "Opciones",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-default" href="Create?date=#=Date#&franchiseId=#=FranchiseId#&vehicleId=#=VehicleId#"><i class="fa fa-pencil"></i>Crear incidencia</a><br/>
+                                <a class="btn btn-default" href="IncidentsList?date=#=Date#&franchiseId=#=FranchiseId#&vehicleId=#=VehicleId#"><i class="fa fa-eye"></i>Ver incidencias</a>`
+                }
+            ]
+        });
+    });
+</script>

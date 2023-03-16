@@ -1,0 +1,38 @@
+﻿@model TopMenuModel.CategoryLineModel
+@{
+    var domId = "top-menu-cat_" + Model.Category.Id;
+    var subCategories = Model.ResponsiveMobileMenu ?
+            //responsive (all categories)
+            Model.Category.SubCategories :
+            //standard design (only categories with "IncludeInTopMenu")
+            Model.Category.SubCategories.Where(x => x.IncludeInTopMenu).ToList();
+
+    var atts = subCategories.Count > 0 ? $"data-target=\"{domId}\" " : "";
+}
+<li class="tab">
+    <a class="top-menu-dropdown-trigger" href="@Url.RouteUrl("Category", new { SeName = Model.Category.SeName })" @Html.Raw(atts)>
+        @Model.Category.Name
+        @if (Model.Category.NumberOfProducts.HasValue)
+        {
+            <text> </text>@T("Categories.TotalProducts", Model.Category.NumberOfProducts.Value)
+        }
+    </a>
+</li>
+
+@*@if (subCategories.Count > 0)
+{
+    <ul id="@domId" class="dropdown-content">
+        @foreach (var subcat in subCategories)
+        {
+            <li>
+                <a href="@Url.RouteUrl("Category", new { SeName = subcat.SeName })">
+                    @subcat.Name
+                    @if (subcat.NumberOfProducts.HasValue)
+                    {
+                        <text> </text>@T("Categories.TotalProducts", subcat.NumberOfProducts.Value)
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+}*@

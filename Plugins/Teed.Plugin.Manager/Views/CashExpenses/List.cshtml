@@ -1,0 +1,210 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@inject Nop.Core.IWorkContext workContext
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.CashExpenses");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<script src="~/Plugins/Teed.Plugin.Manager/Content/js/izi-modal/iziModal.min.js"></script>
+<link href="~/Plugins/Teed.Plugin.Manager/Content/js/izi-modal/iziModal.min.css" rel="stylesheet">
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Manejo de efectivo y caja chica
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Enviar dinero a usuario
+        </a>
+        <a asp-action="Create" asp-controller="Expenses" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Registrar gasto en efectivo
+        </a>
+    </div>
+</div>
+<div class="content">
+    <input type="hidden" value="@workContext.CurrentCustomer.Id" id="currentUser" />
+    <div class="form-horizontal">
+        @if (workContext.CurrentCustomer.Email == "abarrientos@teed.com.mx" || workContext.CurrentCustomer.Email == "cmartinez@teed.com.mx" || workContext.CurrentCustomer.Email == "alopez@teed.com.mx")
+        {
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Usuario</label>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input id="users" />
+                            </div>
+                            <em>Selecciona para filtrar los gastos en efectivo por usuario.</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="order-report-iframe"></div>
+<div id="order-iframe"></div>
+<div id="cash-expense-iframe"></div>
+<script>
+    $(document).ready(function () {
+        $("#users").kendoComboBox({
+            placeholder: "Selecciona al usuario...",
+            dataTextField: "User",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/CashExpenses/UserListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#users").data("kendoComboBox").value()) {
+                    $("#users").data("kendoComboBox").value($("#currentUser").val());
+                }
+            },
+            select: function (e) {
+                $("#currentUser").val(this.dataItem(e.item.index()).Id);
+                $("#element-grid").data("kendoGrid").destroy();
+                loadElements();
+            }
+        });
+
+        loadElements();
+        function loadElements() {
+            var id = parseInt($("#currentUser").val());
+            $("#element-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "/Admin/CashExpenses/ListData?userId=" + id,
+                            type: "POST",
+                            dataType: "json",
+                            data: null
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors"
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                },
+                pageable: {
+                    refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "Date",
+                        title: "Fecha",
+                    },
+                    {
+                        field: "User",
+                        title: "Usuario",
+                        template: '<span>#=User.FullName#</span>'
+                    },
+                    {
+                        field: "Concept",
+                        title: "Concepto",
+                    },
+                    {
+                        field: "Charge",
+                        title: "Cargo",
+                    },
+                    {
+                        field: "Deposit",
+                        title: "Abono",
+                    },
+                    {
+                        field: "Balance",
+                        title: "Saldo",
+                    },
+                    {
+                        field: "AttachmentsCount",
+                        title: "Adjuntos",
+                    },
+                    {
+                        field: "Type",
+                        title: "Ver",
+                        width: 50,
+                        headerAttributes: { style: "text-align:center" },
+                        attributes: { style: "text-align:center" },
+                        template: "# if(Type == 'OrderPayment') {# <a href='/Admin/Order/Edit/#=Id#' class='btn bg-blue order-trigger'>Ver orden</a> #} else if (Type == 'ExpenseOfCash') {# <a href='/Admin/Expenses/Edit/#=Id#' class='btn bg-blue order-report-trigger'>Ver gasto</a> #} else if (Type == 'OrderReport') {# <a href='/Admin/OrderReport/EditOrderReport/#=Id#' class='btn bg-blue order-report-trigger'>Ver reporte</a> #} else { # <a href='/Admin/CashExpenses/Edit/#=Id#' class='btn bg-blue cash-expense-trigger'>Ver registro</a> # } #"
+                    }
+                ]
+            });
+        }
+
+        $(document).on('click', '.order-report-trigger', function (event) {
+            event.preventDefault();
+            $('#order-report-iframe').iziModal('open', event);
+        });
+
+        $(document).on('click', '.order-trigger', function (event) {
+            event.preventDefault();
+            $('#order-iframe').iziModal('open', event);
+        });
+
+        $(document).on('click', '.cash-expense-trigger', function (event) {
+            event.preventDefault();
+            $('#cash-expense-iframe').iziModal('open', event);
+        });
+
+        $("#order-report-iframe").iziModal({
+            fullscreen: true,
+            title: 'Reporte de orden',
+            iconClass: 'fa fa-cog',
+            headerColor: 'rgb(180, 212, 227)',
+            width: 1200,
+            overlayClose: true,
+            iframe: true
+        });
+
+        $("#order-iframe").iziModal({
+            fullscreen: true,
+            title: 'Detalles de la orden',
+            iconClass: 'fa fa-cog',
+            headerColor: 'rgb(180, 212, 227)',
+            width: 1200,
+            overlayClose: true,
+            iframe: true
+        });
+
+        $("#cash-expense-iframe").iziModal({
+            fullscreen: true,
+            title: 'Registro de gasto en efectivo',
+            iconClass: 'fa fa-cog',
+            headerColor: 'rgb(180, 212, 227)',
+            width: 1200,
+            overlayClose: true,
+            iframe: true
+        });
+    });
+</script>

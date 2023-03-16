@@ -1,0 +1,585 @@
+﻿@model Teed.Plugin.Payroll.Models.Bonus.AuthorizeModel
+@using Teed.Plugin.Payroll.Domain.Bonuses
+@using Nop.Services.Helpers
+@{
+    Layout = "_AdminLayout";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Payroll.Bonus");
+}
+<link type="text/css" rel="stylesheet" href="~/Plugins/Teed.Plugin.Payroll/src/css/fullcalendar.min.css" />
+<script src="~/Plugins/Teed.Plugin.Payroll/src/js/fullcalendar.min.js"></script>
+<script src="~/Plugins/Teed.Plugin.Payroll/src/js/locales-all.min.js"></script>
+<style>
+    #external-events .fc-event {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    #incidents-calendar {
+        /*max-width: 500px;*/
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .fc-toolbar-title {
+        font-size: 22px !important;
+        text-transform: capitalize;
+    }
+
+    .fc-col-header-cell-cushion {
+        text-transform: capitalize;
+    }
+
+    .close-button {
+        cursor: pointer;
+        color: #fff;
+        border: 1px solid #000000;
+        border-radius: 30px;
+        background: #ff0000;
+        font-size: 15px;
+        font-weight: bold;
+        display: inline-block;
+        line-height: 0px;
+        padding: 7px 4px 7px 3px;
+        position: absolute;
+        right: 0;
+        top: 2px;
+        z-index: 9999;
+    }
+
+        .close-button:before {
+            content: "×";
+        }
+
+    .color-square {
+        margin-top: 3px;
+        margin-left: 5px;
+        width: 15px;
+        height: 15px;
+        position: absolute;
+    }
+
+        .color-square.authorized {
+            background-color: #00a65a;
+        }
+
+        .color-square.unauthorized {
+            background-color: #dd4b39;
+        }
+
+    #cover-spin {
+        position: absolute;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background-color: rgba(255,255,255,0.7);
+        z-index: 9999;
+        display: none;
+    }
+
+    @@-webkit-keyframes spin {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+
+        to {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    #cover-spin::after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 48%;
+        top: 40%;
+        width: 40px;
+        height: 40px;
+        border-style: solid;
+        border-color: #9bc54c;
+        border-top-color: transparent;
+        border-width: 4px;
+        border-radius: 50%;
+        -webkit-animation: spin .8s linear infinite;
+        animation: spin .8s linear infinite;
+    }
+</style>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Autorización de bono - @Model.Name
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="Index">regresar a la lista de bonos</a>
+            </small>
+        </h1>
+        @if (Model.IsAuth)
+        {
+            <div class="pull-right">
+                <button type="button" name="save" class="btn bg-blue">
+                    <i class="fa fa-floppy-o"></i>
+                    @T("Admin.Common.Save")
+                </button>
+                <button type="button" name="save-continue" class="btn bg-blue">
+                    <i class="fa fa-floppy-o"></i>
+                    @T("Admin.Common.SaveContinue")
+                </button>
+            </div>
+        }
+    </div>
+    <input type="hidden" value="@Model.Id" />
+    <input type="hidden" name="SelectedEntities" id="SelectedEntities" />
+    <input type="hidden" name="SaveAndContinue" id="SaveAndContinue" />
+    <div class="content">
+        <div class="form-horizontal">
+            <nop-tabs id="product-edit">
+                <nop-tab asp-name="tab-info" asp-title="Bono" asp-default="true">
+                    <div class="raw clearfix">
+                        <div class="col-md-12">
+                            <div class="panel-group">
+                                <div class="panel panel-default amounts-danger" style="display: none">
+                                    <div class="panel-body">
+                                        <h4 style="text-align: center; color: red">Aún falta agregar un monto a este bono, favor de agregar uno en la pestaña de “Montos” para que se puedan guardar los cambios de forma correcta.</h4>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        Autorización
+                                    </div>
+                                    <div class="panel-body">
+                                        <h3 style="text-align: center; font-weight: bold;">Información del bono y calendario de autorización</h3>
+                                        <br />
+                                        <div class="col-md-12">
+                                            <p>Nombre: @Model.Name</p>
+                                            <p>Tipo de bono: @(((BonusType)Model.BonusTypeId).GetDisplayName())</p>
+                                            <p>Tipo de condición: @(((ConditionType)Model.ConditionTypeId).GetDisplayName())</p>
+                                            <p>Frecuencia del bono: @(((FrequencyType)Model.FrequencyTypeId).GetDisplayName())</p>
+                                            <br />
+                                            @if (Model.IsAuth)
+                                            {
+                                                <br />
+                                                <div style="font-weight: bold;text-align: center;">
+                                                    <p>Para autorizar o desautorizar una aplicación del bono dar clic en los rectángulos que están dentro del calendario (en cualquier parte del rectángulo de color se puede dar clic para hacer este cambio).</p>
+                                                    <p>
+                                                        Aplicación de bono autorizado:
+                                                        <span class="color-square authorized"></span>
+                                                    </p>
+                                                    <p>
+                                                        Aplicación de bono desautorizado:
+                                                        <span class="color-square unauthorized"></span>
+                                                    </p>
+                                                    @if (Model.ConditionTypeId == (int)ConditionType.Manual)
+                                                    {
+                                                        <p>Para agregar una autorización nueva al calendario favor de arrastrar uno de los elementos del lado izquierdo (Ya sean empleados o empleos dependiendo del tipo de bono) al calendario, soltar en la fecha donde se quiere autorizar o desautorizar esta nueva aplicación.</p>
+                                                        <span>
+                                                            Si se desea eliminar por completo una autorización dar clic al botón
+                                                            <div class="close-button" style="position: initial;cursor: initial;"></div>
+                                                            que se encuentra al final de cada rectángulos.
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        @if (Model.ConditionTypeId == (int)ConditionType.Manual && Model.IsAuth)
+                                        {
+                                            <div class="col-md-3">
+                                                <div id="external-events">
+                                                    <p>
+                                                        <strong>Aplicación de bono por @(Model.BonusTypeId == (int)BonusType.Individual ? "empleado" : "empleo")</strong>
+                                                    </p>
+                                                    @if (Model.BonusTypeId == (int)BonusType.Individual)
+                                                    {
+                                                        @foreach (var employee in Model.EmployeesOfBonus)
+                                                        {
+                                                            <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event apply"
+                                                                 data-event='{ "title": "@employee.Name" }'>
+                                                                <div class="fc-event-main" data-id="@employee.Id">@employee.Name</div>
+                                                            </div>
+                                                        }
+                                                    }
+                                                    else if (Model.BonusTypeId == (int)BonusType.Collective)
+                                                    {
+                                                        @foreach (var job in Model.JobsOfBonus)
+                                                        {
+                                                            <div class="fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event apply"
+                                                                 data-event='{ "title": "@job.Name" }'>
+                                                                <div class="fc-event-main" data-id="@job.Id">@job.Name</div>
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="@(Model.ConditionTypeId == (int)ConditionType.Manual && Model.IsAuth ? "col-md-9" : "col-md-12")" style="position: relative;">
+                                            <div id="bonus-calendar"></div>
+                                            <div id="cover-spin"></div>
+                                        </div>
+                                        <script type="text/javascript">
+                                            var calendar;
+                                            var conditionType = @Model.ConditionTypeId;
+                                            var bonusType = @Model.BonusTypeId;
+                                            var frequencyType = @Model.FrequencyTypeId;
+                                            var selectedEntities = [];
+                                            var applyColor = '#00a65a';
+                                            var notApplyColor = '#dd4b39';
+                                            $(document).ready(function () {
+                                                createCalendar();
+                                                @if (Model.IsAuth)
+                                                {<text>
+                                                $('[name="save"], [name="save-continue"]').click(function () {
+                                                    $('[name="save"], [name="save-continue"]').addClass('disabled');
+                                                    var events = calendar.getEvents().filter(function (e, i, a) {
+                                                        return e.extendedProps.type == 'new' || e.extendedProps.type == 'changed';
+                                                    });
+                                                    $.each(events, function (i, event) {
+                                                        selectedEntities.push(
+                                                            {
+                                                                Id: event.id.split('_')[0],
+                                                                fullId: event.id,
+                                                                Apply: event.extendedProps.apply,
+                                                                Date: formatDateFromEventId(event.id),
+                                                                OldDate: typeof event.extendedProps.oldDate != 'undefined' ? event.extendedProps.oldDate : null,
+                                                                IsDelete: false
+                                                            }
+                                                        );
+                                                    });
+                                                    $('#SelectedEntities').val(JSON.stringify(selectedEntities));
+                                                    $('#SelectedEntities').attr('value', JSON.stringify(selectedEntities));
+                                                    if ($(this).attr('name') == 'save-continue') {
+                                                        $('#SaveAndContinue').prop('checked', true);
+                                                        $('#SaveAndContinue').attr('value', true);
+                                                    }
+                                                    $('form').submit();
+                                                });
+                                                </text>}
+                                                $('.fc-today-button, .fc-prev-button, .fc-next-button').click(function () {
+                                                        redoWidthOfCalendar();
+                                                });
+                                            });
+                                            function redoWidthOfCalendar() {
+                                                //if ($('.fc-scroller.fc-scroller-liquid-absolute').hasScrollBar())
+                                                //    $('.fc-daygrid-day-number').filter(function (i) {
+                                                //        return (i + 1) % 7 == 0;
+                                                //    }).css('margin-right', '8%');
+                                                //else
+                                                //    $('.fc-daygrid-day-number').css('margin-right', 'initial');
+                                            }
+                                            function createCalendar() {
+                                                var calendarObj = [];
+                                                @if(Model.Entities.Any())
+                                                {
+                                                    <text>
+                                                var data = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Entities)));
+                                                $.each(data, function (i, e) {
+                                                    var dateSplit = e.Date.split('/');
+                                                    var newDate = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0];
+
+                                                    var dateSplitForId = e.RegularBiweekDate.split('/');
+                                                    var newDateForFormatForId = new Date(dateSplitForId[2], dateSplitForId[1] - 1, dateSplitForId[0]);
+                                                    @if (Model.FrequencyTypeId == (int)FrequencyType.ByBiweek)
+                                                    {<text>
+                                                    var endDateSplit = e.EndDate.split('/');
+                                                    var endDate = endDateSplit[2] + '-' + endDateSplit[1] + '-' + (parseInt(endDateSplit[0]) + 1);
+                                                    </text>}
+                                                    var currentColor = e.Apply ? applyColor : notApplyColor;
+                                                    var obj = {
+                                                    @if (Model.FrequencyTypeId == (int)FrequencyType.ByBiweek)
+                                                    {<text>
+                                                        end: endDate,
+                                                    </text>}
+                                                        start: newDate,
+                                                        id: createEventId(e.Id, newDateForFormatForId),
+                                                        title: e.Name,
+                                                        extendedProps: {
+                                                            apply: e.Apply,
+                                                        },
+                                                        backgroundColor: currentColor,
+                                                        borderColor: currentColor,
+                                                    };
+                                                    calendarObj.push(obj);
+                                                });
+                                                    </text>
+                                                }
+                                                var calendarEl = document.getElementById('bonus-calendar');
+                                                @if(Model.ConditionTypeId == (int)ConditionType.Manual && Model.IsAuth)
+                                                {<text>
+                                                var containerEl = document.getElementById('external-events');
+                                                new FullCalendar.Draggable(containerEl, {
+                                                    itemSelector: '.fc-event',
+                                                    backgroundColor: '#dd4b39',
+                                                    borderColor: '#dd4b39'
+                                                });
+                                                </text>}
+
+
+                                                calendar = new FullCalendar.Calendar(calendarEl, {
+                                                    height: 'auto',
+                                                    initialView: 'dayGridMonth',
+                                                    events: calendarObj,
+                                                    locale: 'ES',
+                                                    @if (Model.IsAuth)
+                                                    {<text>
+
+                                                    // on event click
+                                                    eventClick: function (event) {
+                                                        $('.fc-daygrid-day-number').css('margin-right', 'initial');
+                                                        if (event.event.extendedProps.apply) {
+                                                            event.event.setExtendedProp('apply', false);
+                                                            event.event.setProp('backgroundColor', notApplyColor);
+                                                            event.event.setProp('borderColor', notApplyColor);
+                                                        } else {
+                                                            event.event.setExtendedProp('apply', true);
+                                                            event.event.setProp('backgroundColor', applyColor);
+                                                            event.event.setProp('borderColor', applyColor);
+                                                        }
+                                                        event.event.setExtendedProp('type', 'changed');
+                                                    },
+
+                                                    @if(Model.ConditionTypeId == (int)ConditionType.Manual)
+                                                    {<text>
+                                                    editable: true,
+                                                    droppable: true,
+
+                                                    // event after render
+                                                    eventDidMount: function (event) {
+                                                    @if(Model.FrequencyTypeId == (int)FrequencyType.ByBiweek)
+                                                    {<text>
+                                                        if (event.isEnd && !event.isStart)
+                                                    </text>}
+                                                            $(event.el).append('<div class="close-button" onclick="deleteEvent(' + "'" + event.event.id + "'" + ')"></div>');
+                                                    },
+                                                    // don't let same event overlap
+                                                    eventOverlap: function (stillEvent, movingEvent) {
+                                                        var eventDoesntExists = stillEvent.title != movingEvent.title;
+                                                        return eventDoesntExists;
+                                                    },
+                                                    // first drop
+                                                    eventReceive: function (event) {
+                                                        event.event.setExtendedProp('apply', true);
+                                                        event.event.setExtendedProp('new', true);
+                                                        event.event.setProp('backgroundColor', applyColor);
+                                                        event.event.setProp('borderColor', applyColor);
+                                                        event.event.setExtendedProp('type', 'new');
+                                                        eventDropManage(event);
+                                                    },
+                                                    // after first drop
+                                                    eventDrop: function (event) {
+                                                        event.event.setExtendedProp('oldDate', formatDateFromEventId(event.oldEvent.id));
+                                                        event.event.setExtendedProp('type', 'changed');
+                                                        eventDropManage(event);
+                                                    },
+                                                    </text>}
+                                                    </text>}
+                                                });
+                                                calendar.render();
+                                                redoWidthOfCalendar();
+                                            }
+                                            function eventDropManage(eventData) {
+                                                $('#cover-spin').show();
+                                                var eventDate = eventData.event.start;
+                                                var event = eventData.event;
+                                                var dateForIding;
+                                                if (frequencyType == 1) {
+                                                    // HERE
+                                                    $.ajax({
+                                                        url: '/Admin/BiweeklyPayment/GetBiweeklyDates?date=' +
+                                                            ((eventDate.getDate() < 10 ? "0" : "") + eventDate.getDate() + "/" +
+                                                                (eventDate.getMonth() + 1 < 10 ? "0" : "") + (eventDate.getMonth() + 1) + "/" +
+                                                                eventDate.getFullYear()),
+                                                        method: 'GET',
+                                                        success: function (data) {
+                                                            var beforeDate = new Date(data.beforeBiweekDate[2], data.beforeBiweekDate[1] - 1, data.beforeBiweekDate[0]);
+                                                            var before1st = new Date(data.before1stBiweek[2], data.before1stBiweek[1] - 1, data.before1stBiweek[0]);
+                                                            var before2d = new Date(data.before2dBiweek[2], data.before2dBiweek[1] - 1, data.before2dBiweek[0]);
+
+                                                            var firstDate = new Date(data.firstBiweekDate[2], data.firstBiweekDate[1] - 1, data.firstBiweekDate[0]);
+                                                            var start1st = new Date(data.start1stBiweek[2], data.start1stBiweek[1] - 1, data.start1stBiweek[0]);
+                                                            var end1st = new Date(data.end1stBiweek[2], data.end1stBiweek[1] - 1, data.end1stBiweek[0]);
+
+                                                            var lastDate = new Date(data.lastBiweekDate[2], data.lastBiweekDate[1] - 1, data.lastBiweekDate[0]);
+                                                            var start2d = new Date(data.start2dBiweek[2], data.start2dBiweek[1] - 1, data.start2dBiweek[0]);
+                                                            var end2d = new Date(data.end2dBiweek[2], data.end2dBiweek[1] - 1, data.end2dBiweek[0]);
+
+                                                            var afterDate = new Date(data.afterBiweekDate[2], data.afterBiweekDate[1] - 1, data.afterBiweekDate[0]);
+                                                            var after1st = new Date(data.after1stBiweek[2], data.after1stBiweek[1] - 1, data.after1stBiweek[0]);
+                                                            var after2d = new Date(data.after2dBiweek[2], data.after2dBiweek[1] - 1, data.after2dBiweek[0]);
+
+                                                            // Before first biweek of month
+                                                            if (before1st <= eventDate && eventDate <= before2d)
+                                                            {
+                                                                event.setDates(before1st, new Date(before2d.getFullYear(), before2d.getMonth(), before2d.getDate() + 1), { allDay: true });
+                                                                dateForIding = beforeDate;
+                                                            }
+                                                            // First biweek of month
+                                                            else if (start1st <= eventDate && eventDate <= end1st)
+                                                            {
+                                                                event.setDates(start1st, new Date(end1st.getFullYear(), end1st.getMonth(), end1st.getDate() + 1), { allDay: true });
+                                                                dateForIding = firstDate;
+                                                            }
+                                                            // Second biweek of month
+                                                            else if (start2d <= eventDate && eventDate <= end2d)
+                                                            {
+                                                                event.setDates(start2d, new Date(end2d.getFullYear(), end2d.getMonth(), end2d.getDate() + 1), { allDay: true });
+                                                                dateForIding = lastDate;
+                                                            }
+                                                            // After second biweek of month
+                                                            else if (after1st <= eventDate && eventDate <= after2d)
+                                                            {
+                                                                event.setDates(after1st, new Date(after2d.getFullYear(), after2d.getMonth(), after2d.getDate() + 1), { allDay: true });
+                                                                dateForIding = afterDate;
+                                                            }
+
+                                                            var newId = $(eventData.draggedEl).find('.fc-event-main').data('id');
+                                                            if (newId == null || newId == 'null' || typeof newId == 'undefined')
+                                                                newId = event.id.split('_')[0];
+                                                            event.setProp('id', createEventId(newId, dateForIding));
+
+                                                            deletePreviousEventInList(event);
+                                                            $('.fc-prev-button').click();
+                                                            $('.fc-next-button').click();
+                                                            $('#cover-spin').hide();
+                                                        },
+                                                        error: function (e) {
+                                                            console.log(e);
+                                                            event.remove();
+                                                            $('#cover-spin').hide();
+                                                        }
+                                                    });
+                                                }
+                                                else
+                                                {
+                                                    event.setProp('id', createEventId($(eventData.draggedEl).find('.fc-event-main').data('id'), eventDate));
+                                                    deletePreviousEventInList(event);
+                                                    $('#cover-spin').hide();
+                                                }
+                                            }
+                                            function deleteEvent(id) {
+                                                var event = calendar.getEventById(id);
+                                                if (event != null) {
+                                                    deletePreviousEventInList(event);
+                                                    selectedEntities.push(
+                                                        {
+                                                            Id: event.id.split('_')[0],
+                                                            fullId: event.id,
+                                                            Apply: event.extendedProps.apply,
+                                                            Date: formatDateFromEventId(event.id),
+                                                            IsDelete: true
+                                                        }
+                                                    );
+                                                    event.remove();
+                                                }
+                                            }
+                                            function deletePreviousEventInList(event) {
+                                                var index = selectedEntities.findIndex(function (e) {
+                                                    return e.fullId === event.id;
+                                                });
+                                                if (index !== -1) selectedEntities.splice(index, 1);
+                                                console.log(selectedEntities);
+                                            }
+
+                                            function createEventId(id, date) {
+                                                //var maxDayOfNMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                                                //if (date.getDate() != 15 && date.getDate() <= 15)
+                                                //    date = new Date(date.getFullYear(), date.getMonth(), 15);
+                                                //else if (date.getDate() != maxDayOfNMonth && date.getDate() <= maxDayOfNMonth &&
+                                                //    date.getDate() != 15)
+                                                //    date = new Date(date.getFullYear(), date.getMonth(), maxDayOfNMonth);
+                                                return id + '_' + formatEventDate(date);
+                                            }
+                                            function formatEventDate(date, forEvent = false) {
+                                                var d = new Date(date),
+                                                    month = '' + (d.getMonth() + 1),
+                                                    day = '' + d.getDate(),
+                                                    year = d.getFullYear();
+
+                                                if (month.length < 2)
+                                                    month = '0' + month;
+                                                if (day.length < 2)
+                                                    day = '0' + day;
+
+                                                if (forEvent)
+                                                    return [year, month, day].join('-');
+                                                else
+                                                    return [day, month, year].join('_');
+                                            }
+                                            function formatDateFromEventId(id) {
+                                                var dateInfo = id.split('_');
+                                                var d = new Date(parseInt(dateInfo[3]), parseInt(dateInfo[2]) - 1, parseInt(dateInfo[1]));
+                                                return d;
+                                            }
+                                            Array.prototype.where = function (filter) {
+
+                                                var collection = this;
+
+                                                switch (typeof filter) {
+
+                                                    case 'function':
+                                                        return $.grep(collection, filter);
+
+                                                    case 'object':
+                                                        for (var property in filter) {
+                                                            if (!filter.hasOwnProperty(property))
+                                                                continue; // ignore inherited properties
+
+                                                            collection = $.grep(collection, function (item) {
+                                                                return item[property] === filter[property];
+                                                            });
+                                                        }
+                                                        return collection.slice(0); // copy the array
+                                                    // (in case of empty object filter)
+
+                                                    default:
+                                                        throw new TypeError('func must be either a' +
+                                                            'function or an object of properties and values to filter by');
+                                                }
+                                            };
+                                            Array.prototype.firstOrDefault = function (func) {
+                                                return this.where(func)[0] || null;
+                                            };
+                                            //$.fn.hasScrollBar = function () {
+                                            //    return this.get(0).scrollHeight > this.height();
+                                            //}
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nop-tab>
+                <nop-tab asp-name="tab-amounts" asp-title="Montos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/Bonuses/_CreateOrUpdate.Amounts.cshtml", Model.Id)</nop-tab>
+                <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                    <div class="raw clearfix">
+                        <div class="col-md-12">
+                            <div class="panel-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        Log
+                                    </div>
+                                    <div class="panel-body">
+                                        <pre>@Model.Log</pre>
+                                    </div>
+                                    <div class="panel-body">
+                                        <pre>@Model.ApplicationsLog</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nop-tab>
+            </nop-tabs>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,314 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+@{
+    var imageText = "El tamaño recomendado es 1980x800 píxeles.";
+    var colorText = "El valor del texto debe ser escrito en código hexadecimal. Por ej: #C1C7C9";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen en fondo
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="Picture6Id_OverrideForStore" asp-input="Picture6Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="Picture6Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Picture6Id" />
+                <span asp-validation-for="Picture6Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="Text6_OverrideForStore" asp-input="Text6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Text6" />
+                <span asp-validation-for="Text6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextColor6_OverrideForStore" asp-input="TextColor6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Color del texto</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextColor6" />
+                <span asp-validation-for="TextColor6"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 1
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown1_OverrideForStore" asp-input="TextDropdown1" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown1" />
+                <span asp-validation-for="TextDropdown1"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown1_OverrideForStore" asp-input="LinkDropdown1" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown1" />
+                <span asp-validation-for="LinkDropdown1"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 2
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown2_OverrideForStore" asp-input="TextDropdown2" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown2" />
+                <span asp-validation-for="TextDropdown2"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown2_OverrideForStore" asp-input="LinkDropdown2" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown2" />
+                <span asp-validation-for="LinkDropdown2"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 3
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown3_OverrideForStore" asp-input="TextDropdown3" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown3" />
+                <span asp-validation-for="TextDropdown3"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown3_OverrideForStore" asp-input="LinkDropdown3" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown3" />
+                <span asp-validation-for="LinkDropdown3"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 4
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown4_OverrideForStore" asp-input="TextDropdown4" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown4" />
+                <span asp-validation-for="TextDropdown4"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown4_OverrideForStore" asp-input="LinkDropdown4" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown4" />
+                <span asp-validation-for="LinkDropdown4"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 5
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown5_OverrideForStore" asp-input="TextDropdown5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown5" />
+                <span asp-validation-for="TextDropdown5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown5_OverrideForStore" asp-input="LinkDropdown5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown5" />
+                <span asp-validation-for="LinkDropdown5"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 6
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown6_OverrideForStore" asp-input="TextDropdown6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown6" />
+                <span asp-validation-for="TextDropdown6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown6_OverrideForStore" asp-input="LinkDropdown6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown6" />
+                <span asp-validation-for="LinkDropdown6"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 7
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown7_OverrideForStore" asp-input="TextDropdown7" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown7" />
+                <span asp-validation-for="TextDropdown7"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown7_OverrideForStore" asp-input="LinkDropdown7" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown7" />
+                <span asp-validation-for="LinkDropdown7"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 8
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown8_OverrideForStore" asp-input="TextDropdown8" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown8" />
+                <span asp-validation-for="TextDropdown8"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown8_OverrideForStore" asp-input="LinkDropdown8" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown8" />
+                <span asp-validation-for="LinkDropdown8"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 9
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown9_OverrideForStore" asp-input="TextDropdown9" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown9" />
+                <span asp-validation-for="TextDropdown9"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown9_OverrideForStore" asp-input="LinkDropdown9" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown9" />
+                <span asp-validation-for="LinkDropdown9"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 10
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TextDropdown10_OverrideForStore" asp-input="TextDropdown10" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TextDropdown10" />
+                <span asp-validation-for="TextDropdown10"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="LinkDropdown10_OverrideForStore" asp-input="LinkDropdown10" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="LinkDropdown10" />
+                <span asp-validation-for="LinkDropdown10"></span>
+            </div>
+        </div>
+    </div>
+</div>

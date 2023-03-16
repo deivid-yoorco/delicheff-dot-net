@@ -1,0 +1,192 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var controllerName = "Patient";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+
+<form asp-controller="Plugin" asp-action="List" method="post" id="plugins-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Pacientes
+        </h1>
+        <div class="pull-right">
+            <a asp-action="VerifyAndCreate" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.AddNew")
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Buscar por nombre, teléfono o correo electrónico</label>
+                        </div>
+                        <div class="col-md-9">
+
+                            <div class="input-group" style="width:100%">
+                                <input id="customers" />
+                                <style>
+                                    .k-input {
+                                        width: 102% !important;
+                                    }
+                                    .k-select {
+                                        display: none !important;
+                                    }
+                                </style>
+                                <script>
+                                    $(document).ready(function () {
+                                        $("#customers").kendoComboBox({
+                                            placeholder: "Buscar paciente...",
+                                            dataTextField: "Patient",
+                                            dataValueField: "Id",
+                                            filter: "contains",
+                                            autoBind: true,
+                                            minLength: 3,
+                                            dataSource: {
+                                                type: "json",
+                                                transport: {
+                                                    read: {
+                                                        url: "@Html.Raw(Url.Action("GetAllPatients", "Patient"))",
+                                                        type: "POST",
+                                                        data: addAntiForgeryToken
+                                                    }
+                                                }
+                                            },
+                                            dataBound: onDataBound,
+                                            select: onSelect,
+                                            change: onChange
+                                        });
+                                        function onDataBound(e) {
+
+                                        };
+                                        function onSelect(e) {
+                                            window.location.replace("/Admin/Patient/Details/" + this.dataItem(e.item.index()).Id);
+                                            console.log(this.dataItem(e.item.index()).Id);
+                                        };
+                                        function onChange(e) {
+
+                                        };
+
+                                        var combobox = $("#customers").data("kendoComboBox");
+                                        combobox.input.keyup(function (e) {
+                                            if (e.keyCode == 13 && e.item == undefined) {
+
+                                                var form = document.createElement("form");
+                                                form.setAttribute("method", "post");
+                                                form.setAttribute("action", "/Admin/Patient/VerifyAndCreate");
+
+                                                var hiddenField = document.createElement("input");
+                                                hiddenField.setAttribute("type", "hidden");
+                                                hiddenField.setAttribute("name", "EmailPhone");
+                                                hiddenField.setAttribute("value", $("#customers").data("kendoComboBox").value());
+
+                                                form.appendChild(hiddenField);
+                                                document.body.appendChild(form);
+                                                form.submit();
+
+                                                //var verify = {
+                                                //    EmailPhone: $("#customers").data("kendoComboBox").value()
+                                                //};
+                                                //addAntiForgeryToken(verify);
+                                                //$.ajax({
+                                                //    cache: false,
+                                                //    type: "POST",
+                                                //    url: "/Admin/Patient/VerifyAndCreate",
+                                                //    data: verify,
+                                                //    success: function (data) {
+                                                        
+                                                //    },
+                                                //    error: function (xhr, ajaxOptions, thrownError) {
+                                                //        alert('Ocurrió un problema.');
+                                                //    }
+                                                //});
+                                            }
+                                        });
+                                    });
+                                </script>
+                                <style scoped>
+                                    .k-widget.k-combobox {
+                                        width: 100% !important;
+                                    }
+                                </style>
+                            </div>
+                            <em>Busca y selecciona al paciente para ir directamente a su expediente.</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="element-grid"></div>
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $("#element-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                                            type: "POST",
+                                            dataType: "json"
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors"
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    pageSize: @(defaultGridPageSize),
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    pageSizes: [@(gridPageSizes)],
+                                    @await Html.PartialAsync("_GridPagerMessages")
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                    field: "FirstName" ,
+                                    title: "Nombre del paciente",
+                                    template: '<a href="Details/#=Id#">#=FirstName# #=LastName#</a>'
+                                    },
+                                    {
+                                        field: "Commentary",
+                                        title: "Comentario",
+
+                                    },
+                                    {
+                                    field: "Id",
+                                    title: "@T("Admin.Common.Edit")",
+                                    width: 100,
+                                    headerAttributes: { style: "text-align:center" },
+                                    attributes: { style: "text-align:center" },
+                                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>@T("Admin.Common.Edit")</a>'
+                                    }
+                                ]
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

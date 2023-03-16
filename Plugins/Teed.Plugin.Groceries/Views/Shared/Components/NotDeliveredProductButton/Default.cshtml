@@ -1,0 +1,252 @@
+﻿@model bool
+
+<div class="modal fade" id="not-delivered-product-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                @if (Model)
+                {
+                    <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Cambiar cantidad de producto entregado</h5>
+                }
+                else
+                {
+                    <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Cambiar cantidad de producto</h5>
+                }
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="not-delivered-qty-container">
+                    @if (Model)
+                    {
+                        <strong>Selecciona la cantidad de producto que SI se entregó. Recuerda que este cambio es permanente y no se puede deshacer:</strong>
+                    }
+                    else
+                    {
+                        <strong>Selecciona la nueva cantidad del producto:</strong>
+                    }
+                    <div>
+                        <select id="product-qty-selector" class="form-control">
+                        </select>
+                    </div>
+                </div>
+
+                @if (Model)
+                {
+                    <div id="not-delivered-checkbox-container" style="margin-top: 1em">
+                        <input type="checkbox" id="not-delivered" name="not-delivered" value="false">
+                        <label for="not-delivered"> El producto no se entregó</label><br>
+                    </div>
+
+                    <div id="not-delivered-reason-container" style="display:none">
+                        <strong>Selecciona la razón por la que el producto no fue entregado:</strong>
+                        <div>
+                            <select id="not-delivered-reason-selector" class="form-control">
+                            </select><br /><br />
+                            <div id="not-delivered-reason-other-container" style="display: none">
+                                <label for="not-delivered-reason-other">¿Por qué no se entregó?</label>
+                                <input type="text" class="form-control" id="not-delivered-reason-other" name="not-delivered-reason-other" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div id="not-wanted-checkbox-container" style="margin-top: 1em">
+                        <input type="checkbox" id="not-wanted" name="not-wanted" value="false">
+                        <label for="not-wanted"> El cliente ya no quiere el producto (será eliminado de la orden)</label><br>
+                    </div>
+                }
+
+                <div id="modal-error" style="display: none">
+                    <strong style="color:red" id="modal-error-text"></strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="update-buttons">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="update-product-button" onclick="updateQty()">Actualizar cantidad</button>
+                </div>
+                <button id="loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Guardando el cambio...
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let currentItemId = 0;
+
+    setTimeout(function () {
+        updateTable();
+    }, 500);
+
+    function updateTable() {
+        const editElements = $(".item-options");
+        const editButtons = $(".edit-order-item");
+        const deleteButtons = $(".delete-order-item");
+        $.each(editElements, function (index, element) {
+            const itemId = $(element).data("orderitemid");
+            const button = `<button type="button" class="btn btn-default" data-toggle="modal" data-target="#not-delivered-product-modal" onClick="modalOpened(${itemId})">
+                                <i class="fa fa-pencil"></i>
+                                Modificar cantidad
+                            </button>`;
+            $(element).append(button)
+        });
+
+        $.each(editButtons, function (index, element) {
+            $(element).hide();
+        });
+
+        $.each(deleteButtons, function (index, element) {
+            $(element).hide();
+        });
+
+        $("#btnAddNewProduct").hide();
+    }
+
+    function modalOpened(itemId) {
+        currentItemId = itemId;
+        $("#product-qty-selector").empty();
+        $("#not-delivered-reason-selector").empty();
+        $("#modal-error").hide();
+        $.ajax({
+            url: '/Admin/Order/GetAllowedQuantities?orderItemId=' + itemId,
+            method: 'GET',
+            success: function (result) {
+                if (result.length > 0) {
+                    $.each(result, function (index, element) {
+                        $("#product-qty-selector").append($('<option>', {
+                            value: element.Value,
+                            text: element.Text
+                        }));
+                    });
+                }
+            },
+            error: function (error) {
+                $("#modal-error").show();
+                $("#modal-error-text").html("Ocurrió un problema al intentar obtener las cantidades.");
+            }
+        });
+        $.ajax({
+            url: '/Admin/Order/GetNotDeliveredReasons',
+            method: 'GET',
+            success: function (result) {
+                if (result.length > 0) {
+                    $.each(result, function (index, element) {
+                        $("#not-delivered-reason-selector").append($('<option>', {
+                            value: element.Value,
+                            text: element.Text
+                        }));
+                    });
+
+                    $("#not-delivered-reason-selector").append($('<option>', {
+                        value: -1,
+                        text: 'Otro'
+                    }));
+                }
+            },
+            error: function (error) {
+                $("#modal-error").show();
+                $("#modal-error-text").html("Ocurrió un problema al intentar obtener las razones de producto no entregado.");
+            }
+        });
+    }
+
+    $("#not-delivered").on('change', function () {
+        $("#modal-error").hide();
+        $("#modal-error-text").html("");
+
+        if ($(this).is(":checked")) {
+            $("#not-delivered-qty-container").hide();
+            $("#not-delivered-reason-container").show();
+        }
+        else {
+            $("#not-delivered-qty-container").show();
+            $("#not-delivered-reason-container").hide();
+        }
+    });
+
+    $("#not-wanted").on('change', function () {
+        $("#modal-error").hide();
+        $("#modal-error-text").html("");
+
+        if ($(this).is(":checked")) {
+            $("#not-delivered-qty-container").hide();
+        }
+        else {
+            $("#not-delivered-qty-container").show();
+        }
+    });
+
+    $("#not-delivered-reason-selector").on('change', function () {
+
+        $("#modal-error").hide();
+        $("#modal-error-text").html("");
+
+        if ($(this).val() == -1) {
+            $("#not-delivered-reason-other-container").show();
+        }
+        else {
+            $("#not-delivered-reason-other-container").hide();
+        }
+    });
+
+    function updateQty() {
+        if (!window.confirm('¿Confirmas que deseas actualizar el producto de la orden?'))
+            return;
+
+        $("#modal-error").hide();
+        $("#modal-error-text").html("");
+        const orderItemId = currentItemId;
+        let rawQuantity = 0;
+        let notDeliveredReasonId = 0;
+        let notDeliveredReason = "";
+        let notWanted = false;
+
+        if ($("#not-delivered").is(":checked")) {
+            if ($("#not-delivered-reason-selector").val() == -1 && !($("#not-delivered-reason-other").val())) {
+                $("#modal-error").show();
+                $("#modal-error-text").html("Debes indicar una razón por la cuál el producto no fue entregado");
+                return;
+            }
+            notDeliveredReasonId = $("#not-delivered-reason-selector").val();
+            notDeliveredReason = $("#not-delivered-reason-other").val();
+        }
+        else if ($("#not-wanted").is(":checked")) {
+            notWanted = true;
+        }
+        else {
+            rawQuantity = $("#product-qty-selector").val();
+        }
+
+        const body = {
+            orderItemId,
+            rawQuantity,
+            notDeliveredReasonId,
+            notDeliveredReason,
+            notWanted
+        };
+
+        $("#loading-button-modal").show();
+        $("#update-buttons").hide();
+
+        $.ajax({
+            url: '/Admin/Order/UpdateOrderItem',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-button-modal").hide();
+                $("#update-buttons").show();
+                $("#modal-error").show();
+                $("#modal-error-text").html("Ocurrió un error al guardar los datos. Inténtalo de nuevo, si el problema sigue, avisa al departamento de desarrollo junto con los siguientes datos: Número de orden, producto que quieres actualizar y una captura de pantalla de esta ventana.");
+            }
+        });
+    }
+</script>

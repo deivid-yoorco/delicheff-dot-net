@@ -1,0 +1,72 @@
+﻿@model Teed.Plugin.ShippingByAddress.Models.ShippingBranch.CreateViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("ShippingBranch");
+}
+<form method="post" enctype="multipart/form-data" id="shipping-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar sucursal
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="Index">regresar a la lista</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue" id="submit-btn">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Nombre</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <nop-editor asp-for="BranchName" />
+                                    <span asp-validation-for="BranchName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Teléfono</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <nop-editor asp-for="BranchPhone" />
+                                    <span asp-validation-for="BranchPhone" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Email</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <nop-editor asp-for="BranchEmail" />
+                                    <span asp-validation-for="BranchEmail" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Se debe de enviar un correo cuando exista una nueva orden de esta sucursal</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <nop-editor asp-for="ShouldSendEmail" />
+                                    <span asp-validation-for="ShouldSendEmail" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

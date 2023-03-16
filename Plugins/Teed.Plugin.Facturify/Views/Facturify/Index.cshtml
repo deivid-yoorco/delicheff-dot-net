@@ -1,0 +1,959 @@
+﻿@model Teed.Plugin.Facturify.Models.ConfigureModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedFacturify");
+}
+<style>
+    .form-heading {
+        background-color: #3c8dbc;
+        margin: 1em 0;
+        padding: 1em;
+        font-weight: bold;
+        display: block;
+        color: #fff;
+    }
+
+    .form-heading-success {
+        background-color: #00a65a;
+        margin: 1em 0;
+        padding: 1em;
+        display: block;
+        color: #fff;
+        text-align: center;
+    }
+
+    .form-heading-danger {
+        background-color: #dd4b39;
+        margin: 1em 0;
+        padding: 1em;
+        display: block;
+        color: #fff;
+        text-align: center;
+    }
+
+    .loader {
+        border: 8px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 8px solid #3498db;
+        margin-left: auto;
+        margin-right: auto;
+        width: 40px;
+        height: 40px;
+        -webkit-animation: spin 2s linear infinite;
+        animation: spin 2s linear infinite;
+    }
+
+    #DaysAllowed, #AllowBillGeneration {
+        width: auto;
+        margin-bottom: 10px;
+    }
+
+    #AllowBillGeneration {
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    /* Safari */
+    @@-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="FacturifyUuid" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Configuración
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Index" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="button" class="btn bg-blue" data-toggle="modal" data-target="#extraConfiguration">
+                <i class="fa fa-ellipsis-v"></i>
+                Configuración avanzada
+            </button>
+
+            <div class="modal fade" id="extraConfiguration" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Configuración extra</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-info">
+                                Herramientas extras para la configuración del plugin de Facturify.<br />
+                                <strong style="color:red">Leer cuidadosamente la información proporcionada de cada uno de los botones antes de hacer cambios en esta sección.</strong>
+                                <div class="col-md-12" style="display: contents;">
+                                    <div style="margin-bottom: 15px; display: flex;">
+                                        <div class="col-md-7" style="margin-bottom: auto;margin-top: auto;">
+                                            <button type="button" class="btn bg-blue" data-toggle="modal" data-target="#token">
+                                                <i class="fa fa-dot-circle-o"></i>
+                                                Volver a crear el token de configuración
+                                            </button>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div>
+                                                Reconfigurar el token de Facturify para guardar información con API Key y API Secret diferentes a la que se tenía previamente
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr align="center" width="100%">
+                                    <div style="margin-bottom: 15px; display: flex;">
+                                        <div class="col-md-7" style="margin-bottom: auto;margin-top: auto;">
+                                            <button type="button" class="btn bg-blue" data-toggle="modal" data-target="#register">
+                                                <i class="fa fa-dot-circle-o"></i>
+                                                Registrar empresa
+                                            </button>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div>
+                                                Utilizar solo en casos de que se muestre un error al guardar de que la empresa no esta registrada, para volver a registrarla con los datos ingresados
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr align="center" width="100%">
+                                    <div style="margin-bottom: 15px; display: flex;">
+                                        <div class="col-md-7" style="margin-bottom: auto;margin-top: auto;">
+                                            <input type="file" id="newLogo" accept="image/*" style="margin-bottom: 10px;" />
+                                            <button type="button" class="btn bg-blue" data-toggle="modal" data-target="#changeLogo">
+                                                <i class="fa fa-dot-circle-o"></i>
+                                                Cambiar logotipo de las facturas
+                                            </button>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div>
+                                                Modificar el logotipo que se muestra en todas las facturas generadas
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr align="center" width="100%">
+                                    <div style="margin-bottom: 15px; display: flex;">
+                                        <div class="col-md-7" style="margin-bottom: auto;margin-top: auto;">
+                                            <input class="form-control" asp-for="DaysAllowed" />
+                                            <button type="button" class="btn bg-blue" data-toggle="modal" data-target="#changeDays">
+                                                <i class="fa fa-dot-circle-o"></i>
+                                                Cambiar número de días de facturación
+                                            </button>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div>
+                                                Modificar el número máximo de días en que se puede facturar una orden
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr align="center" width="100%">
+                                    <div style="margin-bottom: 15px; display: flex;">
+                                        <div class="col-md-7" style="margin-bottom: auto;margin-top: auto;">
+                                            <nop-editor asp-for="AllowBillGeneration" />
+                                            <button type="button" class="btn bg-blue" data-toggle="modal" data-target="#changeAllowGeneration">
+                                                <i class="fa fa-dot-circle-o"></i>
+                                                Permitir generación de factura para clientes
+                                            </button>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div>
+                                                Activar para permitir a los clientes generar sus propias facturas desde el área de detalles de sus ordenes
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="loader" style="display: none"></div>
+                            </div>
+                            <div id="modal-success" style="display: none">
+                                <strong style="color:green" id="modal-success-text"></strong>
+                            </div>
+                            <div id="modal-error" style="display: none">
+                                <strong style="color:red" id="modal-error-text"></strong>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div id="auto-assign-buttons">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="token" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Volver a crear el token de configuración</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-info">
+                                ¿Deseas volver a generar el token de configuración?
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div id="auto-assign-buttons">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="redoToken()">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Registrar empresa</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-info">
+                                ¿Deseas volver a registrar la empresa?
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div id="auto-assign-buttons">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="reregisterCompany()">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="changeLogo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Cambiar logotipo de las facturas</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-info">
+                                ¿Deseas cambiar el logotipo que se mostrara en las facturas generadas?
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div id="auto-assign-buttons">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="changeLogo()">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="changeDays" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Cambiar número de días de facturación</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-info">
+                                ¿Deseas cambiar el número máximo de días en que se puede facturar una orden?
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div id="auto-assign-buttons">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="changeDays()">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="changeAllowGeneration" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Permitir generación de factura para clientes</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-info">
+                                ¿Deseas cambiar el permiso para que los clientes generen sus propias facturas?
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div id="auto-assign-buttons">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="changeAllowGeneration()">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div>
+                        @if (!string.IsNullOrWhiteSpace(Model.FacturifyUuid))
+                        {
+                            <div class="form-heading-success"><strong>Estado de la empresa:</strong> Registrada</div>
+                        }
+                        else
+                        {
+                            <div class="form-heading-danger">
+                                <strong>Estado de la empresa:</strong> Registro pendiente
+                                <div style="display: inline-block" title="El registro se completa llenando y guardando la información de la empresa con datos válidos" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="form-heading">Configuración Facturify</div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Modo de prueba</label>
+                                <div title="Habilitar o deshabilitar modo de prueba" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <nop-editor asp-for="Sandbox" />
+                                <span asp-validation-for="Sandbox"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">API Key</label>
+                                <div title="API Key proporcionado por Facturify" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="ApiKey" />
+                                <span asp-validation-for="ApiKey"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">API Secret</label>
+                                <div title="API Secret proporcionado por Facturify" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="ApiSecret" />
+                                <span asp-validation-for="ApiSecret"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-heading">Datos de la empresa</div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Razón social</label>
+                                <div title="Razón social de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="BusinessName" />
+                                <span asp-validation-for="BusinessName"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">RFC</label>
+                                <div title="RFC de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="RFC" />
+                                <span asp-validation-for="RFC"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Régimen fiscal</label>
+                                <div title="Régimen fiscal de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <select class="form-control" asp-for="Regime" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Facturify.Domain.FiscalRegime>())"></select>
+                                <span asp-validation-for="Regime"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Correo electrónico</label>
+                                <div title="Correo electrónico de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input type="email" class="form-control" asp-for="Email" />
+                                <span asp-validation-for="Email"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Código postal</label>
+                                <div title="Código postal en el que está ubicada la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressPostalCode" />
+                                <span asp-validation-for="AddressPostalCode"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Calle</label>
+                                <div title="Calle en la que está ubicada la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressStreet" />
+                                <span asp-validation-for="AddressStreet"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Número exterior</label>
+                                <div title="Número exterior de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressExteriorNumber" />
+                                <span asp-validation-for="AddressExteriorNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Número interior</label>
+                                <div title="Número interior de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressInternalNumber" />
+                                <span asp-validation-for="AddressInternalNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Colonia</label>
+                                <div title="Colonia en la que está ubicada la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressSuburb" />
+                                <span asp-validation-for="AddressSuburb"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Delegación / Municipio</label>
+                                <div title="Delegación o municipio en la que está ubicada la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressMunicipality" />
+                                <span asp-validation-for="AddressMunicipality"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Ciudad</label>
+                                <div title="Ciudad en la que está ubicada la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressCity" />
+                                <span asp-validation-for="AddressCity"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Estado</label>
+                                <div title="Estado en el que está ubicada la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="AddressState" />
+                                <span asp-validation-for="AddressState"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-heading">Credenciales del SAT</div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Credenciales fiscales CSD (.key)</label>
+                                <div title="Archivo .key del Certificado de Sello Digital (CSD) proporcionado por el SAT de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="file" asp-for="CsdKeyFile" accept=".key" />
+                                <span asp-validation-for="CsdKeyFile"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Credenciales fiscales CSD (.cer)</label>
+                                <div title="Archivo .cer del Certificado de Sello Digital (CSD) proporcionado por el SAT de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="file" asp-for="CsdCerFile" accept=".cer" />
+                                <span asp-validation-for="CsdCerFile"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Contraseña del archivo CSD</label>
+                                <div title="Contraseña del Certificado de Sello Digital (CSD) proporcionado por el SAT" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="CsdKeyFilePassword" />
+                                <span asp-validation-for="CsdKeyFilePassword"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">e.firma (.key)</label>
+                                <div title="Archivo .key de la e.firma (FIEL) proporcionado por el SAT de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="file" asp-for="FielKeyFile" accept=".key" />
+                                <span asp-validation-for="FielKeyFile"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">e.firma (.cer)</label>
+                                <div title="Archivo .cer de la e.firma (FIEL) proporcionado por el SAT de la empresa que emite la factura" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="file" asp-for="FielCerFile" accept=".cer" />
+                                <span asp-validation-for="FielCerFile"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Contraseña de la e.firma</label>
+                                <div title="Contraseña del la e.firma (FIEL)" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="FielKeyFilePassword" />
+                                <span asp-validation-for="FielKeyFilePassword"></span>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="form-heading">Seriado de la factura</div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Serie para ingresos</label>
+                                    <div title="Serie de ingresos" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <input class="form-control" asp-for="IncomeSerie" />
+                                    <span asp-validation-for="IncomeSerie"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Folio inicial para ingresos</label>
+                                    <div title="Folio inicial para ingresos" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <input class="form-control" asp-for="IncomeInitialFolio" />
+                                    <span asp-validation-for="IncomeInitialFolio"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Serie para egresos</label>
+                                    <div title="Serie de egresos" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <input class="form-control" asp-for="ExpenseSerie" />
+                                    <span asp-validation-for="ExpenseSerie"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Folio inicial para egresos</label>
+                                    <div title="Folio inicial para egresos" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <input class="form-control" asp-for="ExpenseInitialFolio" />
+                                    <span asp-validation-for="ExpenseInitialFolio"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="text-align: center;margin-top: 1em;">
+                            <strong>Nota:</strong> Los campos de esta sección son opcionales. Si no se envia la información para las series, estas se generarán automáticamente, las cuales se crean de manera aleatoria con letras del abecedario y utilizando el prefijo -I para ingreso y -E para egreso, el folio incializa en 1.
+                        </p>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $("#DaysAllowed").keypress(function (e) {
+        //if the letter is not digit then display error and don't type anything
+        if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            //do nothing
+            return false;
+        }
+    });
+    function tryParse(stringNumber) {
+        try {
+            var num = parseInt(stringNumber);
+            if (num == "NaN" || typeof num == "undefined" || isNaN(num)) {
+                return 90;
+            } else {
+                return num;
+            }
+        } catch (e) {
+            return 90;
+        }
+    }
+    function changeAllowGeneration() {
+        var allow = $('#AllowBillGeneration').prop('checked');
+        if (allow != null && typeof allow != 'undefined') {
+
+            loading();
+
+            var saveModel = {
+                AllowBillGeneration: allow
+            };
+
+            var formData = new FormData();
+            $.each(saveModel, function (name, value) {
+                formData.append(name, value);
+            });
+
+            $.ajax({
+                url: '/Admin/Facturify/ChangeAllowGeneration',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    done(data, false);
+                },
+                error: function (err) {
+                    done(err.responseText, true);
+                },
+            });
+        }
+    }
+    function changeDays() {
+        var days = tryParse($('#DaysAllowed').val());
+        if (days > 0) {
+
+            loading();
+
+            var saveModel = {
+                DaysAllowedInt: days
+            };
+
+            var formData = new FormData();
+            $.each(saveModel, function (name, value) {
+                formData.append(name, value);
+            });
+
+            $.ajax({
+                url: '/Admin/Facturify/ChangeDaysAllowed',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    done(data, false);
+                },
+                error: function (err) {
+                    done(err.responseText, true);
+                },
+            });
+        }
+    }
+    function changeLogo() {
+        var imgs = $('#newLogo')[0].files;
+        if (imgs.length > 0) {
+
+            loading();
+
+            var saveModel = {
+                Image: imgs[0],
+                Sandbox: $('#Sandbox').prop('checked'),
+            };
+
+            var formData = new FormData();
+            $.each(saveModel, function (name, value) {
+                formData.append(name, value);
+            });
+
+            $.ajax({
+                url: '/Admin/Facturify/ChangeBillsLogo',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    done(data, false);
+                },
+                error: function (err) {
+                    done(err.responseText, true);
+                },
+            });
+        }
+    }
+    function redoToken() {
+        var imgs = $('#newLogo')[0].files;
+        if (imgs.length > 0) {
+
+            loading();
+
+            var saveModel = {
+                Sandbox: $('#Sandbox').prop('checked'),
+                ApiKey: $('#ApiKey').val(),
+                ApiSecret: $('#ApiSecret').val()
+            };
+            if (typeof $('#ApiKey').val() != 'undefined' ||
+                $('#ApiKey').val() != '' ||
+                typeof $('#ApiSecret').val() != 'undefined' ||
+                $('#ApiSecret').val() != '') {
+
+                var formData = new FormData();
+                $.each(saveModel, function (name, value) {
+                    formData.append(name, value);
+                });
+
+                $.ajax({
+                    url: '/Admin/Facturify/RedoToken',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        done(data, false);
+                    },
+                    error: function (err) {
+                        done(err.responseText, true);
+                    },
+                });
+            }
+        }
+    }
+    function reregisterCompany() {
+
+        if ($('#CsdKeyFile')[0].files.length < 1 ||
+            $('#CsdCerFile')[0].files.length < 1 ||
+            $('#FielKeyFile')[0].files.length < 1 ||
+            $('#FielCerFile')[0].files.length < 1) {
+            done("Para registrar la empresa se necesita ingresar los archivos necesarios", true);
+            return false;
+        }
+
+        loading();
+
+        var saveModel = {
+            Sandbox: $('#Sandbox').prop('checked'),
+            ApiKey: $('#ApiKey').val(),
+            ApiSecret: $('#ApiSecret').val(),
+            BusinessName: $('#BusinessName').val(),
+            RFC: $('#RFC').val(),
+            Regime: $('#Regime').val(),
+            Email: $('#Email').val(),
+            AddressPostalCode: $('#AddressPostalCode').val(),
+            AddressStreet: $('#AddressStreet').val(),
+            AddressExteriorNumber: $('#AddressExteriorNumber').val(),
+            AddressInternalNumber: $('#AddressInternalNumber').val(),
+            AddressSuburb: $('#AddressSuburb').val(),
+            AddressMunicipality: $('#AddressMunicipality').val(),
+            AddressCity: $('#AddressCity').val(),
+            AddressState: $('#AddressState').val(),
+            CsdKeyFilePassword: $('#CsdKeyFilePassword').val(),
+            FielKeyFilePassword: $('#FielKeyFilePassword').val(),
+            CsdKeyFile: $('#CsdKeyFile')[0].files[0],
+            CsdCerFile: $('#CsdCerFile')[0].files[0],
+            FielKeyFile: $('#FielKeyFile')[0].files[0],
+            FielCerFile: $('#FielCerFile')[0].files[0],
+        };
+        if (typeof $('#ApiKey').val() != 'undefined' ||
+            $('#ApiKey').val() != '' ||
+            typeof $('#ApiSecret').val() != 'undefined' ||
+            $('#ApiSecret').val() != '') {
+
+            var formData = new FormData();
+            $.each(saveModel, function (name, value) {
+                formData.append(name, value);
+            });
+
+            $.ajax({
+                url: '/Admin/Facturify/ReregisterCompany',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    done(data, false);
+                },
+                error: function (err) {
+                    done(err.responseText, true);
+                },
+            });
+        }
+    }
+
+    function loading() {
+        $('.loader').show();
+        $("#modal-error").hide();
+        $("#modal-success").hide();
+    }
+
+    function done(m, isError) {
+        $('.loader').hide();
+        if (isError) {
+            $("#modal-error-text").html(m);
+            $("#modal-error").show();
+            $("#modal-success").hide();
+        }
+        else {
+            $("#modal-success-text").html(m);
+            $("#modal-success").show();
+            $("#modal-error").hide();
+        }
+    }
+</script>

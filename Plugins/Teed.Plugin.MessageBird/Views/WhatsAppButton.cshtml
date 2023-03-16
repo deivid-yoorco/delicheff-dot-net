@@ -1,0 +1,216 @@
+﻿@model Teed.Plugin.MessageBird.Models.WhatsAppSendModel
+@if (Model.IsAllowed)
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.js" type="text/javascript"></script>
+    <style>
+        .input-tags {
+            width: 100%;
+            padding: 15px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .label-info {
+            background-color: #5bc0de;
+            padding: 3px;
+        }
+    </style>
+
+    <button type="button" class="btn bg-olive modal-trigger" data-target="modal1" onclick="focusMessageInput()">
+        <i class="fa fa-comments"></i>
+        Enviar mensaje WhatsApp
+    </button>
+    <div id="dialog" title="Enviar mensaje WhatsApp">
+        <div class="col-md-12" style="margin-top:1em" id="new-form">
+            <div class="form-group col-md-12">
+                <div class="col-md-12" style="padding:0">
+                    <div class="label-wrapper">
+                        <label class="control-label">Nombre del cliente</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="input-group" style="width:100%">
+                        <select class="form-control" id="to-name">
+                            @foreach (var name in Model.Names)
+                            {
+                                <option value="@name.Value">@name.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="col-md-12" style="padding:0">
+                    <div class="label-wrapper">
+                        <label class="control-label">Número de teléfono al que se envía el mensaje</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="input-group" style="width:100%;display: flex;align-items: center;">
+                        <select class="form-control" id="to-number" style="width:100%">
+                            @foreach (var phone in Model.Phones)
+                            {
+                                <option value="@phone.Value">@phone.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="col-md-12" style="padding:0">
+                    <div class="label-wrapper">
+                        <label class="control-label">Plantilla</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="input-group" style="width:100%">
+                        <select class="form-control" id="template" style="width:100%">
+                            <option value="">Selecciona una plantilla...</option>
+                            <option value="consulta_general">Consulta general</option>
+                            <option value="consulta_pedido_hoy">Consulta pedido hoy</option>
+
+                            <option value="optimizacion_primer_horario">Optimización primer horario</option>
+                            <option value="optimizacion_segundo_horario">Optimización segundo horario</option>
+                            <option value="optimizacion_tercer_horario">Optimización tercer horario</option>
+
+                            <option value="llegada_menos_cinco_vdos">Llegada en menos de 5 minutos</option>
+                            <option value="llegada_entre_cinco_y_diez_vdos">Llegada entre 5 y 10 minutos</option>
+                            <option value="llegada_entre_diez_y_quince_vdos">Llegada entre 10 y 15 minutos</option>
+                            <option value="llegada_entre_quince_y_veinte_vdos">Llegada entre 15 y 20 minutos</option>
+                            <option value="llegada_entre_veinte_y_veinticinco_vdos">Llegada entre 20 y 25 minutos</option>
+                            <option value="llegada_entre_veinticinco_y_treinta_vdos">Llegada entre 25 y 30 minutos</option>
+
+                            <option value="repartidores_llegaron">Los repartidores llegaron</option>
+                            <option value="segundo_intento_entrega">Segundo intento de entrega</option>
+                            <option value="entregar_a_tercero">Entregar a tercero</option>
+                            <option value="pago_pendiente">Pago pendiente</option>
+                            <option value="retraso_ruta">Retraso ruta</option>
+                            <option value="adelanto_entrega">Adelanto de la entrega</option>
+
+                            <option value="cupon_no_utilizado">Cupón no utilizado</option>
+                            <option value="cupon_incidencia">Cupón incidencia</option>
+                            <option value="cupon_primera_compra_n">Cupón primera compra</option>
+
+                            @*<option value="bienvenida_primer_pedido_2">Bienvenida primer pedido</option>*@
+                            <option value="septiembre2022_bienvenida_nuevo_sitioweb_13092022">Bienvenida primer pedido</option>
+                            <option value="septiembre2022_app_bienvenida_nuevo_13092022">Bienvenida primer pedido por app</option>
+                            <option value="bienvenida_nuevo_registro">Bienvenida nuevo registro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            @*<div class="form-group col-md-12">
+                <div class="col-md-12" style="padding:0">
+                    <div class="label-wrapper">
+                        <label class="control-label">Nombre del template</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="input-group" style="width:100%">
+                        <input id="template" type="text" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                    <div class="col-md-12" style="padding:0">
+                        <div class="label-wrapper">
+                            <label class="control-label">
+                                Variables para el template
+                                <br />
+                                (Dar enter después de escribir para agregar variable)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="input-group" style="width:100%">
+                            <input class="input-tags" type="text" data-role="tagsinput">
+                        </div>
+                    </div>
+                </div>
+                <span style="text-align: center;margin-top: 10px">
+                    Los identificadores &lt;nombre&gt; y &lt;saludo&gt;
+                    sirven para colocar información como el nombre y un saludo dependiendo de la hora en la
+                    que se está enviando el mensaje, si se desean tomar estas dos variables favor de agregarlas a las variables para el template,
+                    incluyendo los símbolos &lt; y &gt; como se muestra al inicio de esta nota.
+                </span>*@
+        </div>
+        <div style="display:none;color:red;margin-top:2em" class="col-md-12" id="error-message"></div>
+        <div style="display:none;color:green;margin-top:2em" class="col-md-12" id="success-message"></div>
+        <div style="display:none;margin-top:2em" class="col-md-12" id="sending-message">Enviando mensaje...</div>
+    </div>
+    <script>
+    $(document).ready(function () {
+        var dialog;
+        dialog = $("#dialog").dialog({
+            autoOpen: false,
+            height: 500,
+            width: 565,
+            modal: true,
+            buttons: {
+                "Enviar mensaje": function (e) {
+                    let button = e.target;
+                    $("#sending-message").hide();
+                    $(button).hide();
+                    if ($("#to-number").val() == '' ||
+                        $("#to-number").val() == null ||
+                        typeof $("#to-number").val() == 'undefined' ||
+                        $("#template").val() == '' ||
+                        $("#template").val() == null ||
+                        typeof $("#template").val() == 'undefined') {
+                        $("#loading").hide();
+                        $("#error-message").html("Por favor selecciona un número de teléfono y selecciona una plantilla para poder continuar.");
+                        $("#error-message").show();
+                        $(button).show();
+                    } else {
+                        $("#loading").show();
+                        $("#error-message").hide();
+                        $("#success-message").hide();
+
+                        let body = {
+                            toNumber: $("#to-number").val(),
+                            toName: $("#to-name").val(),
+                            template: $("#template").val(),
+                            variables: $(".input-tags").val(),
+                            customerId: @Model.CustomerId
+                        };
+                        addAntiForgeryToken(body);
+                        $("#sending-message").show();
+                        $.ajax({
+                            url: '/Admin/MessageBird/SendWhatsApp',
+                            method: 'POST',
+                            data: body,
+                            success: function (data) {
+                                $("#loading").hide();
+                                $("#success-message").html("El mensaje de WhatsApp se envió correctamente.");
+                                $("#success-message").show();
+                                $("#sending-message").hide();
+                            },
+                            error: function (e) {
+                                console.log(e);
+                                $("#loading").hide();
+                                $("#error-message").html("Ocurrió un problema al enviar el mensaje, por favor verifica la información seleccionada e inténtalo de nuevo (MessageBird status: " + e.responseText + ")");
+                                $("#error-message").show();
+                                $(button).show();
+                                $("#sending-message").hide();
+                            },
+                            complete: function () {
+                                $('#messages-grid').data('kendoGrid').dataSource.read();
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+        $(".modal-trigger").on("click", function () {
+            $("#dialog").dialog("open");
+        });
+    });
+
+    function focusMessageInput() {
+        setTimeout(function () {
+            $('#text-send').focus();
+        }, 300);
+    }
+    </script>
+}

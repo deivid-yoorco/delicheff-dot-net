@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Shipping rate computation",
+  "FriendlyName": "Estafeta",
+  "SystemName": "Shipping.Estafeta",
+  "Version": "1.11",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "teed",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Nop.Plugin.Shipping.Estafeta.dll",
+  "Description": "This plugin offers shipping rates by Estafeta"
+}

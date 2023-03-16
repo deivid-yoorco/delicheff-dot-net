@@ -1,0 +1,34 @@
+﻿@{
+    Layout = "";
+    Html.AddCssFileParts("~/Plugins/ExternalAuth.Facebook/Content/facebookstyles.css");
+}
+<style>
+    .facebook-points {
+        margin-bottom: 0;
+        margin-top: 25px;
+    }
+</style>
+<div class="facebook-login-block">
+    <div class="row">
+        <h5 class="facebook-points" style="display: none;"></h5>
+        <a asp-controller="facebookauthentication" asp-action="login" asp-route-returnurl="@Context.Request.Query["ReturnUrl"]" style="font-size:1em; margin-top:20px;" class="waves-effect waves-light btn col s12 l8 offset-l2 social facebook"><i class="fab fa-facebook"></i> Iniciar sesión con Facebook</a>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/FacebookAuthentication/GetFacebookPoints',
+            method: 'GET',
+            success: function (data) {
+                if (data > 0) {
+                    $(".facebook-points").text("¡Recibe " + data + " puntos de recompensa al iniciar sesión por primera vez en Facebook!");
+                    $(".facebook-points").show();
+                }
+            },
+            error: function (e) {
+                console.log(e);
+                $(".facebook-points").hide();
+            }
+        });
+    });
+</script>

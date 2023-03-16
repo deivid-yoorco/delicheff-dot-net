@@ -1,0 +1,200 @@
+﻿@model Teed.Plugin.Groceries.Models.UrbanPromoter.UrbanPromoterModel
+
+<input type="hidden" value="@Model.Id" />
+<div class="content">
+    <div class="form-horizontal">
+        <div class="raw clearfix">
+            <div class="col-md-12">
+                <div class="panel-group">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Información principal
+                        </div>
+
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Usuario</label>
+                                        <div title="Usuario ligado al promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="hidden" id="CustomerId" name="CustomerId" />
+                                    <input id="customers" name="customers" style="width: 100%;" />
+                                    <span asp-validation-for="CustomerId"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Banco</label>
+                                        <div title="Banco del promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="AccountBankName" />
+                                    <span asp-validation-for="AccountBankName"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Nombre</label>
+                                        <div title="Nombre del promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="AccountOwnerName" />
+                                    <span asp-validation-for="AccountOwnerName"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Dirección</label>
+                                        <div title="Dirección del promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="AccountAddress" />
+                                    <span asp-validation-for="AccountAddress"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Número de cuenta</label>
+                                        <div title="Número de cuenta del promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="AccountNumber" />
+                                    <span asp-validation-for="AccountNumber"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">CLABE Interbancaria</label>
+                                        <div title="CLABE Interbancaria del promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="AccountCLABE" />
+                                    <span asp-validation-for="AccountCLABE"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Pago en efectivo</label>
+                                        <div title="Seleccionar si el pago se va a hacer en efectivo al promotor."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="CashPayment" />
+                                    <span asp-validation-for="CashPayment"></span>
+                                </div>
+                            </div>
+                            @if (Model.Id > 0)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Activo</label>
+                                            <div title="Seleccionar si el pago se va a hacer en efectivo al promotor."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="IsActive" />
+                                        <span asp-validation-for="IsActive"></span>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var filtering;
+    $(document).ready(function () {
+        filtering = $("#customers").kendoComboBox({
+            placeholder: "Buscar usuario por email...",
+            dataTextField: "name",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            select: function (e) {
+                $("#CustomerId").val(filtering.data("kendoComboBox").dataItem(e.item.index()).id);
+            }
+        });
+        $('[name="customers_input"]').on('keyup', function (e) {
+            if (e.which <= 90 && e.which >= 48) {
+                setTimeout(function () {
+                    if (GetCurrentText().length > 2) {
+                        GetCustomers(GetCurrentText());
+                    }
+                }, 200);
+            }
+        });
+        @if (Model.CustomerId > 0)
+        {
+        <text>
+        $("#CustomerId").val(@Model.CustomerId);
+        GetCustomers('', @Model.CustomerId);
+        </text>
+        }
+    });
+    function GetCurrentText() {
+        return $('[name="customers_input"]').val();
+    }
+    function GetCustomers(text = '', id = 0) {
+        $.ajax({
+            cache: false,
+            type: "GET",
+            url: "/Admin/UrbanPromoter/GetCustomersFiltering?text=" + text + '&byId=' + id,
+            success: function (data) {
+                filtering.data("kendoComboBox").setDataSource($.isArray(data) ? data : [data]);
+                if (id > 0) {
+                    filtering.data("kendoComboBox").value(data.name);
+                }
+                else if (!$('.k-animation-container').is(":visible"))
+                    $('.k-select').click();
+            },
+            error: function (e) {
+                alert('Failed to retrieve customers.');
+                console.log(e)
+            },
+        });
+
+    }
+</script>

@@ -1,0 +1,83 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderMonitor");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Order";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Monitoreo de pedidos
+    </h1>
+    <div class="pull-right">
+        <a href="CheckTimes2?date=@(DateTime.Now.AddDays(1).ToString("dd-MM-yyyy"))" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Monitorear pedidos de mañana
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("MonitorDateListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "Id",
+                    title: "Ver monitoreo",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-success" href="CheckTimes2?date=#=DateShort#"><i class="fa fa-eye"></i>Ver fecha</a>`
+                }
+            ]
+        });
+    });
+</script>

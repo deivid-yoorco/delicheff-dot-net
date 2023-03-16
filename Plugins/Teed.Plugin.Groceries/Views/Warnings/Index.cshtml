@@ -1,0 +1,59 @@
+﻿@model Teed.Plugin.Groceries.Models.Warnings.IndexViewModel;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Warnings");
+}
+<style>
+    .ok {
+        /*text-align: center;
+            font-weight: bold;
+            #dff0d8
+        */
+        padding: 1em;
+        margin: 1em 0;
+        border-color: blue;
+        background-color: white;
+    }
+
+    .order-alert-danger {
+        margin-top: auto;
+        background-color: white;
+        border-radius: 5px;
+        border: solid 2px #3c8dbc;
+    }
+
+    .complete-list {
+        margin-top: auto;
+        font-size: 12px;
+        text-align: left;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #dff0d8;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Alertas de productos
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="warnings">
+            <nop-tab asp-name="tab-published-products" asp-title="Alertas de productos publicados" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Warnings/_Warnings.PublishedProducts.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-costs-increase" asp-title="Alertas de aumento de costos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Warnings/_Warnings.CostsIncrease.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-costs-decrease" asp-title="Alertas de disminución de costos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Warnings/_Warnings.CostsDecrease.cshtml", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>
+<script>
+    function toggleIcon(e) {
+        $(e.target)
+            .prev('.panel-heading')
+            .find(".more-less")
+            .toggleClass('glyphicon-plus glyphicon-minus');
+    }
+    $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+    $('.panel-group').on('shown.bs.collapse', toggleIcon);
+</script>

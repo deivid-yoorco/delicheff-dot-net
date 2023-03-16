@@ -1,0 +1,267 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderDeliveryReports.ManagerExpensesViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var deliveryDate = Model.DeliveryDate.ToString("dd-MM-yyyy");
+    var countExpense = 0;
+    var controllerName = "OrderDeliveryReports";
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Gastos del coordinador de la fecha: @deliveryDate
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="OrderReportStatus" asp-route-id="@(Model.DeliveryDate.ToString("dd-MM-yyyy"))">Regresar a: Liquidación de compradores @Model.DayOfWeek @deliveryDate</a>
+            </small>
+        </h1>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @if (ViewBag.mensaje != null)
+                        {
+                            <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                @ViewBag.mensaje
+                            </h2>
+                        }
+                        <div>
+                            <h2>Gastos adicionales</h2>
+
+                            @*<div>
+                                <button type="button" class="btn btn-success" onclick="createExpenseJson()">crea json</button>
+                            </div>*@
+                            <div id="tablesExpenseContainer" class="table-responsive">
+                                @if (Model.ManagerExpenses == null || Model.ManagerExpenses.Count == 0)
+                                {
+                                    <h4 id="noExpenses">No se han registrado gastos en el día</h4>
+                                }
+                                else
+                                {
+                                    @foreach (var item in Model.ManagerExpenses)
+                                    {
+                                        <table id="tableExpense-@countExpense" class="tableExpense" style="width:100%">
+                                            <tr>
+                                                <td class="tdExpense" style="width:30%; text-align:right;">
+                                                    Importe: $
+                                                    <input id="amountExpense-@countExpense" class="amountExpense" type="number" min="0" style="width:65%; text-align:center" placeholder="Ingresa el importe..." value="@item.Amount" />
+                                                </td>
+                                                <td class="tdExpense" style="text-align:right; width:8%">Concepto: </td>
+                                                <td class="tdExpense" style="width:30%">
+                                                    <textarea id="conceptExpense-@countExpense" class="conceptExpense" style="width:100%" placeholder="Registra el concepto para el importe...">@item.Concept</textarea>
+                                                </td>
+                                                <td class="tdExpense" style="width:12%"><input disabled="@(Model.IsClosedLiquidation)" type="button" id="deleteExpense-@countExpense" class="deleteExpense btn btn-danger" onclick="deleteManagerExpenseInDb(@item.Id, @countExpense)" value="Borrar gasto"></td>
+                                            </tr>
+                                        </table>
+                                        <input hidden id="expenseId-@countExpense" class="expenseId" value="@item.Id">
+                                        countExpense++;
+                                    }
+                                }
+                            </div>
+
+                            <div>
+                                <input id="expenseCount" type="hidden" value="@countExpense" />
+                                <button type="button" class="btn btn-success" onclick="createNewExpense()">Agregar gasto</button>
+                            </div>
+                        </div>
+                        <hr />
+                        <div>
+                            <h2>Totales</h2>
+                            <div class="table-responsive">
+                                <table class="table-responsive" style="width:100%">
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total gastado en efectivo: </label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.CashAmountTotal.ToString("C")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total pagado con tarjeta:</label> </td>
+                                        <td style="text-align:right;width:130px"><strong class="pull-right">@Model.CardAmountTotal.ToString("C")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total gastado en transferencia: </label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.TransferAmountTotal.ToString("C")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total de efectivo entregado a compradores</label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.CashAmountDeliveredBuyers.ToString("C")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total de cambio a devolver de compradores:</label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@(Model.ReturnedAmountByBuyers > 0 ? Model.ReturnedAmountByBuyers.ToString("C") : Model.ReturnedAmountByBuyers.ToString())</strong></td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        <hr />
+                        <div>
+                            <h2>Cuentas del coordinador</h2>
+                            <div class="table-responsive">
+                                <table class="table-responsive" style="width:100%">
+                                    <tr>
+                                        <td style="text-align:left;width:230px"><label>Fondo saldo inicial: </label> </td>
+                                        <td style="text-align:right;width:230px">$ <input style="width:200px;text-align:right" asp-for="InitialAmount" type="number" min="0" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:230px"><label>Dinero recibido por el coordinador:</label> </td>
+                                        <td style="text-align:right;width:230px">$ <input style="width:200px;text-align:right" asp-for="AmountManagerReceives" type="number" min="0" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Gastos realizados por el coordinador: </label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.ExpenseAmountManager.ToString("C")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Fondo saldo final</label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@(Model.RestAmount >= 0 ? Model.RestAmount.ToString("C") : "- " + (Model.RestAmount * -1).ToString("C"))</strong></td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        <input id="ExpenseJsonData" asp-for="ManagerExpensesJson" type="hidden" />
+                        <input hidden asp-for="DeliveryDate" />
+                        <hr />
+                        <br />
+                        <br />
+
+                        @if (Model.IsClosedLiquidation == false)
+                        {
+                            <div class="pull-right">
+                                <button type="submit" asp-action="ManagerExpenses" onclick="return createExpenseJson()" class="btn bg-blue">
+                                    Guardar cambios
+                                </button>
+                            </div>
+                            <div class="pull-right" style="margin-right:10px">
+                                <a class="btn btn-danger" onclick="confirmManagerExpenses('@Model.DayOfWeek','@(Model.DeliveryDate.ToString("dd-MM-yyyy"))', '@Model.CurrentUserName')">Autorizar liquidación</a>
+                            </div>
+                        }
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+
+    function confirmManagerExpenses(weekDay, date, currentUserName) {
+        var alert = confirm("Yo " + currentUserName + " asumo total responsabilidad de la liquidación de las cuentas del coordinador del " + weekDay + " " + date + ".\n\n Recuerda que una vez autorices la liquidación no se podrá modificar.\n\n ¿Confirmas que deseas liquidar las cuentas?");
+        if (alert == true) {
+            $.ajax({
+            url: "@Html.Raw(Url.Action("ConfirmManagerExpenses", controllerName))?date=" + date,
+                type: 'Post',
+            success: function (data) {
+                $("#success-message").html("Se confirmó correctamente la cuenta, por favor espere...");
+                $("#success-message").show();
+                location.reload();
+            },
+            error: function (e) {
+                $("#error-message").html(e.responseText);
+                $("#error-message").show();
+            }
+        });
+        }
+    }
+
+    function createExpenseJson() {
+        var expenseData = [];
+        var countExpense = parseInt($("#expenseCount").val());
+
+        for (var i = 0; i < countExpense; i++) {
+
+             var expenseId = $("#expenseId-" + i).val();
+             var expenseAmount = $("#amountExpense-" + i).val();
+            var expenseDescription = $("#conceptExpense-" + i).val();
+            if (expenseAmount != undefined && expenseDescription != undefined) {
+                var Data = {
+                    Id: expenseId,
+                    Amount: expenseAmount,
+                    Concept: expenseDescription
+                }
+                expenseData.push(Data);
+            }
+        }
+         var expenseDataTypeJson = JSON.stringify(expenseData);
+         console.log(expenseDataTypeJson);
+         DataExpenseJson(expenseDataTypeJson);
+    }
+
+    function DataExpenseJson(dataJsonExpense) {
+        var jsonExpense = dataJsonExpense;
+         $("#ExpenseJsonData").val(jsonExpense);
+
+    }
+
+    function createNewExpense() {
+        var currentExpense = parseInt($("#expenseCount").val());
+        if (currentExpense == 0) {
+            $("#noExpenses").hide();
+        }
+
+        $('#tablesExpenseContainer').append(
+            '<table id="tableExpense-' + currentExpense + '" class= "tableExpense" style = "width:100%" >'
+            + '<tr>'
+            + '<td class="tdExpense" style="width:30%; text-align:right;">Importe: $ <input id="amountExpense-' + currentExpense + '" class="amountExpense" type="number" min="0" value="0" style="width:65%; text-align:center" placeholder="Ingresa el importe..." /> </td>'
+            + '<td class="tdExpense" style="text-align:right; width:8%">Concepto: </td>'
+            + '<td class="tdExpense" style="width:30%"><textarea id="conceptExpense-' + currentExpense + '"  style="width:100%" placeholder="Registra el concepto para el importe..."></textarea></td>'
+            + '<td class="tdExpense" style="width:12%"><button id="deleteExpense-' + currentExpense + '" class="deleteExpense btn btn-danger" type="button" onclick="removeManagerExpense(' + currentExpense + ')">Borrar gasto</button></td>'
+            + '</tr>'
+            + '</table >'
+        );
+        currentExpense++;
+        $("#expenseCount").val(currentExpense);
+    }
+
+    function removeManagerExpense(numberRemove) {
+        var element = document.getElementById("tableExpense-" + numberRemove);
+        element.remove();
+    }
+
+    function deleteManagerExpenseInDb(idExpense, numberRemove) {
+        $.ajax({
+            url: "@Html.Raw(Url.Action("DeleteManagerExpense", controllerName))/" + idExpense,
+            type: "Delete",
+            success: function (data) {
+                console.log("Manager Expense Deleted");
+                removeManagerExpense(numberRemove);
+            }
+        });
+    }
+
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    .tableExpense {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tdExpense, .thExpense {
+        border: 1px solid #ffffff;
+        text-align: center;
+        padding: 8px;
+    }
+</style>

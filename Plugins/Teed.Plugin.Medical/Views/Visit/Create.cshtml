@@ -1,0 +1,124 @@
+﻿@using Teed.Plugin.Medical.Models.Visit;
+@model Teed.Plugin.Medical.Models.Visit.VisitModel
+@{
+    Layout = "_AdminLayout";
+    var selectedUser = (int)ViewData["SelectedUser"];
+    var aid = (int)ViewData["AppointmentId"];
+}
+<script>
+    //$(document).ready(function () {
+
+    //    $("#btn").hide()
+    //    $("#activate-step-1").hide()
+    //    var navListItems = $('ul.setup-panel li a'),
+    //        allWells = $('.setup-content');
+
+    //    allWells.hide();
+
+    //    navListItems.click(function (e) {
+    //        e.preventDefault();
+    //        var $target = $($(this).attr('href')),
+    //            $item = $(this).closest('li');
+
+    //        if (!$item.hasClass('disabled')) {
+    //            navListItems.closest('li').removeClass('active');
+    //            $item.addClass('active');
+    //            allWells.hide();
+    //            $target.show();
+    //        }
+    //    });
+
+    //    $('ul.setup-panel li.active a').trigger('click');
+
+    //    // DEMO ONLY //
+    //    $('#activate-step-2').on('click', function (e) {
+    //        $('ul.setup-panel li:eq(1)').removeClass('disabled');
+    //        $('ul.setup-panel li a[href="#step-2"]').trigger('click');
+    //        $("#btn").show()
+    //        $("#activate-step-1").show()
+    //        $("#activate-step-2").hide()
+    //    })
+    //    $('#activate-step-1').on('click', function (e) {
+    //        $('ul.setup-panel li:eq(2)').removeClass('disabled');
+    //        $('ul.setup-panel li a[href="#step-1"]').trigger('click');
+    //        $("#btn").hide()
+    //        $("#activate-step-2").show()
+    //        $(this).hide();
+    //    })
+    //});
+
+</script>
+<form asp-action="Create" method="post">
+    <input type="hidden" asp-for="AppointmentId" value="@aid" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar consulta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-controller="Patient" asp-action="Details" asp-route-id="@selectedUser">regresar a expediente del paciente</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            @*<a id="activate-step-1" class="btn bg-blue"><i class="fa fa-arrow-left"></i>Atras</a>*@
+            <button id="btn" type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            @*<a id="activate-step-2" class="btn bg-blue"><i class="fa fa-arrow-right"></i>Siguiente</a>*@
+
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-xs-12" hidden>
+                            <ul class="nav nav-pills nav-justified thumbnail setup-panel">
+                                <li class="active">
+                                    <a href="#step-1">
+                                        <h4 class="list-group-item-heading">Step 1</h4>
+                                        <p class="list-group-item-text">First step description</p>
+                                    </a>
+                                </li>
+                                <li class="disabled">
+                                    <a href="#step-2">
+                                        <h4 class="list-group-item-heading">Step 2</h4>
+                                        <p class="list-group-item-text">Second step description</p>
+                                    </a>
+                                </li>
+                                <li class="disabled">
+                                    <a href="#step-3">
+                                        <h4 class="list-group-item-heading">Step 3</h4>
+                                        <p class="list-group-item-text">Third step description</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="row setup-content" id="step-1">
+                            <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <h1>Consulta</h1>
+                                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Visit/_Create.Visit.cshtml", Model)
+                                   
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="row setup-content" id="step-2">
+                            <div class="col-xs-12">
+                                <div class="col-md-12 well">
+                                    <h1 class="text-center">Receta</h1>
+                                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Visit/_PrescriptionProducts.cshtml", new VisitModel())
+                                </div>
+                            </div>
+                        </div>*@
+                        @*<nop-tabs id="visit">*@
+                            @* <nop-tab asp-name="tab-visit" asp-title="Consulta" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Visit/_Create.Visit.cshtml", Model)</nop-tab>*@
+                            @*<nop-tab asp-name="tab-treatment" asp-title="Tratamiento Aplicado">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Visit/_Create.Pending.cshtml", Model)</nop-tab>*@
+                        @*</nop-tabs>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

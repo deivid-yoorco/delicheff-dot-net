@@ -1,0 +1,37 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.CreateViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedCustomPages");
+}
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Crear nueva página
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Nombre</label>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="Name" />
+                                <span asp-validation-for="Name"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,76 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var controllerName = "Patient";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div id="visit-grid"></div>
+                        <script type="text/javascript">
+                        $(document).ready(function() {
+                            $("#visit-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("PatientVisits", controllerName, new { id = Model.Id }))",
+                                            type: "POST",
+                                            dataType: "json"
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors"
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    pageSize: @(defaultGridPageSize),
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    pageSizes: [@(gridPageSizes)],
+                                    @await Html.PartialAsync("_GridPagerMessages")
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "CreationDate",
+                                        title: "Fecha de consulta",
+                                        template: '<a href="/Admin/Visit/Edit/#=Id#">#=CreationDate# - #=CreationTime#</a>'
+                                    },
+                                    {
+                                        field: "Doctor",
+                                        title: "Doctor"
+                                    },
+                                    {
+                                        field: "Branch",
+                                        title: "Sucursal"
+                                    }
+                                ]
+                            });
+                        });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

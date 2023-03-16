@@ -1,0 +1,271 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+@{
+    var imageNote = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es: 1920x1080 píxeles.";
+    var imageNoteArrow = "El tamaño recomendado es: 75x105 píxeles.";
+    var videoText = "Se debe ingresar solo el Id de la URL de YouTube. Por ejemplo: ";
+    var videoId = "xpu14GnkDng";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Video del slider
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="VideoId_OverrideForStore" asp-input="VideoId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Video Id</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="VideoId" />
+                <span asp-validation-for="VideoId"></span>
+                <em>@videoText</em><strong>@videoId</strong>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Primera imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPicture1Id_OverrideForStore" asp-input="BannerPicture1Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture1Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture1Id" />
+                <span asp-validation-for="BannerPicture1Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerText1_OverrideForStore" asp-input="BannerText1" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerText1" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerText1" />
+                <span asp-validation-for="BannerText1"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerLink1_OverrideForStore" asp-input="BannerLink1" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerLink1" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink1" />
+                <span asp-validation-for="BannerLink1"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Segunda imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPicture2Id_OverrideForStore" asp-input="BannerPicture2Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture2Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture2Id" />
+                <span asp-validation-for="BannerPicture2Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerText2_OverrideForStore" asp-input="BannerText2" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerText2" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerText2" />
+                <span asp-validation-for="BannerText2"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerLink2_OverrideForStore" asp-input="BannerLink2" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerLink2" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink2" />
+                <span asp-validation-for="BannerLink2"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Tercera imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPicture3Id_OverrideForStore" asp-input="BannerPicture3Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture3Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture3Id" />
+                <span asp-validation-for="BannerPicture3Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerText3_OverrideForStore" asp-input="BannerText3" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerText3" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerText3" />
+                <span asp-validation-for="BannerText3"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerLink3_OverrideForStore" asp-input="BannerLink3" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerLink3" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink3" />
+                <span asp-validation-for="BannerLink3"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Cuarta imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPicture4Id_OverrideForStore" asp-input="BannerPicture4Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture4Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture4Id" />
+                <span asp-validation-for="BannerPicture4Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerText4_OverrideForStore" asp-input="BannerText4" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerText4" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerText4" />
+                <span asp-validation-for="BannerText4"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerLink4_OverrideForStore" asp-input="BannerLink4" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerLink4" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink4" />
+                <span asp-validation-for="BannerLink4"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Quinta imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="NewBannerPicture5Id_OverrideForStore" asp-input="NewBannerPicture5Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="NewBannerPicture5Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="NewBannerPicture5Id" />
+                <span asp-validation-for="NewBannerPicture5Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="NewBannerText5_OverrideForStore" asp-input="NewBannerText5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="NewBannerText5" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="NewBannerText5" />
+                <span asp-validation-for="NewBannerText5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="NewBannerLink5_OverrideForStore" asp-input="NewBannerLink5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="NewBannerLink5" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="NewBannerLink5" />
+                <span asp-validation-for="NewBannerLink5"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Sexta imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="NewBannerPicture6Id_OverrideForStore" asp-input="NewBannerPicture6Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="NewBannerPicture6Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="NewBannerPicture6Id" />
+                <span asp-validation-for="NewBannerPicture6Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="NewBannerText6_OverrideForStore" asp-input="NewBannerText6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="NewBannerText6" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="NewBannerText6" />
+                <span asp-validation-for="NewBannerText6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="NewBannerLink6_OverrideForStore" asp-input="NewBannerLink6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="NewBannerLink6" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="NewBannerLink6" />
+                <span asp-validation-for="NewBannerLink6"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Flecha del Slider
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPictureArrowId_OverrideForStore" asp-input="BannerPictureArrowId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPictureArrowId" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPictureArrowId" />
+                <span asp-validation-for="BannerPictureArrowId"></span>
+                <em>@imageNoteArrow</em>
+            </div>
+        </div>
+    </div>
+</div>

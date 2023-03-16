@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Config methods",
+  "FriendlyName": "CategorySearch",
+  "SystemName": "Teed.Plugin.CategorySearch",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.CategorySearch.dll",
+  "Description": "Category Search by product"
+}

@@ -1,0 +1,133 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var imageNotes = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es 1920x720.";
+    var colorText = "El valor del texto debe ser escrito en código hexadecimal. Por ej: #C1C7C9";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen en fondo 1
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="BannerPicture5Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture5Id" />
+                <span asp-validation-for="BannerPicture5Id"></span>
+                <em>@imageNotes</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitle5" />
+                <span asp-validation-for="BannerTitle5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitle5" />
+                <span asp-validation-for="BannerSubTitle5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color del título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitleColor5" />
+                <span asp-validation-for="BannerTitleColor5"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color del subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitleColor5" />
+                <span asp-validation-for="BannerSubTitleColor5"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink5" />
+                <span asp-validation-for="BannerLink5"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen en fondo 2
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="BannerPicture6Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture6Id" />
+                <span asp-validation-for="BannerPicture6Id"></span>
+                <em>@imageNotes</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitle6" />
+                <span asp-validation-for="BannerTitle6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitle6" />
+                <span asp-validation-for="BannerSubTitle6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color del título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitleColor6" />
+                <span asp-validation-for="BannerTitleColor6"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color del subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitleColor6" />
+                <span asp-validation-for="BannerSubTitleColor6"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink6" />
+                <span asp-validation-for="BannerLink6"></span>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,177 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+   <TargetFramework>net461</TargetFramework>
+ </PropertyGroup>  
+ <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+   <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Api</OutputPath>
+   <OutDir>$(OutputPath)</OutDir>
+ </PropertyGroup>
+ <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+   <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Api</OutputPath>
+   <OutDir>$(OutputPath)</OutDir>
+ </PropertyGroup>
+ <!-- This target execute after "Build" target -->
+ <Target Name="NopTarget" AfterTargets="Build">
+   <!-- Delete unnecessary libraries from plugins path -->
+   <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+ </Target>
+ <ItemGroup>
+   <None Remove="plugin.json" />
+   <None Remove="src\files\cental-en-linea-firebase-adminsdk-iqtij-787895ec3d.json" />
+   <None Remove="src\images\card\t_amex.jpg" />
+   <None Remove="src\images\card\t_gen.jpg" />
+   <None Remove="src\images\card\t_mascard.jpg" />
+   <None Remove="src\images\card\t_visa.jpg" />
+   <None Remove="Views\Configure.cshtml" />
+   <None Remove="Views\Notifications\NotificationCreate.cshtml" />
+   <None Remove="Views\Notifications\NotificationEdit.cshtml" />
+   <None Remove="Views\Notifications\NotificationList.cshtml" />
+   <None Remove="Views\TaggableBoxConfig\Create.cshtml" />
+   <None Remove="Views\TaggableBoxConfig\Edit.cshtml" />
+   <None Remove="Views\TaggableBoxConfig\List.cshtml" />
+   <None Remove="Views\TaggableBoxConfig\_CreateOrUpdate.cshtml" />
+   <None Remove="Views\TaggableBoxConfig\_Log.cshtml" />
+   <None Remove="Views\OnboardingConfig\Create.cshtml" />
+   <None Remove="Views\OnboardingConfig\Edit.cshtml" />
+   <None Remove="Views\OnboardingConfig\List.cshtml" />
+   <None Remove="Views\OnboardingConfig\_CreateOrUpdate.cshtml" />
+   <None Remove="Views\OnboardingConfig\_Log.cshtml" />
+   <None Remove="Views\PopupConfig\Create.cshtml" />
+   <None Remove="Views\PopupConfig\Edit.cshtml" />
+   <None Remove="Views\PopupConfig\List.cshtml" />
+   <None Remove="Views\PopupConfig\_CreateOrUpdate.cshtml" />
+   <None Remove="Views\PopupConfig\_Log.cshtml" />
+   <None Remove="Views\_ConfigureBanner.cshtml" />
+   <None Remove="Views\_ConfigureCategories.cshtml" />
+   <None Remove="Views\_ConfigureFacebook.cshtml" />
+   <None Remove="Views\_ConfigureGeneral.cshtml" />
+   <None Remove="Views\_ConfigureSmartlook.cshtml" />
+   <None Remove="Views\_ConfigureWelcome.cshtml" />
+   <None Remove="Views\_ConfigureNotifications.cshtml" />
+   <None Remove="Views\_ViewImports.cshtml" />
+ </ItemGroup>
+ <ItemGroup>
+   <Content Include="plugin.json">
+     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+   </Content>
+   <Content Include="src\files\cental-en-linea-firebase-adminsdk-iqtij-787895ec3d.json">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="src\images\card\t_amex.jpg">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="src\images\card\t_gen.jpg">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="src\images\card\t_mascard.jpg">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="src\images\card\t_visa.jpg">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\Configure.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\Notifications\NotificationCreate.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\Notifications\NotificationEdit.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\Notifications\NotificationList.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\TaggableBoxConfig\Create.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\TaggableBoxConfig\Edit.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\TaggableBoxConfig\List.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+     <Pack>$(IncludeRazorContentInPack)</Pack>
+   </Content>
+   <Content Include="Views\TaggableBoxConfig\_CreateOrUpdate.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\TaggableBoxConfig\_Log.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\OnboardingConfig\Create.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\OnboardingConfig\Edit.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\OnboardingConfig\List.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+     <Pack>$(IncludeRazorContentInPack)</Pack>
+   </Content>
+   <Content Include="Views\OnboardingConfig\_CreateOrUpdate.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\OnboardingConfig\_Log.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\PopupConfig\_Log.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\PopupConfig\_CreateOrUpdate.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\PopupConfig\Create.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\PopupConfig\Edit.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\PopupConfig\List.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+     <Pack>$(IncludeRazorContentInPack)</Pack>
+   </Content>
+   <Content Include="Views\_ConfigureSmartlook.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureNotifications.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureWelcome.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureCategories.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureGeneral.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureFacebook.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureBanner.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ViewImports.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+ </ItemGroup>
+ <ItemGroup>
+   <PackageReference Include="FirebaseAdmin" Version="1.17.0" />
+   <PackageReference Include="SharpZipLib" Version="1.3.3" />
+ </ItemGroup>
+ <ItemGroup>
+   <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
+   <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
+   <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj">
+     <Private>false</Private>
+   </ProjectReference>
+ </ItemGroup>
+ <ItemGroup>
+   <Reference Include="System.ServiceModel" />
+ </ItemGroup>
+ <ItemGroup>
+   <WCFMetadata Include="Connected Services" />
+ </ItemGroup>
+</Project>

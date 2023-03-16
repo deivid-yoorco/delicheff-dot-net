@@ -1,0 +1,124 @@
+﻿<div id="payment-stripe-form" style="display:none; margin-top:1em">
+    <form id="payment-form">
+        <div id="card-element"><!--Stripe.js injects the Card Element--></div>
+        <p id="card-error" role="alert" style="font-weight:bold;color:red;"></p>
+    </form>
+    <button type="button" class="waves-effect waves-light btn" id="stripe-pay-button" onclick="stripeSubmit()">
+        Pagar
+    </button>
+    <div style="margin:1em 0;display:none" id="stripe-processing">
+        <span style="font-weight:bold;color:green;">Estamos procesando tu pago, por favor espera.</span>
+    </div>
+    <div id="stripe-error" style="font-weight:bold;color:red;display:none;margin-top:1em"></div>
+</div>
+<script>
+    var stripe;
+    var card;
+    var elements;
+
+    const buildStripeIframe = () => {
+        $("#confirm-button-disable").hide();
+        $('#pay-card').hide();
+        $('#PaymentAlert').empty().html(' ');
+        $('#PaymentAlert').show();
+        $('#PaymentAlert').append('<label>Ingresa la información solicitada para pagar de forma segura con tu tarjeta de crédito o débito.</label>');
+        $("#payment-stripe-form").hide();
+        $("#stripe-error").hide();
+
+        $('#loading-confirm').addClass('active');
+        $('#stripe-pay-button').attr("disabled", true);
+
+        var style = {
+            base: {
+                fontFamily: 'Arial, sans-serif',
+                fontSmoothing: "antialiased",
+                fontSize: "16px"
+            },
+            invalid: {
+                fontFamily: 'Arial, sans-serif',
+                color: "#fa755a",
+                iconColor: "#fa755a"
+            }
+        };
+
+        $.ajax({
+            cache: false,
+            url: '/Admin/PaymentStripe/GetPaymentData',
+            type: 'GET',
+            success: function (key) {
+                stripe = Stripe(key);
+                elements = stripe.elements({ locale: 'es' });
+                card = elements.create("card", { style: style });
+                // Stripe injects an iframe into the DOM
+                card.mount("#card-element");
+                card.on("change", function (event) {
+                    // Disable the Pay button if there are no card details in the Element
+                    document.querySelector("#stripe-pay-button").disabled = event.empty || event.error;
+                    document.querySelector("#card-error").textContent = event.error ? event.error.message : "";
+                });
+
+                $("#payment-stripe-form").show();
+                $('#loading-confirm').removeClass('active');
+                $("#confirm-button-disable").hide();
+            },
+            error: function () {
+                $("#stripe-error").show();
+                $("#stripe-error").html("La tarjeta fue rechazada, por favor intenta con otra forma de pago.");
+                $('#loading-confirm').removeClass('active');
+            }
+        });
+    };
+
+    function stripeSubmit() {
+        $('#loading-confirm').addClass('active');
+        $('#stripe-pay-button').addClass('disabled');
+        $('#stripe-pay-button').hide();
+        $("#stripe-error").hide();
+        $("#stripe-processing").show();
+        $("#card-element").hide();
+
+        stripe.createToken(card).then(function (result) {
+            // Handle result.error or result.token
+            if (result.error) {
+                $("#stripe-error").show();
+                $("#stripe-error").html("La tarjeta fue rechazada, por favor intenta con otra forma de pago.");
+                $('#loading-confirm').removeClass('active');
+                $('#stripe-pay-button').removeClass('disabled');
+                $('#stripe-pay-button').show();
+                $("#stripe-processing").hide();
+                $("#card-element").show();
+            }
+            else {
+                const addressId = $("#third-step-billing-address-select-new").val();
+                var token = result.token.id;
+                let body = {
+                    token: token,
+                    billingAddressId: addressId
+                }
+
+                $.ajax({
+                    url: '/Admin/PaymentStripe/ProcessPayment',
+                    type: 'POST',
+                    data: body,
+                    success: function (result) {
+                        SavePayment.save(result);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        $("#stripe-error").show();
+                        if (error.responseText) {
+                            $("#stripe-error").html(error.responseText);
+                        } else {
+                            $("#stripe-error").html("La tarjeta fue rechazada, por favor intenta con otra forma de pago.");
+                        }
+                        $('#stripe-pay-button').removeClass('disabled');
+                        $('#stripe-pay-button').show();
+                        $('#loading-confirm').removeClass('active');
+                        $("#stripe-processing").hide();
+                        $("#card-element").show();
+                    }
+                })
+            }
+        });
+    }
+</script>

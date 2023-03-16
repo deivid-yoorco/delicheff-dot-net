@@ -1,0 +1,40 @@
+﻿body, button, input, optgroup, select, textarea {
+    font-family: Georgia, 'Times New Roman', Times, serif !important;
+    color: #b08d7b;
+}
+
+.mini-shopping-cart .count,
+.mini-shopping-cart .count a,
+.mini-shopping-cart .items .attributes,
+.mini-shopping-cart .totals,
+.mini-shopping-cart .totals strong,
+.navbar-fixed nav ul.right.hide-on-med-and-down a {
+    color: #b08d7b !important;
+}
+
+.product-card {
+    padding-top: 20px;
+}
+
+.product-page {
+    padding-top: 30px;
+}
+
+.page-footer {
+    background-color: #D6AA8B !important;
+}
+
+.newsletter-email label,
+.newsletter-email input {
+    color: white !important;
+}
+
+.newsletter-email input {
+    border-bottom-color: white !important;
+}
+
+.zana-facebook img, .zana-instagram img {
+    height: 30px;
+    width: 30px;
+    margin-right: 5px;
+}

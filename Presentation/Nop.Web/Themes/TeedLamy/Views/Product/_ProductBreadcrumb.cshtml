@@ -1,0 +1,50 @@
+﻿@model ProductDetailsModel.ProductBreadcrumbModel
+@using Nop.Core.Domain.Common
+@inject CommonSettings commonSettings
+@{
+    var breadcrumbDelimiter = commonSettings.BreadcrumbDelimiter;
+    List<string> names = new List<string>();
+}
+@if (Model.Enabled)
+{
+    <style>
+        #brd-nav {
+            line-height: 32px;
+        }
+        .breadcrumb {
+            font-size: 14px;
+        }
+    </style>
+    <nav class="white z-depth-0 grey-text hide-on-small-only" id="brd-nav">
+        <div class="nav-wrapper container">
+            <div class="col s6 grey-text">
+                @await Component.InvokeAsync("Widget", new { widgetZone = "productbreadcrumb_before", additionalData = Model.ProductId })
+
+                <a class="breadcrumb" href="@Url.RouteUrl("HomePage")" title="@T("Categories.Breadcrumb.Top")">@T("Categories.Breadcrumb.Top")</a>
+                @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                {
+                    @foreach (var cat in Model.CategoryBreadcrumb)
+                    {
+                        <a class="breadcrumb" href="@Url.RouteUrl("Category", new { SeName = cat.SeName })" title="@cat.Name">@cat.Name</a>
+                        names.Add(cat.Name);
+                    }
+                }
+                else
+                {
+                    @foreach (var cat in Model.CategoryBreadcrumb)
+                    {
+                        <a class="breadcrumb" href="@Url.RouteUrl("Category", new { SeName = cat.SeName })" title="@cat.Name">@cat.Name</a>
+                    }
+                }
+                <span class="breadcrumb" title="@Model.ProductName">@Model.ProductName</span>
+
+                @await Component.InvokeAsync("Widget", new { widgetZone = "productbreadcrumb_after", additionalData = Model.ProductId })
+            </div>
+        </div>
+    </nav>
+}
+
+@if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+{
+    <input value="@names.Last()" id="nameCategory" hidden />
+}

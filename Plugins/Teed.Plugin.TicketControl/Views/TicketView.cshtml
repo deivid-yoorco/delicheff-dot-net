@@ -1,0 +1,19 @@
+﻿@model string
+
+@if (!string.IsNullOrEmpty(Model))
+{
+    <style>
+        .qr-container {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+            .qr-container img {
+                float: none !important;
+            }
+    </style>
+    <div class="qr-container row">
+        <img class="col s12 m5" src="data:image/png;base64, @Model" />
+    </div>
+}

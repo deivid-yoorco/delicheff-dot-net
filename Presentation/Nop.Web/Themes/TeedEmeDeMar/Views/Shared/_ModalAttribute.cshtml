@@ -1,0 +1,269 @@
+﻿@model ProductOverviewModel
+@using Nop.Core.Domain.Orders
+@using System.Text
+
+<form asp-route="Product" asp-route-sename="@Model.SeName" method="post" id="product-details-form-modal-@Model.Id">
+    <div class="modal-content">
+        <div class="input-field col s12">
+            <div class="col s12 m6 center">
+                <img class="responsive-img" src="@Model.DefaultPictureModel.ImageUrl" width="350" height="350" id="img-cart-modal-@Model.Id" />
+            </div>
+            <div class="col s12 m6">
+                <strong>@Model.Name</strong>
+                <br />
+                <strong>@Model.ProductPrice.Price</strong>
+                <br />
+                @{
+                    for (int i = 0; i < Model.AttributeProduct.Count; i++)
+                    {
+                        var controlId = $"product_attribute_{Model.AttributeProduct[i].ProductAttributeMappingId}";
+                        if (i == 0)
+                        {
+                            <div>
+                                <label>@Model.AttributeProduct[i].ProductAttributeMapping.TextPrompt:</label>
+                                @if (Model.AttributeProduct.Count > 1)
+                                {
+                                    <select name="@(controlId)" id="@(controlId)" class="select-attr-first-@Model.Id" onchange="getAttrCombinations@(Model.Id)()">
+                                        <option value="" disabled selected>Selecciona una opción...</option>
+                                        @for (int j = 0; j < Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.Count; j++)
+                                        {
+                                            if (@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].StockQty < 1)
+                                            {
+                                                <option disabled value="@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Id">@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Name (Agotado)</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Id">@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Name</option>
+                                            }
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select name="@(controlId)" id="@(controlId)">
+                                        @for (int j = 0; j < Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.Count; j++)
+                                        {
+                                            if (@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].StockQty < 1)
+                                            {
+                                                <option disabled value="@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Id">@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Name (Agotado)</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Id">@Model.AttributeProduct[i].ProductAttributeMapping.ProductAttributeValues.ToArray()[j].Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <script type="text/javascript" asp-location="Footer">
+                                        $('.add-to-cart-button-@Model.Id').removeClass("disabled");
+                                        $('#mobil-add-to-cart-button-@Model.Id').removeClass("disabled");
+                                    </script>
+                                }
+
+                                <input type="hidden" name="product_attribute_@(Model.AttributeProduct[i].ProductAttributeMappingId)" value="" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <label>@Model.AttributeProduct[i].ProductAttributeMapping.TextPrompt:</label>
+                                <select name="@(controlId)" disabled class="select-attrs-@Model.Id" id="@(controlId)"></select>
+
+                                <input type="hidden" name="product_attribute_@(Model.AttributeProduct[i].ProductAttributeMappingId)" value="" />
+                            </div>
+                        }
+
+                        <script type="text/javascript" asp-location="Footer">
+                        $(document).ready(function() {
+                            showHideDropdownQuantity("@controlId");
+                            showHideRadioQuantity("@controlId", true);
+                        });
+                        </script>
+                    }
+                }
+                <script type="text/javascript" asp-location="Footer">
+                    function getAttrCombinations@(Model.Id)() {
+                        var val = $('.select-attr-first-@Model.Id').val();
+                        $.ajax({
+                            cache: false,
+                            url: 'Product/ProductCombinations?productId=' + @Model.Id + '&attr=' + val,
+                            type: 'GET',
+                            success: function (data) {
+                                var obj = JSON.parse(data);
+                                $('.select-attrs-@Model.Id').empty().html(' ');
+                                for (var i = 0; i < obj.length; i++) {
+                                    if (obj[i].AttrId != val) {
+                                        if (obj[i].StockQuantity > 0) {
+                                            var str = '<option value="' + obj[i].AttrId + '">' + obj[i].AttrNameValue + '</option>';
+                                            $('.select-attrs-@Model.Id').append(str);
+                                        } else {
+                                            var str = '<option disabled value="' + obj[i].AttrId + '">' + obj[i].AttrNameValue + ' (Agotado)</option>';
+                                            $('.select-attrs-@Model.Id').append(str);
+                                        }
+                                    }
+                                }
+                                $('.select-attrs-@Model.Id').prop("disabled", false);
+                                $('select').formSelect();
+                                $('.add-to-cart-button-@Model.Id').removeClass("disabled");
+                                $('#mobil-add-to-cart-button-@Model.Id').removeClass("disabled");
+                            },
+                            error: function (d) {
+                                console.log("ERROR");
+                                //console.log(d);
+                            }
+                        });
+                    }
+                </script>
+                <div class="col s12 hide-on-small-only" style="margin-top:10px;">
+                    <button type="button" id="add-to-wish-button-@Model.Id" class="modal-close btn waves-effect waves-light right" onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.Id, shoppingCartTypeId = (int) ShoppingCartType.Wishlist})', '#product-details-form-modal-@Model.Id');return false;">
+                        Agregar a wishlist
+                    </button>
+                    <button type="button" id="add-to-cart-button-@Model.Id" class="modal-close waves-green waves-effect waves-light btn right disabled" onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.Id, shoppingCartTypeId = (int) ShoppingCartType.ShoppingCart})', '#product-details-form-modal-@Model.Id');return false;">
+                        Agregar al carrito
+                    </button>
+                </div>
+                <div class="col s12 show-on-small hide-on-med-and-up center font-size-mobil" style="margin-top:10px;">
+                    <button type="button" id="mobil-add-to-wish-button-@Model.Id" class="modal-close waves-green waves-effect waves-light btn" onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.Id, shoppingCartTypeId = (int) ShoppingCartType.Wishlist})', '#product-details-form-modal-@Model.Id');return false;">
+                        Agregar a wishlist
+                    </button>
+                    <button type="button" id="mobil-add-to-cart-button-@Model.Id" class="modal-close waves-green waves-effect waves-light btn disabled" onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.Id, shoppingCartTypeId = (int) ShoppingCartType.ShoppingCart})', '#product-details-form-modal-@Model.Id');return false;">
+                        Agregar al carrito
+                    </button>
+                </div>
+                <!-- CSS media query within a style sheet -->
+                <style>
+                    @@media (max-width: 500px) {
+                        .font-size-mobil > button {
+                            font-size: 0.7em;
+                        }
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" asp-location="Footer">
+    $(document).ready(function () {
+        $('.add-to-cart-button-@Model.Id').click(function () {
+            setTimeout(function () {
+                $.ajax({
+                cache: false,
+                url: '@Url.Action("CartAjax","ShoppingCart")',
+                type: 'get',
+                success: function (data) {
+                    $('#pop-cart').empty();
+                    $('#pop-cart').append(data);
+                }
+            });
+                //$('#flyout-cart').addClass('active');
+            }, 1500);
+        });
+
+        $('#mobil-add-to-cart-button-@Model.Id').click(function () {
+            setTimeout(function () {
+                $.ajax({
+                cache: false,
+                url: '@Url.Action("CartAjax","ShoppingCart")',
+                type: 'get',
+                success: function (data) {
+                    $('#pop-cart').empty();
+                    $('#pop-cart').append(data);
+                }
+            });
+                //$('#flyout-cart').addClass('active');
+            }, 1500);
+        });
+
+        @*$('.header').on('mouseenter', '.add-to-cart-button-@Model.Id', function () {
+            $('#flyout-cart').addClass('active');
+        });
+        $('.header').on('mouseleave', '.add-to-cart-button-@Model.Id', function () {
+            $('#flyout-cart').removeClass('active');
+        });
+        $('.header').on('mouseenter', '#flyout-cart', function () {
+            $('#flyout-cart').addClass('active');
+        });
+        $('.header').on('mouseleave', '#flyout-cart', function () {
+            $('#flyout-cart').removeClass('active');
+        });*@
+    });
+</script>
+
+<script type="text/javascript" asp-location="Footer">
+    function showHideDropdownQuantity(id) {
+        $('select[name=' + id + '] > option').each(function () {
+            $('#' + id + '_' + this.value + '_qty_box').hide();
+        });
+        $('#' + id + '_' + $('select[name=' + id + '] > option:selected').val() + '_qty_box').css('display', 'inline-block');
+    };
+
+    function showHideRadioQuantity(id) {
+        $('input[name=' + id + ']:radio').each(function () {
+            $('#' + $(this).attr('id') + '_qty_box').hide();
+        });
+        $('#' + id + '_' + $('input[name=' + id + ']:radio:checked').val() + '_qty_box').css('display', 'inline-block');
+    };
+
+    function showHideCheckboxQuantity(id) {
+        if ($('#' + id).is(':checked'))
+            $('#' + id + '_qty_box').css('display', 'inline-block');
+        else
+            $('#' + id + '_qty_box').hide();
+    };
+</script>
+
+@if (Model.PictureModels.Count > 1)
+{
+    //dynamic update support
+    var attributeChangeScriptsBuilder = new StringBuilder();
+    var productId = Model.Id;
+    var attributeChangeHandlerFuncName = $"attribute_change_handler_{productId}";
+
+    //generate change event script
+    foreach (var attribute in Model.AttributeProduct)
+    {
+        var controlId = $"product_attribute_{attribute.ProductAttributeMappingId}";
+        attributeChangeScriptsBuilder.AppendFormat("$('#{0}').change(function(){{{1}();}});\n", controlId, attributeChangeHandlerFuncName);
+
+        foreach (var attributeValue in attribute.ProductAttributeMapping.ProductAttributeValues)
+        {
+            attributeChangeScriptsBuilder.AppendFormat("$('#{0}_{1}_qty').on('input propertychange paste', function(){{{2}();}});\n", controlId, attributeValue.Id, attributeChangeHandlerFuncName);
+        }
+    }
+
+    //render scripts
+    //almost the same implementation is used in the \Views\Product\_RentalInfo.cshtml file
+    <script type="text/javascript" asp-location="Footer">
+        function @(attributeChangeHandlerFuncName)() {
+                $.ajax({
+                    cache: false,
+                    url: '@Html.Raw(Url.Action("productdetails_attributechange", "shoppingcart", new {productId = productId, validateAttributeConditions = true, loadPicture = true }))',
+                    data: $('#product-details-form-modal-@Model.Id').serialize(),
+                    type: 'post',
+                    success: function (data) {
+                        if (data.pictureDefaultSizeUrl != "") {
+                            $('#img-cart-modal-@productId').attr("src", data.pictureDefaultSizeUrl);
+                            //cartAjax();
+                            $.event.trigger({ type: "product_attributes_changed", changedData: data });
+                        }
+                    }
+                });
+            }
+            @*function cartAjax() {
+                $.ajax({
+                    cache: false,
+                    url: '@Url.Action("CartAjax","ShoppingCart")',
+                    type: 'get',
+                    success: function (data) {
+                        console.log(data);
+                        $('#pop-cart').val(data);
+                    }
+                });
+            }*@
+            $(document).ready(function() {
+                @(attributeChangeHandlerFuncName)();
+                @Html.Raw(attributeChangeScriptsBuilder.ToString())
+            });
+    </script>
+}
+<div class="modal-footer">
+</div>

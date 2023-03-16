@@ -1,0 +1,24 @@
+﻿@model int 
+<button type="button" name="" id="notdeliveredorder" class="btn bg-red" style="margin-right: 3px;" data-toggle="modal" data-target="#notdeliveredorder-action-confirmation">
+    Marcar como no entregada
+</button>
+<div id="notdeliveredorder-action-confirmation" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="notdeliveredorder-action-confirmation-title" style="display: none; padding-right: 17px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="notdeliveredorder-action-confirmation-title">¿Seguro?</h4>
+            </div>
+            <div class="modal-body">
+                ¿Seguro que deseas realizar esta acción?
+            </div>
+            <div class="modal-footer">
+                <a  href="/Admin/Order/MarkOrderAsNotDelivered?id=@Model" id="notdeliveredorder-action-confirmation-submit-button" class="btn btn-primary pull-right" name="notdeliveredorder">
+                    Si
+                </a>
+                <span class="btn btn-default pull-right margin-r-5" data-dismiss="modal">No, cancelar</span>
+            </div>
+        </div>
+    </div>
+    <script>$(document).ready(function () { $('#notdeliveredorder').attr("data-toggle", "modal").attr("data-target", "#notdeliveredorder-action-confirmation"); $('#notdeliveredorder-action-confirmation-submit-button').attr("name", $("#notdeliveredorder").attr("name")); $("#notdeliveredorder").attr("name", ""); if ($("#notdeliveredorder").attr("type") == "submit") $("#notdeliveredorder").attr("type", "button"); });</script>
+</div>

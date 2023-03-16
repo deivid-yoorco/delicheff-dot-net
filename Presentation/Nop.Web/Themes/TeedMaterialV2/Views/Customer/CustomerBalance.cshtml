@@ -1,0 +1,117 @@
+﻿@model CustomerBalanceListModel
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts("Mi monedero - Balance");
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-order-list-page");
+    var months = new List<int> { 1, 3, 6, 12 };
+}
+@section left
+{
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.RewardPoints })
+}
+<div class="page account-page points-list-page section ">
+    <div class="">
+        <h1 class="category-page-title">Mi monedero</h1>
+    </div>
+    <div class="page-body card-panel cel-no-card-shadows">
+        @await Html.PartialAsync("RewardNavigationBar")
+        <div class="row">
+            <div class="col s12">
+                <p style="font-weight: bold;font-size: medium">Tu saldo disponible es @Model.TotalAmount.ToString("C")</p>
+            </div>
+            <div class="col s12 m6" style="display: flex;align-items: center;">
+                <span style="font-weight: bold; margin-right: 5px">Movimientos:</span>
+                <span class="teed-primary-text" style="position: relative;left: 5px;top: 2px;"><i class="material-icons small">date_range</i></span>
+                <select class="browser-default points-filtering cel-no-border-select teed-primary-text">
+                    @foreach (var month in months)
+                    {
+                        var innerText = "";
+                        @if (month == 1)
+                        {
+                            innerText = "Último mes";
+                        }
+                        else if (month == 3)
+                        {
+                            innerText = "Últimos 3 meses";
+                        }
+                        else if (month == 6)
+                        {
+                            innerText = "Últimos 6 meses";
+                        }
+                        else if (month == 12)
+                        {
+                            innerText = "Último año";
+                        }
+                        @if (Model.CurrentMonthsFilteringAmount == month)
+                        {
+                            <option selected value="@month">
+                                @innerText
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@month">
+                                @innerText
+                            </option>
+                        }
+                    }
+                </select>
+                <script>
+                    $(document).ready(function () {
+                        $('.points-filtering').change(function () {
+                            location.href = "@Url.RouteUrl("CustomerBalance")?months=" + $(this).val();
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="page-body">
+            @if (Model.Balances.Count > 0)
+            {
+                <table class="highlight">
+                    <tbody>
+                        @foreach (var point in Model.Balances)
+                        {
+                            <tr style="border: none !important;">
+                                <td>
+                                    <span class="teed-primary-text">@point.Date</span> -
+                                    @if (point.OrderId != null)
+                                    {
+                                        if (point.Amount > 0)
+                                        {
+                                            <span>
+                                                Te abonamos <strong>@point.Amount.ToString("C")</strong> de tu orden <strong>#@point.OrderId</strong>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                Usaste <strong>@point.Amount.ToString("C")</strong> en la orden <strong>#@point.OrderId</strong>
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            @point.Description (@point.Amount.ToString("C"))
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="no-data">
+                    Aún no tienes puntos
+                </div>
+            }
+        </div>
+    </div>
+</div>

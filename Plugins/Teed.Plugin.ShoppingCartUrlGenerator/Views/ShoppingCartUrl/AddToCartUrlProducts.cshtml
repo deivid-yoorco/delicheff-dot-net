@@ -1,0 +1,215 @@
+﻿@model Teed.Plugin.ShoppingCartUrlGenerator.Models.ShoppingCartUrlPublicViewModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.ShoppingCart").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-shopping-cart-page");
+}
+<div class="page shopping-cart-page section">
+    @Html.Raw(Model.Body)
+    <h6 class="red-text" style="font-weight: bold">
+        Selecciona de la lista los productos que deseas agregar a tu carrito. Si gustas, puedes modificar la cantidad que será agregada:
+    </h6>
+    <form method="post" action="/ShoppingCartPublicView/AddProductsToCart">
+        <input type="hidden" asp-for="ShoppingCartUrlId" value="@Model.ShoppingCartUrlId" />
+        <div class="page-body">
+            <div class="order-summary-content">
+                <div class="table-wrapper">
+                    <table class="cart">
+                        <colgroup>
+                            <col width="1" />
+                            <col width="1" />
+                            <col width="1" />
+                            <col width="1" />
+                            @*<col width="1" />*@
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    Marcar/<br />
+                                    Desmarcar
+                                </th>
+                                <th class="product-picture">
+                                    @T("ShoppingCart.Image")
+                                </th>
+                                <th class="product">
+                                    @T("ShoppingCart.Product(s)")
+                                </th>
+                                <th class="quantity" style="width:100px">
+                                    @T("ShoppingCart.Quantity")
+                                </th>
+                                @*<th class="subtotal">
+                                        @T("ShoppingCart.ItemTotal")
+                                    </th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var productIds = new List<int>();
+                                var queryString = Context.Request.Query["productIds"].ToString();
+                                if (!string.IsNullOrWhiteSpace(queryString))
+                                {
+                                    var array = queryString.Split(',');
+                                    foreach (var item in array)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(item))
+                                        {
+                                            continue;
+                                        }
+                                        int.TryParse(item, out int productId);
+                                        productIds.Add(productId);
+                                    }
+                                }
+                                if (productIds.Count == 0) { productIds = Model.Products.Select(x => x.ProductId).ToList(); }
+                                for (int i = 0; i < Model.Products.Count; i++)
+                                {
+                                    <input type="hidden" name="SelectedProducts[@(i)].ProductId" value="@Model.Products[i].ProductId" />
+                                    <tr>
+                                        <td style="text-align:center">
+                                            <label>
+                                                <input type="checkbox" @(productIds.Where(x => x == Model.Products[i].ProductId).Any() ? "checked" : null) value="@productIds.Where(x => x == Model.Products[i].ProductId).Any()" name="SelectedProducts[@i].Selected" />
+                                                <span></span>
+                                            </label>
+                                        </td>
+                                        <td class="product-picture">
+                                            <img alt="@Model.Products[i].Picture.AlternateText" class="responsive-img" src="@Model.Products[i].Picture.ImageUrl" title="@Model.Products[i].Picture.Title" />
+                                        </td>
+                                        <td class="product">
+                                            <strong>@Model.Products[i].ProductName</strong>
+                                            @if (!string.IsNullOrEmpty(Model.Products[i].AttributeInfo))
+                                            {
+                                                <div class="attributes">
+                                                    @Html.Raw(Model.Products[i].AttributeInfo)
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(Model.Products[i].SelectedPropertyOption))
+                                            {
+                                                <div class="attributes">
+                                                    @(Model.Products[i].SelectedPropertyOption.First().ToString().ToUpper())@(Model.Products[i].SelectedPropertyOption.Substring(1))
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.Products[i].RecurringInfo))
+                                            {
+                                                <div class="recurring-info">
+                                                    @Html.Raw(Model.Products[i].RecurringInfo)
+                                                </div>
+                                            }
+                                            @if (Model.Products[i].Warnings?.Count > 0)
+                                            {
+                                                <div class="message-error">
+                                                    <ul>
+                                                        @foreach (var warning in Model.Products[i].Warnings)
+                                                        {
+                                                            <li style="color:#ff0000;">@*El producto ya no está dísponible en nuestro catálogo o está agotado.<br />*@@warning</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="quantity" style="width: 150px;">
+                                            <div class="number-input" style="margin-top:0 !important">
+                                                <select name="SelectedProducts[@(i)].SelectedQuantity" class="card-select browser-default selected-qty-@Model.Products[i].Id"></select>
+                                            </div>
+                                            <script asp-location="Footer">
+                                            cartInitialSetup(@(Model.Products[i].Id), @Model.Products[i].EquivalenceCoefficient, @Model.Products[i].WeightInterval, @Model.Products[i].Quantity, '@(Model.Products[i].BuyingBySecondary.ToString())');
+                                            </script>
+                                        </td>
+                                        @*<td class="subtotal">
+                                                <span class="product-subtotal">@Model.Products[i].SubTotal</span>
+                                                @if (!string.IsNullOrEmpty(Model.Products[i].Discount))
+                                                {
+                                                    <div class="discount" style="color:#C53b36">
+                                                        @T("ShoppingCart.ItemYouSave", Model.Products[i].Discount)
+                                                    </div>
+                                                    if (Model.Products[i].MaximumDiscountedQty.HasValue)
+                                                    {
+                                                        <div class="discount-additional-info">
+                                                            @T("ShoppingCart.MaximumDiscountedQty", Model.Products[i].MaximumDiscountedQty.Value)
+                                                        </div>
+                                                    }
+                                                }
+                                            </td>*@
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <div class="row section">
+                        <div class="col s12 center-align" id="loading-confirm-container" style="display: none">
+                            <div class="preloader-wrapper small" style="margin:1em 0" id="loading-confirm">
+                                <div class="spinner-layer">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div><div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div><div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col s12 center-align">
+                            <button type="submit" onclick="submitting(this)" class="btn-large waves-effect waves-light" style="margin-top:10px;">
+                                Agregar los productos seleccionados al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    function submitting(element) {
+        $("#loading-confirm-container").show();
+        $("#loading-confirm").addClass("active");
+        setTimeout(() => {
+            $(element).attr('disabled', 'true');
+        }, 1);
+    };
+
+    function cartInitialSetup(id, coefficient, weightInterval, qty, buyingBySec) {
+        buyingBySec = buyingBySec == "False" ? false : true;
+        var newValue = qty;
+        var select = $(".selected-qty-" + id);
+        select.empty();
+        for (var j = 0; j < select.length; j++) {
+            var type = buyingBySec || weightInterval > 0 ? "gr" : "pz";
+            var options = select[j].options;
+            if (buyingBySec && coefficient > 0) {
+                for (var i = 0; i <= 50; i++) {
+                    var value = qty;
+                    value = ((i * 1000) / coefficient).toFixed(2);
+                    if (value >= 1000) {
+                        value = (value / 1000).toFixed(2);
+                        type = " kg";
+                    }
+                    var option = new Option(value + type, i);
+                    options.add(option);
+                }
+            }
+            else if (weightInterval > 0) {
+                for (var w = 0; w <= 50; w++) {
+                    var weightValue = qty;
+                    weightValue = (w * weightInterval).toFixed(2);
+                    if (weightValue >= 1000) {
+                        weightValue = (weightValue / 1000).toFixed(2);
+                        type = " kg";
+                    }
+                    var optionWeight = new Option(weightValue + type, w);
+                    options.add(optionWeight);
+                }
+            }
+            else {
+                for (var e = 0; e <= 50; e++) {
+                    var newOption = new Option(e + " " + type, e);
+                    options.add(newOption);
+                }
+            }
+        }
+
+        $(".selected-qty-" + id).find('option[value=' + parseInt(newValue) + ']').prop('selected', true);
+    }
+</script>

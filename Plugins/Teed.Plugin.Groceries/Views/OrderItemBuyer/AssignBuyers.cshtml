@@ -1,0 +1,981 @@
+﻿@model Teed.Plugin.Groceries.Controllers.OrderItemCustomerModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderItemBuyer");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var buyerId = (int)ViewBag.BuyerId;
+    var manufacturerId = (int)ViewBag.ManufacturerId;
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .inner-tables {
+        width: inherit;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+        .inner-tables th, Guardando
+        .inner-tables td {
+            border: 1px solid #dddddd !important;
+            text-align: left !important;
+            padding: 8px !important;
+        }
+</style>
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar compradores a la fecha de entrega @(Model.Date.ToString("dd-MM-yyyy"))
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de fechas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label style="text-align:right" for="AllowDownload">¿Permitir a los compradores descargar la lista de compras?</label>
+                                        <div title="Selecciona si deseas que los compradores puedan descargar su lista de compras" class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor id="allow-download" asp-for="AllowDownload" />
+                                    <span asp-validation-for="AllowDownload"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label style="text-align:right" for="AllowReport">¿Permitir a los compradores reportar costos de la lista de compras?</label>
+                                        <div title="Selecciona si deseas que los compradores puedan reportar costos de productos de su lista de compras, los productos se mostrarán pero no se podrán reportar costos." class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor id="allow-report" asp-for="AllowReport" />
+                                    <span asp-validation-for="AllowReport"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12" style="margin-bottom: 12px">
+                            <button type="button" class="btn bg-olive dialog-masive-category">
+                                Asignación masiva por categoría hijo
+                            </button>
+                            <div id="dialog-masive-category" title="Asigna el comprador">
+                                <p>Selecciona el comprador de cada categoría hijo en los casos que corresponda. Se sobreescribirá la selección ya realizada de los compradores seleccionados. Los cambios se guardarán luego de darle al botón "Guardar".</p>
+                                <div>
+                                    @foreach (var category in Model.Categories)
+                                    {
+                                        <div style="margin-bottom: 10px">
+                                            <strong>@category.Category:</strong>
+                                            <select class="massive-category-selector" data-categoryId="@category.CategoryId">
+                                                <option value="-1">Selecciona el comprador...</option>
+                                                @foreach (var buyer in Model.Buyers)
+                                                {
+                                                    <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn bg-olive dialog-masive-manufacturer">
+                                Asignación masiva por fabricante
+                            </button>
+                            <div id="dialog-masive-manufacturer" title="Asigna el comprador">
+                                <p>Selecciona el comprador de cada fabricante en los casos que corresponda. Se sobreescribirá la selección ya realizada de los compradores seleccionados. Los cambios se guardarán luego de darle al botón "Guardar".</p>
+                                <div>
+                                    @foreach (var manufacturer in Model.Categories.Select(x => x.Products.Select(y => y.Manufacturer))?.SelectMany(x => x)?.GroupBy(x => x?.Id)?.Select(x => x.FirstOrDefault()))
+                                    {
+                                        <div style="margin-bottom: 10px">
+                                            <strong>@(manufacturer == null ? "Sin fabricante" : manufacturer.Name):</strong>
+                                            <select class="massive-manufacturer-selector" data-manufacturerId="@(manufacturer == null ? 0 : manufacturer.Id)">
+                                                <option value="-1">Selecciona el comprador...</option>
+                                                @foreach (var buyer in Model.Buyers)
+                                                {
+                                                    <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn bg-olive" data-toggle="modal" data-target="#assignUserModal">
+                                Asignación automática
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="assignUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Asignación automática</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="modal-info">
+                                                Se seleccionará para cada producto el último comprador asignado.
+                                            </div>
+                                            <div>
+                                                <strong>Selecciona los compradores que SI se deben considerar para la asignación:</strong>
+                                                <div>
+                                                    <select multiple class="massive-manufacturer-selector ui-choose-modal">
+                                                        @foreach (var buyer in Model.Buyers.Where(x => x.Value != "0"))
+                                                        {
+                                                            <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div id="modal-error" style="display: none">
+                                                <strong style="color:red">Ocurrió un problema al intentar asignar los compradores.</strong>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div id="auto-assign-buttons">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-primary" id="auto-assing-button">Continuar</button>
+                                            </div>
+                                            <button id="loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Asignando productos...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn bg-olive" data-toggle="modal" data-target="#transferUserModal">
+                                Transferir productos
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="transferUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Transferir productos</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="modal-info">
+                                                Transferir los productos de un comprador a otro comprador
+                                            </div>
+                                            <div>
+                                                <strong>Transferir los productos del comprador:</strong>
+                                                <div>
+                                                    <select class="massive-manufacturer-selector" id="fromBuyer">
+                                                        @foreach (var buyer in Model.Buyers.OrderBy(x => x.Text))
+                                                        {
+                                                            <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <strong>Al comprador:</strong>
+                                                <div>
+                                                    <select class="massive-manufacturer-selector" id="toBuyer">
+                                                        @foreach (var buyer in Model.Buyers.OrderBy(x => x.Text))
+                                                        {
+                                                            <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <strong>
+                                                    Únicamente productos de la categoría
+                                                </strong>
+                                                <div>
+                                                    <select class="massive-transfer-category-selector">
+                                                        <option selected value="0">Todas las categorías</option>
+                                                        @foreach (var category in Model.Categories.OrderBy(x => x.Category))
+                                                        {
+                                                            <option value="@(category.CategoryId)">@(category.Category)</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <strong>
+                                                    Y del fabricante
+                                                </strong>
+                                                <div>
+                                                    <select class="massive-transfer-manufacturer-selector">
+                                                        <option selected value="0">Todos los fabricantes</option>
+                                                        @foreach (var manufacturer in Model.Categories.Select(x => x.Products.Select(y => y.Manufacturer))?.SelectMany(x => x)?.GroupBy(x => x?.Id)?.Select(x => x.FirstOrDefault()).OrderBy(x => x?.Name))
+                                                        {
+                                                            if (manufacturer != null)
+                                                            {
+                                                                <option value="@(manufacturer.Id)">@(manufacturer.Name)</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="-1">Sin fabricante</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div id="modal-error" style="display: none">
+                                                <strong style="color:red">Ocurrió un problema al intentar transferir los productos.</strong>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div id="modal-footer-buttons">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-primary" id="transfer-products-button">Continuar</button>
+                                            </div>
+                                            <button id="loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Transfiriendo productos...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn bg-olive" data-toggle="modal" data-target="#dialog-automatic-distribution-manufacturer">
+                                Distribución automática por fabricante
+                            </button>
+                            <div class="modal fade" id="dialog-automatic-distribution-manufacturer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Asignación automática por fabricante</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="modal-info">
+                                                Si varios compradores tienen asignados productos con el mismo fabricante, todos esos productos quedarán asignados a un solo comprador (el que tiene más productos de ese fabricante).
+                                            </div><br />
+                                            @if (Model.ProductsByManufacturerTable.Where(x => x.BuyerIds.Count() > 1 && x.ManufacturerId != 0).Any())
+                                            {
+                                                <div>
+                                                    <strong>Selecciona los fabricantes que SI deben tener un solo comprador (si no seleccionas ninguno no se hará ningún cambio):</strong><br /><br />
+                                                    <div id="options-manufacturers-many-buyers">
+                                                        <select multiple class="ui-choose-manufacturer-modal" id="select-manufacturers-only-buyer">
+                                                            @foreach (var item in Model.ProductsByManufacturerTable.Where(x => x.BuyerIds.Count() > 1 && x.ManufacturerId != 0))
+                                                            {
+                                                                <option value="@(item.ManufacturerId)">@(item.Manufacturer)</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <strong style="color: red">No hay fabricantes con más de un comprador.</strong>
+                                            }
+                                            <div id="modal-error" style="display: none">
+                                                <strong style="color:red">Ocurrió un problema al intentar asignar los compradores.</strong>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div id="auto-distribution-buttons">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-primary" id="automatic-distribution-button">Continuar</button>
+                                            </div>
+                                            <button id="automatic-distribution-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Asignando productos...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*<button type="button" class="btn bg-olive" data-toggle="modal" data-target="#filterModal">
+                                    Filtrar
+                                </button>*@
+                            <button type="button" class="btn bg-olive download-tables">
+                                Descargar a PDF
+                            </button>
+                            <script>
+                                $('.download-tables').click(function () {
+                                    window.open('/Admin/OrderItemBuyer/ExportDataTables?date=' + location.href.split('=')[1], '_blank');
+                                })
+                            </script>
+
+                            <button type="button" class="btn bg-olive" data-toggle="modal" data-target="#dialog-default-manufacturer">
+                                Asignar compradores default
+                            </button>
+                            <div class="modal fade" id="dialog-default-manufacturer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Asignar compradores por defecto</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="modal-info">
+                                                Se asignarán los compradores por defecto para cada fabricante. <span style="color:red;font-weight:bold">Se correrá un proceso de asignación completo, los cambios que se hayan hecho previamente se perderán</span>.<br /><br />
+                                                Para asignar compradores a los fabricantes puedes dar clic <a target="_blank" href="/admin/ManufacturerBuyer/Configure">aquí</a>.<br /><br />
+                                                @if (Model.PendingManufacturerBuyer)
+                                                {
+                                                    <strong style="color:red">Detectamos que existen fabricantes sin comprador asignado. Si un fabricante no tiene comprador asignado no se tomará en cuenta para la asignación.</strong><br /><br />
+                                                }
+                                                <span>Da clic <a target="_blank" href="/admin/orderitembuyer/VerifyAutoAssignManufacturer?date=@Model.Date.ToString("dd-MM-yyyy")">aquí</a> para verificar que la <strong>asignación actual</strong> corresponde a la asignación por defecto. Es decir, se toma producto por producto y se verifica que el comprador asignado corresponde al comprador por defecto del fabricante principal.</span>
+                                            </div><br />
+                                            <div id="modal-error" style="display: none">
+                                                <strong style="color:red">Ocurrió un problema al intentar asignar los compradores.</strong>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div id="default-manufacturer-buttons">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-primary" id="default-manufacturer-button">Continuar</button>
+                                            </div>
+                                            <button id="default-manufacturer-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Asignando productos...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Total de productos:</strong> @(Model.Categories.Select(x => x.Products).SelectMany(x => x).Count())
+                            <ul>
+                                @foreach (var buyer in Model.Buyers.Where(x => x.Value != "0"))
+                                {
+                                    <li>@buyer.Text: @Model.Categories.Select(x => x.Products).SelectMany(x => x).Where(x => x.SelectedBuyerId.ToString() == buyer.Value).Count()</li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Productos pendientes por asignar:</strong> @(Model.Categories.Select(x => x.Products).SelectMany(x => x).Where(x => x.SelectedBuyerId == 0).Count())
+                            <ul>
+                                @foreach (var item in Model.Categories.Where(x => x.Products.Where(y => y.SelectedBuyerId == 0).Any()))
+                                {
+                                    <li>@(item.Category): @(item.Products.Where(x => x.SelectedBuyerId == 0).Count())</li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            @if (Model.SupermarketBuyer == 0)
+                            {
+                                <strong style="color: red">El encargado de supermercado está pendiente por asignar</strong>
+                            }
+                            else
+                            {
+                                <strong style="color: green">El encargado de supermercado ya fue asignado</strong>
+                            }
+                        </div>
+                        <div class="col-md-12">
+                            <!-- Modal -->
+                            @*<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Filtrar</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div id="modal-info">
+                                                    Filtrar productos por comprador y/o fabricante. <strong>Los cambios no guardados se perderán.</strong>
+                                                </div>
+                                                <div>
+                                                    <strong>Por comprador:</strong>
+                                                    <div>
+                                                        <select class="massive-manufacturer-selector" id="buyerId">
+                                                            @if (buyerId == -1)
+                                                            {
+                                                                <option selected value="-1">No asignado</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="-1">No asignado</option>
+                                                            }
+                                                            @if (buyerId == 0)
+                                                            {
+                                                                <option selected value="0">Todos los compradores</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="0">Todos los compradores</option>
+                                                            }
+                                                            @foreach (var buyer in Model.Buyers
+                                                            .Where(y => y.TotalProducts > 0)
+                                                            .OrderBy(x => x.Text))
+                                                            {
+                                                                if (buyer.Value != "0")
+                                                                {
+                                                                    if (buyerId.ToString() == buyer.Value)
+                                                                    {
+                                                                        <option selected value="@(buyer.Value)">@(buyer.Text)</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                                    }
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <strong>
+                                                        Por fabricante:
+                                                    </strong>
+                                                    <div>
+                                                        <select class="massive-transfer-manufacturer-selector" id="manufacturerId">
+                                                            @if (manufacturerId == 0)
+                                                            {
+                                                                <option selected value="0">Todos los fabricantes</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="0">Todos los fabricantes</option>
+                                                            }
+                                                            @foreach (var manufacturer in Model.Manufacturers
+                                                             .Where(y => y.TotalProducts > 0)
+                                                             .OrderBy(x => x.Text))
+                                                            {
+                                                                if (manufacturer != null)
+                                                                {
+                                                                    if (manufacturerId.ToString() == manufacturer.Value)
+                                                                    {
+                                                                        <option selected value="@(manufacturer.Value)">@(manufacturer.Text)</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@(manufacturer.Value)">@(manufacturer.Text)</option>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="-1">Sin fabricante</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div id="modal-footer-buttons">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                    <button type="button" class="btn btn-primary" id="filter-button">Continuar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                        </div>
+                    </div>
+                    <div class="row" style="padding:1em">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Consecutivo</th>
+                                    <th scope="col">Comprador</th>
+                                    <th scope="col">Total de productos</th>
+                                    <th scope="col">Productos por fabricante</th>
+                                    <th scope="col">Efectivo</th>
+                                    <th scope="col">Transferencia</th>
+                                    <th scope="col">Tarjeta corporativa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.ProductsByBuyerTable.Count; i++)
+                                {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <th>@(Model.ProductsByBuyerTable[i].Buyer)</th>
+                                    <td>@(Model.ProductsByBuyerTable[i].TotalProducts)</td>
+                                    <td>@(Model.ProductsByBuyerTable[i].ProductsByManufacturer)</td>
+                                    <td>@(Model.ProductsByBuyerTable[i].Cash.ToString("C"))</td>
+                                    <td>@(Model.ProductsByBuyerTable[i].Transfer.ToString("C"))</td>
+                                    <td>@(Model.ProductsByBuyerTable[i].CorporateCard.ToString("C"))</td>
+                                </tr>
+                                }
+                                <tr>
+                                    <th></th>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="text-align: right; font-weight: bold">Total</td>
+                                    <td>@(Model.ProductsByBuyerTable.Select(x => x.Cash).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    <td>@(Model.ProductsByBuyerTable.Select(x => x.Transfer).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    <td>@(Model.ProductsByBuyerTable.Select(x => x.CorporateCard).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row" style="padding:1em">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Fabricantes con más de un comprador asignado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@(string.Join(", ", Model.ProductsByManufacturerTable.Where(x => x.BuyerIds.Count() > 1).Select(x => x.Manufacturer)))</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row" style="padding:1em">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Fabricante</th>
+                                    <th scope="col">Total de productos</th>
+                                    <th scope="col">Compradores</th>
+                                    <th scope="col">Efectivo</th>
+                                    <th scope="col">Transferencia</th>
+                                    <th scope="col">Tarjeta corporativa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ProductsByManufacturerTable)
+                                {
+                                    <tr>
+                                        <th>@(item.Manufacturer)</th>
+                                        <td>@(item.TotalProducts)</td>
+                                        <td>@(string.Join(", ", Model.Buyers.Where(x => item.BuyerIds.Contains(int.Parse(x.Value))).Select(x => x.Text)))</td>
+                                        <td>@(item.Cash.ToString("C"))</td>
+                                        <td>@(item.Transfer.ToString("C"))</td>
+                                        <td>@(item.CorporateCard.ToString("C"))</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <th></th>
+                                    <td></td>
+                                    <td style="text-align: right; font-weight: bold">Total</td>
+                                    <td>@(Model.ProductsByManufacturerTable.Select(x => x.Cash).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    <td>@(Model.ProductsByManufacturerTable.Select(x => x.Transfer).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    <td>@(Model.ProductsByManufacturerTable.Select(x => x.CorporateCard).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Supermercado</h3>
+                            <div class="supermarketBuyerId">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="input-group" style="width:100%">
+                                            <select class="ui-choose">
+                                                @foreach (var buyer in Model.Buyers)
+                                                {
+                                                    if (Model.SupermarketBuyer.ToString() == buyer.Value)
+                                                    {
+                                                        <option selected value="@(buyer.Value)">@(buyer.Text)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <h3>@category.Category</h3>
+                                foreach (var product in category.Products.OrderBy(x => x.Name))
+                                {
+                                    <div class="product">
+                                        <input type="hidden" value="@(product.Id)" />
+                                        <a target="_blank" href="/Admin/Product/Edit/@(product.Id)"><h4>@product.Name (@(product.Manufacturer != null ? product.Manufacturer.Name : "Sin fabricante"))</h4></a>
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <div class="input-group" style="width:100%">
+                                                    <select class="ui-choose" data-selectorProductId="@(product.Id)" data-selectorCategoryId="@(category.CategoryId)" data-selectorManufacturerId="@(product.Manufacturer == null ? 0 : product.Manufacturer.Id)">
+                                                        @foreach (var buyer in Model.Buyers)
+                                                        {
+                                                            if (product.SelectedBuyerId.ToString() == buyer.Value)
+                                                            {
+                                                                <option selected value="@(buyer.Value)">@(buyer.Text)</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@(buyer.Value)">@(buyer.Text)</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $('#filter-button').click(function() {
+        window.location.href = window.location.href.split('&')[0] +
+            '&buyerId=' + $('#buyerId').val() +
+            '&manufacturerId=' + $('#manufacturerId').val() +
+            '&byUnassigned=' + ($('#buyerId').val() == -1 ? true : false);
+    });
+    $('#assignUserModal').on('show.bs.modal', function (e) {
+        $('.ui-choose-modal').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose-modal',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $("#auto-assing-button").on('click', () => {
+
+        let buyerIds = $(".ui-choose-modal").val();
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            buyerIds: buyerIds
+        };
+
+        $("#loading-button-modal").show();
+        $("#auto-assign-buttons").hide();
+        $("#modal-error").hide();
+        $.ajax({
+            url: '/Admin/OrderItemBuyer/GetLastAssigned',
+            data: body,
+            type: 'POST',
+            success: (data) => {
+                $.each(data, (index, element) => {
+                    let select = $("select.ui-choose[data-selectorProductId='" + element.ProductId + "']");
+                    $(select).find("option[value='" + element.BuyerId + "']").attr('selected', true);
+                });
+
+                buildUiChoose();
+                $("#assignUserModal").modal('hide');
+                $("#loading-button-modal").hide();
+                $("#auto-assign-buttons").show();
+            },
+            error: (error) => {
+                $("#loading-button-modal").hide();
+                $("#auto-assign-buttons").show();
+                $("#modal-error").show();
+                console.log(error);
+            }
+        })
+    });
+
+    $("#transfer-products-button").on('click', () => {
+        $("#loading-button-modal").show();
+        $("#modal-footer-buttons").hide();
+
+        let fromId = $("#fromBuyer").val();
+        let toId = $("#toBuyer").val();
+
+        let selects = $("select.ui-choose");
+        let selectsToUpdate = [];
+
+        if ($(".massive-transfer-manufacturer-selector").val() !== '0' && $(".massive-transfer-category-selector").val() !== '0')
+        {
+            $.each(selects, (index, select) => {
+                if ($(select).data('selectormanufacturerid') === parseInt($(".massive-transfer-manufacturer-selector").val()) &&
+                    $(select).data('selectorcategoryid') === parseInt($(".massive-transfer-category-selector").val())) {
+                    selectsToUpdate.push(select);
+                }
+            });
+        }
+        else if ($(".massive-transfer-category-selector").val() !== '0') {
+            $.each(selects, (index, select) => {
+                if ($(select).data('selectorcategoryid') === parseInt($(".massive-transfer-category-selector").val())) {
+                    selectsToUpdate.push(select);
+                }
+            });
+        }
+        else if ($(".massive-transfer-manufacturer-selector").val() !== '0') {
+            $.each(selects, (index, select) => {
+                if ($(select).data('selectormanufacturerid') === parseInt($(".massive-transfer-manufacturer-selector").val())) {
+                    selectsToUpdate.push(select);
+                }
+            });
+        }
+        else {
+            selectsToUpdate = selects;
+        }
+
+        $.each(selectsToUpdate, (index, select) => {
+            if ($(select).val() === fromId) {
+                $(select).find("option[value='" + toId + "']").attr('selected', true);
+            }
+        });
+
+        buildUiChoose();
+        $("#transferUserModal").modal('hide');
+        $("#loading-button-modal").hide();
+        $("#modal-footer-buttons").show();
+    });
+
+    $("#dialog-masive-category").dialog({
+        autoOpen: false,
+        height: 450,
+        width: 450,
+        modal: true,
+        buttons: {
+            Asignar: function () {
+                let selects = $(".massive-category-selector");
+                $.each(selects, (index, element) => {
+                    $(".ui-button-text").html("Asignando...");
+                    setTimeout(() => {
+                        let selectsToUpdate = $("select.ui-choose[data-selectorcategoryid='" + $(element).data("categoryid") + "']");
+                        $.each(selectsToUpdate, (index, select) => {
+                            if ($(element).val() == -1) return;
+                            $(select).find("option[value='" + $(element).val() + "']").attr('selected', true);
+                        });
+
+                        buildUiChoose();
+                        $(".ui-button-text").html("Asignar");
+                        $("#dialog-masive-category").dialog("close");
+                    }, 10);
+                });
+            },
+        }
+    });
+
+    $("#dialog-masive-manufacturer").dialog({
+        autoOpen: false,
+        height: 450,
+        width: 450,
+        modal: true,
+        buttons: {
+            Asignar: function () {
+                let selects = $(".massive-manufacturer-selector");
+                $.each(selects, (index, element) => {
+                    let selectsToUpdate = $("select.ui-choose[data-selectormanufacturerid='" + $(element).data("manufacturerid") + "']");
+                    $.each(selectsToUpdate, (index, select) => {
+                        if ($(element).val() == -1) return;
+                        $(select).find("option[value='" + $(element).val() + "']").attr('selected', true);
+                        buildUiChoose();
+                    });
+
+                    $("#dialog-masive-manufacturer").dialog("close");
+                });
+            },
+        }
+    });
+
+    $(".dialog-masive-category").on("click", function () {
+        $("#dialog-masive-category").dialog("open");
+    });
+
+    $(".dialog-masive-manufacturer").on("click", function () {
+        $("#dialog-masive-manufacturer").dialog("open");
+    });
+
+    let buildUiChoose = () => {
+        $('ul.ui-choose').remove();
+        $('.ui-choose').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    };
+
+    buildUiChoose();
+
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        let result = [];
+        let products = $(".product");
+        $.each(products, (index, element) => {
+            let productId = $(element).find('input').val();
+            let selectedCustomerId = $(element).find('select').val();
+            result.push({ productId, customerId: selectedCustomerId });
+        });
+
+        let body = {
+            date: '@Model.Date',
+            result: result,
+            allowDownload: $("#AllowDownload").prop('checked'),
+            allowReport: $("#AllowReport").prop('checked'),
+            supermarketBuyerId: $(".supermarketBuyerId").find('select').val()
+
+        };
+
+        $.ajax({
+            url: '/Admin/OrderItemBuyer/AssignBuyers',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+
+    $("#dialog-automatic-distribution-manufacturer-test").dialog({
+        autoOpen: false,
+        height: 450,
+        width: 450,
+        modal: true,
+        buttons: {
+            Aceptar: function () {
+                $("#loading-container").show();
+                $("#submit-button").hide();
+                $("#dialog-automatic-distribution-manufacturer").dialog("close");
+
+                let body = {
+                    date: '@Model.Date.ToString("dd-MM-yyyy")',
+                };
+
+                $.ajax({
+                    url: '/Admin/OrderItemBuyer/AutomaticDistributionByManufacturer',
+                    type: 'POST',
+                    data: body,
+                    success: () => {
+                        location.reload();
+                        },
+                    error: (error) => {
+                        console.log('ERROR SAVING DATA: ', error);
+                        $("#loading-container").hide();
+                        $("#submit-button").show();
+                    }
+                 })
+            },
+        }
+    });
+
+    $('#dialog-automatic-distribution-manufacturer').on('show.bs.modal', function (e) {
+        $('#options-manufacturers-many-buyers ul.ui-choose').remove();
+        $('.ui-choose-manufacturer-modal').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose-manufacturer-modal',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $("#automatic-distribution-button").on('click', () => {
+
+        let selectedManufacturersIds = $(".ui-choose-manufacturer-modal").val();
+
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            selectedManufacturersIds: selectedManufacturersIds
+        };
+
+        $("#loading-button-modal").show();
+        $("#submit-button").hide();
+        $("#auto-distribution-buttons").hide();
+        $("#automatic-distribution-button").hide();
+        $("#automatic-distribution-button-modal").show();
+        $("#modal-error").hide();
+        $.ajax({
+            url: '/Admin/OrderItemBuyer/AutomaticDistributionByManufacturer',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+                $("#auto-distribution-buttons").show();
+                $("#automatic-distribution-button-modal").hide();
+                $("#automatic-distribution-button").show();
+            }
+        })
+    });
+
+    $("#default-manufacturer-button").on('click', () => {
+        $("#loading-button-modal").show();
+        $("#submit-button").hide();
+        $("#default-manufacturer-buttons").hide();
+        $("#default-manufacturer-button").hide();
+        $("#default-manufacturer-button-modal").show();
+        $("#modal-error").hide();
+        $.ajax({
+            url: '/Admin/OrderItemBuyer/AssignByDefaultManufacturer?date=' + '@Model.Date.ToString("dd-MM-yyyy")',
+            type: 'GET',
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+                $("#default-manufacturer-buttons").show();
+                $("#default-manufacturer-button-modal").hide();
+                $("#default-manufacturer-button").show();
+            }
+        })
+    });
+
+</script>

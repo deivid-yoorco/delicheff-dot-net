@@ -1,0 +1,127 @@
+﻿@model List<Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.AutomaticExpensesModel>
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MarketingExpenses.AutomaticDashboardData");
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Registro de gastos automáticos
+        <small>
+            @*<i class="fa fa-clock-o"></i>*@
+            @*<span>Última actualización: @(Model.ControlDate != DateTime.MinValue ? Model.ControlDate.ToString("dd-MM-yyyy hh:mm:ss tt") : "---")</span>*@
+        </small>
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Actualizando, favor de esperar...</span>
+        </div>
+        <button type="button" id="submit-button" class="btn bg-blue" onclick="refreshData()">
+            <i class="fa fa-refresh"></i>
+            Actualizar datos
+        </button>
+        <a asp-action="ExportAutomaticDataExcel" class="btn bg-blue">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar datos
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Indicadores semanales de MKT
+                                </th>
+                                @foreach (var data in Model)
+                                {
+                                    <th>@(data.InitDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                            <tr>
+                                @*<th>
+                                        ID
+                                    </th>*@
+                                <th>
+                                    Indicador semanal
+                                </th>
+                                @foreach (var data in Model)
+                                {
+                                    <th>@(data.EndDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td>
+                                ‌Uso de cupones
+                            </td>
+                            @foreach (var data in Model)
+                            {
+                                <td>@(data.DiscountsByCoupons.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                Descuentos en producto
+                            </td>
+                            @foreach (var data in Model)
+                            {
+                                <td>@(data.DiscountsByProducts.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                Saldos
+                            </td>
+                            @foreach (var data in Model)
+                            {
+                                <td>@(data.Balances.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                ‌Decuentos de envíos
+                            </td>
+                            @foreach (var data in Model)
+                            {
+                                <td>@(data.DiscountsByShipping.ToString("C"))</td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const refreshData = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        $.ajax({
+            url: '/Admin/MarketingDashboard/GenerateAutomaticDashboardData',
+            type: 'GET',
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

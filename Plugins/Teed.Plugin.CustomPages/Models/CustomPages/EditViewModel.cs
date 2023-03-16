@@ -1,0 +1,369 @@
+﻿using Nop.Web.Framework.Mvc.ModelBinding;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace Teed.Plugin.CustomPages.Models.CustomPages
+{
+    public class EditViewModel
+    {
+        public EditViewModel()
+        {
+            SelectedProductIds = new List<int>();
+        }
+
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "El nombre es requerido")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "El color primario es requerido")]
+        public string PrimaryColor { get; set; }
+
+        [Required(ErrorMessage = "El color de la pestaña es requerido")]
+        public string TabColor { get; set; }
+
+        public bool Published { get; set; }
+
+        public int DisplayOrder { get; set; }
+
+        public bool HideNavBar { get; set; }
+
+        public List<CustomPageLink> ActiveCustomPages { get; set; }
+
+        // SLIDER
+        public string SliderVideoId { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int SliderBannerPicture1Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string SliderBannerText1 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string SliderBannerLink1 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int SliderBannerPicture2Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string SliderBannerText2 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string SliderBannerLink2 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int SliderBannerPicture3Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string SliderBannerText3 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string SliderBannerLink3 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int SliderBannerPicture4Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string SliderBannerText4 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string SliderBannerLink4 { get; set; }
+
+        [UIHint("Picture")]
+        public int SliderArrowId { get; set; }
+
+        // PARALLAX
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int ParallaxPicture1Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string ParallaxText1 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string ParallaxLink1 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int ParallaxPicture2Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string ParallaxText2 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string ParallaxLink2 { get; set; }
+
+        // TOP THREE
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int Top3Picture3Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string Top3Text3 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string Top3Link3 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int Top3Picture4Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string Top3Text4 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string Top3Link4 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int Top3Picture5Id { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Text")]
+        public string Top3Text5 { get; set; }
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Link")]
+        public string Top3Link5 { get; set; }
+
+        // CATEGORY DROPDOWN
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CatPicture6Id { get; set; }
+        public string CatText6 { get; set; }
+        public string CatLink6 { get; set; }
+        public string CatTextColor6 { get; set; }
+
+        public string CatTextDropdown1 { get; set; }
+        public string CatLinkDropdown1 { get; set; }
+        public string CatTextDropdown2 { get; set; }
+        public string CatLinkDropdown2 { get; set; }
+        public string CatTextDropdown3 { get; set; }
+        public string CatLinkDropdown3 { get; set; }
+        public string CatTextDropdown4 { get; set; }
+        public string CatLinkDropdown4 { get; set; }
+        public string CatTextDropdown5 { get; set; }
+        public string CatLinkDropdown5 { get; set; }
+        public string CatTextDropdown6 { get; set; }
+        public string CatLinkDropdown6 { get; set; }
+        public string CatTextDropdown7 { get; set; }
+        public string CatLinkDropdown7 { get; set; }
+        public string CatTextDropdown8 { get; set; }
+        public string CatLinkDropdown8 { get; set; }
+        public string CatTextDropdown9 { get; set; }
+        public string CatLinkDropdown9 { get; set; }
+        public string CatTextDropdown10 { get; set; }
+        public string CatLinkDropdown10 { get; set; }
+
+        // BANNERS
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BannerPicture5Id { get; set; }
+        public string BannerTitle5 { get; set; }
+        public string BannerSubTitle5 { get; set; }
+        public string BannerLink5 { get; set; }
+        public string BannerTitleColor5 { get; set; }
+        public string BannerSubTitleColor5 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BannerPicture6Id { get; set; }
+        public string BannerTitle6 { get; set; }
+        public string BannerSubTitle6 { get; set; }
+        public string BannerLink6 { get; set; }
+        public string BannerTitleColor6 { get; set; }
+        public string BannerSubTitleColor6 { get; set; }
+
+        // CAROUSEL
+        public string CarouselText { get; set; }
+        public string CarouselTextColor { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture7Id { get; set; }
+        public string CarouselLink7 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture8Id { get; set; }
+        public string CarouselLink8 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture9Id { get; set; }
+        public string CarouselLink9 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture10Id { get; set; }
+        public string CarouselLink10 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture11Id { get; set; }
+        public string CarouselLink11 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture12Id { get; set; }
+        public string CarouselLink12 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture13Id { get; set; }
+        public string CarouselLink13 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CarouselPicture14Id { get; set; }
+        public string CarouselLink14 { get; set; }
+
+        [UIHint("Picture")]
+        public int CarouselArrowId { get; set; }
+
+        // TAGS
+        public int TagsQty { get; set; }
+        public bool TagsEnable { get; set; }
+        
+        // BOXES
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BoxPicture15Id { get; set; }
+        public string BoxLink15 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BoxPicture16Id { get; set; }
+        public string BoxLink16 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BoxPicture17Id { get; set; }
+        public string BoxLink17 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BoxPicture18Id { get; set; }
+        public string BoxLink18 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BoxPicture40Id { get; set; }
+        public string BoxLink40 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int BoxPicture41Id { get; set; }
+        public string BoxLink41 { get; set; }
+
+        // COLLAGE
+        public bool CollageEnable { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture19Id { get; set; }
+        public string CollageLink19 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture20Id { get; set; }
+        public string CollageLink20 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture21Id { get; set; }
+        public string CollageLink21 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture22Id { get; set; }
+        public string CollageLink22 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture23Id { get; set; }
+        public string CollageLink23 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture24Id { get; set; }
+        public string CollageLink24 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture25Id { get; set; }
+        public string CollageLink25 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture26Id { get; set; }
+        public string CollageLink26 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture27Id { get; set; }
+        public string CollageLink27 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture28Id { get; set; }
+        public string CollageLink28 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture29Id { get; set; }
+        public string CollageLink29 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture30Id { get; set; }
+        public string CollageLink30 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture31Id { get; set; }
+        public string CollageLink31 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture32Id { get; set; }
+        public string CollageLink32 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture33Id { get; set; }
+        public string CollageLink33 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture34Id { get; set; }
+        public string CollageLink34 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture35Id { get; set; }
+        public string CollageLink35 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture36Id { get; set; }
+        public string CollageLink36 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture37Id { get; set; }
+        public string CollageLink37 { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int CollagePicture38Id { get; set; }
+        public string CollageLink38 { get; set; }
+
+        // POP UP
+        public bool PopUpEnable { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int PopUpPicture39Id { get; set; }
+
+        [NopResourceDisplayName("Plugins.Widgets.NivoSlider.Picture")]
+        [UIHint("Picture")]
+        public int PopUpPicture39ResponsiveId { get; set; }
+
+        // PRODUCTS
+        public string ProductSectionTitle { get; set; }
+
+        public IList<int> SelectedProductIds { get; set; }
+    }
+
+    public class CustomPageLink
+    {
+        public string PageName { get; set; }
+        public string Slug { get; set; }
+        public string TabColor { get; set; }
+    }
+}

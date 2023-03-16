@@ -1,0 +1,242 @@
+﻿@model Teed.Plugin.Medical.Models.Doctors.DoctorsModel
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Settings");
+    string controllerName = "doctor";
+}
+<script src="~/Plugins/Teed.Plugin.Medical/js/schedule-doctor.js"></script>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div id="example" class="k-content">
+                <div id="scheduler"></div>
+            </div>
+            @if (Model.ElementsCount <= 0)
+            {
+                <div id="empty-message" class="panel panel-default">
+                    <div class="panel-body">
+                        No se han agregado horarios.
+                    </div>
+                </div>
+            }
+            <br />
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Agregar horario
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Sucursal</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="BranchId" type="hidden" id="branchId" />
+                                <input id="branches" style="width: 100%;" />
+                                <script>
+                                            $(document).ready(function () {
+                                                $("#branches").kendoComboBox({
+                                                    placeholder: "Selecciona la sucursal...",
+                                                    dataTextField: "Name",
+                                                    dataValueField: "Id",
+                                                    filter: "contains",
+                                                    autoBind: true,
+                                                    minLength: 1,
+                                                    dataSource: {
+                                                        type: "json",
+                                                        transport: {
+                                                            read: {
+                                                                url: "@Html.Raw(Url.Action("BranchesListData", "Doctor"))",
+                                                                type: "POST",
+                                                                data: addAntiForgeryToken
+                                                            }
+                                                        }
+                                                    },
+                                                    select: onSelect
+                                                });
+                                                function onSelect(e) {
+                                                    $("#branchId").val(this.dataItem(e.item.index()).Id);
+                                                }
+                                            });
+                                </script>
+                                <span id="selectBranch" style="display:none" class="text-danger">Debes seleccionar una sucursal</span>
+                                <span asp-validation-for="BranchId"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Selecciona el día de la semana</label>
+                            </div>
+                            <div class="col-md-9">
+                                <select asp-for="Day" class="form-control" id="dayOfTheWeek" asp-items="@Html.GetEnumSelectList<Teed.Plugin.Medical.Domain.WeekDays>()"></select>
+                                <span asp-validation-for="Day" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>De</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select asp-for="StartHour" class="form-control" id="startHour">
+                                    @for (int i = 0; i < 24; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="StartHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <select asp-for="StartMinute" class="form-control" id="startMinute">
+                                    @for (int i = 0; i < 60; i = i + 5)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="StartMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Hasta</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select asp-for="EndHour" class="form-control" id="endHour">
+                                    @for (int i = 0; i < 24; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="EndHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <select asp-for="EndMinute" class="form-control" id="endMinute">
+                                    @for (int i = 0; i < 60; i = i + 5)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="EndMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <button type="button" id="addProductSpec" class="btn btn-primary">Agregar</button>
+                            </div>
+                        </div>
+                        <script>
+                        $(document).ready(function () {
+                            $('#addProductSpec').click(function () {
+                                var branchId = $('#branchId').val();
+                                var day = $('#dayOfTheWeek').val();
+                                var startHour = $('#startHour').val();
+                                var startMinute = $('#startMinute').val();
+                                var endHour = $('#endHour').val();
+                                var endMinute = $('#endMinute').val();
+
+                                if (branchId == 0) {
+                                    document.getElementById("selectBranch").style.display = "block";
+                                }
+                                else {
+                                    $('#addProductSpec').attr('disabled', true);
+                                    var postData = {
+                                        branchId: branchId,
+                                        day: day,
+                                        startHour: startHour,
+                                        startMinute: startMinute,
+                                        endHour: endHour,
+                                        endMinute: endMinute,
+                                        doctorId: @Model.Id
+                                    };
+                                    addAntiForgeryToken(postData);
+
+                                    $.ajax({
+                                        cache: false,
+                                        type: "POST",
+                                        url: "@(Url.Action("AddScheduleToDoctor", controllerName))",
+                                        data: postData,
+                                        success: function (data) {
+                                            var grid = $("#schedules-grid").data('kendoGrid');
+                                            grid.dataSource.read();
+                                            $('#addProductSpec').attr('disabled', false);
+                                            $('#empty-message').hide();
+                                            document.getElementById("selectBranch").style.display = "none";
+                                        },
+                                        error: function (xhr, ajaxOptions, thrownError) {
+                                            alert('Ocurrió un error al agregar el horario.');
+                                            $('#addProductSpec').attr('disabled', false);
+                                            document.getElementById("selectBranch").style.display = "none";
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .movie-template img {
+        float: left;
+        margin: 0 8px;
+    }
+
+    .movie-template p {
+        margin: 5px 0 0;
+    }
+
+    .movie-template h3 {
+        padding: 0 8px 5px;
+        font-size: 12px;
+    }
+
+    .movie-template a {
+        color: #ffffff;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+        .k-state-hover .movie-template a,
+        .movie-template a:hover {
+            color: #000000;
+        }
+
+    .k-scheduler-toolbar,
+    .k-scheduler-footer {
+        /* make them invisible */
+        display: none;
+        /* prevent height and paddings from influencing the size calculations */
+        height: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>

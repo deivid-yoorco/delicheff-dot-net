@@ -1,0 +1,33 @@
+﻿@model Teed.Plugin.Medical.Models.Doctors.DoctorsModel
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Settings");
+}
+
+@if (Model != null)
+{
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-9 col-md-offset-3">
+                                <p><strong>Nombre completo:</strong> @Model.FirstName @Model.LastName</p>
+                                <p><strong>Email:</strong> @Model.Email</p>
+                                <p><strong>Fecha de Nacimiento:</strong> @Model.DateOfBirth</p>
+                                <p><strong>Teléfono:</strong> @Model.Phone</p>
+                                <br />
+                                <p><strong>Dirección (Línea 1):</strong> @Model.Address</p>
+                                <p><strong>Dirección (Línea 2):</strong> @Model.Address2</p>
+                                <p><strong>Ciudad:</strong> @Model.City</p>
+                                <p><strong>Estado:</strong> @Model.State</p>
+                                <p><strong>País:</strong> @Model.Country</p>
+                                <p><strong>Código postal:</strong> @Model.PostalCode</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

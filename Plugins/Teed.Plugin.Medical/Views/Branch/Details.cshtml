@@ -1,0 +1,69 @@
+﻿@model Teed.Plugin.Medical.Models.Branch.DetailsViewModel
+@using Nop.Services.Common;
+@using Nop.Core.Domain.Customers;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedBranches.Branches");
+}
+
+<form asp-controller="Plugin" asp-action="List" method="post" id="plugins-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Información de la sucursal
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de sucursales</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn bg-blue">
+                <i class="fa fa-pencil"></i>
+                @T("Admin.Common.Edit")
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-9 col-md-offset-3">
+                                <p><strong>Encargado:</strong> @(Model.Customer.GetAttribute<string>(SystemCustomerAttributeNames.FirstName)) @(Model.Customer.GetAttribute<string>(SystemCustomerAttributeNames.LastName)) (@Model.Customer.Email)</p>
+                                <p><strong>Nombre de la Sucursal:</strong> @Model.Name</p>
+
+                                <p><strong>Teléfono 1:</strong> @Model.Phone</p>
+                                <p><strong>Teléfono 2:</strong> @Model.Phone2</p>
+                                <p><strong>Línea de dirección 1:</strong> @Model.StreetAddress</p>
+                                <p><strong>Línea de dirección 2:</strong> @Model.StreetAddress2</p>
+                                <p><strong>País:</strong> @Model.Country</p>
+                                <p><strong>Estado:</strong> @Model.StateProvince</p>
+                                <p><strong>Municipio/Delegación:</strong> @Model.City</p>
+                                <p><strong>Código Postal:</strong> @Model.ZipPostalCode</p>
+
+                                <h3>Horarios de atención</h3>
+                                <p><strong>De lunes a viernes:</strong> de @(new DateTime(Model.WeekOpenTime.Ticks).ToString("HH:mm")) hasta @(new DateTime(Model.WeekCloseTime.Ticks).ToString("HH:mm"))</p>
+                                @if (Model.WorksOnSaturday)
+                                {
+                                <p><strong>Sábado:</strong> de @(new DateTime(Model.SaturdayOpenTime.Value.Ticks).ToString("HH:mm")) hasta @(new DateTime(Model.SaturdayCloseTime.Value.Ticks).ToString("HH:mm"))</p>
+                                }
+                                else
+                                {
+                                    <p><strong>Sábado:</strong> No trabaja los sábados.</p>
+                                }
+                                @if (Model.WorksOnSunday)
+                                {
+                                    <p><strong>Domingo:</strong> de @(new DateTime(Model.SundayOpenTime.Value.Ticks).ToString("HH:mm")) hasta @(new DateTime(Model.SundayCloseTime.Value.Ticks).ToString("HH:mm"))</p>
+                                }
+                                else
+                                {
+                                    <p><strong>Domingo:</strong> No trabaja los domingos.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

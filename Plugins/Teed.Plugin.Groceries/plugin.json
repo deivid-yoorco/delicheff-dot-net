@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Teed Plugins",
+  "FriendlyName": "Teed Groceries",
+  "SystemName": "Teed.Plugin.Groceries",
+  "Version": "1.3",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Groceries.dll",
+  "Description": "Teed Groceries"
+}

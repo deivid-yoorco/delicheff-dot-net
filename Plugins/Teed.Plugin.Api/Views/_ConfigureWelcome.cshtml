@@ -1,0 +1,67 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen de bienvenida
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Imagen</label>
+            </div>
+            <div class="col-md-9">
+                <div>
+                    <input asp-for="WelcomeImage" type="file" id="inputGroupFile01" class="custom-file-input" aria-describedby="inputGroupFileAddon01">
+                </div>
+                <div>
+                    <div class="alert"></div>
+                    <div><img id="preview" src="@Model.WelcomeImageB64" /></div>
+                </div>
+                <script>
+                    $("#inputGroupFile01").change(function (event) {
+                        RecurFadeIn();
+                        readURL(this);
+                    });
+                    $("#inputGroupFile01").on('click', function (event) {
+                        RecurFadeIn();
+                    });
+                    function readURL(input) {
+                        if (input.files && input.files[0]) {
+                            var reader = new FileReader();
+                            var filename = $("#inputGroupFile01").val();
+                            filename = filename.substring(filename.lastIndexOf('\\') + 1);
+                            reader.onload = function (e) {
+                                $('#preview').attr('src', e.target.result);
+                                $('#preview').hide();
+                                $('#preview').fadeIn(500);
+                                $('.custom-file-label').text(filename);
+                            }
+                            reader.readAsDataURL(input.files[0]);
+                        }
+                        $(".alert").removeClass("loading").hide();
+                    }
+                    function RecurFadeIn() {
+                        console.log('ran');
+                        FadeInAlert("Wait for it...");
+                    }
+                    function FadeInAlert(text) {
+                        $(".alert").show();
+                        $(".alert").text(text).addClass("loading");
+                    }
+                </script>
+                <style>
+                    #preview {
+                        max-height: 256px;
+                        height: auto;
+                        width: auto;
+                        display: block;
+                        margin-top: 10px;
+                    }
+
+                </style>
+
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,267 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.InfoModel
+@{
+    //Html.SetActiveMenuItemSystemName("Groceries.Franchises");
+}
+<link href="/lib/ionicons/css/ionicons-2.0.1.min.css" rel="stylesheet" type="text/css">
+<script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
+<style>
+    #tab-resume .fa {
+        padding-left: 5px !important;
+    }
+
+    #tab-resume .btn.btn-default {
+        padding: 2px !important;
+    }
+
+    @@media only screen and (max-width: 600px) {
+        .small-box h3 {
+            font-size: 3vh
+        }
+    }
+
+    .small-box .icon {
+        margin-top: 10px;
+    }
+</style>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="box-body">
+
+            <div class="col-lg-6 col-xs-6">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>@(Model.BalanceDue < 0 ? "-" + Math.Abs(Model.BalanceDue).ToString("C") : Model.BalanceDue.ToString("C"))</h3>
+                        <p>Saldo exigible</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="fa-solid:money-bill-wave"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xs-6">
+                <div class="small-box bg-purple">
+                    <div class="inner">
+                        <h3>@(Model.LastPaymentDate != null ? Model.LastPaymentDate.Value.ToString("dd/MM/yyyy") : "---")</h3>
+                        <p>Fecha de último pago</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="akar-icons:calendar"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>@Model.ActiveVehicles</h3>
+                        <p>Camionetas activas</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="carbon:van"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>@Model.Customers.Where(x => x.Active).Count()</h3>
+                        <p>Repartidores activos</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="healthicons:domestic-worker-outline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-xs-6">
+                <div class="small-box bg-red">
+                    <div class="inner">
+                        <h3>@Model.TotalIncidentsLast30Days</h3>
+                        <p>Número de incidencias (últimos 30 días)</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="akar-icons:triangle-alert"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-xs-6">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>@(Model.BalanceToBeReleased < 0 ? "-" + Math.Abs(Model.BalanceToBeReleased).ToString("C") : Model.BalanceToBeReleased.ToString("C"))</h3>
+                        <p>Saldo por liberar (sujeto a aplicación de incidencias)</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="fa-solid:money-bill-wave"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>@(Model.Capital < 0 ? Math.Abs(Model.Capital).ToString("C") : Model.Capital.ToString("C"))</h3>
+                        <p>Comisiones exigibles totales</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="fa-solid:money-bill-wave"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-xs-6">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>@(Model.TotalPayments < 0 ? Math.Abs(Model.TotalPayments).ToString("C") : Model.TotalPayments.ToString("C"))</h3>
+                        <p>Total cobrado</p>
+                    </div>
+                    <div class="icon">
+                        <span class="iconify" data-icon="fa-solid:money-bill-wave"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="col-lg-6">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Statistics.cshtml", "incidents-" + Model.FranchiseId)
+            </div>
+            <div class="col-lg-6">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Statistics.cshtml", "puntuality-" + Model.FranchiseId)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <h3>Repartidores registrados</h3>
+                <table>
+                    @foreach (var customer in Model.Customers.OrderBy(x => x.Name))
+                    {
+                        <tr>
+                            <td style="padding-right:20px">@customer.Name</td>
+                            <td>@(customer.Active ? Html.Raw("<span class=\"grid-report-item green\">Activo</span>") : Html.Raw("<span class=\"grid-report-item red\">No activo</span>"))</td>
+                            @if (Model.IsAdmin)
+                            {
+                                <td>
+                                    @(customer.Active ? Html.Raw($"<a title=\"Desactivar\" onclick=\"changeActive(false, {customer.Id}, false)\" class=\"btn btn-default\" href=\"#\"><i class=\"fa fa-times\"></i></a>") : Html.Raw($"<a title=\"Activar\" onclick=\"changeActive(false, {customer.Id}, true)\" class=\"btn btn-default\" href=\"#\"><i class=\"fa fa-check\"></i></a>"))
+                                </td>
+                            }
+                        </tr>
+                    }
+                </table>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <h3>Camionetas registradas</h3>
+                <table>
+                    @foreach (var vehicle in Model.Vehicles.OrderBy(x => x.Name))
+                    {
+                        <tr>
+                            <td style="padding-right:20px">@vehicle.Name</td>
+                            <td>@(vehicle.Active ? Html.Raw("<span class=\"grid-report-item green\">Activa</span>") : Html.Raw("<span class=\"grid-report-item red\">No activa</span>"))</td>
+                            @if (Model.IsAdmin)
+                            {
+                                <td>
+                                    @(vehicle.Active ? Html.Raw($"<a title=\"Desactivar\" onclick=\"changeActive(true, {vehicle.Id}, false)\" class=\"btn btn-default\" href=\"#\"><i class=\"fa fa-times\"></i></a>") : Html.Raw($"<a title=\"Activar\" onclick=\"changeActive(true, {vehicle.Id}, true)\" class=\"btn btn-default\" href=\"#\"><i class=\"fa fa-check\"></i></a>"))
+                                </td>
+                            }
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+        <br />
+        <br />
+        <div id="weeks-grid"></div>
+
+        <script type="text/javascript">
+            function getUrlResume() {
+                return "@Html.Raw(Url.Action("ResumeLast10Weeks", "Franchise"))?franchiseId=@Model.FranchiseId";
+            }
+            function changeActive(isRoute, id, active) {
+
+                            var postData = {
+                                id: id,
+                                active: active,
+                                };
+                            addAntiForgeryToken(postData);
+                            var formData = new FormData();
+                            $.each(postData, function (name, value) {
+                                formData.append(name, value);
+                            });
+                var url = isRoute ? "@(Url.Action("ChangeRouteActive", "Franchise"))" :
+                    "@(Url.Action("ChangeCustomerActive", "Franchise"))"
+                            $.ajax({
+                                contentType: false,
+                                processData: false,
+                                type: "POST",
+                                url: url,
+                                data: formData,
+                                success: function (data) {
+                                    location.reload();
+                                }
+                            });
+            }
+                $(document).ready(function() {
+                    $("#weeks-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: getUrlResume(),
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: addAntiForgeryToken
+                                }
+                            },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors",
+                                model: {
+                                    id: "Id",
+                                }
+                            },
+                            error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            serverPaging: true,
+                            serverFiltering: true,
+                            serverSorting: true
+                        },
+                        pageable: {
+                            refresh: true,
+                            numeric: false,
+                            previousNext: false,
+                            info: false,
+                            @await Html.PartialAsync("_GridPagerMessages")
+                        },
+                        scrollable: false,
+                        columns: [
+                            {
+                                field: "WeekName",
+                                title: "Semana",
+                                width: 200
+                            }, {
+                                field: "Base",
+                                title: "Base total de pedidos entregados (sin descontar incidencias)",
+                                width: 150
+                            }, {
+                                field: "Comission",
+                                title: "Comisión (8% sobre base)",
+                                width: 150
+                            }, {
+                                field: "Bonus",
+                                title: "Bonos",
+                                width: 150
+                            }, {
+                                field: "Incidents",
+                                title: "Incidencias descuentos (incidencias y penalizaciones)",
+                                width: 150
+                            }, {
+                                field: "Billed",
+                                title: "Facturado (comisión + bono – incidencias)",
+                                width: 150
+                            }
+                        ],
+                    });
+                });
+        </script>
+    </div>
+</div>

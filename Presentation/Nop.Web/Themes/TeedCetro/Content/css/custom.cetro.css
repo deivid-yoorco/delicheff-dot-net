@@ -1,0 +1,84 @@
+﻿/* MAKE SURE GET RID OF "!Important" IN "site.min.css" TO FIRST ".teed-primary-text{color:#######}" SO COLORS HERE CAN WORK PROPERLY */
+/*:root {
+    --main-color: #ffffff;
+}
+
+.teed-primary-text {
+    color: black !important;
+}
+
+    .teed-primary-text a {
+        color: black !important;
+    }
+
+.card-action a .grey-text {
+    color: black !important;
+}
+
+.nav-wrapper.container li a {
+    color: var(--main-color) !important;
+}
+
+.nav-wrapper.container .material-icons {
+    color: var(--main-color) !important;
+}
+
+.product-page .full-description img {
+    max-width: 100%;
+    height: auto;
+}
+
+.navbar-fixed .white {
+    background-color: #0d5ab7 !important;
+}
+*/
+
+.brand-logo img {
+    vertical-align: sub;
+}
+
+.flyout-cart {
+    right: 23% !important;
+}
+
+#flyout-cart .btn {
+    background-color: black;
+}
+
+@media only screen and (min-width: 601px) {
+    #main-navbar nav a {
+        height: 64px !important;
+        line-height: 64px !important;
+    }
+}
+
+.custom-home-component .card {
+    background-color: black !important;
+}
+
+.custom-home-component .card-image img {
+    width: 85% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.table-row {
+    display: flex;
+    align-items: center;
+    border-bottom: none;
+}
+
+    .table-row ol {
+        list-style-type: disc;
+    }
+
+.grid a img {
+    border-radius: 10px;
+}
+
+@media only screen and (max-width: 600px) {
+    .table-row {
+        display: block !important;
+    }
+}

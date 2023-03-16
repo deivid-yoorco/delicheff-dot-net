@@ -1,0 +1,52 @@
+﻿@model Teed.Plugin.Payroll.Models.JobCatalog.JobCatalogModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+@using Teed.Plugin.Payroll.Domain.PayrollEmployees;
+<style>
+    #chart-container {
+        overflow: hidden;
+    }
+</style>
+<div class="raw clearfix" id="chart-parent">
+    <div class="col-md-12" style="min-height: 500px;">
+        <div id="chart-container" style="min-height: 500px;"></div>
+    </div>
+</div>
+<script>
+    var datascource = @Html.Raw(Model.OrganigramString);
+
+    $(document).ready(function () {
+        $('#chart-container').orgchart({
+            'data': datascource,
+            'depth': 2,
+            'nodeTitle': 'name',
+            'nodeContent': 'title',
+            'parentNodeSymbol': '',
+            'zoom': true,
+            'zoominLimit': 7,
+            'zoomoutLimit': 0.5,
+            'exportButton': true,
+            'exportFilename': 'CEL - Organigrama ' + moment().format('DD-MM-yyyy')
+        });
+        $(".orgchart").draggable();
+        $('.edge').remove();
+        $('#chart-container .content').each(function (i, e) {
+            var innerText = $(e).text();
+            if (innerText.includes('replace-')) {
+                var id = innerText.substring(innerText.lastIndexOf('-') + 1);
+                console.log($(e).html('<a href="/Admin/PayrollEmployee/Edit?Id=' + id + '" target="_blank">Ver expediente</a>'));
+            }
+        });
+        $('.orgchart .content').each(function (i, e) {
+            var div = $(e);
+            if (div.text().includes('<') && div.text().includes('>') && div.text().includes('/')) {
+                div.html(div.text());
+            }
+        });
+    });
+</script>

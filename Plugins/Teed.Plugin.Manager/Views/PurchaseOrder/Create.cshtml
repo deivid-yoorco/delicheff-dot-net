@@ -1,0 +1,247 @@
+﻿@model Teed.Plugin.Manager.Models.PurchaseOrder.CreatePurchaseOrderModel
+@using Teed.Plugin.Manager.Models.PurchaseOrder;
+@{
+    Layout = "_AdminLayout";
+    var branches = (List<Nop.Core.Domain.Shipping.Warehouse>)ViewData["Branches"];
+}
+<link href="~/Plugins/Teed.Plugin.Medical/js/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Medical/js/ui-choose/ui-choose.js"></script>
+<script>
+    var products = [];
+</script>
+<form asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Nueva orden de compra
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de órdenes de compra</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button id="submit-btn" type="button" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            @if (branches.Count > 0)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Sucursal</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <select asp-for="BranchId" class="ui-choose" id="branches">
+                                            @foreach (var branch in branches)
+                                            {
+                                                <option value="@branch.Id">@branch.Name</option>
+                                            }
+                                        </select>
+                                        <script>
+                                            $(document).ready(function () {
+                                                $('#branches').ui_choose({
+                                                    itemWidth: null,
+                                                    skin: '',
+                                                    multi: true,
+                                                    active: 'selected',
+                                                    full: false,
+                                                    colNum: null,
+                                                    dataKey: 'ui-choose'
+                                                });
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+                            }
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Productos</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div id="products-grid"></div>
+                                </div>
+                            </div>
+                            <script>
+                                $(document).ready(function () {
+                                    $("#products-grid").kendoGrid({
+                                        dataSource: {
+                                            data: products,
+                                            schema: {
+                                                model: {
+                                                    fields: {
+                                                        ProductName: { type: "string" },
+                                                        Units: { type: "number" },
+                                                        Id: { type: "number" },
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        columns: [
+                                            { field: "ProductName", title: "Nombre del producto", width: 200 },
+                                            { field: "Units", title: "Unidades", width: 100 },
+                                            { command: [{ text: "Eliminar", click: deleteElement, className: "btn", width: 100 }] }
+                                        ]
+                                    });
+
+                                    function deleteElement(e) {
+                                        var grid = $("#products-grid").data('kendoGrid');
+                                        var row = $(e.currentTarget).closest("tr");
+                                        var rowIdx = $("tr", grid.tbody).index(row);
+                                        products.splice(rowIdx, 1);
+                                        grid.dataSource.data(products);
+                                    }
+                                });
+                            </script>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label></label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            Incluir producto
+                                        </div>
+                                        <div class="panel-body">
+                                            <div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <label>Producto</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="hidden" id="productId" />
+                                                        <input type="hidden" id="productName" />
+                                                        <input id="products" style="width: 100%;" />
+                                                        <a style="margin-left:10px" id="noExist" href="#">El producto no existe en el catálogo</a>
+                                                        <script>
+                                                        $(document).ready(function () {
+                                                            $("#products").kendoComboBox({
+                                                                placeholder: "Buscar producto...",
+                                                                dataTextField: "Name",
+                                                                dataValueField: "Id",
+                                                                filter: "contains",
+                                                                autoBind: true,
+                                                                minLength: 1,
+                                                                dataSource: {
+                                                                    type: "json",
+                                                                    transport: {
+                                                                        read: {
+                                                                            url: "@Html.Raw(Url.Action("ProductListData", "PurchaseOrder"))",
+                                                                            type: "POST",
+                                                                            data: addAntiForgeryToken
+                                                                        }
+                                                                    }
+                                                                },
+                                                                select: onSelect
+                                                            });
+                                                            function onSelect(e) {
+                                                                if (this.dataItem(e.item.index()).Id == 0) {
+                                                                    document.getElementById("item-name").style.display = "block";
+                                                                } else {
+                                                                    document.getElementById("item-name").style.display = "none";
+                                                                }
+                                                                document.getElementById("selectProduct").style.display = "none";
+                                                                $("#productId").val(this.dataItem(e.item.index()).Id);
+                                                                $("#productName").val(this.dataItem(e.item.index()).Name);
+                                                            }
+                                                            $("#noExist").click(function () {
+                                                                document.getElementById("item-name").style.display = "block";
+                                                                document.getElementById("selectProduct").style.display = "none";
+                                                                $("#products").data("kendoComboBox").value(0);
+                                                                $("#productId").val(0);
+                                                                return false;
+                                                            });
+                                                        });
+                                                        </script>
+                                                        <span id="selectProduct" style="display:none" class="text-danger">Debes seleccionar un producto</span>
+                                                    </div>
+                                                </div>
+                                                <div id="item-name" class="form-group" style="display:none">
+                                                    <div class="col-md-3 text-right">
+                                                        <label for="ItemName">Ingresa el nombre del producto</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input maxlength="256" class="form-control" id="unlistedProductName" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <label>Cantidad requerida</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control" id="unitsNumber" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-9 col-md-offset-3">
+                                                        <button type="button" id="addProductSpec" class="btn btn-primary">Agregar</button>
+                                                    </div>
+                                                    <script>
+                                                        $(document).ready(function () {
+                                                            $('#addProductSpec').click(function () {
+
+                                                                var data = {
+                                                                    ProductName: $("#productName").val(),
+                                                                    Units: $("#unitsNumber").val(),
+                                                                    Id: $("#productId").val()
+                                                                }
+
+                                                                if ($("#productId").val() == 0) {
+                                                                    data.ProductName = $("#unlistedProductName").val();
+                                                                }
+
+                                                                products.push(data);
+                                                                var grid = $("#products-grid").data('kendoGrid');
+                                                                grid.dataSource.data(products);
+                                                            });
+
+                                                            $("#submit-btn").click(function () {
+                                                                var data = {
+                                                                    BranchId: $("#branches").val(),
+                                                                    Comment: $("#comment").val(),
+                                                                    ProductsJson: JSON.stringify(products)
+                                                                }
+                                                                addAntiForgeryToken(data);
+                                                                $.ajax({
+                                                                    type: "POST",
+                                                                    url: "/Admin/PurchaseOrder/Create",
+                                                                    data: data,
+                                                                    success: function (data) {
+                                                                        window.location.href = "/Admin/PurchaseOrder/List";
+                                                                    },
+                                                                    error: function (xhr, ajaxOptions, thrownError) {
+                                                                        alert('Ocurrió un problema al guardar la ODC.');
+                                                                    }
+                                                                });
+                                                            });
+                                                        });
+                                                    </script>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Comentarios</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Comment" class="form-control" id="comment"></textarea>
+                                    <span asp-validation-for="Comment" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

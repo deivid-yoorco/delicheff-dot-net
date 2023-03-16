@@ -1,0 +1,131 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.PaymentListModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.AssignmentCheck");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Franchise";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Verificación de asignaciones
+    </h1>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Fraquicia</label>
+                                        <div title="Selecciona la franquicia correspondiente a la información que quieres ver" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select id="franchise-select" asp-for="SelectedFranchiseId" asp-items="@Model.Franchises" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="element-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<span id="popupNotification"></span>
+<script>
+    $(document).ready(function () {
+
+        $("#franchise-select").on('change', function () {
+            var url = window.location.origin + window.location.pathname;
+            window.location.href = url + "?franchiseId=" + $(this).val();
+        });
+
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("AssignmentCheckData", controllerName, new { franchiseId = Model.SelectedFranchiseId }))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha de entrega",
+                },
+                {
+                    field: "Vehicle",
+                    title: "Camioneta",
+                },
+                {
+                    field: "Route",
+                    title: "Ruta",
+                },
+                {
+                    field: "DeliveryUsers",
+                    title: "Repartidores asignados",
+                    template: function (dataItem) {
+                        let list = "";
+                        $.each(dataItem.DeliveryUsers, function (i, e) {
+                            list += "<span>" + e + "</span><br />";
+                        });
+                        return list;
+                    }
+                },
+                {
+                    field: "UsedExternalUser",
+                    title: "Verificación",
+                    attributes: {
+                        style: "text-align: center;"
+                    },
+                    template: function (dataItem) {
+                        let status = dataItem.UsedExternalUser;
+                        return status ? '<span class="grid-report-item red">Uso de repartidor externo</span>' : '<span class="grid-report-item green">Sin cambio</span>';
+                    }
+                }
+            ]
+        });
+    });
+</script>

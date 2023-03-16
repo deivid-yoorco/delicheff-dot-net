@@ -1,0 +1,76 @@
+﻿@model int
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+@if (Model > 0)
+{
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Órdenes en las que no fue entregado el producto
+        </h1>
+    </div>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="not-delivered-element-grid"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+    $(document).ready(function () {
+        $("#not-delivered-element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("GetNotDeliveredHistoricData", "Product", new { productId = Model }))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "OrderId",
+                    title: "# de orden",
+                },
+                {
+                    field: "Reason",
+                    title: "Motivo de no entrega",
+                }
+            ]
+        });
+    });
+    </script>
+} 

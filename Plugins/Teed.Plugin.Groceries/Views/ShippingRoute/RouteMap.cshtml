@@ -1,0 +1,695 @@
+﻿@model DateTime
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRouteOrder");
+    var dayBefore = DateTime.Now.Date > Model.Date;
+    var dayAfter = DateTime.Now.Date < Model.Date;
+}
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/oms.min.js"></script>
+<link href="~/Plugins/Teed.Plugin.Groceries/src/css/custom.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/custom.js"></script>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Mapa de entregas del día @(Model.ToString("dd-MM-yyyy"))
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a href="/Admin/ShippingRoute/AssignRouteOrder?date=@(Model.ToString("dd-MM-yyyy"))">regresar a la
+                asignación de la ruta</a>
+        </small>
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Guardando...</span>
+        </div>
+        <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.Save")
+        </button>
+        <span id="saving-error" style="margin-left: 10px; color:red; display:none">Ocurrió un problema guardando la
+            información</span>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @if (dayAfter)
+                {
+                    <h2 style="color:red;text-align: center;">ESTÁS VIENDO INFORMACIÓN QUE CORRESPONDE A UN DIA FUTURO</h2>
+                }
+                @if (dayBefore)
+                {
+                    <h2 style="color:red;text-align: center;">ESTÁS VIENDO INFORMACIÓN QUE CORRESPONDE A UN DIA PASADO</h2>
+                }
+                <div class="col-md-12" id="edit-order-container" style="display:none; margin-bottom: 20px">
+                    <h3>Órdenes a modificar:</h3>
+                    <table class="table" id="changes-table">
+                        <tr id="changes-header">
+                            <th>Orden</th>
+                            <th>Ruta original</th>
+                            <th>Nueva ruta</th>
+                        </tr>
+                    </table>
+                    <span style="color:red">Luego de guardar los cambios recuerda optimizar las rutas.</span>
+                </div>
+                <div id="map" style="height:55em;width:100%"></div>
+                <div class="row">
+                    <div class="row" style="margin-bottom: 1em">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label style="text-align:right;margin-top: 7px;">¿Mostrar división por
+                                            zonas?</label>
+                                        <div title="Selecciona si deseas mostrar la división por zonas"
+                                            class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <input checked class="check-box" id="display-zones" type="checkbox" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+                            aria-controls="collapseExample">
+                            <h3
+                                style="text-align: center; background-color: #f3f3f3; padding: 1em; margin-bottom: 1em;">
+                                <i class="fa fa-bars" aria-hidden="true"></i> Datos del mapa</h3>
+                        </a>
+                    </div>
+                    <div class="collapse" id="collapseExample">
+                        <div class="col-md-4">
+                            <table id="route-colors-table"></table>
+                        </div>
+                        <div class="col-md-4">
+                            <table id="zone-colors-table"></table>
+                        </div>
+                        <div class="col-md-4">
+                            <table class="table" style="width: 100%">
+                                <tr>
+                                    <th>Horario</th>
+                                    <th>Valor</th>
+                                </tr>
+                                <tr>
+                                    <td>1:00 PM - 3:00 PM</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>3:00 PM - 5:00 PM</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>5:00 PM - 7:00 PM</td>
+                                    <td>3</td>
+                                </tr>
+                                <tr>
+                                    <td>7:00 PM - 9:00 PM</td>
+                                    <td>4</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>Cantidad de entregas por horario</h4>
+                        <table class="table table-by-hours" style="width: 100%">
+                            <tr>
+                                <th>Horario</th>
+                                <th>Cantidad</th>
+                            </tr>
+                            <tr>
+                                <td>1:00 PM - 3:00 PM</td>
+                                <td class="1"></td>
+                            </tr>
+                            <tr>
+                                <td>3:00 PM - 5:00 PM</td>
+                                <td class="2"></td>
+                            </tr>
+                            <tr>
+                                <td>5:00 PM - 7:00 PM</td>
+                                <td class="3"></td>
+                            </tr>
+                            <tr>
+                                <td>7:00 PM - 9:00 PM</td>
+                                <td class="4"></td>
+                            </tr>
+                            <tr>
+                                <td>Total</td>
+                                <td class="total"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Cantidad de entregas/número de rutas</h4>
+                        <table class="table table-by-divition" style="width: 100%">
+                            <tr>
+                                <th>Horario</th>
+                                <th>Cantidad</th>
+                            </tr>
+                            <tr>
+                                <td>1:00 PM - 3:00 PM</td>
+                                <td class="1"></td>
+                            </tr>
+                            <tr>
+                                <td>3:00 PM - 5:00 PM</td>
+                                <td class="2"></td>
+                            </tr>
+                            <tr>
+                                <td>5:00 PM - 7:00 PM</td>
+                                <td class="3"></td>
+                            </tr>
+                            <tr>
+                                <td>7:00 PM - 9:00 PM</td>
+                                <td class="4"></td>
+                            </tr>
+                            <tr>
+                                <td>Total</td>
+                                <td class="total"></td>
+                            </tr>
+                            <tr>
+                                <td>Venta promedio</td>
+                                <td class="average-sell"></td>
+                            </tr>
+                            <tr>
+                                <td>Promedio de productos</td>
+                                <td class="average-product"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Totales por ruta</h4>
+                        <table class="table table-route-order-totals" style="width: 100%">
+                            <tr>
+                                <th>Ruta</th>
+                                <th>Total</th>
+                                <th>Ticket promedio</th>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 style="color: white;">C</h4>
+                        <table class="table table-total-products" style="width: 100%">
+                            <tr>
+                                <th>Total de productos</th>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-12">
+                        <h3 style="text-align: center">Datos por ruta</h3>
+                    </div>
+                    <div class="col-md-12" style="text-align: center;">
+                        <h4>Cantidad de entregas por horario por ruta y totales de la ruta</h4>
+                    </div>
+                    <div class="routes-data">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var allZondesCp = [];
+    var map;
+    var currentStyle;
+    let ordersToUpdate = [];
+    let ordersToOptimize = [];
+    let markers = [];
+    let oms;
+
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    function initMap() {
+        createMap();
+    }
+
+    function createMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 19.3170078, lng: -99.2090609 },
+            disableDefaultUI: true,
+            zoomControl: true,
+            zoom: 12
+        });
+
+        map.set('styles', myStyle);
+        map.data.loadGeoJson('/shippingarea/GetGeoJson');
+
+        oms = new OverlappingMarkerSpiderfier(map, {
+            markersWontMove: true,
+            markersWontHide: true,
+            basicFormatEvents: true,
+            keepSpiderfied: true,
+            nearbyDistance: 5
+        });
+    }
+
+    function getNumberByTime(time) {
+        switch (time) {
+            case "1:00 PM - 3:00 PM":
+                return 1;
+            case "3:00 PM - 5:00 PM":
+                return 2;
+            case "5:00 PM - 7:00 PM":
+                return 3;
+            case "7:00 PM - 9:00 PM":
+                return 4;
+            default:
+                return 0;
+        }
+    };
+
+    function processTemplate(str) {
+        var template = str.split('`');
+        for (var i = 0, len = template.length; i < len; i += 2) template[i] = encodeURIComponent(template[i]);
+        return template;
+    };
+
+    $.ajax({
+        url: '/Admin/ShippingZone/GetAllPostalCodesOfZones',
+        method: 'GET',
+        success: function (data) {
+            console.log(data);
+            $.each(data, function (i, e) {
+                allZondesCp.push({ id: e.Id, color: e.Color, pcs: e.Pcs, zoneName: e.ZoneName });
+            });
+
+            var filteredZones = [...new Set(allZondesCp.map(x => x.zoneName))];
+            $.each(filteredZones, function (index, element) {
+                let i = allZondesCp.map(x => x.zoneName).indexOf(element);
+                let color = allZondesCp[i].color;
+                let id = allZondesCp[i].id;
+                let zoneTableRow = `<tr><td style="padding: 5px 0"><div style="width:20px;height:20px;background:${color};margin-right: 5px;"></td>
+                                        <td style="padding: 5px 0"><a href="/Admin/ShippingZone/Edit/${id}" target="_blank">${element}</a></td></tr>`;
+                $("#zone-colors-table").append(zoneTableRow);
+            });
+
+            var bounds = new google.maps.LatLngBounds();
+            map.data.addListener('addfeature', function (e) {
+                console.log(e);
+                var feature = e.feature.j;
+                if (typeof feature == 'undefined')
+                    feature = e.feature.h;
+                if (allZondesCp.find(x => x.pcs.includes(feature.d_cp))) {
+                    var current = allZondesCp.find(x => x.pcs.includes(feature.d_cp));
+                    e.feature.setProperty("name", current.id);
+                }
+                processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+                map.fitBounds(bounds);
+            });
+
+            map.data.setStyle(function (feature) {
+                var color = '#919191';
+                var allZones = allZondesCp;
+                if (typeof feature.getProperty('name') != 'undefined' &&
+                    feature.getProperty('name') != '' &&
+                    feature.getProperty('name') != null) {
+                    var current = allZones.find(x => x.id.includes(feature.getProperty('name')));
+                    color = current.color != 'null' ? (current.color.includes('#') ? current.color : "#" + current.color) : '#3fff2e';
+                }
+
+                return ({
+                    fillColor: color,
+                    strokeColor: color,
+                    strokeWeight: 3
+                });
+            });
+
+            currentStyle = map.data.getStyle();
+        },
+        error: function (e) {
+            console.log(e);
+        }
+    });
+
+    function processPoints(geometry, callback, thisArg) {
+        if (geometry instanceof google.maps.LatLng) {
+            callback.call(thisArg, geometry);
+        } else if (geometry instanceof google.maps.Data.Point) {
+            callback.call(thisArg, geometry.get());
+        } else {
+            geometry.getArray().forEach(function (g) {
+                processPoints(g, callback, thisArg);
+            });
+        }
+    };
+
+    $("#display-zones").change(function () {
+        if (this.checked) {
+            map.data.setStyle(currentStyle);
+        } else {
+            map.data.setStyle({ visible: false });
+        }
+    });
+
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        $("#saving-error").hide();
+
+        let body = {
+            data: ordersToUpdate,
+            optimizationData: [],
+            date: '@(Model.ToString("dd-MM-yyyy"))'
+        }
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/UpdateOrdersFromMap',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#saving-error").show();
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+
+    $.ajax({
+        type: 'GET',
+        url: '/Admin/ShippingRoute/RouteMapData?date=' + '@(Model.ToString("dd-MM-yyyy"))',
+        success: (data) => {
+            var OneToThree = 0;
+            var ThreeToFive = 0;
+            var FiveToSeven = 0;
+            var SevenToNine = 0;
+            var TotalRoutes = data.Data.length;
+            data.Routes.unshift({
+                RouteName: 'Sin ruta asignada',
+                Id: 0
+            });
+            $.each(data.Data, function (index, element) {
+                if (!element.Route) {
+                    element.Route = {
+                        Id: 0,
+                        RouteName: 'Sin ruta asignada',
+                        GuidId: '00'
+                    }
+                }
+                var pinColor = "cccccc";
+                if (element.Route.Id > 0) { pinColor = routeColors[index]; }
+                var tableImage = "https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|" + pinColor;
+                let tableRow = `<tr><td><img id="${element.Route.Id}" data-color="${pinColor}" style="margin: 10px" src="${tableImage}" />${element.Route.RouteName} (${element.Orders.length} entregas)</td></tr>`;
+                $("#route-colors-table").append(tableRow);
+                $.each(element.Orders, function (i, e) {
+                    setTimeout(function () {
+                        var pinNumber = getNumberByTime(e.SelectedShippingTime);
+                        var imageUrl = "https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=" + pinNumber + "|" + pinColor;
+                        if (e.OptimizeTypeId > 0) {
+                            var starColor = getStarColor(e.OptimizeTypeId);
+                            imageUrl = "https://chart.apis.google.com/chart?chst=d_map_xpin_letter&chld=pin_star|" + pinNumber + "|" + pinColor + "|000000|" + starColor;
+                        }
+                        var pinImage = new google.maps.MarkerImage(imageUrl);
+                        var marker = new google.maps.Marker({
+                            position: { lat: parseFloat(e.Latitude), lng: parseFloat(e.Longitude) },
+                            animation: google.maps.Animation.DROP,
+                            icon: pinImage,
+                            id: e.OrderIds
+                        });
+                        //marker.setMap(map);
+                        oms.addMarker(marker)
+                        markers.push(marker);
+
+                        let optionsHtml;
+                        for (q = 0; q < data.Routes.length; q++) {
+                            if (data.Routes[q].Id === element.Route.Id) {
+                                optionsHtml += "<option selected value=\"" + data.Routes[q].Id + "\">" + data.Routes[q].RouteName + "</option>";
+                            }
+                            else {
+                                optionsHtml += "<option value=\"" + data.Routes[q].Id + "\">" + data.Routes[q].RouteName + "</option>";
+                            }
+                        }
+
+                        var infowindow = new google.maps.InfoWindow({
+                            content: `
+                                <div>
+                                    <strong>${e.OrderNumber}</strong><br/>
+                                    <strong>${e.OrderTotal}</strong><br/>
+                                    <strong>${e.PaymentMethodSystemName}</strong><br/>
+                                    <strong>${e.ProductCount}</strong><br/>
+                                    <select onchange="routeUpdated(this, '${e.OrderIds}', '${e.OrderNumber}', '${element.Route.RouteName}', ${pinNumber}, ${element.Route.Id})">
+                                `
+                                + optionsHtml +
+                                `
+                                    </select><br/><br/>
+                                    <span>${e.ShippingFullName}</span><br/>
+                                    <span>${e.ShippingAddress}</span><br/>
+                                    <span>${e.SelectedShippingTime}</span><br/>
+                                    <span>CP: ${e.PostalCode}</span><br/>
+                                    <span>${e.ZoneName}</span>
+                                    ${getOptimizationType(e.OptimizeTypeId)}
+                                </div>
+                            `
+                        });
+                        google.maps.event.addListener(infowindow, 'closeclick', function () {
+
+                            // Close jQuery ui tooltip related to the close button
+                            jQuery("[role='tooltip']").remove();
+                        });
+
+                        marker.addListener('spider_click', function () {
+                            infowindow.open(map, marker);
+                        });
+                    }, (index + i) * 200);
+                });
+                // Creation of tables by route
+                var id = element.Route.GuidId;
+                var appendRoute = '<div class="col-md-4 table-route-' + id + '">' +
+                    '<h4 class="route-name"></h4>' +
+                    '<table class="table" style="width: 100%">' +
+                    '<tr>' +
+                    '<th>Horario</th>' +
+                    '<th>Cantidad</th>' +
+                    '<th>Total de productos</th>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>1:00 PM - 3:00 PM</td>' +
+                    '<td class="1"></td>' +
+                    '<td class="total-products"></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>3:00 PM - 5:00 PM</td>' +
+                    '<td class="2"></td>' +
+                    '<td style="font-weight:bold">Venta / Ticket Promedio</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>5:00 PM - 7:00 PM</td>' +
+                    '<td class="3"></td>' +
+                    '<td class="sell-and-ticket"></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>7:00 PM - 9:00 PM</td>' +
+                    '<td class="4"></td>' +
+                    '<td style="font-weight:bold">Distancia / Tiempo</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>Total</td>' +
+                    '<td class="total"></td>' +
+                    '<td class="time-distance"></td>' +
+                    '</tr>' +
+                    '</table>' +
+                    '</div>';
+                $('.routes-data').append(appendRoute);
+                var ordersOfRoute = element.Orders;
+                $('.table-route-' + id + ' .route-name').text(element.Route.RouteName + ' (' + parseFranchiseName(element.FranchiseName) + ')');
+                $('.table-route-' + id + ' .total-products').text(element.ProductsCount);
+                $('.table-route-' + id + ' .sell-and-ticket').text(formatCurrency(element.OrderTotals) + ' / ' + formatCurrency(element.AverageTicket));
+                $('.table-route-' + id + ' .time-distance').text(element.TotalDistance + ' km / ' + element.TotalTime + ' minutos');
+                $('.table-route-' + id + ' .total').text(ordersOfRoute.length);
+                for (var i = 1; i < 5; i++) {
+                    var count = 0;
+                    switch (i) {
+                        case 1:
+                            count = ordersOfRoute.where({ SelectedShippingTime: "1:00 PM - 3:00 PM" }).length;
+                            OneToThree += count;
+                            break;
+                        case 2:
+                            count = ordersOfRoute.where({ SelectedShippingTime: "3:00 PM - 5:00 PM" }).length;
+                            ThreeToFive += count;
+                            break;
+                        case 3:
+                            count = ordersOfRoute.where({ SelectedShippingTime: "5:00 PM - 7:00 PM" }).length;
+                            FiveToSeven += count;
+                            break;
+                        case 4:
+                            count = ordersOfRoute.where({ SelectedShippingTime: "7:00 PM - 9:00 PM" }).length;
+                            SevenToNine += count;
+                            break;
+                        default:
+                            break;
+                    }
+                    $('.table-route-' + id + ' .' + i).text(count);
+                }
+                //
+                // Set Route totals
+                $('.table-route-order-totals').append(
+                    "<tr>" +
+                    "<td>" + element.Route.RouteName + "</td>" +
+                    "<td class='" + element.Route.RouteName.replace(/\s/g, "-") + "'>" +
+                    formatCurrency(element.OrderTotals) +
+                    "</td>" +
+                    "<td>" + formatCurrency(element.AverageTicket) + "</td>" +
+                    "</tr>"
+                );
+            });
+            // Set totals to tables
+            $('.table-total-products td').text(data.ProductsTotal);
+            var totalByHour = 0;
+            var totalByDevived = 0.0;
+            for (var i = 1; i < 5; i++) {
+                var currentNum = 0;
+                var currentDiv = 0.0;
+                switch (i) {
+                    case 1:
+                        currentNum = OneToThree;
+                        break;
+                    case 2:
+                        currentNum = ThreeToFive;
+                        break;
+                    case 3:
+                        currentNum = FiveToSeven;
+                        break;
+                    case 4:
+                        currentNum = SevenToNine;
+                        break;
+                    default:
+                        break;
+                }
+                currentDiv = round(currentNum / TotalRoutes, 1);
+                totalByHour += currentNum;
+                $('.table-by-hours .' + i).text(currentNum);
+                totalByDevived += currentDiv;
+                $('.table-by-divition .' + i).text(currentDiv);
+            }
+            $('.table-by-hours .total').text(totalByHour);
+            $('.table-by-divition .total').text(round(totalByDevived, 1));
+            $('.table-by-divition .average-sell').text(formatCurrency(data.SalesAverage));
+            $('.table-by-divition .average-product').text(round(data.ProductsAverage, 1));
+            //
+        },
+        error: (error) => {
+            console.log('ERROR CARGANDO DATOS PARA EL MAPA:', error);
+        }
+    });
+
+    function parseFranchiseName(name) {
+        return name ? name : 'Franquicia no asignada';
+    };
+
+    function formatCurrency(total) {
+        var neg = false;
+        if (total < 0) {
+            neg = true;
+            total = Math.abs(total);
+        }
+        return (neg ? "-$" : '$') + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
+    }
+
+    function routeUpdated(element, orderIds, orderNames, originalRouteName, pinNumber, originalRouteId) {
+        let markerIndex = markers.map(x => x.id).indexOf(orderIds);
+        let color = $("img#" + $(element).val()).data("color");
+        markers[markerIndex].setIcon("https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=" + pinNumber + "|" + color);
+
+        let existingIndex = ordersToUpdate.map(x => x.orderIds).indexOf(orderIds);
+
+        if (existingIndex > -1) {
+            ordersToUpdate.splice(existingIndex, 1);
+        }
+
+        if (originalRouteName !== $(element).find('option:selected').text()) {
+            ordersToUpdate.push({
+                orderIds: orderIds,
+                newRouteId: $(element).val(),
+                orderNames: orderNames,
+                originalRouteName: originalRouteName,
+                newRouteName: $(element).find('option:selected').text()
+            });
+        }
+
+        if (ordersToUpdate.length > 0) {
+            $("#edit-order-container").show();
+        } else {
+            $("#edit-order-container").hide();
+        }
+
+        $("#changes-table tr:gt(0)").remove();
+        $.each(ordersToUpdate, function (index, el) {
+            let row = "<tr><td>" + el.orderNames + "</td><td>" + el.originalRouteName + "</td><td>" + el.newRouteName + "</td></tr>";
+            $("#changes-table").append(row);
+        });
+    }
+
+    Array.prototype.where = function (filter) {
+
+        var collection = this;
+
+        switch (typeof filter) {
+
+            case 'function':
+                return $.grep(collection, filter);
+
+            case 'object':
+                for (var property in filter) {
+                    if (!filter.hasOwnProperty(property))
+                        continue; // ignore inherited properties
+
+                    collection = $.grep(collection, function (item) {
+                        return item[property] === filter[property];
+                    });
+                }
+                return collection.slice(0); // copy the array
+            // (in case of empty object filter)
+
+            default:
+                throw new TypeError('func must be either a' +
+                    'function or an object of properties and values to filter by');
+        }
+    };
+
+    Array.prototype.firstOrDefault = function (func) {
+        return this.where(func)[0] || null;
+    };
+
+    function round(value, precision) {
+        var multiplier = Math.pow(10, precision || 0);
+        return Math.round(value * multiplier) / multiplier;
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap" async
+    defer></script>

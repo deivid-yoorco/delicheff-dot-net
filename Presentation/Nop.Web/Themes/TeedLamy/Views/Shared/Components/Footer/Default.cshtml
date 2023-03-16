@@ -1,0 +1,263 @@
+﻿@model FooterModel
+@using Nop.Core
+@using Nop.Core.Domain.Tax
+@inject IWorkContext workContext;
+@inject IStoreContext storeContext;
+@{
+    var storeName = storeContext.CurrentStore.Name;
+}
+<style>
+    .black-font {
+        color: #000;
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
+    .footer-links {
+        float: left;
+    }
+
+    .letter-item {
+        font-size: 28px;
+        line-height: 1.1;
+        font-weight: bold;
+    }
+
+    .footer-img {
+        float: right;
+    }
+
+    .page-footer .footer-links a, .page-footer .footer-links p {
+        display: block;
+        text-decoration: none;
+        margin-bottom: 10px;
+    }
+
+    .footer-img p {
+        float: left;
+        padding-top: 4px;
+        padding-right: 10px;
+        color: #888888;
+    }
+
+    .col.l3.m6.s12 a {
+        color: #888;
+    }
+
+        .col.l3.m6.s12 a:hover {
+            color: #000;
+        }
+
+    .footer-bar {
+        background: white;
+        border-top: 1px solid #d8dde0;
+        font-size: 16px;
+        padding-top: 0.5%;
+    }
+
+        .footer-bar li {
+            color: #888888;
+        }
+</style>
+
+<input type="hidden" value="@storeName" id="store-name" />
+<section class="footer-bar">
+    <section class="container">
+        <ul>
+            <li><i>Tienda oficial LAMY</i></li>
+        </ul>
+    </section>
+</section>
+<footer class="page-footer" style="background-color: #eeeff1">
+    <div class="container">
+        <div class="row">
+            <div class="col full-width">
+                <ul class="footer-links">
+                    <li class="footer-links-items">
+                        <a href="#categories-dropdown" class="black-font letter-item modal-trigger">Productos</a>
+                    </li>
+                    <li class="footer-links-items">
+                        <a href="https://cms.lamyshop.com.mx/es/made-in-germany-1338.html" class="black-font letter-item">Hecho en Alemania</a>
+                    </li>
+                    <li class="footer-links-items">
+                        <a href="https://cms.lamyshop.com.mx/es/su-historia.html" class="black-font letter-item">Historias</a>
+                    </li>
+                </ul>
+                <div class="footer-img">
+                    <p>Métodos de pago:</p>
+                    <img src="~/images/Pagos_PayPal_250px.png" alt="Paypal" width="170" style="vertical-align: middle;">
+                    @*<img src="~/images/Pagos_RapidSSL_250px.png" alt="RapidSsl" width="70" style="vertical-align:middle;">*@
+                </div>
+                <div id="providers-images-footer" style="margin-top:5%;vertical-align:middle;text-align:center"></div>
+            </div>
+            <div class="col l3 m6 s12">
+                <h5 class="black-font">Contacto</h5>
+                <ul>
+                    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Lamy)
+                    {
+                        <li style="display: grid;">
+                            <span style="color: #888;">Teléfono Whatsapp:</span>
+                            <a class="black-font" href="https://api.whatsapp.com/send?phone=5215512314239">(55) 1231 4239</a>
+                        </li>
+                        <br>
+                        <br>
+                        <li>
+                            <a class="black-font" href="https://cms.lamyshop.com.mx/es/lamy-on-site.html">LAMY ON-SITE</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="col l3 m6 s12">
+                <h5 class="black-font">@T("Footer.Information")</h5>
+                <ul>
+                    @if (Model.SitemapEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Sitemap")">@T("Sitemap")</a></li>
+                    }
+                    @foreach (var topic in Model.Topics.Where(x => x.IncludeInFooterColumn1).ToList())
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Topic", new { SeName = topic.SeName })">@topic.Name</a></li>
+                    }
+                </ul>
+            </div>
+            <div class="col l3 m6 s12">
+                <h5 class="black-font">@T("Footer.CustomerService")</h5>
+                <ul>
+                    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                    {
+                        <li><a class="black-font" href="~/files/TablasMedidas.pdf" target="_blank">Tabla de tallas y medidas</a></li>
+                    }
+                    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Aldora)
+                    {
+                        <li><a class="black-font" href="~/files/guia-tamanos-aldora.pdf" target="_blank">Tabla de tallas y medidas</a></li>
+                    }
+
+                    @if (Model.NewsEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("NewsArchive")">@T("News")</a></li>
+                    }
+                    @if (Model.BlogEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Blog")">@T("Blog")</a></li>
+                    }
+                    @if (Model.ForumEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Boards")">@T("Forum.Forums")</a></li>
+                    }
+                    @*@if (Model.CompareProductsEnabled)
+                        {
+                            <li><a class="black-font" href="@Url.RouteUrl("CompareProducts")">@T("Products.Compare.List")</a></li>
+                        }*@
+                    @*@if (Model.NewProductsEnabled)
+                        {
+                            <li><a class="black-font" href="@Url.RouteUrl("NewProducts")">@T("Products.NewProducts")</a></li>
+                        }*@
+                    @foreach (var topic in Model.Topics.Where(x => x.IncludeInFooterColumn2).ToList())
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Topic", new { SeName = topic.SeName })">@topic.Name</a></li>
+                    }
+                    <li><a class="black-font" href="@Url.RouteUrl("ContactUs")">@T("ContactUs")</a></li>
+                </ul>
+            </div>
+            <div class="col l3 m6 s12">
+                <h5 class="black-font">@T("Footer.MyAccount")</h5>
+                <ul>
+                    <li><a class="black-font" href="@Url.RouteUrl("CustomerInfo")">@T("Account.MyAccount")</a></li>
+                    <li><a class="black-font" href="@Url.RouteUrl("CustomerOrders")">@T("Account.CustomerOrders")</a></li>
+                    @*<li><a class="black-font" href="@Url.RouteUrl("CustomerAddresses")">@T("Account.CustomerAddresses")</a></li>*@
+                    @if (Model.ShoppingCartEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("ShoppingCart")">@T("ShoppingCart")</a></li>
+                    }
+                    @if (Model.WishlistEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Wishlist")">@T("Wishlist")</a></li>
+                    }
+                    @if (Model.AllowCustomersToApplyForVendorAccount)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("ApplyVendorAccount")">@T("Vendors.ApplyAccount")</a></li>
+                    }
+                    @foreach (var topic in Model.Topics.Where(x => x.IncludeInFooterColumn3).ToList())
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("Topic", new { SeName = topic.SeName })">@topic.Name</a></li>
+                    }
+
+                    @if (Model.RecentlyViewedProductsEnabled)
+                    {
+                        <li><a class="black-font" href="@Url.RouteUrl("RecentlyViewedProducts")">@T("Products.RecentlyViewedProducts")</a></li>
+                    }
+                </ul>
+            </div>
+            @*<div class="col l3 m6 s12">
+                <h5 class="black-font">@T("Footer.FollowUs")</h5>
+                <div class="social">
+                    @await Component.InvokeAsync("SocialButtons")
+                </div>
+                @await Component.InvokeAsync("NewsletterBox")*@
+
+            @*<div style="margin-top:5%;vertical-align:middle;text-align:center">
+                    <img src="~/images/Pagos_PayPal_250px.png" alt="Paypal" width="170" style="vertical-align:middle;">
+                    <img src="~/images/Pagos_RapidSSL_250px.png" alt="RapidSsl" width="70" style="vertical-align:middle;">
+                </div>
+                <div id="providers-images-footer" style="margin-top:5%;vertical-align:middle;text-align:center"></div>*@
+            @*</div>*@
+        </div>
+    </div>
+    <div class="footer-copyright" style="background-color:#fff">
+        <div class="container row" style="display:flex;align-items:center;">
+            <div class="col l6 s12">
+                <div>
+                    @await Component.InvokeAsync("SocialButtons")
+                </div>
+            </div>
+            <div class="col l6 s12 right-align black-font">
+                <span class="footer-disclaimer">@T("Content.CopyrightNotice", DateTime.Now.Year, Model.StoreName)</span>
+                @if (Model.DisplayTaxShippingInfoFooter)
+                {
+                    var inclTax = workContext.TaxDisplayType == TaxDisplayType.IncludingTax;
+                    <span class="footer-tax-shipping">
+                        @T(inclTax ? "Footer.TaxShipping.InclTax" : "Footer.TaxShipping.ExclTax", Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("shippinginfo") }))
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync("Widget", new { widgetZone = "footer" })
+</footer>
+<script>
+    $.ajax({
+        url: '/admin/custompages/GetCustomPages',
+        type: 'GET',
+        cache: false,
+        success: function (data) {
+            if (data.length > 0) {
+                var element = "<li class='tab-shape hide-on-med-and-down' style='border-bottom-color:#dd042b'><a style='text-align:center' href='/' >" + $("#store-name").val().toUpperCase() + "</a></li>";
+                $(".header ul.left").append(element);
+                $(".header .nav-wrapper.container").attr("style", "width:auto !important");
+                $("#slide-out").prepend("<div style='margin-bottom:20px'></div>");
+            }
+
+            $.each(data, function (i, val) {
+                var element = "<li class='tab-shape hide-on-med-and-down' style='border-bottom-color:#" + val.TabColor + "'><a style='text-align:center' href='/" + val.Slug + "'>" + val.PageName.toUpperCase() + "</a></li>";
+                $(".header ul.left").append(element);
+                $("#slide-out").prepend(element.replace("tab-shape hide-on-med-and-down", "").replace("border-bottom-color", "height:60px;background-color").replace("style='text-align:center", "style='height:60px!important;line-height:60px!important;text-align:center"));
+            });
+
+            $("#slide-out").prepend("<div style='margin-bottom:20px'></div>");
+        }
+    })
+</script>
+<style>
+    .tab-shape {
+        border-bottom: 30px solid;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        height: 0;
+    }
+
+    nav ul a:hover {
+        background-color: unset;
+    }
+</style>

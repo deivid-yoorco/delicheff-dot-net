@@ -1,0 +1,86 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderItemBuyer.ManufacturerBuyerModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ManufacturerBuyer");
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .inner-tables {
+        width: inherit;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+        .inner-tables th, Guardando
+        .inner-tables td {
+            border: 1px solid #dddddd !important;
+            text-align: left !important;
+            padding: 8px !important;
+        }
+</style>
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar compradores por defecto a fabricantes
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <nop-tabs id="product-edit">
+                        <nop-tab asp-name="tab-assign-buyer" asp-title="Asignar compradores" asp-default="true">
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/OrderItemBuyer/_Configure.AssignBuyer.cshtml", Model)
+                        </nop-tab>
+                        <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                            <div class="raw clearfix">
+                                <div class="col-md-12">
+                                    <div class="panel-group">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                Log
+                                            </div>
+                                            <div class="panel-body">
+                                                @foreach (var log in Model.Log)
+                                                {
+                                                    <span>@Html.Raw(log)</span><br /><br />
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </nop-tab>
+                    </nop-tabs>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

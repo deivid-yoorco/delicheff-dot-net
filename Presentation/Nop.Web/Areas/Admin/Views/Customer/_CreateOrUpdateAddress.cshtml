@@ -1,0 +1,54 @@
+﻿@model CustomerAddressModel
+
+<div asp-validation-summary="ModelOnly"></div>
+<input type="hidden" asp-for="CustomerId" />
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_customer_address_details_top", additionalData = Model.Address?.Id })
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <nop-editor asp-for="Address" asp-template="Address" />
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">
+                                    Latitud
+                                </label>
+                                <div title="Ingresa la latitud." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-required">
+                                <input class="form-control text-box single-line" id="latitude" name="Address.Latitude" type="text" asp-for="Address.Latitude">
+                            </div>
+                            <span class="field-validation-valid" data-valmsg-for="Address.Latitude" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">
+                                    Longitud
+                                </label>
+                                <div title="Ingresa la longitud." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group input-group-required">
+                                <input class="form-control text-box single-line" id="latitude" name="Address.Longitude" type="text" asp-for="Address.Longitude">
+                            </div>
+                            <span class="field-validation-valid" data-valmsg-for="Address.Longitude" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_customer_address_details_bottom", additionalData = Model.Address?.Id })
+        </div>
+    </div>
+</div>

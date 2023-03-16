@@ -1,0 +1,47 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.LevelModel
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Name" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Name" />
+                            <span asp-validation-for="Name"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Description" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Description" />
+                            <span asp-validation-for="Description"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="RequiredAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="RequiredAmount" />
+                            <span asp-validation-for="RequiredAmount"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="CustomerRoleId" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="CustomerRoleId" asp-items="Model.CustomerRoles" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

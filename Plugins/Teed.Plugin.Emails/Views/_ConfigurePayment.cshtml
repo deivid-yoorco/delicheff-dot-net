@@ -1,0 +1,27 @@
+﻿@model Teed.Plugin.Emails.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Configuración general
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Subtitulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SubTitlePayment" />
+                <span asp-validation-for="SubTitlePayment"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Texto del botón</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BtnTextPayment" />
+                <span asp-validation-for="BtnTextPayment"></span>
+            </div>
+        </div>
+    </div>
+</div>

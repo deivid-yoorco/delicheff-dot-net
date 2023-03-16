@@ -1,0 +1,237 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.InfoModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h3 style="text-align: center; margin-top: 0px !important; margin-bottom: 30px">
+            Pagos
+            <div class="pull-right">
+                <a asp-action="ExportPayments" asp-route-franchiseId="@Model.FranchiseId" class="btn bg-blue">
+                    <i class="fa fa-file-excel-o"></i>
+                    Exportar
+                </a>
+            </div>
+        </h3>
+        <div id="payments-grid"></div>
+        <script>
+            $(document).ready(function () {
+                $("#payments-grid").kendoGrid({
+                    dataSource: {
+                        type: "json",
+                        transport: {
+                            read: {
+                                url: "@Html.Raw(Url.Action("PaymentsData", "Franchise", new { franchiseId = Model.FranchiseId }))",
+                                type: "POST",
+                                dataType: "json",
+                                data: null
+                            }
+                        },
+                        schema: {
+                            data: "Data",
+                            total: "Total",
+                            errors: "Errors"
+                        },
+                        error: function(e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        pageSize: @(defaultGridPageSize),
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true
+                    },
+                    pageable: {
+                        refresh: false,
+                        pageSizes: [@(gridPageSizes)],
+                        @await Html.PartialAsync("_GridPagerMessages")
+                    },
+                    editable: {
+                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                        mode: "inline"
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "Id",
+                            title: "Identificador",
+                        },
+                        {
+                            field: "Date",
+                            title: "Fecha de pago",
+                        },
+                        {
+                            field: "Amount",
+                            title: "Monto",
+                        },
+                        {
+                            field: "Status",
+                            title: "Estatus",
+                            attributes: {
+                                style: "text-align: center;"
+                            },
+                            width: 200,
+                            template: function (dataItem) {
+                                var status = dataItem.Status;
+                                return '<span class="grid-report-item ' + status +
+                                    '">' + (status == "yellow" ? "Pendiente de pago" :
+                                        status == "red" ? "Factura pendiente" : "Pagado") + '</span>';
+                            }
+                        },
+                        {
+                                field: "PdfId",
+                                title: "Factura PDF/XML",
+                                width: 150,
+                                template: function (dataItem) {
+                                    var final = "<span>Archivos Pdf:<br />";
+
+                                    $.each(dataItem.PdfIds, function (i, e) {
+                                        final += '<a class="btn btn-default download-button" href="#" onclick="downloadFile(true, ' + e + ')">Descargar PDF (Id: ' + e + ')</a><br />';
+                                    });
+                                    final += '<span><input onchange="uploadFile(this, ' + dataItem.Id + ', true)" type="file" id="' + dataItem.Id + '" class="pdf"></span><br />Archivos XML: <br />';
+                                    $.each(dataItem.XmlIds, function (i, e) {
+                                        final += '<a class="btn btn-default download-button" href="#" onclick="downloadFile(false, ' + e + ')">Descargar XML (Id: ' + e + ')</a>';
+                                    });
+                                    final += '<span><input onchange="uploadFile(this, ' + dataItem.Id + ', false)" type="file" id="' + dataItem.Id + '" class="xml"></span>';
+
+                                    final += "</span><br />";
+                                    return final;
+                                }
+                            },
+                            {
+                                field: "OtherFileIds",
+                                title: "Comprobante de pago",
+                                width: 150,
+                                template: function (dataItem) {
+                                    if (dataItem.OtherFileIds.length > 0) {
+                                        var final = "<span'>";
+                                        $.each(dataItem.OtherFileIds, function (i, e) {
+                                            final += '<a class="btn btn-default" href="#" onclick="downloadFile(null, ' + e + ')">Descargar comprobante</a><br /><br />';
+                                        });
+                                        final += "</span>";
+                                        return final;
+                                    } else {
+                                        return "<span>Sin archivos</span>";
+                                    }
+                                }
+                        },
+                            @if (Model.IsAdmin)
+                            {
+                                <text>
+                                {
+                                    field: "VerifiedByCustomerId",
+                                    title: "Verificado por",
+                                    width: 150,
+                                    attributes: {
+                                        style: "text-align: center;"
+                                    },
+                                    template: function (dataItem) {
+                                        var html = "";
+                                        if (dataItem.VerifiedByCustomerId > 0)
+                                            html += dataItem.VerifiedByCustomer + "<br>" + dataItem.VerifiedDate;
+                                        else
+                                            html += "<button type='button' class='btn btn-primary' onclick='verifyPayment(" + dataItem.Id + ", this)'>Verificar</button>";
+                                        return html;
+                                    }
+                                }
+                                </text>
+                            }
+                    ]
+                });
+            });
+
+            function verifyPayment(id = 0, elm) {
+                var $elm = $(elm);
+                if (confirm('¿Estas segur@("@") de que deseas confirmar el pago con identificador "' + id + '"?')) {
+                    $.ajax({
+                        cache: false,
+                        type: "GET",
+                        url: "@(Url.Action("VerifyPayment", "Franchise"))?id=" + id,
+                        success: function (data) {
+                            $elm.parent().html(data);
+                        },
+                        error: function (e) {
+                            console.log(e);
+                            alert("Hubo un error al verificar el pago, por favor inténtalo más tarde.");
+                        }
+                    });
+                }
+            }
+
+            function downloadFile(isPdf, id) {
+                                    $.ajax({
+                                        cache: false,
+                                        type: "GET",
+                                        url: "@(Url.Action("PaymentFileDownload", "Payment"))?id=" + id + (isPdf == null ? "" : "&isPdf=" + isPdf),
+                                        success: function (data) {
+                                            console.log(data);
+                                            // Create "a" element
+                                            var a = window.document.createElement('a');
+                                            // Convert to blob
+                                            var blob = new Blob([s2ab(atob(data.FileArray))], {
+                                                type: ''
+                                            });
+                                            a.href = window.URL.createObjectURL(blob);
+                                            // Supply fileName
+                                            a.download = data.Title + "." +
+                                                data.Extension;
+                                            // Add to count for better name
+                                            document.body.appendChild(a);
+                                            // Click "a" for download
+                                            a.click();
+                                            document.body.removeChild(a);
+                                        },
+                                        error: function (xhr, ajaxOptions, thrownError) {
+                                            console.log(thrownError);
+                                        }
+                                    });
+            }
+
+            function uploadFile(input, id, isPdf) {
+                            var file = $(input)[0].files[0];
+
+                            if (file == "" || typeof file == 'undefined') {
+                                $('.file-error').show();
+                                return false;
+                            }
+
+                            $('#addIncidentFile').attr('disabled', true);
+
+                            var postData = {
+                                file: file,
+                                paymentId: id,
+                                isPdf: isPdf,
+                                };
+                            addAntiForgeryToken(postData);
+                            var formData = new FormData();
+                            $.each(postData, function (name, value) {
+                                formData.append(name, value);
+                            });
+
+                            $.ajax({
+                                contentType: false,
+                                processData: false,
+                                type: "POST",
+                                url: "@(Url.Action("PaymentFileAdd", "Payment"))",
+                                data: formData,
+                                success: function(data) {
+                                    var grid = $("#bills-grid");
+                                    grid.data('kendoGrid').dataSource.read();
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    alert('Failed to add employee file.');
+                                }
+                            });
+            }
+            function s2ab(s) {
+                var buf = new ArrayBuffer(s.length);
+                var view = new Uint8Array(buf);
+                for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                return buf;
+            }
+        </script>
+    </div>
+</div>

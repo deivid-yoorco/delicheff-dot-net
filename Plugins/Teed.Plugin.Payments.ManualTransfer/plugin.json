@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Manual Transfer",
+  "SystemName": "Payments.ManualTransfer",
+  "Version": "1.40",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.ManualTransfer.dll",
+  "Description": "This payment module allows you to enable \"Manual Transfer\" option in your store"
+}

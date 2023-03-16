@@ -1,0 +1,80 @@
+@model WishlistModel
+@using Nop.Core
+@using Nop.Core.Domain.Tax
+@using Nop.Core.Domain.Orders
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Wishlist").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-wishlist-page");
+}
+<div class="page wishlist-page section">
+    <div class="">
+        <h1 class="category-page-title">
+            @if (Model.IsEditable)
+            {
+                @T("Wishlist")
+            }
+            else
+            {
+                @string.Format(T("Wishlist.WishlistOf").Text, Model.CustomerFullname)
+            }
+        </h1>
+    </div>
+    <div class="page-body">
+        @if (Model.Products.Where(x => x.Product.Published).ToList().Count > 0)
+        {
+            <div class="row">
+                @foreach (var item in Model.Products.Where(x => x.Product.Published).ToList())
+                {
+                    <div class="col s6 m6 l3">
+                        @await Html.PartialAsync("_ProductBox", item)
+                    </div>
+                }
+            </div>
+            <div class="section"></div>
+            <div class="row buttons center-align col s12">
+                <div class="row col s12 l4 center-align"></div>
+                @if (Model.IsEditable && Model.EmailWishlistEnabled)
+                {
+                    <div class="row col s12 l4 center-align">
+                        <input type="button" value="@T("Wishlist.EmailAFriend")" class="btn email-a-friend-wishlist-button col s12" onclick="setLocation('@Url.RouteUrl("EmailWishlist")')" />
+                    </div>
+                }
+                <div class="row col s12 l4 center-align"></div>
+            </div>
+            <div class="section"></div>
+        }
+        else
+        {
+            @*<div class="no-data">
+                    @T("Wishlist.CartIsEmpty")
+                </div>*@
+
+            <div class="section">
+                <div class="card horizontal">
+                    <div class="card-stacked">
+                        <div class="card-content" style="font-size:16px;">
+                            @T("Wishlist.CartIsEmpty")
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    @await Component.InvokeAsync("HomepageBestSellers")
+                </div>
+            </div>
+        }
+        @if (Model.IsEditable && Model.Items.Count > 0)
+        {
+            <div class="share-info">
+                <span class="share-label">@T("Wishlist.YourWishlistURL"):</span>
+                <a href="@Url.RouteUrl("Wishlist", new { customerGuid = Model.CustomerGuid })" class="share-link">@Url.RouteUrl("Wishlist", new { customerGuid = Model.CustomerGuid }, "http")</a>
+            </div>
+        }
+    </div>
+</div>

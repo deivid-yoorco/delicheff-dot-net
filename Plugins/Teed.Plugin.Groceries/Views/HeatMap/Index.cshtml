@@ -1,0 +1,304 @@
+﻿@model Teed.Plugin.Groceries.Models.HeatMap.HeatMapModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.HeatMap");
+}
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/oms.min.js"></script>
+<style>
+    #info-box {
+        display: none;
+        padding: 1em;
+        background-color: white;
+        text-align: center;
+        border: solid 3px #3c8dbc;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        margin-bottom: 1em;
+        z-index: 2;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Mapa de calor 🔥
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form method="post" enctype="multipart/form-data">
+                    <p style="font-weight:bold">Códigos postales</p>
+                    <p>Carga un excel con los códigos postales en la primera columna, y el valor en la segunda. Haz clic
+                        <a href="~/Plugins/Teed.Plugin.Groceries/src/files/plantilla.xlsx">aquí</a> para descargar una
+                        plantilla.</p>
+                    <input style="margin-bottom: 1em" type="file" name="file" />
+                    <button style="margin-bottom: 1em" type="submit" class="btn bg-blue">Cargar códigos
+                        postales</button>
+                </form>
+                @if (Model != null && Model.Data?.Count > 0)
+                {
+                    <div style="position: relative">
+                        <div id="info-box">
+                            <strong><span id="selected-zone"></span></strong><br />
+                            <span id="selected-cp"></span>
+                        </div>
+                        <div id="map" style="height:55em;width:100%"></div>
+                    </div>
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label style="text-align:right;margin-top: 7px;">¿Mostrar división por
+                                                zonas?</label>
+                                            <div title="Selecciona si deseas mostrar la división por zonas"
+                                            class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input checked class="check-box" id="display-zones" type="checkbox" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="row" style="margin-bottom: 1em">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label style="text-align:right;margin-top: 7px;">¿Mostrar marcadores?</label>
+                                            <div title="Selecciona si deseas mostrar los marcadores" class="ico-help"><i
+                                                class="fa fa-question-circle"></i></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input checked class="check-box" id="hide-markers" type="checkbox" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 style="font-weight: bold">Lista de códigos postales cargados</h5>
+                            <ul style="columns: 2">
+                                @foreach (var item in Model.Data.OrderByDescending(x => x.Weight))
+                                {
+                                    <li id="@(item.PostalCode)">
+                                        @(item.PostalCode) (@(item.Weight))
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 style="font-weight: bold">Lista de zonas mostradas</h5>
+                            <table id="zone-colors-table"></table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@if (Model != null && Model.Data?.Count > 0)
+{
+    <script>
+        var allZondesCp = [];
+        var map;
+        var currentStyle;
+        let ordersToUpdate = [];
+        let markers = [];
+        let oms;
+
+        var routeColors = [
+            "03a9f4",
+            "e91e63",
+            "607d8b",
+            "9c27b0",
+            "cddc39",
+            "673ab7",
+            "ffc107",
+            "3f51b5",
+            "795548",
+            "2196f3",
+            "ff5722",
+            "f44336",
+            "00bcd4",
+            "009688",
+            "4caf50",
+            "8bc34a",
+            "ffeb3b",
+            "ff9800",
+        ];
+
+        var myStyle = [
+            {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            },
+            {
+                featureType: "transit",
+                elementType: "labels",
+                stylers: [
+                    { visibility: "off" }
+                ]
+            }
+        ];
+
+        function initMap() {
+            createMap();
+        }
+
+        function createMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 19.3170078, lng: -99.2090609 },
+                disableDefaultUI: true,
+                zoomControl: true,
+                zoom: 12
+            });
+
+            map.set('styles', myStyle);
+            map.data.loadGeoJson('/shippingarea/GetGeoJson');
+
+            var heatmapData = @Html.Raw(Json.Serialize(@Model.Data));
+            var heatmapDataParsed = [];
+            $.each(heatmapData, function (index, data) {
+                heatmapDataParsed.push({
+                    location: new google.maps.LatLng(data.Latitude, data.Longitude),
+                    weight: data.Weight
+                })
+            });
+
+            var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: heatmapDataParsed,
+                radius: 50
+            });
+            heatmap.setMap(map);
+
+            $.each(heatmapDataParsed, function (i, e) {
+                markers.push(new google.maps.Marker({
+                    position: e.location,
+                    label: {
+                        text: e.weight.toString(),
+                        color: 'white',
+                        fontSize: "8px"
+                    },
+                    map: map,
+                }));
+            });
+        }
+
+        $.ajax({
+            url: '/Admin/ShippingZone/GetAllPostalCodesOfZones',
+            method: 'GET',
+            success: function (data) {
+                console.log(data);
+                $.each(data, function (i, e) {
+                    allZondesCp.push({ id: e.Id, color: e.Color, pcs: e.Pcs, zoneName: e.ZoneName });
+                });
+
+                var filteredZones = [...new Set(allZondesCp.map(x => x.zoneName))];
+                $.each(filteredZones, function (index, element) {
+                    let i = allZondesCp.map(x => x.zoneName).indexOf(element);
+                    let color = allZondesCp[i].color;
+                    let id = allZondesCp[i].id;
+                    let zoneTableRow = `<tr><td style="padding: 5px 0"><div style="width:20px;height:20px;background:${color};margin-right: 5px;"></td>
+                                                <td style="padding: 5px 0"><a href="/Admin/ShippingZone/Edit/${id}" target="_blank">${element}</a></td></tr>`;
+                    $("#zone-colors-table").append(zoneTableRow);
+                });
+
+                var bounds = new google.maps.LatLngBounds();
+                map.data.addListener('addfeature', function (e) {
+                    var feature = e.feature.j;
+                    if (typeof feature == 'undefined')
+                        feature = e.feature.h;
+                    if (allZondesCp.find(x => x.pcs.includes(feature.d_cp))) {
+                        var current = allZondesCp.find(x => x.pcs.includes(feature.d_cp));
+                        e.feature.setProperty("name", current.id);
+                        e.feature.setProperty("zoneName", current.zoneName);
+                    }
+                    processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+                    map.fitBounds(bounds);
+                });
+
+                map.data.setStyle(function (feature) {
+                    var color = '#919191';
+                    var allZones = allZondesCp;
+                    if (typeof feature.getProperty('name') != 'undefined' &&
+                        feature.getProperty('name') != '' &&
+                        feature.getProperty('name') != null) {
+                        var current = allZones.find(x => x.id.includes(feature.getProperty('name')));
+                        color = current.color != 'null' ? (current.color.includes('#') ? current.color : "#" + current.color) : '#3fff2e';
+                    }
+
+                    return ({
+                        fillColor: 'transparent',
+                        strokeColor: color,
+                        strokeWeight: 3
+                    });
+                });
+
+                currentStyle = map.data.getStyle();
+
+                // zoom on click
+                map.data.addListener('click', function (e) {
+                    var feature = e.feature.j;
+                    if (typeof feature == 'undefined')
+                        feature = e.feature.h;
+                    console.log(feature.d_cp);
+                    $("#info-box").show();
+
+                    var cp = $("#" + feature.d_cp).text();
+                    if (!cp) cp = feature.d_cp + " (0)";
+
+                    $("#selected-cp").html(cp);
+                    $("#selected-zone").html(e.feature.getProperty('zoneName'));
+                });
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+
+        function processPoints(geometry, callback, thisArg) {
+            if (geometry instanceof google.maps.LatLng) {
+                callback.call(thisArg, geometry);
+            } else if (geometry instanceof google.maps.Data.Point) {
+                callback.call(thisArg, geometry.get());
+            } else {
+                geometry.getArray().forEach(function (g) {
+                    processPoints(g, callback, thisArg);
+                });
+            }
+        };
+
+        $("#display-zones").change(function () {
+            if (this.checked) {
+                map.data.setStyle(currentStyle);
+            } else {
+                map.data.setStyle({ visible: false });
+            }
+        });
+
+        $("#hide-markers").change(function () {
+            var chkd = this.checked;
+            $.each(markers, function (i, e) {
+                if (chkd) {
+                    e.setVisible(true);
+                } else {
+                    e.setVisible(false);
+                }
+            });
+        });
+    </script>
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&libraries=visualization&callback=initMap"
+    async defer></script>
+}

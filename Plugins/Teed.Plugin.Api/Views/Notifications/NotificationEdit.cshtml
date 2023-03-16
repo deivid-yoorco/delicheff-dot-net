@@ -1,0 +1,287 @@
+﻿@model Teed.Plugin.Api.Models.NotificationModel
+@{
+    var availableCustomers = (List<SelectListItem>)ViewData["Customers"];
+    Html.SetActiveMenuItemSystemName("TeedApi");
+    Layout = "_AdminLayout";
+}
+
+<style>
+    [aria-owns="notification-additional-select_listbox"][disabled] {
+        background-color: #eee;
+        opacity: 1;
+    }
+</style>
+<form asp-controller="TeedApi" asp-action="NotificationEdit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar notificación
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="NotificationList">Regresar a lista de notificaciones</a>
+            </small>
+        </h1>
+        @if (!Model.BlockChanges)
+        {
+            <div class="pull-right">
+                <a asp-action="CancelNotification" asp-route-id="@Model.Id" class="btn bg-red">
+                    <i class="fa fa-trash-o"></i>
+                    Cancelar notificación
+                </a>
+            </div>
+        }
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="homepage-images">
+                    <nop-tab asp-name="tab-notification" asp-title="Notificación" asp-default="true">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" style="margin-bottom: 1em">
+                                <div asp-validation-summary="ModelOnly" class="red-text"></div>
+                                @if (Model.CustomersSent > 0)
+                                {
+                                    <strong>Esta notificación se envió a @(Model.CustomersSent) dispositivos. Se registraron @(Model.ErrorsCount) errores.</strong><br />
+                                    @if (Model.CompletedAt.HasValue)
+                                    {
+                                        <strong>Fecha y hora de envío: @(Model.CompletedAt.Value.ToLocalTime().ToString("dd-MM-yyyy hh:mm tt"))</strong><br />
+                                        <a asp-action="DownloadNotificationReport" asp-route-id="@Model.Id">Descargar reporte</a>
+                                    }
+                                }
+                                else if (Model.IsCancelled)
+                                {
+                                    <strong>Notificación cancelada</strong>
+                                }
+                                else
+                                {
+                                    <strong>Esta notificación será enviada a @(Model.CustomersToSend) usuarios</strong>
+                                }
+                            </div>
+                            <input asp-for="Id" hidden />
+                            <div class="panel-body">
+                                <div style="margin-bottom: 1em">
+                                    <h5>Variables:</h5>
+                                    <ul>
+                                        <li>{{NAME}} -> Primer nombre del cliente</li>
+                                    </ul>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3" style="text-align:right">
+                                        <label>Título de la notificación</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="Title" disabled="@(Model.BlockChanges)" class="form-control text-box single-line" data-val="true" data-val-maxlength="The field Title must be a string or array type with a maximum length of '30'." data-val-maxlength-max="30" type="text" maxlength="30" />
+                                        <span asp-validation-for="Title"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3" style="text-align:right">
+                                        <label>Texto de la notificación</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-textarea asp-for="Body" disabled="@(Model.BlockChanges)" maxlength="512" />
+                                        <span asp-validation-for="Body"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="dateTimeToSend">
+                                    <div class="col-md-3" style="text-align:right">
+                                        <label>Fecha y hora seleccionada de envío</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="DontSendBeforeDate" disabled="@(Model.BlockChanges)" type="datetime-local" style="font-size:large">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3" style="text-align:right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Tipo de acción</label>
+                                            <div title="Selecciona qué debería ocurrir cuando el usuario abre la notificación." class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select disabled="@(Model.BlockChanges)" asp-for="ActionTypeId" asp-items="@Model.ActionTypes" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3" style="text-align:right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label" for="AdditionalData">Información adicional</label>
+                                            <div title="Escribe o selecciona la información adicional para el tipo de acción." class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input disabled="@(Model.BlockChanges)" id="AdditionalData" name="AdditionalData" value="@Model.AdditionalData" class="form-control text-box single-line" type="text" data-value="@(Model.AdditionalData)" />
+                                        <span asp-validation-for="AdditionalData"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3" style="text-align:right">
+                                        <div class="label-wrapper">
+                                            <label>Enviar a usuarios específicos (opcional)</label>
+                                            <div title="Enviar la notificación a usuarios específicos.
+                                                 Si no se ingresa ninguno, se enviará a todos los usuarios que hayan descargado la aplicación móvil y tengan las notificaciones activadas.
+                                                 Considerar que solo se muestran usuarios que hayan ingresado desde la app móvil." class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select disabled="@(Model.BlockChanges)" asp-for="CustomersIds" asp-items="availableCustomers" asp-multiple="true" />
+                                        <script type="text/javascript">
+                                            $(document).ready(function() {
+                                                var customersInput = $('#@Html.IdFor(model => model.CustomersIds)').data("kendoMultiSelect");
+                                                customersInput.setOptions({
+                                                    autoClose: false,
+                                                    filter: "contains",
+                                                    disabled: @(Model.BlockChanges.ToString().ToLower())
+                                                });
+                                                @if (availableCustomers.Count == 0)
+                                                {
+                                                    <text>
+                                                        customersInput.setOptions({
+                                                            enable: false,
+                                                            placeholder: 'No hay usuarios disponibles.'
+                                                        });
+                                                        customersInput._placeholder();
+                                                        customersInput._enable();
+                                                    </text>
+                                                }
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-tab>
+                    <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                        <div class="panel-body">
+                            <nop-textarea asp-for="Log" readonly rows="50" />
+                            <br />
+                        </div>
+                    </nop-tab>
+                </nop-tabs>
+                @if (!Model.BlockChanges)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-9 col-md-offset-3">
+                                    <input disabled="@(Model.BlockChanges)" type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('[id*="AdditionalData"]').hide();
+        $('[for*="AdditionalData"]').hide();
+        $('#ActionTypeId').change(function () {
+            createSelect(this);
+        });
+        $('[for="AdditionalData"]').hide();
+        $('[for="AdditionalData"]').next().hide();
+        @if (Model.ActionTypeId == 50 ||
+            Model.ActionTypeId == 60 ||
+            Model.ActionTypeId == 70 ||
+            Model.ActionTypeId == 80)
+        {
+            <text>
+        createSelect($('#ActionTypeId')[0]);
+            </text>
+        }
+    });
+    function createSelect(elm) {
+        var $elm = $(elm);
+        var value = $elm.val();
+        $('#notification-additional-select').remove();
+        $('[aria-owns="notification-additional-select_listbox"]').parentsUntil('.col-md-9').last().remove();
+        $('[for="AdditionalData"]').hide();
+        $('[for="AdditionalData"]').next().hide();
+        $('#AdditionalData').val('');
+        $('#AdditionalData').hide();
+        $('#AdditionalData').removeAttr('placeholder');
+        if (value == 50 || value == 60 || value == 70) {
+            switch (value) {
+                case "50":
+                    $('[for="AdditionalData"]').html('Categoría');
+                    break;
+                case "60":
+                    $('[for="AdditionalData"]').html('Producto');
+                    break;
+                case "70":
+                    $('#AdditionalData').attr('placeholder', 'Escribe la palabra clave o...');
+                    $('#AdditionalData').show();
+                    $('[for="AdditionalData"]').html('Tag o busqueda');
+                    break;
+                default:
+                    break;
+            }
+            $('[for="AdditionalData"]').show();
+            $('[for="AdditionalData"]').next().show();
+            $('#AdditionalData').after('<input id="notification-additional-select" style="width: 100% !important;" />');
+            $("#notification-additional-select").kendoComboBox({
+                placeholder: value == 50 ? "Selecciona la categoría..." : value == 60 ? "Selecciona el producto..." : value == 70 ? "Selecciona el tag..." : "",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                filter: "contains",
+                autoBind: true,
+                minLength: 1,
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "/Admin/TeedApi/GetActionSelect?typeId=" + value,
+                            type: "POST"
+                        }
+                    }
+                },
+                dataBound: function (e) {
+                    checkOriginalValue();
+                },
+                select: function (e) {
+                    $("#AdditionalData").val(this.dataItem(e.item.index()).Id);
+                }
+            });
+        } else if (value == 80) {
+            checkOriginalValue();
+            $('#AdditionalData').show();
+            $('[for="AdditionalData"]').html('Link o URL');
+            $('[for="AdditionalData"]').show();
+            $('[for="AdditionalData"]').next().show();
+        } else
+            $('#AdditionalData').hide();
+    }
+    function checkOriginalValue() {
+        if ($("#AdditionalData").data("value") != "" &&
+            typeof $("#AdditionalData").data("value") != 'undefined') {
+            if ($("#notification-additional-select").data("kendoComboBox") != null)
+                $("#notification-additional-select").data("kendoComboBox").value($("#AdditionalData").data("value"));
+            $("#AdditionalData").val($("#AdditionalData").data("value"));
+            $("#AdditionalData").removeAttr("data-value");
+        }
+        if (typeof $('#ActionTypeId').attr('disabled') != 'undefined' &&
+            $('#ActionTypeId').attr('disabled') != 'false')
+        {
+            $("#AdditionalData").attr('disabled', 'disabled');
+            $('[aria-owns="notification-additional-select_listbox"]').attr('disabled', 'disabled');
+            $('[aria-controls="notification-additional-select_listbox"]').parent().remove();
+        }
+    }
+    changeSendImmediately();
+    function changeSendImmediately() {
+        if ($('#SendImmediately').is(':checked')) {
+            $('#dateTimeToSend').hide();
+        } else {
+            $('#dateTimeToSend').show();
+        }
+    }
+</script>

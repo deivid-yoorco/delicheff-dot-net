@@ -1,0 +1,139 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingRoute.CreateViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRoute");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nueva ruta
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-6">
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Nombre de la ruta</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="RouteName" />
+                                    <span asp-validation-for="RouteName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Nombre del vehículo</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="VehicleName" />
+                                    <span asp-validation-for="VehicleName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Capacidad de carga</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="LoadingCapacity" />
+                                    <span asp-validation-for="LoadingCapacity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Volumen de nevera</label>
+                                        <div title="Volumen de nevera" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <input min="0" asp-for="FridgeVolume" class="form-control text-box single-line" type="number" id="FridgeVolume">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Volumen de manojo</label>
+                                        <div title="Volumen de manojo" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <input min="0" asp-for="BunchVolume" class="form-control text-box single-line" type="number" id="BunchVolume">
+                                </div>
+                            </div>*@
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Activa</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Active" />
+                                    <span asp-validation-for="Active" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            @*@if (Model.UserCanSelectedFranchise)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Franquicia</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="FranchiseId" asp-items="Model.AvailablesFranchises" />
+                                        <span asp-validation-for="FranchiseId"></span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <input asp-for="FranchiseId" hidden />
+                            }*@
+
+
+                            @*<div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Códigos postales</label>
+            </div>
+            <div class="col-md-9">
+                <textarea class="form-control" asp-for="PostalCodes" id="postal-codes" rows="6" readonly></textarea>
+                <span asp-validation-for="PostalCodes" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Primer encargado</label>
+            </div>
+            <div class="col-md-9">
+                <input asp-for="FirstResponsableUserId" type="hidden" id="firstResponsableUserId" />
+                <input id="users" style="width: 100%;" />
+            </div>
+        </div>*@
+                        </div>
+                        <div class="col-md-6">
+                            @*<div id="map"></div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

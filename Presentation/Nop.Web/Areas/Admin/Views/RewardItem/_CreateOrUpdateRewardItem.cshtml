@@ -1,0 +1,21 @@
+﻿@model Nop.Web.Areas.Admin.Models.RewardItem.RewardItemSettingViewModel
+@inject IEventPublisher eventPublisher
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="regardItem-edit">
+            <nop-tab asp-name="tab-resources" asp-title="@T("Admin.Configuration.RewardItem.Add")" asp-default="true">@await Html.PartialAsync("_ProductsRewardItem")</nop-tab>
+            <nop-tab asp-name="tab-config" asp-title="@T("Admin.Configuration.RewardItem.Info")">@await Html.PartialAsync("_CreateOrUpdateRewardItem.Info", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>
+
+@{
+    //custom tabs
+    var eventMessage = new AdminTabStripCreated(this.Html, "regardItem-edit");
+    eventPublisher.Publish(eventMessage);
+    foreach (var eventBlock in eventMessage.BlocksToRender)
+    {
+        @eventBlock
+    }
+}

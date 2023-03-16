@@ -1,0 +1,280 @@
+﻿@model TopMenuModel
+@using Nop.Core
+@using Nop.Services.Configuration
+@using Nop.Web.Models.HomePageImages
+@{
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+
+    var rootCategories = Model.Categories.Where(x => x.IncludeInTopMenu).ToList();
+    var rootCategoriesResponsive = Model.Categories.ToList();
+    var responsiveMenuTitle = Model.HasOnlyCategories ? T("Categories") : T("Menu");
+    var menuColors = new string[] { "#B3965D", "#A9031A", "#D6127B", "#75BE34", "#DC4025", "#54148C", "#1BA2EB", "#E68122", "#40AB60" };
+
+}
+@functions {
+private int colorCount = 0;
+
+void CheckColorCount()
+{
+    if (colorCount >= 9)
+    {
+        colorCount = 0;
+    }
+}
+}
+<style>
+    .sidenav-trigger {
+        @* height: 10px !important; *@
+        height: -1px !important;
+    }
+</style>
+<div class="navbar-fixed" id="custom-navbar">
+    <nav class="white z-depth-1 nav-extended" role="navigation" id="header-nav">
+        <div class="nav-wrapper container custom-nav" style="width: 100% !important; max-width: 100% !important;">
+            @await Component.InvokeAsync("Logo")
+            <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <style>
+                .sidenav-trigger {
+                    margin: 0 0px !important;
+                }
+            </style>
+        </div>
+        @*<div class="nav-content">
+            <ul class="tabs tabs-transparent hide-on-med-and-down">
+                @await Component.InvokeAsync("Widget", new { widgetZone = "header_menu_before" })
+                @if (Model.DisplayHomePageMenuItem)
+                {
+                    <li class="tab home-tab" ><a href="@Url.RouteUrl("HomePage")">@T("HomePage")</a></li>
+                }
+                @for (int i = 0; i < rootCategories.Count; i++)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    var categoryLineModel = new TopMenuModel.CategoryLineModel
+                    {
+                        Category = rootCategories[i],
+                        Color = menuColors[colorCount]
+                    };
+                    @await Html.PartialAsync("_CategoryLine.TopMenu", categoryLineModel)
+                }
+                @for (int i = 0; i < Model.Topics.Count; i++)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("Topic", new { SeName = Model.Topics[i].SeName })">@Model.Topics[i].Name</a></li>
+                }
+                @if (Model.NewProductsEnabled && Model.DisplayNewProductsMenuItem)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("NewProducts")">@T("Products.NewProducts")</a></li>
+                }
+                @if (Model.DisplayProductSearchMenuItem)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("ProductSearch")">@T("Search")</a></li>
+                }
+                @if (Model.DisplayCustomerInfoMenuItem)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("CustomerInfo")">@T("Account.MyAccount")</a></li>
+                }
+                @if (Model.BlogEnabled && Model.DisplayBlogMenuItem)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("Blog")">@T("Blog")</a></li>
+                }
+                @if (Model.ForumEnabled && Model.DisplayForumsMenuItem)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("Boards")">@T("Forum.Forums")</a></li>
+                }
+                @if (Model.DisplayContactUsMenuItem)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="@Url.RouteUrl("ContactUs")">@T("ContactUs")</a></li>
+                }
+                @if (imagesSettings.ManufacturerEnable)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="/manufacturer/all">@imagesSettings.TitleManufacturer</a></li>
+                }
+                @if (imagesSettings.VendorEnable)
+                {
+                    colorCount++;
+                    CheckColorCount();
+                    <li class="tab" style="background-color: @menuColors[colorCount]"><a href="/vendor/all">@imagesSettings.TitleVendor</a></li>
+                }
+                @await Component.InvokeAsync("Widget", new { widgetZone = "header_menu_after" })
+            </ul>
+        </div>*@
+    </nav>
+</div>
+
+
+<ul id="slide-out" class="sidenav">
+    @*<div class="menu-toggle">@responsiveMenuTitle</div>*@
+    @*Background original: style="background-color:@menuColors[colorCount]*@
+    @await Component.InvokeAsync("Widget", new { widgetZone = "mob_header_menu_before" })
+    @if (Model.DisplayHomePageMenuItem)
+    {
+        colorCount = 0;
+        <li><a href="@Url.RouteUrl("HomePage")" >@T("HomePage")</a></li>
+    }
+    @foreach (var category in rootCategoriesResponsive)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li >
+            <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })">
+                @category.Name
+                @if (category.NumberOfProducts.HasValue)
+                {
+                    <text> </text>@T("Categories.TotalProducts", category.NumberOfProducts.Value)
+                }
+            </a>
+        </li>
+    }
+    @foreach (var topic in Model.Topics)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("Topic", new { SeName = topic.SeName })">@topic.Name</a></li>
+    }
+    @if (Model.NewProductsEnabled && Model.DisplayNewProductsMenuItem)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("NewProducts")">@T("Products.NewProducts")</a></li>
+    }
+    @if (Model.DisplayProductSearchMenuItem)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("ProductSearch")">@T("Search")</a></li>
+    }
+    @if (Model.DisplayCustomerInfoMenuItem)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("CustomerInfo")">@T("Account.MyAccount")</a></li>
+    }
+    @if (Model.BlogEnabled && Model.DisplayBlogMenuItem)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("Blog")">@T("Blog")</a></li>
+    }
+    @if (Model.ForumEnabled && Model.DisplayForumsMenuItem)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("Boards")">@T("Forum.Forums")</a></li>
+    }
+    @if (Model.DisplayContactUsMenuItem)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="@Url.RouteUrl("ContactUs")">@T("ContactUs")</a></li>
+    }
+    @if (imagesSettings.ManufacturerEnable)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="/manufacturer/all">@imagesSettings.TitleManufacturer</a></li>
+    }
+    @if (imagesSettings.VendorEnable)
+    {
+        colorCount++;
+        CheckColorCount();
+        <li ><a href="/vendor/all">@imagesSettings.TitleVendor</a></li>
+    }
+    @await Component.InvokeAsync("Widget", new { widgetZone = "mob_header_menu_after" })
+</ul>
+
+<script>
+    var windWidth = 0;
+    var each = 7;
+    var tabsCount = 0;
+    var navbarHeight = 0;
+    var $originaltab = null;
+    $(document).ready(function () {
+        if (navigator.userAgent.match(/Android/i)
+            || navigator.userAgent.match(/webOS/i)
+            || navigator.userAgent.match(/iPhone/i)
+            || navigator.userAgent.match(/iPad/i)
+            || navigator.userAgent.match(/iPod/i)
+            || navigator.userAgent.match(/BlackBerry/i)
+            || navigator.userAgent.match(/Windows Phone/i)
+        ) {
+        }
+        else {
+            changeTabs();
+        }
+    });
+
+    window.onresize = function () { changeHeaderBar() };
+
+    function changeTabs() {
+        var heads = $(".tabs").length;
+        var tabs = $(".tabs .tab").length;
+
+        if (heads < 2 && tabs > each) {
+            // Math
+            var eachTab = Math.ceil(tabs / 2);
+            var tabsSlice = tabs - eachTab;
+            // Clone, slice and hide
+            $originaltab = ($(".nav-content").clone()).addClass("original-tabs");
+            $(".nav-content").addClass("tabs-splice");
+            var $temptab = $(".tabs").clone();
+            $temptab = $temptab.addClass('tabs-splice-1');
+            $('.tabs > .tab').slice(-Math.abs(tabsSlice)).remove();
+            $(".tabs").after($temptab);
+            $('.tabs-splice-1 > .tab').slice(0, eachTab).remove();
+            $(".nav-content").after($originaltab);
+            $(".nav-content.tabs-splice").find('.tabs').each(function () {
+                this.style.setProperty('height', '30px', 'important');
+            });
+            $(".nav-content.tabs-splice").find('.tab').each(function () {
+                this.style.setProperty('line-height', '30px', 'important');
+            });
+            navbarHeight = 190;
+            //$("#custom-navbar").height(navbarHeight + "px");
+        }
+        changeHeaderBar();
+    }
+
+    function changeHeaderBar() {
+        windWidth = $(window).width();
+        if (windWidth <= 1590 && windWidth > 991) {
+            //$(".tabs-splice").show();
+            $(".tabs-splice").hide();
+            $(".original-tabs").hide();
+            //$("#custom-navbar").height(navbarHeight + "px");
+        } else if (windWidth >= 1590) {
+            $(".tabs-splice").hide();
+            //$(".original-tabs").show();
+            $(".original-tabs").hide();
+            //$("#custom-navbar").height("168px");
+        }
+    }
+    // When the user scrolls down 80px from the top of the document, resize the navbar's padding and the logo's font size
+    window.onscroll = function () { scrollFunction() };
+    //$("#custom-navbar").height($("#header-nav").height());
+    function scrollFunction() {
+        if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
+            $("#logo-image").addClass("scrolled");
+        } else {
+            $("#logo-image").removeClass("scrolled");
+        }
+    }
+</script>

@@ -1,0 +1,15 @@
+﻿@model Teed.Plugin.RecentProducts.Models.ConfigurationModel
+
+@if (Model.Active)
+{
+    if (string.IsNullOrEmpty(Model.DivElementClassString))
+    {
+        <li class="collection-item"><a href="/RecentProducts">@(Model.TextMenu)</a></li>
+    }
+    else
+    {
+        <div class="@Model.DivElementClassString">
+            <a href="/RecentProducts">@(Model.TextMenu)</a>
+        </div>
+    }
+}

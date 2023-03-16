@@ -1,0 +1,146 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+@{ 
+    var imageNotes = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es 1920x720.";
+    var colorText = "El valor del texto debe ser escrito en código hexadecimal. Por ej: #C1C7C9";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen en fondo 1
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPicture5Id_OverrideForStore" asp-input="BannerPicture5Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture5Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture5Id" />
+                <span asp-validation-for="BannerPicture5Id"></span>
+                <em>@imageNotes</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerTitle5_OverrideForStore" asp-input="BannerTitle5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitle5" />
+                <span asp-validation-for="BannerTitle5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerSubTitle5_OverrideForStore" asp-input="BannerSubTitle5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitle5" />
+                <span asp-validation-for="BannerSubTitle5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerTitleColor5_OverrideForStore" asp-input="BannerTitleColor5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Color del título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitleColor5" />
+                <span asp-validation-for="BannerTitleColor5"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerSubTitleColor5_OverrideForStore" asp-input="BannerSubTitleColor5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Color del subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitleColor5" />
+                <span asp-validation-for="BannerSubTitleColor5"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerLink5_OverrideForStore" asp-input="BannerLink5" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink5" />
+                <span asp-validation-for="BannerLink5"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen en fondo 2
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="BannerPicture6Id_OverrideForStore" asp-input="BannerPicture6Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture6Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture6Id" />
+                <span asp-validation-for="BannerPicture6Id"></span>
+                <em>@imageNotes</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerTitle6_OverrideForStore" asp-input="BannerTitle6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitle6" />
+                <span asp-validation-for="BannerTitle6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerSubTitle6_OverrideForStore" asp-input="BannerSubTitle6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitle6" />
+                <span asp-validation-for="BannerSubTitle6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerTitleColor6_OverrideForStore" asp-input="BannerTitleColor6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Color del título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerTitleColor6" />
+                <span asp-validation-for="BannerTitleColor6"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerSubTitleColor6_OverrideForStore" asp-input="BannerSubTitleColor6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Color del subtítulo</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerSubTitleColor6" />
+                <span asp-validation-for="BannerSubTitleColor6"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="BannerLink6_OverrideForStore" asp-input="BannerLink6" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerLink6" />
+                <span asp-validation-for="BannerLink6"></span>
+            </div>
+        </div>
+    </div>
+</div>

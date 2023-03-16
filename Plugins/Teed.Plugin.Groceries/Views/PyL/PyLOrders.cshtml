@@ -1,0 +1,214 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@model string
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.P&L");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    .prices {
+        float: right;
+    }
+
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 60px;
+        height: 60px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+        margin: auto;
+        margin-bottom: 6em;
+    }
+    /* Safari */
+    @@-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Productos P&L del @Model.Replace("-", "/")
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="PyL">Volver a la lista de P&L</a>
+        </small>
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+            <div class="panel-body">
+                <div id="extra-costs"></div>
+            </div>
+            <div class="panel-body">
+                <div id="total-costs"></div>
+            </div>
+            <div class="loader"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").append("<table id='itemsTable'><tr><th>Producto</th><th>Número de orden</th><th>Precio (kg/pz)</th><th>Precio de pedido</th><th>Costo</th><th>P/L</th><th>Porcentaje</th></tr></table>");
+        $.ajax({
+            url: "/Admin/Order/PylOrderListData?date=" + '@Model',
+            type: "GET",
+            success: function (data) {
+                console.log(data);
+                $(".loader").hide();
+                //Create table
+                var products = "";
+                var fullSales = 0.00;
+                var fullRequesteds = 0.00;
+                var fullExpenses = 0.00;
+                var fullProfits = 0.00;
+                var color = "";
+                $.each(data.PlOrders, function (k, v) {
+                    var sales = 0.00;
+                    var requesteds = 0.00;
+                    var expenses = 0.00;
+                    var profits = 0.00;
+                    products += "<tr><td style='background-color: #EFEFEF;'><b>" + v.Product + "</b>" +
+                        "<text class='prices'>CH = " + ((v.ScrapperPrices.ChedrauiPrice == "$0.00") ? "$-.--" : v.ScrapperPrices.ChedrauiPrice) +
+                            " / LC = " + ((v.ScrapperPrices.LaComerPrice == "$0.00") ? "$-.--" : v.ScrapperPrices.LaComerPrice) +
+                            " / SU = " + ((v.ScrapperPrices.SuperamaPrice == "$0.00") ? "$-.--" : v.ScrapperPrices.SuperamaPrice) +
+                            " / WM = " + ((v.ScrapperPrices.WalmartPrice == "$0.00") ? "$-.--" : v.ScrapperPrices.WalmartPrice) +
+                            "</text></td>";
+
+                    $.each(v.Data, function (index, product) {
+                        var porcentage = (Math.round(((1 - (product.Expenses / product.Requested)) * 100) * 100) / 100).toString();
+
+                        if (porcentage == "NaN")
+                            porcentage = "0";
+
+                        if (product.Profit > 0) {
+                            color = "color: #56dd4f;";
+                        }
+                        else if (product.Profit < 0) {
+                            color = "color: red;";
+                        }
+
+                        if (index < 1) {
+                            products += "<td>#" + product.OrderNumber +
+                                "</td><td>" + formatter.format(Math.round(product.Sales * 100) / 100) +
+                                "</td><td>" + formatter.format(Math.round(product.Requested * 100) / 100) +
+                                "</td><td>" + formatter.format(Math.round(product.Expenses * 100) / 100) +
+                                "</td><td>" + formatter.format(Math.round(product.Profit * 100) / 100) + "</td><td style='" + color + "'>" +
+                                porcentage + "%</td></tr>";
+                        }
+                        else
+                        {
+                            products += "<tr><td></td><td>#" + product.OrderNumber +
+                                "</td><td>" + formatter.format(Math.round(product.Sales * 100) / 100) +
+                                "</td><td>" + formatter.format(Math.round(product.Requested * 100) / 100) +
+                                "</td><td>" + formatter.format(Math.round(product.Expenses * 100) / 100) +
+                                "</td><td>" + formatter.format(Math.round(product.Profit * 100) / 100) +
+                                "</td><td style='" + color + "'>" + porcentage + "%</td></tr>";
+                        }
+                        sales += product.Sales;
+                        requesteds += product.Requested;
+                        expenses += product.Expenses;
+                        profits += product.Profit;
+                        color = "";
+                    });
+
+                    if (profits > 0) {
+                        color = "color: #56dd4f;";
+                    }
+                    else if (profits < 0) {
+                        color = "color: red;";
+                    }
+
+                    products += "<tr><td colspan='2' style='text-align: right;'><b>Total por producto</b></td>" +
+                        "<td><b>" + formatter.format(Math.round(sales * 100) / 100) +
+                        "</b></td><td><b>" + formatter.format(Math.round(requesteds * 100) / 100) +
+                        "</b></td><td><b>" + formatter.format(Math.round(expenses * 100) / 100) +
+                        "</b></td><td style='" + color + "'><b>" + formatter.format(Math.round(profits * 100) / 100) + "</b></td></tr>";
+
+                    fullSales += sales;
+                    fullRequesteds += requesteds;
+                    fullExpenses += expenses;
+                    fullProfits += profits;
+                    color = "";
+                });
+                $("#itemsTable").append(products);
+
+                // Extras
+                products = "";
+                var extrasTotal = 0.00;
+
+                $("#extra-costs").append("<h3>Costos extras</h3><table id='extras'><th>Descripción</th><th>Costo</th></tr></table>");
+                $.each(data.ExtraCosts, function (k, v) {
+                    products += "<tr><td>" + v.Description + "</td>" +
+                        "<td>" + formatter.format(Math.round(v.Cost * 100) / 100) + "</td></tr>";
+                    fullExpenses += v.Cost;
+                    fullProfits -= v.Cost;
+                });
+                $("#extras").append(products);
+
+                // Totals
+                if (fullProfits > 0) {
+                    color = "color: #56dd4f;";
+                }
+                else if (fullProfits < 0) {
+                    color = "color: red;";
+                }
+                products = "";
+
+                $("#total-costs").append("<h3>Totales del día</h3><table id='totals'><tr><th>Precios (kgs/pzs)</th><th>Precio de pedidos</th><th>Costos</th><th>P/L</th></tr></table>");
+
+                products += "<tr style='background-color: #e0f4ff;'>" +
+                    "<td><b>" + formatter.format(Math.round(fullSales * 100) / 100) +
+                    "</b></td><td><b>" + formatter.format(Math.round(fullRequesteds * 100) / 100) +
+                    "</b></td><td><b>" + formatter.format(Math.round(fullExpenses * 100) / 100) +
+                    "</b></td><td style='" + color + "'><b>" + formatter.format(Math.round(fullProfits * 100) / 100) + "</b></td></tr>";
+                $("#totals").append(products);
+                color = "";
+
+            },
+            error: function(error) {
+                console.log(error);
+                $(".loader").hide();
+            }
+        });
+    });
+
+    const formatter = new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 2
+    })
+</script>

@@ -1,0 +1,68 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.PaymentModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Payments");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar pago
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de pagos</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+            @*<span id="billing-delete" class="btn bg-red">
+                <i class="fa fa-trash-o"></i>
+                @T("Admin.Common.Delete")
+            </span>*@
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel-body">
+                    <nop-tabs id="categories-price">
+                        <nop-tab asp-name="tab-payment" asp-title="Pago" asp-default="true">
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Payments/_CreateOrUpdate.cshtml", Model)
+                        </nop-tab>
+                        <nop-tab asp-name="tab-files" asp-title="Archivos">
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Payments/_Files.cshtml", Model)
+                        </nop-tab>
+                        <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                            <div class="raw clearfix">
+                                <div class="col-md-12">
+                                    <div class="panel-group">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                Log
+                                            </div>
+                                            <div class="panel-body">
+                                                <pre>@Model.Log</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </nop-tab>
+                    </nop-tabs>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+</script>
+<nop-delete-confirmation asp-model-id="@Model.Id" asp-button-id="billing-delete" />

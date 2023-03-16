@@ -1,0 +1,117 @@
+﻿@{
+    Layout = "_ConfigurePlugin";
+}
+
+@model Nop.Plugin.Shipping.Estafeta.Models.EstafetaShippingModel
+@using Nop.Plugin.Shipping.Estafeta;
+
+<form asp-controller="ShippingEstafeta" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>Login</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Login" maxlength="500" class="form-control" />
+                        <span asp-validation-for="Login" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>Password</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Password" maxlength="500" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>UrlCotizador</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="UrlCotizador" maxlength="500" class="form-control" />
+                        <span asp-validation-for="UrlCotizador" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>CotizadorId</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="CotizadorId" maxlength="500" class="form-control" />
+                        <span asp-validation-for="CotizadorId" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>UrlGuias</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="UrlGuias" maxlength="500" class="form-control" />
+                        <span asp-validation-for="UrlGuias" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>GuiasId</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="GuiasId" maxlength="500" class="form-control" />
+                        <span asp-validation-for="GuiasId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>ServiceTypeId</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="ServiceTypeId" maxlength="500" class="form-control" />
+                        <span asp-validation-for="ServiceTypeId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>OfficeNum</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="OfficeNum" maxlength="500" class="form-control" />
+                        <span asp-validation-for="OfficeNum" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>UrlEnvios</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="UrlEnvios" maxlength="500" class="form-control" />
+                        <span asp-validation-for="UrlEnvios" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>EnviosId</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="EnviosId" maxlength="500" class="form-control" />
+                        <span asp-validation-for="EnviosId" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="Guardar" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

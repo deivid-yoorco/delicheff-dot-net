@@ -1,0 +1,202 @@
+﻿@model Teed.Plugin.Payroll.Models.FiltersXlsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Payroll.BiweeklyPayment");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "BiweeklyPayment";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Nómina quincenal
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <form asp-controller="Incident" asp-action="GetIncidentsXls" method="post" id="download-xls">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3 style="text-align: center;">Descarga de detalles</h3>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Fecha inicial</label>
+                                        <div title="Fehca de inicio para la descarga de incidencias."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="hidden" name="StartDate" id="StartDate" />
+                                    <input type="text" id="start-date" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Fecha final</label>
+                                        <div title="Fehca de fin para la descarga de incidencias."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="hidden" name="EndDate" id="EndDate" />
+                                    <input type="text" id="end-date" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8 col-md-offset-1" style="margin-bottom: 10px; margin-top: 10px;">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Empleos</label>
+                                        <div title="Empleos de los empleados que se tomaran en la busqueda de incidencias para descargar."
+                                             class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <nop-select asp-for="JobIds" asp-items="Model.AvailableJobs" asp-multiple="true" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="text-align: center;">
+                        <div class="col-md-5">
+                            <button type="button" id="search-orders" class="btn btn-primary btn-incidents-download"
+                                    onclick="$('#download-xls').attr('action', '/Admin/Incident/GetIncidentsXls'); $('#download-xls').submit();">
+                                <i class="fa fa-file-excel-o"></i>
+                                Descargar detalles de incidencias
+                            </button>
+                        </div>
+                        <div class="col-md-5 col-md-offset-2">
+                            <button type="button" id="search-orders" class="btn btn-primary btn-assiatances-download"
+                                    onclick="$('#download-xls').attr('action', '/Admin/Assistance/GetAssistancesXls'); $('#download-xls').submit();">
+                                <i class="fa fa-file-excel-o"></i>
+                                Descargar detalles de asistencias
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function formatDate(n) {
+        return n < 10 ? '0' + n : '' + n;
+    }
+    $(document).ready(function () {
+        $("#start-date").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            change: function (date) {
+                var parsedDate = formatDate(date.sender.value().getMonth() + 1) + "/" + formatDate(date.sender.value().getDate()) + "/" + date.sender.value().getFullYear();
+                $('#StartDate').val(parsedDate);
+            },
+        });
+        $("#end-date").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            change: function (date) {
+                var parsedDate = formatDate(date.sender.value().getMonth() + 1) + "/" + formatDate(date.sender.value().getDate()) + "/" + date.sender.value().getFullYear();
+                $('#EndDate').val(parsedDate);
+            },
+        });
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha de quincena",
+                },
+                {
+                    field: "BasePayment",
+                    title: "Sueldo base",
+                },
+                {
+                    field: "DiscountIncidents",
+                    title: "Descuentos por incidencias",
+                },
+                {
+                    field: "DiscountDelays",
+                    title: "Descuentos por inasistencias o retardos",
+                },
+                {
+                    field: "BonusTotal",
+                    title: "Total de bonos",
+                },
+                {
+                    field: "TotalBiweekly",
+                    title: "Nómina neta",
+                },
+                {
+                    field: "TotalEmployees",
+                    title: "Número de empleados",
+                },
+                {
+                    field: "Date",
+                    title: "Descargar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-default" href="PayrollEmployee/ActivePayrollEmployees?forBiweek=#=Date#"><i class="fa fa-file-excel-o"></i>Descargar</a>`
+                },
+                {
+                    field: "Date",
+                    title: "Ver",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-default" href="BiweeklyPayment/PaymentsOfDate?date=#=Date#"><i class="fa fa-eye"></i>Ver fecha</a>`
+                }
+            ]
+        });
+    });
+</script>

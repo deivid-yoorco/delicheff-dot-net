@@ -1,0 +1,199 @@
+﻿@model int
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h3 style="text-align: center;margin-top: 0px !important;">Monto para el bono</h3>
+            <h4 style="text-align: center;font-weight: bold;margin-bottom: 20px !important;">(Monto actual en negritas)</h4>
+            <div id="amount-grid"></div>
+
+            <script type="text/javascript">
+                    $(document).ready(function() {
+                        $("#amount-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("AmountsList", "Bonus", new {Id = Model}))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "Id",
+                                    template: "<span data-id='#=Id#'></span>",
+                                    hidden: true
+                                },
+                                {
+                                    field: "ApplyDate",
+                                    title: "Fecha de aplicación"
+                                },
+                                {
+                                    field: "Amount",
+                                    title: "Monto"
+                                },
+                                {
+                                    field: "Created",
+                                    title: "Fecha de creación"
+                                },
+                            ],
+                            dataBound: function (e) {
+                                $("#amount-grid tbody tr").first().css('font-weight', 'bold');
+                                if (e.sender.dataSource.data().length < 1)
+                                    $('.amounts-danger').show();
+                                else
+                                    $('.amounts-danger').hide();
+                            },
+                        });
+                    });
+            </script>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Agregar nuevo monto para el bono
+        </div>
+        <div class="panel-body">
+            <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('#addBonusAmount').click(function() {
+                            $('.amount-error').hide();
+                            var applyDate = $("#ApplyDate").val();
+                            var amount = $("#Amount").val();
+
+                            if (
+                                applyDate == "" || typeof applyDate == 'undefined' ||
+                                amount == "" || typeof amount == 'undefined' || amount < 1
+                            ) {
+                                $('.amount-error').show();
+                                return false;
+                            }
+
+                            $('#addBonusAmount').attr('disabled', true);
+
+                            var postData = {
+                                applyDate: applyDate,
+                                amount: amount,
+                                bonusId: @Model,
+                            };
+                            addAntiForgeryToken(postData);
+                            var formData = new FormData();
+                            $.each(postData, function (name, value) {
+                                formData.append(name, value);
+                            });
+
+                            $.ajax({
+                                contentType: false,
+                                processData: false,
+                                type: "POST",
+                                url: "@(Url.Action("AddBonusAmount", "Bonus"))",
+                                data: formData,
+                                success: function(data) {
+                                    var grid = $("#amount-grid");
+                                    grid.data('kendoGrid').dataSource.read();
+                                    $('#addBonusAmount').attr('disabled', false);
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    alert('Failed to add employee salary.');
+                                    $('#addBonusAmount').attr('disabled', false);
+                                }
+                            });
+                        });
+                        $("#datepicker").datepicker({
+                            dateFormat: "dd-mm-yy",
+                            defaultDate: '@(DateTime.Now.ToString("dd-MM-yyyy"))',
+                            onSelect: function (dateVal) {
+                                let dateArray = dateVal.split("-");
+                                let day = dateArray[0];
+                                let month = parseInt(dateArray[1]) - 1;
+                                let year = dateArray[2];
+                                console.log(formatDate(new Date(year, month, day)));
+                                $("#ApplyDate").val(formatDate(new Date(year, month, day)));
+                                $("#ApplyDate").attr('value', (month + 1) + "-" + day + "-" + year);
+                            }
+                        });
+                        $("#ApplyDate").attr('value', '@(DateTime.Now.ToString("MM-dd-yyyy"))');
+                        $("#ApplyDate").val('@(DateTime.Now.ToString("MM-dd-yyyy"))');
+                    });
+
+                function formatDate(date) {
+                    let year = date.getFullYear();
+                    let month = date.getMonth() + 1;
+                    let day = date.getDate();
+
+                    let parsedMonth = month < 10 ? "0" + month : month;
+                    let parsedDay = day < 10 ? "0" + day : day;
+
+                    return parsedDay + "-" + parsedMonth + "-" + year;
+                }
+            </script>
+            <div class="form-group">
+                <div class="col-md-3 text-right">
+                    <div class="label-wrapper">
+                        <label class="control-label">Fecha festiva</label>
+                        <div title="Fecha en que aplica la festividad." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 datepicker-container">
+                    <input type="hidden" id="ApplyDate" name="ApplyDate" value="@(DateTime.Now.ToString("MM-dd-yyyy"))" />
+                    <input type="text" id="datepicker" class="form-control" value="@(DateTime.Now.ToString("dd-MM-yyyy"))">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3 text-right">
+                    <div class="label-wrapper">
+                        <label class="control-label">Monto</label>
+                        <div title="Monto que se dará con el bono." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <input id="Amount" name="Amount" class="form-control text-box single-line" type="number" min="1">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-3 col-md-9 amount-error" style="color: red;display: none;margin-bottom: 10px;">
+                Todos los campos son requeridos para agregar un nuevo monto
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                <button type="button" id="addBonusAmount" class="btn btn-primary">Agregar nuevo monto al bono</button>
+            </div>
+        </div>
+    </div>
+</div>

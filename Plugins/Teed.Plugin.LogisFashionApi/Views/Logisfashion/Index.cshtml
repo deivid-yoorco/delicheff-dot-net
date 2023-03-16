@@ -1,0 +1,76 @@
+﻿@model Teed.Plugin.Logisfashion.Models.ConfigureModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedLogisfashion");
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Configuración
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Index" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Modo de prueba</label>
+                                <div title="Habilitar o deshabilitar modo de prueba" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <nop-editor asp-for="Sandbox" />
+                                <span asp-validation-for="Sandbox"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Client Code</label>
+                                <div title="Client Code proporcionado por Logisfashion" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="ClientCode" />
+                                <span asp-validation-for="ClientCode"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">ApiKey</label>
+                                <div title="ApiKey proporcionado por Logisfashion" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="ApiKey" />
+                                <span asp-validation-for="ApiKey"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

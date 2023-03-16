@@ -1,0 +1,189 @@
+﻿@model Teed.Plugin.TicketControl.Models.DatePersonalization.CreateOrEditModel
+@{
+    var days = 1;
+    var dateToInput = DateTime.Now.Date;
+    if (Model.TakenDates.Where(x => x.Date == dateToInput).Any())
+    {
+        do
+        {
+            dateToInput = dateToInput.AddDays(days);
+            days++;
+        } while (Model.TakenDates.Where(x => x.Date == dateToInput).Any());
+    }
+}
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Información principal
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Date" />
+                        </div>
+                        <div class="col-md-9" id="date-here">
+                            <span asp-validation-for="Date"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ScheduleSplit" />
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table table-hover table-bordered" style="width: 100%;text-align: center;">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            Horario
+                                        </th>
+                                        <th>
+                                            Cantidad
+                                        </th>
+                                    </tr>
+                                    @foreach (var schedule in Model.Schedules)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @schedule.Name
+                                            </td>
+                                            <td>
+                                                <input class="schedule-quantity"
+                                                       type="number" name="@schedule.Name.ToLower().Replace(" ", "-")" value="@schedule.OriginalQuantity"
+                                                       data-id="@schedule.Id" min="0" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ScheduleSplit" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ScheduleSplit" />
+                            <span asp-validation-for="ScheduleSplit"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        <div class="col-md-3">
+                            <nop-label asp-for="OriginalDate" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="OriginalDate" />
+                            <span asp-validation-for="OriginalDate"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .disabledDay {
+        display: block;
+        overflow: hidden;
+        min-height: 22px;
+        line-height: 22px;
+        padding: 0 .45em 0 .1em;
+        cursor: default;
+        opacity: 0.5;
+    }
+</style>
+<script>
+    var refreshIntervalId;
+
+    Array.prototype.where = function (filter) {
+
+        var collection = this;
+
+        switch (typeof filter) {
+
+            case 'function':
+                return $.grep(collection, filter);
+
+            case 'object':
+                for (var property in filter) {
+                    if (!filter.hasOwnProperty(property))
+                        continue; // ignore inherited properties
+
+                    collection = $.grep(collection, function (item) {
+                        return item[property] === filter[property];
+                    });
+                }
+                return collection.slice(0); // copy the array
+            // (in case of empty object filter)
+
+            default:
+                throw new TypeError('func must be either a' +
+                    'function or an object of properties and values to filter by');
+        }
+    };
+
+    Array.prototype.firstOrDefault = function (func) {
+        return this.where(func)[0] || null;
+    };
+
+    disabledDaysBefore = [
+        @foreach (var date in Model.TakenDates)
+        {
+                <text>
+        { date: +new Date(@date.Year, @(date.Month-1), @date.Day) },
+                </text>
+        }
+    ];
+    $(document).ready(function () {
+        $('#date-here').prepend('<input type="date" id="Date" name="Date"/>');
+        $("#Date").kendoDatePicker({
+            dates: disabledDaysBefore,
+            format: "MM/dd/yyyy",
+            month: {
+                content:
+                    '# if (data.dates.where({ date: +new Date(data.date) }).length > 0) { #' +
+                    '<div class="disabledDay">#= data.value #</div>' +
+                    '# } else { #' +
+                    '#= data.value #' +
+                    '# } #'
+            },
+            open: function (e) {
+                refreshIntervalId = window.setInterval(function () {
+                    $(".disabledDay").parent().removeClass("k-link");
+                    $(".disabledDay").parent().removeAttr("href");
+                }, 100);
+            },
+            close: function (e) {
+                clearInterval(refreshIntervalId);
+            },
+        });
+        @if(Model.Id < 1)
+            {
+                <text>
+        $('#Date').val('@dateToInput.ToString("MM/dd/yyyy")');
+        $('#OriginalDate').val('@dateToInput.ToString("MM/dd/yyyy")');
+        $('#Date').change(function () {
+            $('#OriginalDate').val($(this).val());
+        });
+                </text>
+            }
+            else
+            {
+                <text>
+        $('#Date').val('@Model.Date.ToString("MM/dd/yyyy")');
+                </text>
+            }
+        $('[name="save"], [name="save-continue"]').click(function () {
+            var final = "";
+            $('.schedule-quantity').each(function (i, e) {
+                if (final.length > 0)
+                    final += "|" + $(e).data('id') + "-" + $(e).val();
+                else
+                    final = $(e).data('id') + "-" + $(e).val();
+            });
+            $('#ScheduleSplit').val(final);
+            $('#date-form').submit();
+        });
+    });
+</script>

@@ -1,0 +1,310 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Primera imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture1Id_OverrideForStore" asp-input="BannerPicture1Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Imagen</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture1Id" />
+                <span asp-validation-for="BannerPicture1Id"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture1TypeId_OverrideForStore" asp-input="BannerPicture1TypeId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture1TypeId" />
+            </div>
+            <div class="col-md-9">
+                <select class="form-control action-select" data-imageid="1" asp-for="BannerPicture1TypeId" value="@(Model.BannerPicture1TypeId)" asp-items="@Model.ActionTypes"></select>
+                <span asp-validation-for="BannerPicture1TypeId"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture1AdditionalData_OverrideForStore" asp-input="BannerPicture1AdditionalData" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture1AdditionalData" />
+            </div>
+            <div class="col-md-9">
+                <input id="BannerPicture1AdditionalData" name="BannerPicture1AdditionalData" class="form-control text-box single-line" type="text" data-value="@(Model.BannerPicture1AdditionalData)" />
+                <span asp-validation-for="BannerPicture1AdditionalData"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Segunda imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture2Id_OverrideForStore" asp-input="BannerPicture2Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Imagen</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture2Id" />
+                <span asp-validation-for="BannerPicture2Id"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture2TypeId_OverrideForStore" asp-input="BannerPicture2TypeId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture2TypeId" />
+            </div>
+            <div class="col-md-9">
+                <select class="form-control action-select" data-imageid="2" asp-for="BannerPicture2TypeId" value="@(Model.BannerPicture2TypeId)" asp-items="@Model.ActionTypes"></select>
+                <span asp-validation-for="BannerPicture2TypeId"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture2AdditionalData_OverrideForStore" asp-input="BannerPicture2AdditionalData" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture2AdditionalData" />
+            </div>
+            <div class="col-md-9">
+                <input id="BannerPicture2AdditionalData" name="BannerPicture2AdditionalData" class="form-control text-box single-line" type="text" data-value="@(Model.BannerPicture2AdditionalData)" />
+                <span asp-validation-for="BannerPicture2AdditionalData"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Tercera imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture3Id_OverrideForStore" asp-input="BannerPicture3Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Imagen</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture3Id" />
+                <span asp-validation-for="BannerPicture3Id"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture3TypeId_OverrideForStore" asp-input="BannerPicture3TypeId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture3TypeId" />
+            </div>
+            <div class="col-md-9">
+                <select class="form-control action-select" data-imageid="3" asp-for="BannerPicture3TypeId" value="@(Model.BannerPicture3TypeId)" asp-items="@Model.ActionTypes"></select>
+                <span asp-validation-for="BannerPicture3TypeId"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture3AdditionalData_OverrideForStore" asp-input="BannerPicture3AdditionalData" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture3AdditionalData" />
+            </div>
+            <div class="col-md-9">
+                <input id="BannerPicture3AdditionalData" name="BannerPicture3AdditionalData" class="form-control text-box single-line" type="text" data-value="@(Model.BannerPicture3AdditionalData)" />
+                <span asp-validation-for="BannerPicture3AdditionalData"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Cuarta imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture4Id_OverrideForStore" asp-input="BannerPicture4Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Imagen</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture4Id" />
+                <span asp-validation-for="BannerPicture4Id"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture4TypeId_OverrideForStore" asp-input="BannerPicture4TypeId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture4TypeId" />
+            </div>
+            <div class="col-md-9">
+                <select class="form-control action-select" data-imageid="4" asp-for="BannerPicture4TypeId" value="@(Model.BannerPicture4TypeId)" asp-items="@Model.ActionTypes"></select>
+                <span asp-validation-for="BannerPicture4TypeId"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture4AdditionalData_OverrideForStore" asp-input="BannerPicture4AdditionalData" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture4AdditionalData" />
+            </div>
+            <div class="col-md-9">
+                <input id="BannerPicture4AdditionalData" name="BannerPicture4AdditionalData" class="form-control text-box single-line" type="text" data-value="@(Model.BannerPicture4AdditionalData)" />
+                <span asp-validation-for="BannerPicture4AdditionalData"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Quinta imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture5Id_OverrideForStore" asp-input="BannerPicture5Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Imagen</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerPicture5Id" />
+                <span asp-validation-for="BannerPicture5Id"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture5TypeId_OverrideForStore" asp-input="BannerPicture5TypeId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture5TypeId" />
+            </div>
+            <div class="col-md-9">
+                <select class="form-control action-select" data-imageid="5" asp-for="BannerPicture5TypeId" value="@(Model.BannerPicture5TypeId)" asp-items="@Model.ActionTypes"></select>
+                <span asp-validation-for="BannerPicture5TypeId"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <nop-override-store-checkbox asp-for="BannerPicture5AdditionalData_OverrideForStore" asp-input="BannerPicture5AdditionalData" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="BannerPicture5AdditionalData" />
+            </div>
+            <div class="col-md-9">
+                <input id="BannerPicture5AdditionalData" name="BannerPicture5AdditionalData" class="form-control text-box single-line" type="text" data-value="@(Model.BannerPicture5AdditionalData)" />
+                <span asp-validation-for="BannerPicture5AdditionalData"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('[id*="AdditionalData"]').hide();
+        $('[for*="AdditionalData"]').hide();
+        $('.action-select').change(function () {
+            createSelect(this);
+        });
+        @if (Model.BannerPicture1TypeId == 50 ||
+            Model.BannerPicture1TypeId == 60 ||
+            Model.BannerPicture1TypeId == 70 ||
+            Model.BannerPicture1TypeId == 80)
+        {
+            <text>
+                createSelect($('#BannerPicture1TypeId')[0]);
+            </text>
+        }
+        @if (Model.BannerPicture2TypeId == 50 ||
+            Model.BannerPicture2TypeId == 60 ||
+            Model.BannerPicture2TypeId == 70 ||
+            Model.BannerPicture2TypeId == 80)
+        {
+            <text>
+                createSelect($('#BannerPicture2TypeId')[0]);
+            </text>
+        }
+        @if (Model.BannerPicture3TypeId == 50 ||
+            Model.BannerPicture3TypeId == 60 ||
+            Model.BannerPicture3TypeId == 70 ||
+            Model.BannerPicture3TypeId == 80)
+        {
+            <text>
+                createSelect($('#BannerPicture3TypeId')[0]);
+            </text>
+        }
+        @if (Model.BannerPicture4TypeId == 50 ||
+            Model.BannerPicture4TypeId == 60 ||
+            Model.BannerPicture4TypeId == 70 ||
+            Model.BannerPicture4TypeId == 80)
+        {
+            <text>
+                createSelect($('#BannerPicture4TypeId')[0]);
+            </text>
+        }
+        @if (Model.BannerPicture5TypeId == 50 ||
+            Model.BannerPicture5TypeId == 60 ||
+            Model.BannerPicture5TypeId == 70 ||
+            Model.BannerPicture5TypeId == 80)
+        {
+            <text>
+                createSelect($('#BannerPicture5TypeId')[0]);
+            </text>
+        }
+    });
+    function createSelect(elm) {
+        var $elm = $(elm);
+        var value = $elm.val();
+        var id = $elm.data('imageid');
+        $('#banner-additional-select-' + id).remove();
+        $('[aria-owns="banner-additional-select-' + id + '_listbox"]').parentsUntil('.col-md-9').last().remove();
+        $('[for="BannerPicture' + id + 'AdditionalData"]').hide();
+        $('#BannerPicture' + id + 'AdditionalData').val('');
+        $('#BannerPicture' + id + 'AdditionalData').hide();
+        $('#BannerPicture' + id + 'AdditionalData').removeAttr('placeholder');
+        if (value == 50 || value == 60 || value == 70) {
+            switch (value) {
+                case "50":
+                    $('[for="BannerPicture' + id + 'AdditionalData"]').html('Categoría');
+                    break;
+                case "60":
+                    $('[for="BannerPicture' + id + 'AdditionalData"]').html('Producto');
+                    break;
+                case "70":
+                    $('#BannerPicture' + id + 'AdditionalData').attr('placeholder', 'Escribe la palabra clave o...');
+                    $('#BannerPicture' + id + 'AdditionalData').show();
+                    $('[for="BannerPicture' + id + 'AdditionalData"]').html('Tag o busqueda');
+                    break;
+                default:
+                    break;
+            }
+            $('[for="BannerPicture' + id + 'AdditionalData"]').show();
+            $('#BannerPicture' + id + 'AdditionalData').after('<input id="banner-additional-select-' + id + '" style="width: 100% !important;" />');
+            $("#banner-additional-select-" + id).kendoComboBox({
+                placeholder: value == 50 ? "Selecciona la categoría..." : value == 60 ? "Selecciona el producto..." : value == 70 ? "Selecciona el tag..." : "",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                filter: "contains",
+                autoBind: true,
+                minLength: 1,
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "/Admin/TeedApi/GetActionSelect?typeId=" + value,
+                            type: "POST"
+                        }
+                    }
+                },
+                dataBound: function (e) {
+                    checkOriginalValue(id);
+                },
+                select: function (e) {
+                    $("#BannerPicture" + id + "AdditionalData").val(this.dataItem(e.item.index()).Id);
+                }
+            });
+        } else if (value == 80) {
+            checkOriginalValue(id);
+            $('#BannerPicture' + id + 'AdditionalData').show();
+            $('[for="BannerPicture' + id + 'AdditionalData"]').html('Link o URL');
+            $('[for="BannerPicture' + id + 'AdditionalData"]').show();
+        } else
+            $('#BannerPicture' + id + 'AdditionalData').hide();
+    }
+    function checkOriginalValue(id) {
+        if ($("#BannerPicture" + id + "AdditionalData").data("value") != "" &&
+            typeof $("#BannerPicture" + id + "AdditionalData").data("value") != 'undefined') {
+            if ($("#banner-additional-select-" + id).data("kendoComboBox") != null)
+                $("#banner-additional-select-" + id).data("kendoComboBox").value($("#BannerPicture" + id + "AdditionalData").data("value"));
+            $("#BannerPicture" + id + "AdditionalData").val($("#BannerPicture" + id + "AdditionalData").data("value"));
+            $("#BannerPicture" + id + "AdditionalData").removeAttr("data-value");
+        }
+    }
+</script>

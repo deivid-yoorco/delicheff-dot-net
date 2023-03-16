@@ -1,0 +1,199 @@
+﻿@model Teed.Plugin.Groceries.Controllers.ShippingRouteOrderModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@inject Nop.Services.Common.IAddressAttributeFormatter addressAttributeFormatter
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRouteOrder");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var orderBy = (int)ViewBag.OrderBy;
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+</style>
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar ruta a las órdenes con fecha de entrega @(Model.Date.ToString("dd-MM-yyyy"))
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="AssignRouteOrderList">regresar a la lista de fechas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Total de órdenes:</strong> @(Model.Orders.Count) <br />
+                            <strong>Rutas asignadas:</strong> @(Model.Orders.Where(x => x.RouteId != 0).Count()) <br />
+                            <strong>Rutas pendientes por asignar:</strong> @(Model.Orders.Where(x => x.RouteId == 0).Count()) <br />
+                            @if (Model.Orders.Select(x => x.RouteDisplayOrder).Count() != Model.Orders.Select(x => x.RouteDisplayOrder).Distinct().Count())
+                            {
+                                <strong style="color:red">Existen órdenes con orden para mostrar iguales.</strong>
+                            }
+                            <div>
+                                Ordenar por (recuerda guardar tus cambios antes de ordenar la lista):
+                                <select id="orderBy">
+                                    <option value="0">Código postal</option>
+                                    @if (orderBy == 0 || orderBy == 2)
+                                    {
+                                        <option value="1">Orden para mostrar</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="1" selected>Orden para mostrar</option>
+                                    }
+
+                                    @if (orderBy == 0 || orderBy == 1)
+                                    {
+                                        <option value="2">Colonia</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="2" selected>Colonia</option>
+                                    }
+
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @foreach (var order in Model.Orders)
+                            {
+                                <div style="margin-bottom: 1em">
+                                    <h3 style="margin-bottom:0"><a target="_blank" href="/Admin/Order/Edit/@(order.Id)">Orden #@order.CustomOrderNumber</a></h3>
+                                    <strong>Dirección: </strong><span>@(order.ShippingAddress.Address1) @(order.ShippingAddress.Address2) CP: @(order.ShippingAddress.ZipPostalCode)</span><br />
+                                    <strong>Horario de entrega: </strong><span>@(order.SelectedShippingTime)</span>
+
+                                    @if (!string.IsNullOrWhiteSpace(order.ShippingAddress.CustomAttributes))
+                                    {
+                                        <p>@Html.Raw(addressAttributeFormatter.FormatAttributes(order.ShippingAddress.CustomAttributes))</p>
+                                    }
+                                </div>
+                                <div class="order">
+                                    <div style="margin-bottom: 10px">
+                                        Orden para mostrar:
+                                        <select style="width: 50px" class="displayOrder">
+                                            @for (int i = 1; i <= Model.Orders.Count; i++)
+                                            {
+                                                @if (order.RouteDisplayOrder == i)
+                                                {
+                                                    <option selected value="@i">@i</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i">@i</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <input type="hidden" value="@(order.Id)" />
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <div class="input-group" style="width:100%">
+                                                <select class="ui-choose buyer">
+                                                    @foreach (var route in Model.Routes)
+                                                    {
+                                                        if (order.RouteId.ToString() == route.Value)
+                                                        {
+                                                            <option selected value="@(route.Value)">@(route.Text)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(route.Value)">@(route.Text)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $('.ui-choose').ui_choose({
+        itemWidth: null,
+        skin: '',
+        multi: true,
+        active: 'selected',
+        full: false,
+        colNum: null,
+        dataKey: 'ui-choose',
+        change: function (data) {
+            console.log(data);
+        },
+        click: null
+    });
+
+    $('#orderBy').change(function() {
+        window.location.href = window.location.href.split('&')[0] + '&orderBy=' + $(this).val();
+    });
+
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        let result = [];
+        let orders = $(".order");
+        $.each(orders, (index, element) => {
+            let orderId = $(element).find('input').val();
+            let selectedRouteId = $(element).find('select.buyer').val();
+            let routeDisplayOrder = $(element).find('select.displayOrder').val();
+            result.push({ orderId, routeId: selectedRouteId, routeDisplayOrder });
+        });
+
+        let body = {
+            date: '@Model.Date',
+            result: result
+        };
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/AssignRouteOrder',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

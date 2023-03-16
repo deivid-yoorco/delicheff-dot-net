@@ -1,0 +1,99 @@
+﻿@model Teed.Plugin.Groceries.Models.ManufacturerBankAccount.ManufacturerBankAccountModel
+<div class="tab-pane" id="tab-manufacturerbankaccount" style="display: none">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <input type="hidden" asp-for="ManufacturerId" />
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Titular de cuenta bancaria</label>
+                            <div title="Ingresa el nombre del titular de la cuenta bancaria" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <input class="form-control" asp-for="AccountOwner" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Banco</label>
+                            <div title="Ingresa el nombre del banco" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <input class="form-control" asp-for="BankName" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Cuenta bancaria</label>
+                            <div title="Ingresa la cuenta bancaria del fabricante" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <input class="form-control" asp-for="AccountNumber" />
+                        </div>
+                    </div>
+                </div>
+                <div style="float:right">
+                    <strong id="save-success" style="color:green;display:none">La cuenta bancaria se guardó correctamente.</strong>
+                    <strong id="save-error" style="color:red;display:none">Ocurrió un problema al guardar la cuenta bancaria. Por favor notifica a un desarrollador.</strong>
+                    <strong id="saving" style="display: none">Guardando...</strong>
+                    <button id="submit-button" class="btn btn-primary" type="button" onclick="submitBankAccount()">Guardar cuenta bancaria</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#manufacturer-edit .nav-tabs').append('<li><a data-tab-name="tab-manufacturerbankaccount" data-toggle="tab" href="#tab-manufacturerbankaccount" aria-expanded="true">Cuenta bancaria</a></li>');
+        $('#tab-manufacturerbankaccount').appendTo('.tab-content');
+        $('#tab-manufacturerbankaccount').attr('style', '');
+    });
+
+    const submitBankAccount = () => {
+        $("#save-success").hide();
+        $("#save-error").hide();
+        $("#saving").show();
+        $("#submit-button").hide();
+        let body = {
+            accountOwner: $('#AccountOwner').val(),
+            bankName: $('#BankName').val(),
+            accountNumber: $('#AccountNumber').val(),
+            manufacturerId: $('#ManufacturerId').val()
+        };
+        addAntiForgeryToken(body);
+
+        $.ajax({
+            url: '/Admin/ManufacturerBankAccount/Update',
+            method: 'POST',
+            data: body,
+            success: () => {
+                $("#saving").hide();
+                $("#save-success").show();
+                $("#submit-button").show();
+            },
+            error: () => {
+                $("#saving").hide();
+                $("#save-error").show();
+                $("#submit-button").show();
+            }
+        })
+    };
+
+</script>

@@ -1,0 +1,9 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@{
+    Layout = "_Layout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var now = Model.DateOfBirthDay == 0 ? DateTime.Now : Model.DateOfBirth;
+    var email = string.IsNullOrWhiteSpace(Model.Email) ? "El paciente no tiene correo electrónico" : Model.Email;
+}
+
+<h2 style="text-align:center;margin:5%">¡Gracias! Tus datos han sido actualizados.</h2>

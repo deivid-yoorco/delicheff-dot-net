@@ -1,0 +1,214 @@
+﻿@model Teed.Plugin.Api.Models.PopupModel
+
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Nombre</label>
+                                <div title="Nombre del popup. El nombre es únicamente para que lo puedan identificar internamente." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Imagen para móviles (web y app)</label>
+                                <div title="Ingresa la imagen del pop up optimizada para móviles. Será mostrada en la web cuando el usuario ingrese desde un dispositivo móvil y en la app." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ImageId" />
+                            <span asp-validation-for="ImageId" class="text-danger"></span>
+                            <em>Tamaño recomendado: 400x600</em>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Imagen para escritorio</label>
+                                <div title="Ingresa la imagen del pop up, la cual se mostrará en la versión web de la plataforma cuando el usuario no entre desde un dispositivo móvil." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ImageForDesktopId" />
+                            <span asp-validation-for="ImageForDesktopId" class="text-danger"></span>
+                            <em>Tamaño recomendado: 600x400</em>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Activo</label>
+                                <div title="Si está activo o no el popup." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Active" />
+                            <span asp-validation-for="Active" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Fecha límite</label>
+                                <div title="Fecha límite hasta cuando se mostrará el popup, incluyendo el día indicado." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="text" name="ViewableDeadlineDateString" id="ViewableDeadlineDateString" />
+                            <span asp-validation-for="ViewableDeadlineDateString" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-4 text-right">
+                            <h3>¿Cuándo se debe mostrar el popup?</h3>
+                        </div>
+                        <div class="col-md-8"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los lunes</label>
+                                <div title="Mostrar el popup todos los lunes" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Mondays" />
+                            <span asp-validation-for="Mondays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los martes</label>
+                                <div title="Mostrar el popup todos los martes" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Tuesdays" />
+                            <span asp-validation-for="Tuesdays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los miércoles</label>
+                                <div title="Mostrar el popup todos los miércoles" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Wednesdays" />
+                            <span asp-validation-for="Wednesdays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los jueves</label>
+                                <div title="Mostrar el popup todos los jueves" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Thursdays" />
+                            <span asp-validation-for="Thursdays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los viernes</label>
+                                <div title="Mostrar el popup todos los viernes" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Fridays" />
+                            <span asp-validation-for="Fridays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los sábados</label>
+                                <div title="Mostrar el popup todos los sábados" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Saturdays" />
+                            <span asp-validation-for="Saturdays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Todos los domingos</label>
+                                <div title="Mostrar el popup todos los domingos" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Sundays" />
+                            <span asp-validation-for="Sundays" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Solo la primera vez</label>
+                                <div title="Mostrar el popup solo la primera vez que el usuario ingresa en la app, independientemente del día de la semana." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FirstTimeOnly" />
+                            <span asp-validation-for="FirstTimeOnly" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+<script>
+    $(document).ready(function () {
+        $('#ViewableDeadlineDateString').kendoDatePicker({ format: "dd-MM-yyyy" });
+        @if (!string.IsNullOrEmpty(Model.ViewableDeadlineDateString)) {
+        <text>
+        $('#ViewableDeadlineDateString').val('@Model.ViewableDeadlineDateString');
+        </text>
+        }
+        });
+</script>

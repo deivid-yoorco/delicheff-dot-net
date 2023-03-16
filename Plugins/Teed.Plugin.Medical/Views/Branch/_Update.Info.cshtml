@@ -1,0 +1,177 @@
+﻿@model Teed.Plugin.Medical.Models.Branch.BranchModel
+@{
+    Html.SetActiveMenuItemSystemName("TeedBranches.Branches");
+    var availableUsers = (List<SelectListItem>)ViewData["AllCustomers"];
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div>
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Encargado</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="UserId" type="hidden" id="userId" />
+                                <input id="users" style="width: 100%;" />
+                                <script>
+                                    $(document).ready(function () {
+                                        $("#users").kendoComboBox({
+                                            placeholder: "Selecciona al encargado...",
+                                            dataTextField: "Customer",
+                                            dataValueField: "Id",
+                                            filter: "contains",
+                                            autoBind: true,
+                                            minLength: 1,
+                                            dataSource: {
+                                                type: "json",
+                                                transport: {
+                                                    read: {
+                                                        url: "@Html.Raw(Url.Action("UsersListData", "Branch"))",
+                                                        type: "POST",
+                                                        data: addAntiForgeryToken
+                                                    }
+                                                }
+                                            },
+                                            dataBound: onDataBound,
+                                            select: onSelect,
+                                            change: onChange
+                                        });
+                                        function onDataBound(e) {
+                                            if (@Model.UserId != 0 && !$("#users").data("kendoComboBox").value()) {
+                                                $("#users").data("kendoComboBox").value(@Model.UserId);
+                                                $("#userId").val(@Model.UserId);
+                                            }
+                                        };
+                                        function onSelect(e) {
+                                            $("#userId").val(this.dataItem(e.item.index()).Id);
+                                        };
+                                        function onChange(e) {
+                                            if (this.selectedIndex == -1) {
+                                                $("#users").data("kendoComboBox").value("");
+                                            }
+                                        };
+                                    });
+                                </script>
+                                <span asp-validation-for="UserId"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Name">Nombre de la sucursal</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="Name" maxlength="256" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Phone">Teléfono 1</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="Phone" maxlength="256" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Phone">Teléfono 2</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="Phone2" maxlength="256" class="form-control" />
+                                <span asp-validation-for="Phone2" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="StreetAddress">Línea de dirección 1</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="StreetAddress" maxlength="256" class="form-control" />
+                                <span asp-validation-for="StreetAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="StreetAddress2">Línea de dirección 2</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="StreetAddress2" maxlength="256" class="form-control" />
+                                <span asp-validation-for="StreetAddress2" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="CountryId">País</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="CountryId" asp-items="Model.AvailableCountries" />
+                                <span asp-validation-for="CountryId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="StateProvinceId">Estado</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="StateProvinceId" asp-items="Model.AvailableStates" />
+                                <span asp-validation-for="StateProvinceId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="City">Municipio/Delegación</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="City" maxlength="256" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="ZipPostalCode">Código Postal</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="ZipPostalCode" maxlength="256" class="form-control" />
+                                <span asp-validation-for="ZipPostalCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Trabajadores</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="SelectedUsersIds" asp-items="availableUsers" asp-multiple="true" />
+                                <script type="text/javascript">
+                                                $(document).ready(function() {
+                                                    var productIdsInput = $('#@Html.IdFor(model => model.SelectedUsersIds)').data("kendoMultiSelect");
+                                                        productIdsInput.setOptions({
+                                                        autoClose: false,
+                                                        filter: "contains"
+                                                    });
+                                                    @if (availableUsers.Count == 0)
+                                                    {
+                                                        <text>
+                                                                productIdsInput.setOptions({
+                                                                enable: false,
+                                                                placeholder: 'No hay procedimientos disponibles.'
+                                                            });
+                                                            productIdsInput._placeholder();
+                                                            productIdsInput._enable();
+                                                        </text>
+                                                    }
+                                                });
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

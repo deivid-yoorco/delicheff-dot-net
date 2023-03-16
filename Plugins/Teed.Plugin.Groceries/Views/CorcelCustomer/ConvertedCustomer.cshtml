@@ -1,0 +1,55 @@
+﻿@model Teed.Plugin.Groceries.Models.Corcel.CorcelCustomerModel
+
+@using System.Reflection
+@using System.ComponentModel.DataAnnotations
+@using Nop.Services.Helpers
+
+@if (Model.CorcelifiedDate != null)
+{
+    <div class="form-group">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="control-label" for="DateCorcelConvertedOn">CORCELizado en:</label>
+                <div title="La fecha de la orden en la que el usuario se convirtió en cliente CORCEL." class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="form-text-row">@Model.CorcelifiedDate.Value.ToString("dd/MM/yyyy")</div>
+        </div>
+    </div>
+
+    @if (Model.CorcelRulesThatApply.Any())
+    {
+        <div class="form-horizontal corcel-rules">
+            <div class="panel-group" style="margin:15px;margin-bottom: 0px">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="accordion" id="accordionExample">
+                            <div class="card order-alert-success">
+                                <div class="card-header" id="headingOne">
+                                    <h2 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                            Este cliente cumple con reglas de CORCEL, da clic para ver más información.
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                    <div class="card-body" style="margin: 30px;margin-top:0px">
+                                        <ul>
+                                            @foreach (var item in Model.CorcelRulesThatApply)
+                                            {
+                                                <li>@(item.GetDisplayName()): @(item.GetType().GetMember(item.ToString()).First().GetCustomAttribute<DisplayAttribute>().GetDescription())</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

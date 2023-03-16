@@ -1,0 +1,181 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+
+@{
+    var imageNote = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es: 1920x1080 píxeles.";
+    var videoText = "Se debe ingresar solo el Id de la URL de YouTube. Por ejemplo: ";
+    var videoId = "xpu14GnkDng";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Video del slider
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Video Id</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderVideoId" />
+                <span asp-validation-for="SliderVideoId"></span>
+                <em>@videoText</em><strong>@videoId</strong>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen de flecha
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Imagen de flecha</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderArrowId" />
+                <span asp-validation-for="SliderArrowId"></span>
+                <em>Ingresa selecciona la imagen que será utilizada como flecha para cambiar de imagen en el Slider. Solo es necesaria la flecha que apunta a la derecha.</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Primera imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerPicture1Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerPicture1Id" />
+                <span asp-validation-for="SliderBannerPicture1Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerText1" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerText1" />
+                <span asp-validation-for="SliderBannerText1"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerLink1" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerLink1" />
+                <span asp-validation-for="SliderBannerLink1"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Segunda imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerPicture2Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerPicture2Id" />
+                <span asp-validation-for="SliderBannerPicture2Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerText2" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerText2" />
+                <span asp-validation-for="SliderBannerText2"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerLink2" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerLink2" />
+                <span asp-validation-for="SliderBannerLink2"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Tercera imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerPicture3Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerPicture3Id" />
+                <span asp-validation-for="SliderBannerPicture3Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerText3" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerText3" />
+                <span asp-validation-for="SliderBannerText3"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerLink3" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerLink3" />
+                <span asp-validation-for="SliderBannerLink3"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Cuarta imagen del banner
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerPicture4Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerPicture4Id" />
+                <span asp-validation-for="SliderBannerPicture4Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerText4" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerText4" />
+                <span asp-validation-for="SliderBannerText4"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="SliderBannerLink4" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SliderBannerLink4" />
+                <span asp-validation-for="SliderBannerLink4"></span>
+            </div>
+        </div>
+    </div>
+</div>

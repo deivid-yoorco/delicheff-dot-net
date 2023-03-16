@@ -1,0 +1,36 @@
+﻿@model Teed.Plugin.Groceries.Models.PrintedCouponBook.PrintedCouponBookModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.PrintedCouponBooks");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nueva cuponera impresa
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="FranchiseList">regresar a la lista de cuponera impresa</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-franchise" asp-title="Información general" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/PrintedCouponBook/_CreateOrUpdate.cshtml", Model)
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+</script>

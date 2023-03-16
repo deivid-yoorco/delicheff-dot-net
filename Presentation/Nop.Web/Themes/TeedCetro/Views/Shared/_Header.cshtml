@@ -1,0 +1,52 @@
+﻿<style>
+    .main-icon-container {
+        background-color: 
+    }
+</style>
+<div id="main-icon-container">
+    <div class="header">
+        <div class="navbar-fixed top-small-navbar hide-on-med-and-up">
+            <nav class="black z-depth-0">
+                <div class="nav-wrapper container">
+                    <ul class="left">
+                        @await Component.InvokeAsync("TaxTypeSelector")
+                        @await Component.InvokeAsync("CurrencySelector")
+                        @await Component.InvokeAsync("LanguageSelector")
+                        @await Component.InvokeAsync("Widget", new { widgetZone = "header_selectors" })
+                    </ul>
+                    <ul class="right">
+                        @await Component.InvokeAsync("HeaderLinks")
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        @await Component.InvokeAsync("FlyoutShoppingCart")
+    </div>
+    @await Component.InvokeAsync("SearchBox")
+</div>
+
+@*<div class="header">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "header_before" })
+    <div class="header-upper">
+    <div class="header-selectors-wrapper">
+    @await Component.InvokeAsync("TaxTypeSelector")
+    @await Component.InvokeAsync("CurrencySelector")
+    @await Component.InvokeAsync("LanguageSelector")
+    @await Component.InvokeAsync("Widget", new { widgetZone = "header_selectors" })
+    </div>
+    <div class="header-links-wrapper">
+    @await Component.InvokeAsync("HeaderLinks")
+    @await Component.InvokeAsync("FlyoutShoppingCart")
+    </div>
+    </div>
+    @await Component.InvokeAsync("Widget", new { widgetZone = "header_middle" })
+    <div class="header-lower">
+    <div class="header-logo">
+    @await Component.InvokeAsync("Logo")
+    </div>
+    <div class="search-box store-search-box">
+    @await Component.InvokeAsync("SearchBox")
+    </div>
+    </div>
+    @await Component.InvokeAsync("Widget", new { widgetZone = "header_after" })
+    </div>*@

@@ -1,0 +1,155 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.FranchiseData
+
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="row" style="margin-bottom:10px">
+            @*@if (Model.CanEdit)
+                {
+                    <div class="pull-right">
+                        <a asp-controller="ShippingVehicle" asp-action="Create" asp-route-franchiseId="@Model.Id" class="btn bg-blue">
+                            <i class="fa fa-plus-square"></i>
+                            Crear camioneta
+                        </a>
+                    </div>
+                    <div class="pull-right" style="margin-right: 10px">
+                        <a asp-controller="ShippingVehicle" asp-action="List" class="btn bg-blue">
+                            <i class="fa fa-plus-square"></i>
+                            Asignar camioneta ya creada
+                        </a>
+                    </div>
+                }
+                else
+                {*@
+            <h3 style="text-align: center;margin-top: 0px !important;">Empleados</h3>
+            @*}*@
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h4 style="text-align: center; margin-top: 25px;">Activos y Candidatos</h4>
+                <div id="employees-grid"></div>
+            </div>
+            <div class="panel-body">
+                <h4 style="text-align: center; margin-top: 25px;">Bajas</h4>
+                <div id="discharged-grid"></div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                $("#employees-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                        transport: {
+                            read: {
+                                url: "@Html.Raw(Url.Action("ListData", "PayrollEmployee"))?discharged=false&franchiseId=" + @Model.Id,
+                                type: "POST",
+                                dataType: "json",
+                                data: null
+                            }
+                        },
+                        schema: {
+                        data: "Data",
+                            total: "Total",
+                            errors: "Errors"
+                        },
+                        error: function(e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        pageSize: @(defaultGridPageSize),
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true
+                    },
+                    pageable: {
+                    refresh: true,
+                        pageSizes: [@(gridPageSizes)],
+                        @await Html.PartialAsync("_GridPagerMessages")
+                    },
+                    editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                        mode: "inline"
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "Picture",
+                            title: "Perfil",
+                            template: `<div class="uploaded-image"><img src="#=Picture#"></div>`
+                        }, {
+                            field: "FullName",
+                            title: "Nombre",
+                        }, {
+                            field: "JobCatalog",
+                            title: "Puesto",
+                        }, {
+                            field: "EmployeeStatus",
+                            title: "Estatus de empleado",
+                        },
+                    ]
+                });
+
+                $("#discharged-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                        transport: {
+                            read: {
+                                url: "@Html.Raw(Url.Action("ListData", "PayrollEmployee"))?discharged=true&franchiseId=" + @Model.Id,
+                                type: "POST",
+                                dataType: "json",
+                                data: null
+                            }
+                        },
+                        schema: {
+                        data: "Data",
+                            total: "Total",
+                            errors: "Errors"
+                        },
+                        error: function(e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        pageSize: @(defaultGridPageSize),
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true
+                    },
+                    pageable: {
+                    refresh: true,
+                        pageSizes: [@(gridPageSizes)],
+                        @await Html.PartialAsync("_GridPagerMessages")
+                    },
+                    editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                        mode: "inline"
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "Picture",
+                            title: "Perfil",
+                            template: `<div class="uploaded-image"><img src="#=Picture#"></div>`
+                        }, {
+                            field: "FullName",
+                            title: "Nombre",
+                        }, {
+                            field: "JobCatalog",
+                            title: "Puesto",
+                        }, {
+                            field: "EmployeeStatus",
+                            title: "Estatus de empleado",
+                        },
+                    ]
+                });
+            });
+        </script>
+    </div>
+</div>

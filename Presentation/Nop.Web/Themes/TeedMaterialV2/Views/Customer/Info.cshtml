@@ -1,0 +1,739 @@
+﻿@using Nop.Core
+@using Nop.Services
+@model CustomerInfoModel
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Account").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-customer-info-page");
+    var birthDate = Model.DateOfBirthDay.HasValue ? new DateTime(Model.DateOfBirthYear.Value, Model.DateOfBirthMonth.Value, Model.DateOfBirthDay.Value) : default(DateTime);
+}
+
+<style>
+
+    .profile-picture-container .uploaded-image {
+        text-align: center;
+        /*max-width: 20% !important;
+        width: 20%;*/
+        max-height: 20%;
+        height: 20%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .profile-picture-container .uploaded-image div {
+            height: 137px;
+            width: 137px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+    .profile-picture-container .qq-upload-button {
+        margin-left: auto;
+        margin-right: auto;
+        padding-bottom: 0;
+        padding-top: 0;
+        width: 145px;
+    }
+
+    .profile-picture-container .qq-upload-list-selector.qq-upload-list {
+        display: none !important;
+    }
+
+    .profile-picture-container .remove-image-button {
+        text-align: end;
+        margin-top: 15px;
+    }
+</style>
+
+@section left
+    {
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.Info })
+}
+
+@if (Model.CountryEnabled && Model.StateProvinceEnabled)
+{
+    <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+            $("#@Html.IdFor(model => model.CountryId)").change(function () {
+                var selectedItem = $(this).val();
+                var ddlStates = $("#@Html.IdFor(model => model.StateProvinceId)");
+                var statesProgress = $("#states-loading-progress");
+                statesProgress.show();
+                $.ajax({
+                    cache: false,
+                    type: "GET",
+                    url: "@(Url.RouteUrl("GetStatesByCountryId"))",
+                    data: { "countryId": selectedItem, "addSelectStateItem": "true" },
+                    success: function (data) {
+                        ddlStates.html('');
+                        $.each(data, function (id, option) {
+                            ddlStates.append($('<option></option>').val(option.id).html(option.name));
+                        });
+                        statesProgress.hide();
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Failed to retrieve states.');
+                        statesProgress.hide();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<div class="page account-page customer-info-page section">
+    <div class="">
+        <h1 class="category-page-title">@T("Account.CustomerInfo")</h1>
+    </div>
+    @if (Model.RewardsActive && Model.Level != null)
+    {
+        var porcentage = (decimal)100;
+        var left = Math.Round((Model.NextLevel?.RequiredAmount ?? 0) - (Model.Level?.RequiredAmount ?? 0), 2);
+        if (Model.NextLevel?.RequiredAmount > 0)
+        {
+            porcentage = Math.Round((Model.Level.RequiredAmount * 100) / Model.NextLevel.RequiredAmount, 2);
+        }
+        <style>
+            .progress {
+                background: rgba(0,0,0,0.1);
+                justify-content: flex-start;
+                border-radius: 100px;
+                align-items: center;
+                position: relative;
+                padding: 0 5px;
+                display: flex;
+                height: 40px;
+            }
+
+            .progress-value {
+                animation: load 3s normal forwards;
+                border-radius: 100px;
+                height: 30px;
+                width: 0;
+            }
+
+            @@keyframes load {
+                0% {
+                    width: 0;
+                }
+
+                50% {
+                    width: 0;
+                }
+
+                100% {
+                    width: @porcentage%;
+                }
+            }
+        </style>
+        <div class="row" style="text-align-last: center;">
+            <h4>
+                @Model.Level?.Name
+            </h4>
+            <p>@Model.Level?.Description</p>
+            <div class="col s12" style="display: flex;align-items: center;">
+                <div style="text-align: center;">
+                    @(Model.Level?.RequiredAmount ?? 0) puntos
+                </div>
+                <div class="progress">
+                    <div class="progress-value"></div>
+                </div>
+                <div style="text-align: center;">
+                    @if (Model.NextLevel == null)
+                    {
+                        <text>@Model.Level.RequiredAmount</text>
+                    }
+                    else
+                    {
+                        <text>@Model.NextLevel?.RequiredAmount</text>
+                    }
+                    puntos
+                </div>
+            </div>
+            @if (Model.NextLevel != null)
+            {
+                <div>
+                    ¡Te faltan
+                    @left
+                    puntos para el siguiente nivel!
+                </div>
+            }
+            else
+            {
+                <div>
+                    Has llegado al último nivel, ¡felicidades!
+                </div>
+            }
+        </div>
+        <script>
+            $(document).ready(function () {
+                var color = $('#pop-cart').parent().css('background-color');
+                $('.progress-value').css('box-shadow', '0 10px 40px -10px ' + color);
+                $('.progress-value').css('background', color);
+            });
+        </script>
+    }
+    <div class="page-body card-panel cel-no-card-shadows" style="display: flex;">
+        <form asp-route="CustomerInfo" method="post" id="customer-info-form">
+            <div asp-validation-summary="ModelOnly" class="message-error"></div>
+            <div class="fieldset">
+                @await Html.PartialAsync("CustomerNavigationBar")
+                <div class="title">
+                    <strong>@T("Account.YourPersonalDetails")</strong>
+                </div>
+                <div class="form-fields">
+                    @if (TeedCommerceStores.CurrentStore == TeedStores.CentralEnLinea)
+                    {
+                        //register CSS and JS
+                        Html.AddCssFileParts(ResourceLocation.Footer, "~/lib/fineuploader/fineuploader-4.2.2.min.css");
+                        Html.AddScriptParts(ResourceLocation.Footer, "~/lib/fineuploader/jquery.fineuploader-4.2.2.js");
+                        <div class="inputs profile-picture-container">
+                            <label asp-for="ProfilePictureId"></label>
+                            <div id="picture118077765value">
+                                @if (Model.ProfilePictureId > 0)
+                                {
+                                    <input type="hidden" data-val="true" data-val-required="The profile picture field is required." id="ProfilePictureId" name="ProfilePictureId" value="@Model.ProfilePictureId">
+                                }
+                                else
+                                {
+                                    <input type="hidden" data-val="true" data-val-required="The profile picture field is required." id="ProfilePictureId" name="ProfilePictureId">
+                                }
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12" style="text-align: center;">
+                                    <div class="preloader-wrapper big active" style="display: none;">
+                                        <div class="spinner-layer spinner-blue-only">
+                                            <div class="circle-clipper left">
+                                                <div class="circle"></div>
+                                            </div><div class="gap-patch">
+                                                <div class="circle"></div>
+                                            </div><div class="circle-clipper right">
+                                                <div class="circle"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="picture118077765image" class="uploaded-image">
+                                        @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                                        {
+                                            <div class="responsive-img circle" style="background-image: url('@Model.ProfilePicture'); background-size: cover; background-position: center center;"></div>
+                                        }
+                                        else
+                                        {
+                                            <div class="responsive-img circle" style="background-image: url('@Model.DefaultPicture'); background-size: cover; background-position: center center;"></div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="picture118077765" class="upload-image-button pull-left margin-t-5">
+                                        <div class="qq-uploader-selector qq-uploader">
+                                            <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone="" style="display: none;">
+                                                <span>Arrastra los archivos aquí para cargar</span>
+                                            </div>
+                                            <div class="qq-upload-button-selector qq-upload-button" style="position: relative; overflow: hidden; direction: ltr;">
+                                                <div>Cargar imagen</div>
+                                                <input qq-button-id="12278ee4-670e-49c0-a7c3-1b6dcaa96e9d" type="file" name="qqfile" style="position: absolute; right: 0px; top: 0px; font-family: Arial; font-size: 118px; margin: 0px; padding: 0px; cursor: pointer; opacity: 0;">
+                                            </div>
+                                            <span class="qq-drop-processing-selector qq-drop-processing qq-hide">
+                                                <span>Procesando los archivos arrastrados...</span>
+                                                <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                            </span>
+                                            <ul class="qq-upload-list-selector qq-upload-list"></ul>
+                                        </div>
+                                    </div>
+                                    <div class="remove-image-button pull-left margin-t-5">
+                                        <span id="picture118077765remove" class="btn bg-red" style="display: none;">Quitar imagen</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script type="text/template" id="picture118077765-qq-template">
+                                <div class="qq-uploader-selector qq-uploader">
+                                    <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+                                        <span>Arrastra los archivos aquí para cargar</span>
+                                    </div>
+                                    <div class="qq-upload-button-selector qq-upload-button">
+                                        <div>Cargar imagen</div>
+                                    </div>
+                                    <span class="qq-drop-processing-selector qq-drop-processing">
+                                        <span>Procesando los archivos arrastrados...</span>
+                                        <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                    </span>
+                                    <ul class="qq-upload-list-selector qq-upload-list">
+                                        <li>
+                                            <div class="qq-progress-bar-container-selector">
+                                                <div class="qq-progress-bar-selector qq-progress-bar"></div>
+                                            </div>
+                                            <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
+                                            <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
+                                            <span class="qq-upload-file-selector qq-upload-file"></span>
+                                            <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
+                                            <span class="qq-upload-size-selector qq-upload-size"></span>
+                                            <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Cancelar</a>
+                                            <a class="qq-upload-retry-selector qq-upload-retry" href="#">Reintentar</a>
+                                            <a class="qq-upload-delete-selector qq-upload-delete" href="#">Eliminar</a>
+                                            <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </script>
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    $("#picture118077765").fineUploader({
+                                        request: {
+                                            endpoint: '/Admin/Picture/AsyncUpload?returnThumb=false'
+                                        },
+                                        template: "picture118077765-qq-template",
+                                        multiple: false
+                                    }).on("complete", function (event, id, name, responseJSON, xhr) {
+                                        if (responseJSON.success) {
+                                            $("#picture118077765image").html('<div class="responsive-img circle" style="background-image: url(\'' + responseJSON.imageUrl + '\'); background-size: cover; background-position: center center;"></div>');
+                                            $("#picture118077765value input").val(responseJSON.pictureId);
+                                            $("#picture118077765remove").show();
+                                        }
+                                        $('.uploaded-image').show();
+                                        $('.preloader-wrapper').hide();
+                                    });
+                                    $("#picture118077765remove").click(function (e) {
+                                        $("#picture118077765image").html("<img class='circle responsive-img' src='@Model.DefaultPicture'/>");
+                                        $("#picture118077765value input").val(0);
+                                        $(this).hide();
+                                    });
+                                    $('.qq-upload-button').addClass('teed-primary');
+                                    $('.qq-upload-button').addClass('btn');
+                                    $('.qq-upload-button').addClass('waves-effect');
+                                    $('.qq-upload-button').addClass('waves-light');
+                                    $('.qq-upload-button input').on('change', function () {
+                                        $('.uploaded-image').hide();
+                                        $('.preloader-wrapper').show();
+                                    });
+                                });
+                            </script>
+                            <span class="field-validation-valid" data-valmsg-for="ProfilePictureId" data-valmsg-replace="true"></span>
+                        </div>
+                    }
+                    <div class="inputs col l6">
+                        <label asp-for="FirstName" asp-postfix=":"></label>
+                        <input class="cel-full-input" asp-for="FirstName" />
+                        <span asp-validation-for="FirstName"></span>
+                    </div>
+                    <div class="inputs col l6">
+                        <label asp-for="LastName" asp-postfix=":"></label>
+                        <input class="cel-full-input" asp-for="LastName" />
+                        <span asp-validation-for="LastName"></span>
+                    </div>
+                    @if (Model.GenderEnabled)
+                    {
+                        <div class="inputs col l12">
+                            <label>@T("Account.Fields.Gender"):</label>
+                            <div class="gender">
+                                <span class="male col label l2">
+                                    <label>
+                                        <input type="radio" asp-for="Gender" value="M" checked="@(Model.Gender == "M")" id="gender-male" />
+                                        <span>@T("Account.Fields.Gender.Male")</span>
+                                    </label>
+                                </span>
+
+
+
+                                <span class="female col l2">
+                                    <label>
+                                        <input type="radio" asp-for="Gender" value="F" checked="@(Model.Gender == "F")" id="gender-female" />
+                                        <span>@T("Account.Fields.Gender.Female")</span>
+                                    </label>
+
+                                </span>
+
+
+
+                                <span class="other col l2">
+                                    <label>
+                                        <input type="radio" asp-for="Gender" value="O" checked="@(Model.Gender == "O")" id="gender-other" />
+                                        <span>@T("Account.Fields.Gender.Other")</span>
+                                    </label>
+
+                                </span>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.DateOfBirthEnabled)
+                    {
+                        <div class="inputs col l12 date-of-birth cel-full-select">
+                            <label>@T("Account.Fields.DateOfBirth"):</label><br />
+                            <span>@(birthDate.ToString("dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-MX")))</span>
+                        </div>
+                    }
+                    <div class="inputs col l12">
+                        <label asp-for="Email" asp-postfix=":"></label>
+                        <input class="cel-full-input" asp-for="Email" />
+                        <span asp-validation-for="Email"></span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.EmailToRevalidate))
+                    {
+                        <div class="inputs col l12">
+                            <label asp-for="EmailToRevalidate"></label>
+                            <span class="email-to-revalidate">@Model.EmailToRevalidate</span>
+                            <span class="email-to-revalidate-note">
+                                <em>@T("Account.Fields.EmailToRevalidate.Note")</em>
+                            </span>
+                        </div>
+                    }
+                    @if (Model.UsernamesEnabled)
+                    {
+                        if (Model.AllowUsersToChangeUsernames)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Username" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="Username" />
+                                <nop-required />
+                                <span asp-validation-for="Username"></span>
+                                @if (Model.CheckUsernameAvailabilityEnabled)
+                                {
+                                    @await Html.PartialAsync("_CheckUsernameAvailability")
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="inputs">
+                                <label asp-for="Username" asp-postfix=":"></label>
+                                <span class="readonly-username">@Model.Username</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            @if (Model.CompanyEnabled || Model.DisplayVatNumber)
+            {
+                <div class="fieldset">
+                    <div class="title">
+                        <strong>@T("Account.CompanyDetails")</strong>
+                    </div>
+                    <div class="form-fields">
+                        @if (Model.CompanyEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Company" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="Company" />
+                                @if (Model.CompanyRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="Company"></span>
+                            </div>
+                        }
+                        @if (Model.DisplayVatNumber)
+                        {
+                            <div class="inputs">
+                                <label asp-for="VatNumber" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="VatNumber" />
+                                <span class="vat-status">@Model.VatNumberStatusNote</span>
+                                <span class="vat-note">
+                                    <em>@T("Account.Fields.VatNumber.Note")</em>
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            @if (Model.StreetAddressEnabled ||
+  Model.StreetAddress2Enabled ||
+  Model.ZipPostalCodeEnabled ||
+  Model.CityEnabled ||
+  Model.CountryEnabled)
+            {
+                <div class="fieldset ">
+                    <div class="title">
+                        <strong>@T("Account.YourAddress")</strong>
+                    </div>
+                    <div class="form-fields">
+                        @if (Model.StreetAddressEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="StreetAddress" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="StreetAddress" />
+                                @if (Model.StreetAddressRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="StreetAddress"></span>
+                            </div>
+                        }
+                        @if (Model.StreetAddress2Enabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="StreetAddress2" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="StreetAddress2" />
+                                @if (Model.StreetAddress2Required)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="StreetAddress2"></span>
+                            </div>
+                        }
+                        @if (Model.ZipPostalCodeEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="ZipPostalCode" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="ZipPostalCode" />
+                                @if (Model.ZipPostalCodeRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="ZipPostalCode"></span>
+                            </div>
+                        }
+                        @if (Model.CityEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="City" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="City" />
+                                @if (Model.CityRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="City"></span>
+                            </div>
+                        }
+                        @if (Model.CountryEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="CountryId" asp-postfix=":"></label>
+                                <select class="cel-full-input" asp-for="CountryId" asp-items="Model.AvailableCountries"></select>
+                                @if (Model.CountryRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="CountryId"></span>
+                            </div>
+                        }
+                        @if (Model.CountryEnabled && Model.StateProvinceEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="StateProvinceId" asp-postfix=":"></label>
+                                <select class="cel-full-input" asp-for="StateProvinceId" asp-items="Model.AvailableStates"></select>
+                                @if (Model.StateProvinceRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="StateProvinceId"></span>
+                                <span id="states-loading-progress" style="display: none;" class="please-wait">@T("Common.Wait...")</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            @if (Model.PhoneEnabled || Model.FaxEnabled)
+            {
+                <div class="fieldset ">
+                    <div class="title">
+                        <strong>@T("Account.YourContactInformation")</strong>
+                    </div>
+                    <div class="form-fields">
+                        @if (Model.PhoneEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Phone" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="Phone" />
+                                @if (Model.PhoneRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="Phone"></span>
+                            </div>
+                        }
+                        @if (Model.FaxEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Fax" asp-postfix=":"></label>
+                                <input class="cel-full-input" asp-for="Fax" />
+                                @if (Model.FaxRequired)
+                                {
+                                    <nop-required />
+                                }
+                                <span asp-validation-for="Fax"></span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            @if (Model.NewsletterEnabled || Model.CustomerAttributes.Count > 0)
+            {
+                <div class="fieldset col l12">
+                    <div class="title">
+                        <strong>@T("Account.Options")</strong>
+                    </div>
+                    <p></p>
+                    <div class="form-fields">
+                        @if (Model.NewsletterEnabled)
+                        {
+                            <div class="inputs">
+
+                                <label>
+                                    <input asp-for="Newsletter" />
+                                    <span asp-validation-for="Newsletter">Boletín</span>
+                                </label>
+
+
+                            </div>
+                        }
+                        @if (Model.CustomerAttributes.Count > 0)
+                        {
+                            @await Html.PartialAsync("_CustomerAttributes", Model.CustomerAttributes)
+                        }
+                    </div>
+                    <p></p>
+                </div>
+
+            }
+            @if (Model.AllowCustomersToSetTimeZone || Model.SignatureEnabled)
+            {
+                <div class="fieldset ">
+                    <div class="title">
+                        <strong>@T("Account.Preferences")</strong>
+                    </div>
+                    <div class="form-fields">
+                        @if (Model.AllowCustomersToSetTimeZone)
+                        {
+                            <div class="inputs">
+                                <label asp-for="TimeZoneId" asp-postfix=":"></label>
+                                <select asp-for="TimeZoneId" asp-items="Model.AvailableTimeZones"></select>
+                                <span asp-validation-for="TimeZoneId"></span>
+                            </div>
+                        }
+                        @if (Model.SignatureEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Signature" asp-postfix=":"></label>
+                                <textarea asp-for="Signature" class="account-signature-text"></textarea>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            @if (Model.NumberOfExternalAuthenticationProviders > 0)
+            {
+                <div class="fieldset col l12">
+                    <div class="title">
+                        <strong>@T("Account.AssociatedExternalAuth")</strong>
+                    </div>
+                    @if (Model.AssociatedExternalAuthRecords.Count > 0)
+                    {
+                        //existing associated external records
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <colgroup>
+                                    <col />
+                                    <col />
+                                    <col />
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th class="auth-method-name">
+                                            @T("Account.AssociatedExternalAuth.AuthMethodName")
+                                        </th>
+                                        <th class="email">
+                                            @T("Account.AssociatedExternalAuth.Email")
+                                        </th>
+                                        <th class="external-id">
+                                            @T("Account.AssociatedExternalAuth.ExternalIdentifier")
+                                        </th>
+                                        @if (Model.AllowCustomersToRemoveAssociations)
+                                        {
+                                            <th class="remove">
+                                                @T("Account.AssociatedExternalAuth.Remove")
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.AssociatedExternalAuthRecords)
+                                    {
+                                        <tr>
+                                            <td class="auth-method-name">
+                                                @item.AuthMethodName
+                                            </td>
+                                            <td class="email">
+                                                @item.Email
+                                            </td>
+                                            <td class="external-id">
+                                                @CommonHelper.EnsureMaximumLength(item.ExternalIdentifier, 40, "...")
+                                            </td>
+                                            @if (Model.AllowCustomersToRemoveAssociations)
+                                            {
+                                                <td class="remove">
+                                                    <a href="#" onclick="return removeexternalassociation(@item.Id)">@T("Account.AssociatedExternalAuth.Remove")</a>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    @if (Model.NumberOfExternalAuthenticationProviders > Model.AssociatedExternalAuthRecords.Count)
+                    {
+                        //we can add more external records
+                        <div class="form-fields add-more-external-records">
+                            @T("Account.AssociatedExternalAuth.AddMoreRecords")
+                            <a href="@Url.RouteUrl("Login", null, "http")">
+                                @Url.RouteUrl("Login", null, "http")
+                            </a>
+                        </div>
+                    }
+                    <p></p>
+                </div>
+            }
+
+        <div class="buttons center-align">
+            @if (!Model.IsSmsVerificationActive)
+                {
+                    <input type="submit" value="@T("Common.Save")" name="save-info-button" class="btn save-customer-info-button " />
+                }
+                else
+                {
+                    <input id="VerifyOnlyNumber" name="VerifyOnlyNumber" type="hidden" value="true" />
+                    <input type="button" value="@T("Common.Save")" name="save-info-button" class="btn save-customer-info-button " />
+
+                    @await Html.PartialAsync("_SmsVerification", new SmsVerificationModel { 
+                        ElementSelector = ".save-customer-info-button", 
+                        MinutesForCodeRequest = Model.MinutesForCodeRequest,
+                        ElementsToCheckSelector = "#Phone",
+                        FormSelector = "#customer-info-form",
+                        OriginalPhoneNumber = Model.Phone ?? ""
+                    })
+                }
+        </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript" asp-location="Footer">
+    function removeexternalassociation(itemId) {
+        if (confirm('@T("Common.AreYouSure")')) {
+            var postData = {
+                id: itemId
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                cache: false,
+                type: 'POST',
+                url: '@Url.Action("RemoveExternalAssociation", "Customer")',
+                data: postData,
+                dataType: 'json',
+                success: function (data) {
+                    location.href = data.redirect;
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Failed to delete');
+                }
+            });
+        }
+        return false;
+    }
+</script>

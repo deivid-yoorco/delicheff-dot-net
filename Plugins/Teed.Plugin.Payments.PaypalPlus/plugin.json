@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Paypal Plus",
+  "SystemName": "Payments.PaypalPlus",
+  "Version": "1.01",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.PaypalPlus.dll",
+  "Description": "Payment Method Paypal Plus"
+}

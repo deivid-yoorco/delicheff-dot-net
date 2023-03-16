@@ -1,0 +1,122 @@
+﻿@model AddressModel
+<script type="text/javascript" asp-location="Footer">
+    //we don't move this script to the footer as it's used in Ajax requests where footer is not available
+        $(document).ready(function () {
+            $("#@Html.IdFor(model => model.CountryId)").change(function () {
+            var selectedItem = $(this).val();
+            var ddlStates = $("#@Html.IdFor(model => model.StateProvinceId)");
+            var statesProgress = $("#states-loading-progress-new");
+            statesProgress.show();
+                $.ajax({
+                cache: false,
+                    type: "GET",
+                    url: "@(Url.RouteUrl("GetStatesByCountryId"))",
+                    data: { "countryId": selectedItem, "addSelectStateItem": "true" },
+                    success: function (data) {
+                    ddlStates.html('');
+                        $.each(data, function (id, option) {
+                        ddlStates.append($('<option></option>').val(option.id).html(option.name));
+                        });
+                        $('select').formSelect();
+                    statesProgress.hide();
+                },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Failed to retrieve states.');
+                    statesProgress.hide();
+                }
+            });
+        });
+        });
+</script>
+
+<input asp-for="Id" type="hidden" id="input-Checkout-Id" />
+<div class="edit-address row" style="margin-top:2%;">
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.FirstName)</label>
+        <input asp-for="FirstName" id="input-Checkout-FirstName" />
+        <span class="helper-text red-text" id="first-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.LastName)</label>
+        <input asp-for="LastName" id="input-Checkout-LastName" />
+        <span class="helper-text red-text" id="last-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    <div class="inputs col s12 m12">
+        <label>*@Html.DisplayNameFor(m => m.Email)</label>
+        <input asp-for="Email" id="input-Checkout-Email" />
+        <span class="helper-text red-text" id="email-field-teed" style="display:none;">Este campo es obligatorio</span>
+        <span class="helper-text red-text" id="validate-email-field-teed" style="display:none;">Debes ingresar un correo electrónico válido</span>
+    </div>
+    @if (Model.CompanyEnabled)
+    {
+        string companyReq = Model.CompanyRequired ? "*" : "";
+        <div class="inputs col s12 m12">
+            <label>@Html.Raw(companyReq)@Html.DisplayNameFor(m => m.Company)</label>
+            <input asp-for="Company" id="input-Checkout-Company" />
+            <span class="helper-text red-text" asp-validation-for="Company"></span>
+        </div>
+    }
+
+    <div class="inputs col s12 m12">
+        <label>*@Html.DisplayNameFor(m => m.CountryId)</label>
+        <select asp-for="CountryId" asp-items="Model.AvailableCountries" class="input-Checkout-Country browser-default"></select>
+        <span class="helper-text red-text" id="countryId-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.StateProvinceId)</label>
+        <select asp-for="StateProvinceId" asp-items="Model.AvailableStates" class="state-input input-Checkout-State browser-default"></select>
+        <span class="helper-text red-text" id="stateId-field-teed" style="display:none;">Este campo es obligatorio</span>
+        @*<span class="helper-text blue-text" id="states-loading-progress-new" style="display: none;"></span>*@
+    </div>
+    @{
+        string cityReq = Model.CityRequired ? "*" : "";
+        <div class="inputs col s12 m6">
+            <label>@Html.Raw(cityReq)@Html.DisplayNameFor(m => m.City)</label>
+            <input asp-for="City" id="input-Checkout-City" />
+            <span class="helper-text red-text" id="city-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string add1Req = Model.StreetAddressRequired ? "*" : "";
+        <div class="inputs col s12 m12">
+            <label>@Html.Raw(add1Req)@Html.DisplayNameFor(m => m.Address1)</label>
+            <input asp-for="Address1" id="input-Checkout-Address1" />
+            <span class="helper-text red-text" id="address1-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string add2Req = Model.StreetAddress2Required ? "*" : "";
+        <div class="inputs col s12 m12">
+            <label>@Html.Raw(add2Req)@Html.DisplayNameFor(m => m.Address2)</label>
+            <input asp-for="Address2" id="input-Checkout-Address2" />
+            <span class="helper-text red-text" asp-validation-for="Address2"></span>
+        </div>
+
+        string zipReq = Model.ZipPostalCodeRequired ? "*" : "";
+        <div class="inputs col s12 m6">
+            <label>@Html.Raw(zipReq)@Html.DisplayNameFor(m => m.ZipPostalCode)</label>
+            <input asp-for="ZipPostalCode" id="input-Checkout-ZCP" />
+            <span class="helper-text red-text" id="zcp-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string phoneReq = Model.PhoneRequired ? "*" : "";
+        <div class="inputs col s12 m6">
+            <label>@Html.Raw(phoneReq)@Html.DisplayNameFor(m => m.PhoneNumber)</label>
+            <input asp-for="PhoneNumber" id="input-Checkout-Phone" />
+            <span class="helper-text red-text" id="phone-field-teed" style="display:none;">Este campo es obligatorio</span>
+            <span class="helper-text red-text" id="validate-phone-field-teed" style="display:none;">Debes ingresar un teléfono válido</span>
+        </div>
+
+        @*string faxReq = Model.FaxRequired ? "*" : "";
+            <div class="inputs col s12 m12">
+                <input asp-for="FaxNumber" />
+                <label>@Html.Raw(faxReq)@Html.DisplayNameFor(m => m.FaxNumber)</label>
+                <span class="helper-text red-text" asp-validation-for="FaxNumber"></span>
+            </div>*@
+    }
+    @if (Model.CustomAddressAttributes.Count > 0)
+    {
+        <div class="inputs col s12 m12">
+            @await Html.PartialAsync("_AddressAttributes", Model.CustomAddressAttributes)
+        </div>
+    }
+</div>

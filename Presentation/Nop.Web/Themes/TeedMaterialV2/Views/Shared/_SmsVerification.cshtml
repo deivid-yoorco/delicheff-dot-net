@@ -1,0 +1,262 @@
+﻿@model SmsVerificationModel
+
+<div id="phone-verification" class="modal">
+    <div style="text-align: center;">
+        <h5>
+            Por favor ingresa el código de verificación de 6 dígitos
+            <br class="codes-break">
+            que enviamos a través de SMS,
+            <br class="codes-break">
+            para poder verificar tu número de teléfono:
+        </h5>
+    </div>
+    <div class="preloader-parent row" style="text-align: center">
+        <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue-only">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="verification-error red-text" style="display: none;"></div>
+    <div class="verification-success teed-primary-text" style="display: none;">
+        <span>¡La verificación de tu número de teléfono fue exitosa!</span>
+        <br />
+        <span>Espera un momento en lo que terminamos de crear tu cuenta…</span>
+        <br />
+    </div>
+    <div class="modal-content" style="display: none;">
+        <fieldset class='number-code'>
+            <legend>Código de verificación</legend>
+            <div style="text-align: center;">
+                <input type="text" name='code' class='code-input' required min="0" max="9" pattern="[0-9]{1}" />
+                <input type="text" name='code' class='code-input' required min="0" max="9" pattern="[0-9]{1}" />
+                <input type="text" name='code' class='code-input' required min="0" max="9" pattern="[0-9]{1}" />
+                <br class="codes-break">
+                <input type="text" name='code' class='code-input' required min="0" max="9" pattern="[0-9]{1}" />
+                <input type="text" name='code' class='code-input' required min="0" max="9" pattern="[0-9]{1}" />
+                <input type="text" name='code' class='code-input' required min="0" max="9" pattern="[0-9]{1}" />
+            </div>
+        </fieldset>
+        <div class="row">
+            <button type="button" id="check-verification" class="waves-effect waves-light btn" style="width: 130px;margin-bottom: 25px;">
+                Verificar
+            </button>
+            <div class="countdown-parent" style="display: none">
+                Puedes solicitar otro código dentro de&nbsp;
+                <div style="font-weight: bold" class="countdown"></div>
+            </div>
+            <button type="button" id="resend-verification" class="waves-effect btn-flat teed-primary-text">
+                Reenviar código de verificación
+            </button>
+        </div>
+    </div>
+    <div class="close-verification-parent row" style="display: none;">
+        <button type="button" id="close-verification" class="waves-effect btn-flat teed-primary-text">
+            Regresar
+        </button>
+    </div>
+</div>
+
+<script>
+    const inputElements = [...document.querySelectorAll('input.code-input')];
+    const originalPhoneNumber =
+    @if (Model.OriginalPhoneNumber != null)
+    {
+    <text>
+        "@Model.OriginalPhoneNumber"
+    </text>
+    } else
+    {
+    <text>
+        ""
+    </text>
+    };
+    $(document).ready(function () {
+      $('@Model.ElementSelector').click(function () {
+        var canContinue = true;
+        $('@Model.ElementsToCheckSelector').each(function (i, e) {
+          if ($(e).val() === '') {
+            canContinue = false;
+            if ($('[data-valmsg-for="' + $(e).attr('id') + '"]').children().length < 1)
+              $('[data-valmsg-for="' + $(e).attr('id') + '"]').append('<span id="' + $(e).attr('id') + '-error" class="">El campo es requerido.</span>');
+          }
+        });
+          if (new RegExp('^\\d{10}$').test($('#Phone').val()) && canContinue) {
+              if (originalPhoneNumber == $('#Phone').val())
+                  $('@Model.FormSelector').submit();
+              else {
+                  getCode();
+                  $('#phone-verification').modal('open');
+              }
+        } else if (!new RegExp('^\\d{10}$').test($('#Phone').val()))
+          alert('El número de celular no es válido, por favor, ingresa un numero de celular de 10 dígitos sin símbolos ni letras.');
+      });
+      $('#resend-verification').click(function () {
+        $('.preloader-parent').show();
+        $('#phone-verification .modal-content').hide();
+        $('#phone-verification .close-verification-parent').hide();
+        stopCountdown();
+        getCode();
+      });
+      $('#close-verification').click(function () {
+        closeVerificationModal();
+      });
+      $('#check-verification').click(function () {
+        sendVerificationCode();
+      });
+      $('.code-input').on('focus click', function () {
+        $(this)[0].setSelectionRange(0, 0);
+      })
+      setTimeout(function () {
+        $('#phone-verification').modal({
+          dismissible: false,
+        });
+      }, 200);
+    });
+
+    inputElements.forEach((ele, index) => {
+      ele.addEventListener('keydown', (e) => {
+        if (e.keyCode === 13 && $('.code-input').filter(function (i, e) { $(e).val() === '' }).length == 0) {
+          e.preventDefault();
+          sendVerificationCode();
+        }
+        else if (e.keyCode === 8 || e.keyCode === 46) {
+          e.preventDefault();
+          $(e.srcElement).val('');
+        }
+        else if (e.keyCode === 9 || (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+          e.preventDefault();
+          if (e.keyCode !== 9)
+            $(e.srcElement).val(e.key);
+          if ($(e.srcElement).next().length == 0)
+            $(e.srcElement).parent().children().first().focus();
+          else if (!$(e.srcElement).next().hasClass('code-input'))
+            $(e.srcElement).next().next().focus();
+          else
+            $(e.srcElement).next().focus();
+        }
+      })
+      ele.addEventListener('input', (e) => {
+        const [first, ...rest] = e.target.value;
+        e.target.value = first ?? '';
+        if (index !== inputElements.length - 1 && first !== undefined) {
+          inputElements[index + 1].focus();
+          inputElements[index + 1].value = rest.join('');
+          inputElements[index + 1].dispatchEvent(new Event('input'));
+        }
+      })
+    });
+
+    var interval;
+    var timer3 = "@Model.MinutesForCodeRequest:00";
+    function startCountdown() {
+      var timer2 = timer3;
+      $('.countdown').html(timer3);
+      $('.countdown-parent').css('display', 'flex');
+      interval = setInterval(function () {
+        var timer = timer2.split(':');
+        //by parsing integer, I avoid all extra string processing
+        var minutes = parseInt(timer[0], 10);
+        var seconds = parseInt(timer[1], 10);
+        --seconds;
+        minutes = (seconds < 0) ? --minutes : minutes;
+        if (minutes < 0) {
+          clearInterval(interval);
+          $('.countdown-parent').css('display', 'none');
+          $('#resend-verification').show();
+        }
+        seconds = (seconds < 0) ? 59 : seconds;
+        seconds = (seconds < 10) ? '0' + seconds : seconds;
+        //minutes = (minutes < 10) ?  minutes : minutes;
+        $('.countdown').html(minutes + ':' + seconds);
+        timer2 = minutes + ':' + seconds;
+      }, 1000);
+    }
+
+    function getCode() {
+      $('#phone-verification .verification-error').hide();
+      $('#resend-verification').hide();
+      $('.code-input').val('');
+      $.ajax({
+        cache: false,
+        type: "POST",
+        url: "/Customer/SmsVerification",
+        data: $('@Model.FormSelector').serialize(),
+        success: function (data) {
+          startCountdown();
+          $('.preloader-parent').hide();
+          $('#phone-verification .modal-content').show();
+          $('#phone-verification .close-verification-parent').show();
+        },
+        error: function (err) {
+          $('.preloader-parent').hide();
+          $('#phone-verification .close-verification-parent').show();
+          $('#phone-verification .verification-error').html('<span>' +
+            (!err.responseText.includes('[C]') && !err.responseText.includes('DOCTYPE') ?
+              err.responseText :
+              'No pudimos crear tu código de verificación, por favor inténtalo más tardes. Si el problema persiste, contáctanos') + '.'
+            + '</span>');
+          $('#phone-verification .verification-error').show();
+          console.log(err.responseText);
+        }
+      });
+    }
+
+    function sendVerificationCode() {
+      $('#phone-verification .verification-error').hide();
+      var $inputs = $('#check-verification, #close-verification, #resend-verification, .code-input');
+      $inputs.attr('disabled', 'disabled');
+      $('.preloader-parent').show();
+      const code = inputElements
+        .filter(({ name }) => name)
+        .map(({ value }) => value)
+        .join('');
+      $.ajax({
+        cache: false,
+        type: "GET",
+        url: "/Customer/ValidateSmsVerificationCode?phoneNumber=" +
+          $('#Phone').val() +
+          "&code=" + code,
+        success: function (data) {
+            stopCountdown();
+            $('#phone-verification .modal-content').hide();
+            $('#phone-verification .close-verification-parent').hide();
+            $('.verification-success').show();
+            $('@Model.FormSelector').submit();
+        },
+        error: function (err) {
+          $('.preloader-parent').hide();
+          $inputs.removeAttr('disabled');
+          $('#phone-verification .close-verification-parent').show();
+          $('#phone-verification .verification-error').html('<span>' +
+            (!err.responseText.includes('[C]') && !err.responseText.includes('DOCTYPE') ?
+              err.responseText :
+              'Hubo un error al verificar el codigo que ingresaste, por favor, inténtalo de nuevo o solicita otro codigo de verificaciónModel Si el problema persiste, contáctanos') + '.'
+            + '</span>');
+          $('#phone-verification .verification-error').show();
+          console.log(err.responseText);
+        }
+      });
+    }
+
+    function stopCountdown() {
+      if (typeof interval != 'undefined')
+        clearInterval(interval);
+    }
+
+    function closeVerificationModal() {
+      $('#phone-verification').modal('close');
+      $('#Phone').focus();
+      stopCountdown();
+      $('.preloader-parent').show();
+      $('#phone-verification .modal-content').hide();
+      $('#phone-verification .close-verification-parent').hide();
+      $('#phone-verification .verification-error').hide();
+    }
+</script>

@@ -1,0 +1,313 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingRegion.CreateEditViewModel
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-6">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Nombre de la región</label>
+                                    <div title="Ingresa un nombre para poder identificar la región" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Zonas de entrega que integran esta región</label>
+                                    <div title="Aquí se muestrán las zonas seleccionadas para esta región" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control valid" id="ZoneNames" name="ZoneNames" rows="6" readonly="">@Model.ZoneNames</textarea>
+                            </div>
+                            <div style="display: none;">
+                                <nop-editor asp-for="ZoneIds" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Número de pedidos para el primer horario</label>
+                                    <div title="Número de pedidos para el horario de 1:00 PM - 3:00 PM" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Schedule1Quantity" />
+                                <span asp-validation-for="Schedule1Quantity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Número de pedidos para el segundo horario</label>
+                                    <div title="Número de pedidos para el horario de 3:00 PM - 5:00 PM" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Schedule2Quantity" />
+                                <span asp-validation-for="Schedule2Quantity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Número de pedidos para el tercer horario</label>
+                                    <div title="Número de pedidos para el horario de 5:00 PM - 7:00 PM" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Schedule3Quantity" />
+                                <span asp-validation-for="Schedule3Quantity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Número de pedidos para el cuarto horario</label>
+                                    <div title="Número de pedidos para el horario de 7:00 PM - 9:00 PM" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Schedule4Quantity" />
+                                <span asp-validation-for="Schedule4Quantity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        @if (Model.CurrentOrderCount != null && Model.CurrentOrderCount.Count > 0)
+                        {
+                            <div>
+                                <h4>Cantidad máxima de pedidos en un solo día de los últimos 30 días de las zonas seleccionadas:</h4>
+                                @foreach (var item in Model.CurrentOrderCount)
+                                {
+                                    <strong>@(item.Key):</strong> @item.Value<br />
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input class="form-control text-box single-line" id="ZoneName" value="Coloca el mouse sobre una de las zonas del mapa para ver su nombre" readonly>
+                            </div>
+                        </div>
+                        <div id="map"></div>
+                        <div style="margin-top: 1em">
+                            <table>
+                                <tr>
+                                    <td style="padding: 5px 0"><div style="width:20px;height:20px;background:#3fff2e;margin-right:10px"></td>
+                                    <td style="padding: 5px 0"><span>Zonas seleccionadas para esta región</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0"><div style="width:20px;height:20px;background:#e21f1f;margin-right:10px"></td>
+                                    <td style="padding: 5px 0"><span>Zonas ocupadas para otra región</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var allZondesCp = [];
+    var takenZones = [];
+    var selectedZones = [];
+    $.each("@Model.ZoneIds".split(','), function (i, e) {
+        if (e != "")
+            selectedZones.push(e);
+    });
+
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    function initMap() {
+        $.ajax({
+            url: '/Admin/ShippingRegion/GetTakenZones?regionId=' + @(Model?.Id ?? 0),
+            method: 'GET',
+            success: function (data) {
+                takenZones = data;
+                createMap();
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+    }
+
+    function createMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 19.3170078, lng: -99.2090609 },
+            disableDefaultUI: true,
+            zoomControl: true,
+            zoom: 13
+        });
+        map.set('styles', myStyle);
+        map.data.loadGeoJson('/shippingarea/GetGeoJson');
+
+        // zoom to show all the features
+        $.ajax({
+            url: '/Admin/ShippingRegion/GetAllPostalCodesOfRegions?notThisRegion=' + @(Model?.Id ?? 0),
+            method: 'GET',
+            success: function (data) {
+                console.log(data);
+                $.each(data, function (i, e) {
+                    allZondesCp.push({ id: e.Id, zoneName: e.ZoneName, regionId: e.RegionId, pcs: e.Pcs, color: e.Color });
+                });
+
+                var bounds = new google.maps.LatLngBounds();
+                map.data.addListener('addfeature', function (e) {
+                    var feature = e.feature.j;
+                    if (typeof feature == 'undefined')
+                        feature = e.feature.h;
+                    var current = allZondesCp.find(x => x.pcs.includes(feature.d_cp));
+                    e.feature.setProperty("id", current.regionId);
+                    e.feature.setProperty("name", current.zoneName);
+                    e.feature.setProperty("zoneId", current.id);
+                    if (selectedZones.indexOf(e.feature.getProperty('zoneId')) > -1) {
+                        e.feature.setProperty('isSelected', true);
+                    }
+                    else if (takenZones.indexOf(e.feature.getProperty('zoneId')) > -1) {
+                        e.feature.setProperty('isTaken', true);
+                    }
+                    processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+                    map.fitBounds(bounds);
+                });
+
+                map.data.setStyle(function (feature) {
+                    var fillColor = '#919191';
+                    var strokeColor = '#919191'
+
+                    var selectedColor = '#3fff2e';
+                    var takenColor = '#e21f1f';
+
+                    var allZones = allZondesCp;
+                    if (typeof feature.getProperty('zoneId') != 'undefined' &&
+                        feature.getProperty('zoneId') != '' &&
+                        feature.getProperty('zoneId') != null) {
+                        var current = allZones.find(x => x.id.includes(feature.getProperty('zoneId')));
+                        strokeColor = current.color != 'null' ? (current.color.includes('#') ? current.color : "#" + current.color) : selectedColor;
+                    }
+                    if (feature.getProperty('isSelected')) {
+                        fillColor = selectedColor;
+                        strokeColor = selectedColor;
+                    }
+                    else if (feature.getProperty('isTaken')) {
+                        fillColor = takenColor;
+                        strokeColor = takenColor;
+                    }
+                    return ({
+                        fillColor: fillColor,
+                        strokeColor: strokeColor,
+                        strokeWeight: 3
+                    });
+                });
+
+                map.data.addListener("mouseover", (event) => {
+                    var f = event.feature;
+                    map.data.revertStyle();
+                    map.data.forEach(function (feature) {
+                        if (f.getProperty('zoneId') == feature.getProperty('zoneId')) {
+                            map.data.overrideStyle(feature, { strokeWeight: 8 });
+                        }
+                    });
+                    $('#ZoneName').val(f.getProperty('name'));
+                });
+                map.data.addListener("mouseout", (event) => {
+                    map.data.revertStyle();
+                    $('#ZoneName').val('Coloca el mouse sobre una de las zonas del mapa para ver su nombre');
+                });
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+
+        // zoom on click
+        map.data.addListener('click', function (e) {
+            if (typeof e.feature.getProperty('id') == 'undefined' ||
+                e.feature.getProperty('id') == '' ||
+                e.feature.getProperty('id') == null) {
+                // The new requeriment request to avoid click if already selected
+                let currentPostalCodes = "";
+                let extra = "";
+                if (currentPostalCodes) {
+                    extra = ", "
+                }
+                var f = e.feature;
+                if (!e.feature.getProperty('isSelected')) {
+                    $("#ZoneNames").val($("#ZoneNames").val() + e.feature.getProperty('name') + ", ");
+                    $("#ZoneIds").val($("#ZoneIds").val() + e.feature.getProperty('zoneId') + ",");
+                    map.data.forEach(function (feature) {
+                        if (f.getProperty('zoneId') == feature.getProperty('zoneId')) {
+                            feature.setProperty('isSelected', true);
+                            console.log(feature);
+                        }
+                    });
+                }
+                else {
+                    if (!$("#ZoneNames").val().includes(e.feature.getProperty('name') + ",")) {
+                        $("#ZoneNames").val($("#ZoneNames").val() + e.feature.getProperty('name') + ", ");
+                        $("#ZoneIds").val($("#ZoneIds").val() + e.feature.getProperty('zoneId') + ",");
+                    } else {
+                        $("#ZoneNames").val($("#ZoneNames").val().replace(e.feature.getProperty('name') + ", ", ""));
+                        $("#ZoneIds").val($("#ZoneIds").val().replace(e.feature.getProperty('zoneId') + ",", ""));
+                    }
+                    map.data.forEach(function (feature) {
+                        if (f.getProperty('zoneId') == feature.getProperty('zoneId')) {
+                            feature.setProperty('isSelected', false);
+                            console.log(feature);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function processPoints(geometry, callback, thisArg) {
+        if (geometry instanceof google.maps.LatLng) {
+            callback.call(thisArg, geometry);
+        } else if (geometry instanceof google.maps.Data.Point) {
+            callback.call(thisArg, geometry.get());
+        } else {
+            geometry.getArray().forEach(function (g) {
+                processPoints(g, callback, thisArg);
+            });
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap"
+        async defer></script>

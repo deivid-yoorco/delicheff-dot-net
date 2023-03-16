@@ -1,0 +1,975 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Groceries</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Groceries</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+  </Target>
+  <ItemGroup>
+    <None Remove="logo.jpg" />
+    <None Remove="plugin.json" />
+    <None Remove="src\css\custom.css" />
+    <None Remove="src\files\manual_franquicia.mp4" />
+    <None Remove="src\files\plantilla.xlsx" />
+    <None Remove="src\files\sql\customer-complete-NewsLetter.sql" />
+    <None Remove="src\files\sql\generic-attributes-customer-dateOfBirth.sql" />
+    <None Remove="src\files\sql\generic-attributes-customer-firstName.sql" />
+    <None Remove="src\files\sql\generic-attributes-customer-lastName.sql" />
+    <None Remove="src\files\sql\generic-attributes-customer-phone.sql" />
+    <None Remove="src\files\sql\newsLetter.sql" />
+    <None Remove="src\files\sql\only-newsLetter.sql" />
+    <None Remove="src\files\sql\order-reports-with-no-manufacturer.sql" />
+    <None Remove="src\files\sql\products-with-low-margin-13.sql" />
+    <None Remove="src\files\sql\products-with-low-margin.sql" />
+    <None Remove="src\files\sql\products-with-morethanone-child-categories.sql" />
+    <None Remove="src\files\sql\products-with-morethanone-parent-categories.sql" />
+    <None Remove="src\files\sql\products-without-child-categories.sql" />
+    <None Remove="src\files\sql\products-without-earnings.sql" />
+    <None Remove="src\files\sql\products-without-manufacturer.sql" />
+    <None Remove="src\files\sql\products-without-parent-categories.sql" />
+    <None Remove="src\files\sql\products-without-picture.sql" />
+    <None Remove="src\files\sql\products_sku_repeated.sql" />
+    <None Remove="src\js\aguacate.svg" />
+    <None Remove="src\js\confetti.js" />
+    <None Remove="src\js\custom.js" />
+    <None Remove="src\js\oms.min.js" />
+    <None Remove="src\ui-choose\icon-selected.png" />
+    <None Remove="src\ui-choose\ui-choose.css" />
+    <None Remove="src\ui-choose\ui-choose.js" />
+    <None Remove="Views\Billing\BillingList.cshtml" />
+    <None Remove="Views\Billing\Create.cshtml" />
+    <None Remove="Views\Billing\Edit.cshtml" />
+    <None Remove="Views\Billing\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\Billing\_Files.cshtml" />
+    <None Remove="Views\BuyerPayment\BuyerPaymentDashboard.cshtml" />
+    <None Remove="Views\BuyerPayment\Edit.cshtml" />
+    <None Remove="Views\BuyerPayment\List.cshtml" />
+    <None Remove="Views\CancelOrderButton\CancelOrderButton.cshtml" />
+    <None Remove="Views\CategoryPrice\_ConfigureData.cshtml" />
+    <None Remove="Views\Configure.cshtml" />
+    <None Remove="Views\CorcelCustomer\ConvertedCustomer.cshtml" />
+    <None Remove="Views\CorcelProduct\Index.cshtml" />
+    <None Remove="Views\CorporateCard\CorporateCardDashboard.cshtml" />
+    <None Remove="Views\CorporateCard\Index.cshtml" />
+    <None Remove="Views\CorporateCard\List.cshtml" />
+    <None Remove="Views\DefaultManufacturer\Default.cshtml" />
+    <None Remove="Views\Discount\DiscountsBreakdown.cshtml" />
+    <None Remove="Views\Discount\List.cshtml" />
+    <None Remove="Views\ExportExcelOrdersForDay\ExportExcelOrdersForDay.cshtml" />
+    <None Remove="Views\FestiveDate\List.cshtml" />
+    <None Remove="Views\FinalRouteReport\List.cshtml" />
+    <None Remove="Views\FinalRouteReport\RouteReport.cshtml" />
+    <None Remove="Views\FirstOrderList\DateList.cshtml" />
+    <None Remove="Views\FirstOrderList\OrderList.cshtml" />
+    <None Remove="Views\PrintedCouponBook\Create.cshtml" />
+    <None Remove="Views\PrintedCouponBook\Edit.cshtml" />
+    <None Remove="Views\PrintedCouponBook\List.cshtml" />
+    <None Remove="Views\PrintedCouponBook\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\Franchise\AssignmentCheck.cshtml" />
+    <None Remove="Views\Franchise\_Employees.cshtml" />
+    <None Remove="Views\Franchise\_Payments.cshtml" />
+    <None Remove="Views\Franchise\_Statement.cshtml" />
+    <None Remove="Views\Franchise\_Vehicles.cshtml" />
+    <None Remove="Views\HeatMap\Index.cshtml" />
+    <None Remove="Views\Franchise\Create.cshtml" />
+    <None Remove="Views\Franchise\Edit.cshtml" />
+    <None Remove="Views\Franchise\FranchiseList.cshtml" />
+    <None Remove="Views\Franchise\Info.cshtml" />
+    <None Remove="Views\Franchise\_Bills.cshtml" />
+    <None Remove="Views\Franchise\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\Franchise\_Resume.cshtml" />
+    <None Remove="Views\Franchise\_Statistics.cshtml" />
+    <None Remove="Views\Franchise\_WeekDetails.cshtml" />
+    <None Remove="Views\Incidents\Create.cshtml" />
+    <None Remove="Views\Incidents\Edit.cshtml" />
+    <None Remove="Views\Incidents\IncidentDatesList.cshtml" />
+    <None Remove="Views\Incidents\IncidentsList.cshtml" />
+    <None Remove="Views\Incidents\IncidentVehiclesList.cshtml" />
+    <None Remove="Views\Incidents\_Files.cshtml" />
+    <None Remove="Views\MarketingDashboardGoalsToday\GoalsToday.cshtml" />
+    <None Remove="Views\MonitorHq\BalanceUsageMonitor.cshtml" />
+    <None Remove="Views\MonitorHq\Dashboard1.cshtml" />
+    <None Remove="Views\MonitorHq\Dashboard2.cshtml" />
+    <None Remove="Views\NewsLetterButton\NewsLetterButton.cshtml" />
+    <None Remove="Views\OperationalErrors\Index.cshtml" />
+    <None Remove="Views\OptimizationRequest\Index.cshtml" />
+    <None Remove="Views\OrderItemBuyer\Configure.cshtml" />
+    <None Remove="Views\OrderItemBuyer\_Configure.AssignBuyer.cshtml" />
+    <None Remove="Views\OrderOptionButtons\Default.cshtml" />
+    <None Remove="Views\NotDeliveredButton\NotDeliveredButton.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\CreateOrderReports.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\DeliveryDateList.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\EditOrderReports.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\ManagerExpenses.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\OrderNoBuyedReportDetails.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\OrderReportDetails.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\OrderReportStatus.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\OrderSuperReportDetails.cshtml" />
+    <None Remove="Views\OrderDeliveryReports\ValidityNewManufacturers.cshtml" />
+    <None Remove="Views\CorporateCard\Create.cshtml" />
+    <None Remove="Views\CorporateCard\Edit.cshtml" />
+    <None Remove="Views\CorporateCard\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\Order\Monitor.cshtml" />
+    <None Remove="Views\Order\MonitorDateList.cshtml" />
+    <None Remove="Views\Order\NotDeliveredOrderItems.cshtml" />
+    <None Remove="Views\Payments\Create.cshtml" />
+    <None Remove="Views\Payments\Edit.cshtml" />
+    <None Remove="Views\Payments\List.cshtml" />
+    <None Remove="Views\Payments\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\FestiveDate\Create.cshtml" />
+    <None Remove="Views\FestiveDate\Edit.cshtml" />
+    <None Remove="Views\FestiveDate\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\PenaltiesVariables\Create.cshtml" />
+    <None Remove="Views\PenaltiesVariables\Edit.cshtml" />
+    <None Remove="Views\PenaltiesVariables\PenaltiesList.cshtml" />
+    <None Remove="Views\PenaltiesVariables\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\PrintReport\BuyerReport.cshtml" />
+    <None Remove="Views\PrintReport\DeliveryReport.cshtml" />
+    <None Remove="Views\Product\_NotDeliveredHistory.cshtml" />
+    <None Remove="Views\RouteFranchise\RouteFranchise.cshtml" />
+    <None Remove="Views\RouteRescue\AssignRescue.cshtml" />
+    <None Remove="Views\RouteRescue\List.cshtml" />
+    <None Remove="Views\Shared\Components\BuyerPaymentManufacturer\Default.cshtml" />
+    <None Remove="Views\Shared\Components\CustomerData\Default.cshtml" />
+    <None Remove="Views\Shared\Components\Default.cshtml" />
+    <None Remove="Views\Shared\Components\LimitedCustomerRoles\Default.cshtml" />
+    <None Remove="Views\Shared\Components\ManufacturerBankAccount\Default.cshtml" />
+    <None Remove="Views\Shared\Components\MarkAsUnpaidButton\Default.cshtml" />
+    <None Remove="Views\Shared\Components\NotDeliveredProductButton\Default.cshtml" />
+    <None Remove="Views\Shared\Components\OrderAlert\Default.cshtml" />
+    <None Remove="Views\Shared\Components\OrderSuspiciousCheck\Default.cshtml" />
+    <None Remove="Views\Shared\Components\ProductMarginCalculation\Default.cshtml" />
+    <None Remove="Views\ShippingRegion\EditGlobal.cshtml" />
+    <None Remove="Views\ShippingRegion\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\PenaltiesCatalog\Create.cshtml" />
+    <None Remove="Views\PenaltiesCatalog\Edit.cshtml" />
+    <None Remove="Views\PenaltiesCatalog\PenaltiesList.cshtml" />
+    <None Remove="Views\PenaltiesCatalog\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\RatesAndBonuses\Index.cshtml" />
+    <None Remove="Views\ShippingRouteUser\AssignSubstituteBuyers.cshtml" />
+    <None Remove="Views\ShippingRouteUser\ListDatesAssignBuyers.cshtml" />
+    <None Remove="Views\ShippingRoute\MonitorRoutes.cshtml" />
+    <None Remove="Views\ShippingRoute\MonitorRoutesList.cshtml" />
+    <None Remove="Views\ShippingRoute\RouteMap.cshtml" />
+    <None Remove="Views\ShippingRegion\Create.cshtml" />
+    <None Remove="Views\ShippingRegion\Edit.cshtml" />
+    <None Remove="Views\ShippingRegion\List.cshtml" />
+    <None Remove="Views\ShippingVehicleRoute\AssignVehicles.cshtml" />
+    <None Remove="Views\ShippingVehicleRoute\List.cshtml" />
+    <None Remove="Views\ShippingVehicle\Create.cshtml" />
+    <None Remove="Views\ShippingVehicle\Edit.cshtml" />
+    <None Remove="Views\ShippingVehicle\List.cshtml" />
+    <None Remove="Views\ShippingVehicle\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\TipsWithCard\List.cshtml" />
+    <None Remove="Views\OrderItemBuyer\AssignBuyers.cshtml" />
+    <None Remove="Views\OrderItemBuyer\AssignRouteOrderList.cshtml" />
+    <None Remove="Views\OrderItemBuyer\BuyerBar.cshtml" />
+    <None Remove="Views\OrderItemBuyer\List.cshtml" />
+    <None Remove="Views\OrderReport\Create.cshtml" />
+    <None Remove="Views\OrderReport\Edit.cshtml" />
+    <None Remove="Views\OrderReport\_EditInfo.cshtml" />
+    <None Remove="Views\OrderReport\_EditLog.cshtml" />
+    <None Remove="Views\OrderType\Create.cshtml" />
+    <None Remove="Views\OrderType\Edit.cshtml" />
+    <None Remove="Views\OrderType\List.cshtml" />
+    <None Remove="Views\OrderType\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\PyL\PyL.cshtml" />
+    <None Remove="Views\PyL\PyLOrders.cshtml" />
+    <None Remove="Views\ShippingArea\Configure.cshtml" />
+    <None Remove="Views\ShippingArea\InvalidPostalCodes.cshtml" />
+    <None Remove="Views\ShippingRouteUser\AssignRoutes.cshtml" />
+    <None Remove="Views\ShippingZone\AssignZoneOrder.cshtml" />
+    <None Remove="Views\ShippingZone\AssignZoneOrderList.cshtml" />
+    <None Remove="Views\ShippingZone\Create.cshtml" />
+    <None Remove="Views\ShippingZone\Edit.cshtml" />
+    <None Remove="Views\ShippingZone\List.cshtml" />
+    <None Remove="Views\ShippingRouteUser\AssignRouteOrderList.cshtml" />
+    <None Remove="Views\ShippingRouteUser\Create.cshtml" />
+    <None Remove="Views\ShippingRouteUser\CreateOrdersReports.cshtml" />
+    <None Remove="Views\ShippingRouteUser\Edit.cshtml" />
+    <None Remove="Views\ShippingRouteUser\EditOrdersReports.cshtml" />
+    <None Remove="Views\ShippingRouteUser\List.cshtml" />
+    <None Remove="Views\ShippingRoute\AssignRouteOrder.cshtml" />
+    <None Remove="Views\ShippingRoute\Create.cshtml" />
+    <None Remove="Views\ShippingRoute\Edit.cshtml" />
+    <None Remove="Views\ShippingRoute\List.cshtml" />
+    <None Remove="Views\UpdateCost\Index.cshtml" />
+    <None Remove="Views\UpdateCost\_Index.Less30Days.cshtml" />
+    <None Remove="Views\UpdateCost\_Index.More30Days.cshtml" />
+    <None Remove="Views\UpdateCost\_Index.NoReportedProducts.cshtml" />
+    <None Remove="Views\UpdatePrices\Index.cshtml" />
+    <None Remove="Views\UpdatePrices\UpdateCategoryPrices.cshtml" />
+    <None Remove="Views\UrbanPromoter\AddCoupon.cshtml" />
+    <None Remove="Views\UrbanPromoter\Create.cshtml" />
+    <None Remove="Views\UrbanPromoter\Edit.cshtml" />
+    <None Remove="Views\UrbanPromoter\Index.cshtml" />
+    <None Remove="Views\UrbanPromoter\PublicView.cshtml" />
+    <None Remove="Views\UrbanPromoter\View.cshtml" />
+    <None Remove="Views\UrbanPromoter\_CreateOrUpdate.cshtml" />
+    <None Remove="Views\UrbanPromoter\_View.AccountStatus.cshtml" />
+    <None Remove="Views\UrbanPromoter\_View.Coupons.cshtml" />
+    <None Remove="Views\UrbanPromoter\_View.General.cshtml" />
+    <None Remove="Views\UrbanPromoter\_View.Payments.cshtml" />
+    <None Remove="Views\Warnings\CostDecreaseWarnings.cshtml" />
+    <None Remove="Views\Warnings\CostIncreaseWarnings.cshtml" />
+    <None Remove="Views\Warnings\Index.cshtml" />
+    <None Remove="Views\Warnings\_Warnings.CostsDecrease.cshtml" />
+    <None Remove="Views\Warnings\_Warnings.CostsIncrease.cshtml" />
+    <None Remove="Views\Warnings\_Warnings.PublishedProducts.cshtml" />
+    <None Remove="Views\_ConfigureChildren.cshtml" />
+    <None Remove="Views\_ConfigureParent.cshtml" />
+    <None Remove="Views\_ViewImports.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="logo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\css\custom.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\manual_franquicia.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\plantilla.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\generic-attributes-customer-firstName.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\generic-attributes-customer-lastName.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\generic-attributes-customer-phone.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\generic-attributes-customer-dateOfBirth.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\customer-complete-NewsLetter.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\newsLetter.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\order-reports-with-no-manufacturer.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\only-newsLetter.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-with-low-margin-13.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-with-morethanone-parent-categories.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-with-morethanone-child-categories.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-with-low-margin.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-without-picture.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-without-earnings.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-without-parent-categories.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-without-child-categories.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products-without-manufacturer.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\files\sql\products_sku_repeated.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\js\aguacate.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\js\confetti.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\js\custom.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\js\oms.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\ui-choose\icon-selected.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\ui-choose\ui-choose.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="src\ui-choose\ui-choose.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Billing\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Billing\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Billing\BillingList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\BuyerPayment\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\BuyerPayment\BuyerPaymentDashboard.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\BuyerPayment\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\CorcelCustomer\ConvertedCustomer.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\CorcelProduct\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CorporateCard\CorporateCardDashboard.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CorporateCard\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\FinalRouteReport\RouteReport.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\FinalRouteReport\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\FirstOrderList\OrderList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\FirstOrderList\DateList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PrintedCouponBook\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PrintedCouponBook\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PrintedCouponBook\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\PrintedCouponBook\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\_Employees.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\MarketingDashboardGoalsToday\GoalsToday.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\MonitorHq\BalanceUsageMonitor.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\NewsLetterButton\NewsLetterButton.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\FestiveDate\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\FestiveDate\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\FestiveDate\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\FestiveDate\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderItemBuyer\_Configure.AssignBuyer.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CorporateCard\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CorporateCard\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CorporateCard\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\CorporateCard\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PrintReport\BuyerReport.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\PrintReport\DeliveryReport.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Product\_NotDeliveredHistory.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\RouteFranchise\RouteFranchise.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CancelOrderButton\CancelOrderButton.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\DefaultManufacturer\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Discount\DiscountsBreakdown.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Discount\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ExportExcelOrdersForDay\ExportExcelOrdersForDay.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\AssignmentCheck.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Franchise\_Payments.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Franchise\_Statement.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\MonitorHq\Dashboard2.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\MonitorHq\Dashboard1.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\OperationalErrors\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OptimizationRequest\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderItemBuyer\Configure.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderOptionButtons\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\NotDeliveredButton\NotDeliveredButton.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Order\MonitorDateList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payments\_Files.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Billing\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CategoryPrice\ConfigureCategoryPrice.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CategoryPrice\_ConfigureChildren.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CategoryPrice\_ConfigureData.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\CategoryPrice\_ConfigureParent.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\HeatMap\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Franchise\_Bills.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Franchise\_Statistics.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\_WeekDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Franchise\_Resume.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Franchise\_Vehicles.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Franchise\FranchiseList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Incidents\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Incidents\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Incidents\IncidentVehiclesList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Incidents\IncidentDatesList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Incidents\IncidentsList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Incidents\_Files.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\ManagerExpenses.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\OrderSuperReportDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\OrderNoBuyedReportDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\ValidityNewManufacturers.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\OrderReportDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\OrderReportStatus.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Order\Monitor.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Order\NotDeliveredOrderItems.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payments\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payments\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Payments\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Payments\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PenaltiesVariables\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PenaltiesVariables\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PenaltiesVariables\PenaltiesList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\PenaltiesVariables\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PenaltiesCatalog\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PenaltiesCatalog\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PenaltiesCatalog\PenaltiesList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\PenaltiesCatalog\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\RatesAndBonuses\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\RouteRescue\AssignRescue.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\RouteRescue\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\Shared\Components\BuyerPaymentManufacturer\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\CustomerData\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\LimitedCustomerRoles\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\ManufacturerBankAccount\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\ManufacturerBuyerLog\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\MarkAsUnpaidButton\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\NotDeliveredProductButton\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\OrderAlert\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\OrderSuspiciousCheck\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Shared\Components\ProductMarginCalculation\Default.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRegion\EditGlobal.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRegion\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRouteUser\AssignSubstituteBuyers.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRouteUser\ListDatesAssignBuyers.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingRoute\RouteMap.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRoute\MonitorRoutes.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRoute\MonitorRoutesList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRegion\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRegion\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRegion\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingVehicleRoute\AssignVehicles.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingVehicleRoute\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingVehicle\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingVehicle\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingVehicle\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingVehicle\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\TipsWithCard\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderItemBuyer\AssignBuyers.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderItemBuyer\BuyerBar.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderType\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderType\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderType\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderType\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingRouteUser\AssignRoutes.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingZone\AssignZoneOrder.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingZone\AssignZoneOrderList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingZone\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingZone\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingZone\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingRouteUser\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRouteUser\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRoute\AssignRouteOrder.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRoute\AssignRouteOrderList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderItemBuyer\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderReport\_EditLog.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderReport\_EditInfo.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderReport\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderReport\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\PyL\PyLOrders.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\PyL\PyL.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\ShippingArea\Configure.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\CreateOrderReports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\EditOrderReports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\OrderDeliveryReports\DeliveryDateList.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingArea\InvalidPostalCodes.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingRouteUser\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\ShippingRoute\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRoute\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\ShippingRoute\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Include="Views\UpdateCost\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UpdateCost\_Index.NoReportedProducts.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\UpdateCost\_Index.More30Days.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\UpdateCost\_Index.Less30Days.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Views\UpdatePrices\UpdateCategoryPrices.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UpdatePrices\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\AddCoupon.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\PublicView.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\View.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\_CreateOrUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\_View.AccountStatus.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\_View.Coupons.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\_View.General.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UrbanPromoter\_View.Payments.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Warnings\CostDecreaseWarnings.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Warnings\CostIncreaseWarnings.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Warnings\_Warnings.CostsDecrease.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Warnings\_Warnings.CostsIncrease.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Warnings\_Warnings.PublishedProducts.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Warnings\Index.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="itext7" Version="7.1.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
+    <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

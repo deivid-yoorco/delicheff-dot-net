@@ -1,0 +1,112 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.VerifyModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var now = DateTime.Now;
+}
+<form asp-action="VerifyAndCreate" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar paciente
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de pacientes</a>
+            </small>
+        </h1>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Email">Correo electrónico o Teléfono </label>
+                                </div>
+                                <div class="col-md-9">
+
+                                    <div class="input-group">
+                                        <input asp-for="EmailPhone" type="hidden" id="EmailPhone" />
+                                        <input asp-for="CustomerId" type="hidden" id="CustomerId" />
+                                        <input id="Customers" />
+                                        <script>
+                                                $(document).ready(function () {
+                                                    $("#Customers").kendoComboBox({
+                                                        placeholder: "Ingresa el teléfono o correo electrónico del paciente...",
+                                                        dataTextField: "Customer",
+                                                        dataValueField: "Id",
+                                                        filter: "contains",
+                                                        autoBind: true,
+                                                        minLength: 1,
+                                                        dataSource: {
+                                                            type: "json",
+                                                            transport: {
+                                                                read: {
+                                                                    url: "@Html.Raw(Url.Action("VerifyCustomerListData", "Patient"))",
+                                                                    type: "POST",
+                                                                    data: addAntiForgeryToken
+                                                                }
+                                                            }
+                                                        },
+                                                        dataBound: onDataBound,
+                                                        select: onSelect,
+                                                        change: onChange
+                                                    });
+                                                    function onDataBound(e) {
+
+                                                    };
+                                                    function onSelect(e) {
+                                                        $("#CustomerId").val(this.dataItem(e.item.index()).Id);
+                                                    };
+                                                    function onChange(e) {
+                                                        if (this.selectedIndex == -1) {
+                                                            $("#EmailPhone").val($("#Customers").val());
+                                                            $("#Customers").data("kendoComboBox").value("");
+
+                                                        }
+                                                    };
+
+
+
+                                            });
+
+                                        </script>
+                                        <button class="btn btn-default" type="submit">Continuar</button>
+                                    </div>
+
+                                    <em>Ingresa el número telefónico o correo electrónico del paciente.</em>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                   
+                                </div>
+                            </div>
+
+                            @*
+
+                            <div class="col-md-9">
+                                    <div class="input-group">
+                                        <input asp-for="Email" type="text" class="form-control" placeholder="Correo electrónico...">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="submit">Continuar</button>
+                                        </span>
+                                    </div>
+                                    <em>Dejar en blanco si el paciente no tiene correo electrónico.</em>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            *@
+
+                            @*<div class="col-md-3">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-check"></i>
+                Verificar
+            </button>
+        </div>*@
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

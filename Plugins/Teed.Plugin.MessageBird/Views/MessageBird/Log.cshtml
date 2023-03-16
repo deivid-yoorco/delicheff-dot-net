@@ -1,0 +1,21 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MessageBird.Log");
+}
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Logs de MessageBird
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="messages-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+@await Component.InvokeAsync("AdminWidget", new { widgetZone = "whatsapp-kendo-script", additionalData = 0 })

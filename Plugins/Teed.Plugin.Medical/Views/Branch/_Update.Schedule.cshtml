@@ -1,0 +1,298 @@
+﻿@model Teed.Plugin.Medical.Models.Branch.BranchModel
+@{
+    Html.SetActiveMenuItemSystemName("TeedBranches.Branches");
+}
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3 class="col-md-offset-1">Lunes a Viernes</h3>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label for="WeekOpenHour">Apertura</label>
+                        </div>
+                        <div class="col-md-2">
+                            <select style="text-align-last:center;" class="form-control" asp-for="WeekOpenHour">
+                                <option value="">Hora</option>
+                                @for (int i = 0; i < 24; i++)
+                                {
+                                    @if (i < 10)
+                                    {
+                                        <option value="@i">0@(i)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="WeekOpenHour" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <select style="text-align-last:center;" class="form-control" asp-for="WeekOpenMinute">
+                                <option value="">Minutos</option>
+                                @for (int i = 0; i < 60; i++)
+                                {
+                                    @if (i < 10)
+                                    {
+                                        <option value="@i">0@(i)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="WeekOpenMinute" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label for="ZipPostalCode">Cierre</label>
+                        </div>
+                        <div class="col-md-2">
+                            <select style="text-align-last:center;" class="form-control" asp-for="WeekCloseHour">
+                                <option value="">Hora</option>
+                                @for (int i = 0; i < 24; i++)
+                                {
+                                    @if (i < 10)
+                                    {
+                                        <option value="@i">0@(i)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="WeekCloseHour" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <select style="text-align-last:center;" class="form-control" asp-for="WeekCloseMinute">
+                                <option value="">Minutos</option>
+                                @for (int i = 0; i < 60; i++)
+                                {
+                                    @if (i < 10)
+                                    {
+                                        <option value="@i">0@(i)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="WeekCloseMinute" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <h3 class="col-md-offset-1">Sábados</h3>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>¿Trabaja los sábados?</label>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="checkbox" asp-for="WorksOnSaturday" id="saturdayCheckbox" />
+                        </div>
+                    </div>
+                    <div id="worksOnSaturday">
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Saturday">Apertura</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SaturdayOpenHour">
+                                    <option value="">Hora</option>
+                                    @for (int i = 0; i < 24; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SaturdayOpenHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SaturdayOpenMinute">
+                                    <option value="">Minutos</option>
+                                    @for (int i = 0; i < 60; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SaturdayOpenMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Saturday">Cierre</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SaturdayCloseHour">
+                                    <option value="">Hora</option>
+                                    @for (int i = 0; i < 24; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SaturdayCloseHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SaturdayCloseMinute">
+                                    <option value="">Minutos</option>
+                                    @for (int i = 0; i < 60; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SaturdayCloseMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="col-md-offset-1">Domingos</h3>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>¿Trabaja los domingos?</label>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="checkbox" asp-for="WorksOnSunday" id="sundayCheckbox" />
+                        </div>
+                    </div>
+                    <div id="worksOnSunday">
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Sunday">Apertura</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SundayOpenHour">
+                                    <option value="">Hora</option>
+                                    @for (int i = 0; i < 24; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SundayOpenHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SundayOpenMinute">
+                                    <option value="">Minutos</option>
+                                    @for (int i = 0; i < 60; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SundayOpenMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Saturday">Cierre</label>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SundayCloseHour">
+                                    <option value="">Hora</option>
+                                    @for (int i = 0; i < 24; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SundayCloseHour" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <select style="text-align-last:center;" class="form-control" asp-for="SundayCloseMinute">
+                                    <option value="">Minutos</option>
+                                    @for (int i = 0; i < 60; i++)
+                                    {
+                                        @if (i < 10)
+                                        {
+                                            <option value="@i">0@(i)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="SundayCloseMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        if (document.getElementById("saturdayCheckbox").checked)
+            $("#worksOnSaturday").show();
+        else
+            $("#worksOnSaturday").hide();
+
+        if (document.getElementById("sundayCheckbox").checked)
+            $("#worksOnSunday").show();
+        else
+            $("#worksOnSunday").hide();
+
+        $("#saturdayCheckbox").change(function () {
+            if (this.checked)
+                $("#worksOnSaturday").show();
+            else
+                $("#worksOnSaturday").hide();
+        });
+        $("#sundayCheckbox").change(function () {
+            if (this.checked)
+                $("#worksOnSunday").show();
+            else
+                $("#worksOnSunday").hide();
+        });
+    });
+</script>

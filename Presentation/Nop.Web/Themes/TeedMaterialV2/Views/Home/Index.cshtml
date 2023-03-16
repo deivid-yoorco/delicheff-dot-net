@@ -1,0 +1,1079 @@
+﻿@using Nop.Web.Models.HomePageImages
+@using Nop.Services.Media
+@using Nop.Services.Configuration
+@using Nop.Core
+@using Nop.Core.Caching
+@{
+
+    Layout = "_NoContainer";
+
+    //page class
+    Html.AppendPageCssClassParts("html-home-page");
+
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+
+    string picture1Url = GetPictureUrl(imagesSettings.Picture1Id);
+    string picture2Url = GetPictureUrl(imagesSettings.Picture2Id);
+    string picture3Url = GetPictureUrl(imagesSettings.Picture3Id);
+    string picture4Url = GetPictureUrl(imagesSettings.Picture4Id);
+    string picture5Url = GetPictureUrl(imagesSettings.Picture5Id);
+    string picture6Url = GetPictureUrl(imagesSettings.Picture6Id);
+
+    string textCarousel = imagesSettings.TextCarousel;
+    string textColorCarousel = imagesSettings.TextColorCarousel;
+
+    string picture7Url = GetPictureUrl(imagesSettings.Picture7Id);
+    string picture8Url = GetPictureUrl(imagesSettings.Picture8Id);
+    string picture9Url = GetPictureUrl(imagesSettings.Picture9Id);
+    string picture10Url = GetPictureUrl(imagesSettings.Picture10Id);
+    string picture11Url = GetPictureUrl(imagesSettings.Picture11Id);
+    string picture12Url = GetPictureUrl(imagesSettings.Picture12Id);
+    string picture13Url = GetPictureUrl(imagesSettings.Picture13Id);
+    string picture14Url = GetPictureUrl(imagesSettings.Picture14Id);
+    string picture15Url = GetPictureUrl(imagesSettings.Picture15Id);
+    string picture16Url = GetPictureUrl(imagesSettings.Picture16Id);
+    string picture17Url = GetPictureUrl(imagesSettings.Picture17Id);
+    string picture18Url = GetPictureUrl(imagesSettings.Picture18Id);
+    string picture19Url = GetPictureUrl(imagesSettings.Picture19Id);
+    string picture20Url = GetPictureUrl(imagesSettings.Picture20Id);
+    string picture21Url = GetPictureUrl(imagesSettings.Picture21Id);
+    string picture22Url = GetPictureUrl(imagesSettings.Picture22Id);
+    string picture23Url = GetPictureUrl(imagesSettings.Picture23Id);
+    string picture24Url = GetPictureUrl(imagesSettings.Picture24Id);
+    string picture25Url = GetPictureUrl(imagesSettings.Picture25Id);
+    string picture26Url = GetPictureUrl(imagesSettings.Picture26Id);
+    string picture27Url = GetPictureUrl(imagesSettings.Picture27Id);
+    string picture28Url = GetPictureUrl(imagesSettings.Picture28Id);
+    string picture29Url = GetPictureUrl(imagesSettings.Picture29Id);
+    string picture30Url = GetPictureUrl(imagesSettings.Picture30Id);
+    string picture31Url = GetPictureUrl(imagesSettings.Picture31Id);
+    string picture32Url = GetPictureUrl(imagesSettings.Picture32Id);
+    string picture33Url = GetPictureUrl(imagesSettings.Picture33Id);
+    string picture34Url = GetPictureUrl(imagesSettings.Picture34Id);
+    string picture35Url = GetPictureUrl(imagesSettings.Picture35Id);
+    string picture36Url = GetPictureUrl(imagesSettings.Picture36Id);
+    string picture37Url = GetPictureUrl(imagesSettings.Picture37Id);
+    string picture38Url = GetPictureUrl(imagesSettings.Picture38Id);
+
+    string bannerPicUrl1 = GetPictureUrl(imagesSettings.BannerPicture1Id);
+    string bannerPicUrl2 = GetPictureUrl(imagesSettings.BannerPicture2Id);
+    string bannerPicUrl3 = GetPictureUrl(imagesSettings.BannerPicture3Id);
+    string bannerPicUrl4 = GetPictureUrl(imagesSettings.BannerPicture4Id);
+    string bannerPicUrl5 = GetPictureUrl(imagesSettings.BannerPicture5Id);
+    string bannerPicUrl6 = GetPictureUrl(imagesSettings.BannerPicture6Id);
+    string newBannerPicUrl5 = GetPictureUrl(imagesSettings.NewBannerPicture5Id);
+    string newBannerPicUrl6 = GetPictureUrl(imagesSettings.NewBannerPicture6Id);
+
+    string bannerPicUrlArrow = GetPictureUrl(imagesSettings.BannerPictureArrowId);
+
+    string text6 = imagesSettings.Text6;
+    string textColor6 = !string.IsNullOrEmpty(imagesSettings.TextColor6) ? imagesSettings.TextColor6 : "#ffffff";
+
+    string option1 = imagesSettings.TextDropdown1;
+    string linkOption1 = imagesSettings.LinkDropdown1;
+    string option2 = imagesSettings.TextDropdown2;
+    string linkOption2 = imagesSettings.LinkDropdown2;
+    string option3 = imagesSettings.TextDropdown3;
+    string linkOption3 = imagesSettings.LinkDropdown3;
+    string option4 = imagesSettings.TextDropdown4;
+    string linkOption4 = imagesSettings.LinkDropdown4;
+    string option5 = imagesSettings.TextDropdown5;
+    string linkOption5 = imagesSettings.LinkDropdown5;
+    string option6 = imagesSettings.TextDropdown6;
+    string linkOption6 = imagesSettings.LinkDropdown6;
+    string option7 = imagesSettings.TextDropdown7;
+    string linkOption7 = imagesSettings.LinkDropdown7;
+    string option8 = imagesSettings.TextDropdown8;
+    string linkOption8 = imagesSettings.LinkDropdown8;
+    string option9 = imagesSettings.TextDropdown9;
+    string linkOption9 = imagesSettings.LinkDropdown9;
+    string option10 = imagesSettings.TextDropdown10;
+    string linkOption10 = imagesSettings.LinkDropdown10;
+
+    string bannerTitle5 = imagesSettings.BannerTitle5;
+    string bannerSubTitle5 = imagesSettings.BannerSubTitle5;
+    string bannerTitleColor5 = imagesSettings.BannerTitleColor5;
+    string bannerSubTitleColor5 = imagesSettings.BannerSubTitleColor5;
+
+    string bannerTitle6 = imagesSettings.BannerTitle6;
+    string bannerSubTitle6 = imagesSettings.BannerSubTitle6;
+    string bannerTitleColor6 = imagesSettings.BannerTitleColor6;
+    string bannerSubTitleColor6 = imagesSettings.BannerSubTitleColor6;
+
+    int tagsQty = imagesSettings.TagsQty;
+
+    string picture39Url = GetPictureUrl(imagesSettings.Picture39Id);
+    string picture39RUrl = GetPictureUrl(imagesSettings.Picture39ResponsiveId);
+}
+<style>
+    @@media only screen and (max-width: 600px) {
+        .homepage-parallax {
+            min-height: 150px;
+            max-height: 150px;
+        }
+    }
+
+    @@media only screen and (max-width: 992px) {
+        .slick-prev:before,
+        .slick-next:before {
+            content: "";
+            background: url('@bannerPicUrlArrow') no-repeat;
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+        }
+    }
+
+    @@media only screen and (min-width: 992px) {
+        .slick-prev:before,
+        .slick-next:before {
+            content: "";
+            background: url('@bannerPicUrlArrow') no-repeat;
+            display: block;
+            width: 70px;
+            height: 70px;
+            background-size: contain;
+        }
+    }
+
+    .slick-prev, .slick-next {
+        width: auto !important;
+        height: auto !important;
+    }
+
+    .slick-prev {
+        transform: rotate(180deg) translate(0, 50%);
+        z-index: 1;
+        left: 1%;
+    }
+
+    .slick-next {
+        right: 1%;
+    }
+</style>
+@if (imagesSettings.PopUpEnable)
+{
+    <div id="modal-home" class="modal" style="overflow: hidden;">
+        <img src="@picture39Url" class="hide-on-small-only" style="z-index:-1;width:100%;position:@(string.IsNullOrEmpty(picture39Url) ? "fixed" : "static");" /> @*if form is enable use only position:fixed*@
+        <img src="@picture39RUrl" class="hide-on-med-and-up" style="z-index:-1;width:100%;position:@(string.IsNullOrEmpty(picture39RUrl) ? "fixed" : "static");" /> @*if form is enable use only position:fixed*@
+
+        @*<div class="modal-content">
+                <div class="row">
+                    <div class="col s12 m12" style="margin-top:2%;">
+                        <div class="col s12 m6"></div>
+                        <div class="col s12 m6">
+                            <div class="row">
+                                <div class="input-field col s12 m6">
+                                    <input placeholder="" id="first_name" type="text" class="validate" style="color:white;">
+                                    <label for="first_name">Nombre</label>
+                                </div>
+                                <div class="input-field col s12 m6">
+                                    <input placeholder="" id="last_name" type="text" class="validate" style="color:white;">
+                                    <label for="last_name">Apellido</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="input-field col s12 m12">
+                                    <input placeholder="" id="email" type="email" class="validate" style="color:white;">
+                                    <label for="email">Correo</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col s12 m6"></div>
+                        <div class="col s12 m6 center">
+                            <a href="#!" class="modal-close waves-effect waves-red btn-flat" style="color:white;">No gracias</a>
+                            <a href="#!" class="modal-close waves-effect waves-green btn" onclick="registerAjax();">Enviar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+        @*<div class="modal-footer">
+            </div>*@
+    </div>
+    <button data-target="modal-home" class="btn modal-trigger" id="btn-modal" style="display:none;"></button>
+    <script asp-location="Footer">
+        $(document).ready(function () {
+            if (document.cookie.indexOf("runOnce") < 0) {
+                $('#modal-home').modal();
+                $('#btn-modal').trigger('click');
+                var d = new Date();
+                d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
+                var expires = "expires=" + d.toGMTString();
+                document.cookie = "runOnce=true;" + expires + "; path=/";
+            }
+        });
+
+        function registerAjax() {
+            var name = $('#first_name').val();
+            var lastName = $('#last_name').val();
+            var email = $('#email').val();
+
+            var data = {
+                name: name,
+                lastName: lastName,
+                mail: email
+            };
+
+            $.ajax({
+                cache: false,
+                url: 'Customer/RegisterAjax',
+                data: data,
+                type: 'POST',
+                success: function () {
+                },
+                error: function () {
+                    alert('Error de conexión');
+                }
+            });
+        }
+    </script>
+}
+@*SLIDER*@
+<div class="one-time hide-on-small-only show-on-medium-and-up" style="display:none !important;">
+    @if (!string.IsNullOrEmpty(imagesSettings.VideoId))
+    {
+        <div>
+            <div class="video-container">
+                <div id="player"></div>
+            </div>
+            <script>
+            // 2. This code loads the IFrame Player API code asynchronously.
+            var tag = document.createElement('script');
+
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            // 3. This function creates an <iframe> (and YouTube player)
+            //    after the API code downloads.
+            var player;
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    videoId: '@imagesSettings.VideoId',
+                    playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'showinfo': 0, 'disablekb': 1, 'enablejsapi': 1, 'modestbranding': 1, 'loop': 1 },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+
+            // 4. The API will call this function when the video player is ready.
+            function onPlayerReady(event) {
+                event.target.playVideo();
+            }
+
+            // 5. The API calls this function when the player's state changes.
+            //    The function indicates that when playing a video (state=1),
+            //    the player should play for six seconds and then stop.
+            function onPlayerStateChange(event) {
+                if (event.data == YT.PlayerState.ENDED) {
+                    player.playVideo();
+                }
+            }
+            </script>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl1))
+    {
+        string link1 = string.IsNullOrEmpty(imagesSettings.BannerLink1) ? "#" : imagesSettings.BannerLink1;
+        <a href="@link1"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl1"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl2))
+    {
+        string link2 = string.IsNullOrEmpty(imagesSettings.BannerLink2) ? "#" : imagesSettings.BannerLink2;
+        <a href="@link2"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl2"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl3))
+    {
+        string link3 = string.IsNullOrEmpty(imagesSettings.BannerLink3) ? "#" : imagesSettings.BannerLink3;
+        <a href="@link3"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl3"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl4))
+    {
+        string link4 = string.IsNullOrEmpty(imagesSettings.BannerLink4) ? "#" : imagesSettings.BannerLink4;
+        <a href="@link4"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl4"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl5))
+    {
+        string link5 = string.IsNullOrEmpty(imagesSettings.NewBannerLink5) ? "#" : imagesSettings.NewBannerLink5;
+        <a href="@link5"><img width="1920" height="1080" class="responsive-img" src="@newBannerPicUrl5"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl6))
+    {
+        string link6 = string.IsNullOrEmpty(imagesSettings.NewBannerLink6) ? "#" : imagesSettings.NewBannerLink6;
+        <a href="@link6"><img width="1920" height="1080" class="responsive-img" src="@newBannerPicUrl6"></a>
+    }
+</div>
+<div class="one-time show-on-small hide-on-med-and-up" style="display:none !important;">
+    @if (!string.IsNullOrEmpty(bannerPicUrl1))
+    {
+        string link1 = string.IsNullOrEmpty(imagesSettings.BannerLink1) ? "#" : imagesSettings.BannerLink1;
+        <a href="@link1"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl1"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl2))
+    {
+        string link2 = string.IsNullOrEmpty(imagesSettings.BannerLink2) ? "#" : imagesSettings.BannerLink2;
+        <a href="@link2"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl2"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl3))
+    {
+        string link3 = string.IsNullOrEmpty(imagesSettings.BannerLink3) ? "#" : imagesSettings.BannerLink3;
+        <a href="@link3"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl3"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl4))
+    {
+        string link4 = string.IsNullOrEmpty(imagesSettings.BannerLink4) ? "#" : imagesSettings.BannerLink4;
+        <a href="@link4"><img width="1920" height="1080" class="responsive-img" src="@bannerPicUrl4"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl5))
+    {
+        string link5 = string.IsNullOrEmpty(imagesSettings.NewBannerLink5) ? "#" : imagesSettings.NewBannerLink5;
+        <a href="@link5"><img width="1920" height="1080" class="responsive-img" src="@newBannerPicUrl5"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl6))
+    {
+        string link6 = string.IsNullOrEmpty(imagesSettings.NewBannerLink6) ? "#" : imagesSettings.NewBannerLink6;
+        <a href="@link6"><img width="1920" height="1080" class="responsive-img" src="@newBannerPicUrl6"></a>
+    }
+</div>
+@*SLIDER*@
+
+@if (!string.IsNullOrEmpty(imagesSettings.VideoId))
+{
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.one-time').slick({
+                    dots: true,
+                    infinite: false,
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                    adaptiveHeight: true,
+                    arrows: false
+                }).on('afterChange', function (event, slick, currentSlide, nextSlide) {
+                    if (currentSlide != 0) {
+                        $('#player').each(function () {
+                            $(this)[0].contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                        });
+                    } else {
+                        $('#player').each(function () {
+                            $(this)[0].contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                        });
+                    }
+                });
+            }, 500);
+        });
+    </script>
+}
+else
+{
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.one-time').slick({
+                    mobileFirst: true,
+                    dots: false,
+                    infinite: true,
+                    autoplaySpeed: 6000,
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                    adaptiveHeight: true,
+                    arrows: true,
+                    autoplay: true
+                });
+            }, 500);
+            
+        });
+    </script>
+}
+
+@*Dropdown de categorías*@
+@if (!string.IsNullOrEmpty(text6))
+{
+    <div class="parallax-container-categories center valign-wrapper" style="margin-top: -6px;">
+        <div class="parallax-categories"><img width="1980" height="800" class="responsive-img" src="@picture6Url" style="width:100%;"></div>
+        <div class="container" id="container6">
+            <div class="row" style="margin-bottom:0;">
+                <div class="col s12 m6 textColor6">
+                    <h5 id="fontTextColor6" style="margin-top:3.5%;font-weight: bold;">@text6</h5>
+                </div>
+                <div class="col s12 m5" style="margin-top:1%;">
+                    <select class="browser-default" id="select-categories" style="padding-left:1%;" onchange="redirectCategory()">
+                        <option value="0" selected>@T("Home.SelectCategories")</option>
+                        @if (!string.IsNullOrEmpty(option1))
+                        {
+                            <option value="@linkOption1">@option1</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option2))
+                        {
+                            <option value="@linkOption2">@option2</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option3))
+                        {
+                            <option value="@linkOption3">@option3</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option4))
+                        {
+                            <option value="@linkOption4">@option4</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option5))
+                        {
+                            <option value="@linkOption5">@option5</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option6))
+                        {
+                            <option value="@linkOption6">@option6</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option7))
+                        {
+                            <option value="@linkOption7">@option7</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option8))
+                        {
+                            <option value="@linkOption8">@option8</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option9))
+                        {
+                            <option value="@linkOption9">@option9</option>
+                        }
+                        @if (!string.IsNullOrEmpty(option10))
+                        {
+                            <option value="@linkOption10">@option10</option>
+                        }
+                    </select>
+                </div>
+                <div class="col s1 m1 hide-on-small-only"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .textColor6 {
+            color: @textColor6 !important;
+        }
+    </style>
+}
+@*Dropdown de categorías*@
+
+@*Banners*@
+@if (!string.IsNullOrEmpty(bannerPicUrl5))
+{
+    string link5 = string.IsNullOrEmpty(imagesSettings.BannerLink5) ? "#" : imagesSettings.BannerLink5;
+    <a href="@link5">
+        <div id="parallax-container5" class="parallax-container center valign-wrapper">
+            <div class="parallax"><img width="1920" height="720" class="responsive-img" src="@bannerPicUrl5"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col s10 m6">
+                        <h2 id="bannerTitleColor5">@bannerTitle5</h2>
+                        <h3 id="bannerSubTitleColor5" style="margin-top:5%;">@bannerSubTitle5</h3>
+                    </div>
+                    <div class="col s2 m6"></div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <style>
+        #bannerTitleColor5 {
+            color: @bannerTitleColor5 !important;
+        }
+
+        #bannerSubTitleColor5 {
+            color: @bannerSubTitleColor5 !important;
+        }
+
+        .parallax-container .parallax img {
+            min-height: 0;
+        }
+
+        @@media only screen and (max-width: 1024px)
+        {
+            #parallax-container5 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 768px)
+        {
+            #parallax-container5 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 601px) {
+            #parallax-container5 {
+                min-height: 0px !important;
+                margin-top: -0.5%;
+            }
+
+            .parallax-container5 {
+                min-height: 0;
+                height: 200px;
+            }
+
+            #bannerTitleColor5 {
+                font-size: 1.5em;
+            }
+
+            #bannerSubTitleColor5 {
+                font-size: 1em;
+            }
+
+            .row {
+                margin-bottom: 18px;
+            }
+        }
+    </style>
+}
+
+@if (!string.IsNullOrEmpty(bannerPicUrl6))
+{
+    string link6 = string.IsNullOrEmpty(imagesSettings.BannerLink6) ? "#" : imagesSettings.BannerLink6;
+    <a href="@link6">
+        <div id="parallax-container6" class="parallax-container center valign-wrapper">
+            <div class="parallax"><img class="responsive-img" width="1920" height="720" src="@bannerPicUrl6"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col s10 m6">
+                        <h2 id="bannerTitleColor6">@bannerTitle6</h2>
+                        <h3 id="bannerSubTitleColor6" style="margin-top:5%;">@bannerSubTitle6</h3>
+                    </div>
+                    <div class="col s2 m6"></div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <style>
+        #bannerTitleColor6 {
+            color: @bannerTitleColor6 !important;
+        }
+
+        #bannerSubTitleColor6 {
+            color: @bannerSubTitleColor6 !important;
+        }
+
+        @@media only screen and (max-width: 1024px)
+        {
+            #parallax-container6 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 768px)
+        {
+            #parallax-container6 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 601px) {
+            #parallax-container6 {
+                min-height: 0px !important;
+            }
+
+            .parallax-container6 {
+                min-height: 0;
+                height: 200px;
+            }
+
+            #bannerTitleColor6 {
+                font-size: 1.5em;
+            }
+
+            #bannerSubTitleColor6 {
+                font-size: 1em;
+            }
+        }
+
+         @@media only screen and (max-width: 768px) {
+            .parallax-container {
+                min-height: 0;
+            }
+        }
+    </style>
+}
+@*Banners*@
+
+@*Collage*@
+@if (imagesSettings.CollageEnable)
+{
+    @*<script type="text/javascript">
+        window.onload = function () {
+            var options =
+            {
+                srcNode: 'img',             // grid items (class, node)
+                margin: '5px',              // margin in pixel, default: 0px
+                width: '250px',             // grid item width in pixel, default: 220px
+                max_width: '',              // dynamic gird item width if specified, (pixel)
+                resizable: true,            // re-layout if window resize
+                transition: 'all 0.5s ease' // support transition for CSS3, default: all 0.5s ease
+            }
+            document.querySelector('.grid').gridify(options);
+        }
+    </script>*@
+    <div class="grid" style="margin-top:3%; text-align: center">
+        @{
+            string link19 = string.IsNullOrEmpty(imagesSettings.Link19) ? "#" : imagesSettings.Link19;
+            <a href="@link19"><img class="responsive-img" width="250" height="125" src="@picture19Url" /></a>
+            string link20 = string.IsNullOrEmpty(imagesSettings.Link20) ? "#" : imagesSettings.Link20;
+            <a href="@link20"><img class="responsive-img" width="250" height="125" src="@picture20Url" /></a>
+            string link21 = string.IsNullOrEmpty(imagesSettings.Link21) ? "#" : imagesSettings.Link21;
+            <a href="@link21"><img class="responsive-img" width="250" height="125" src="@picture21Url" /></a>
+            string link22 = string.IsNullOrEmpty(imagesSettings.Link22) ? "#" : imagesSettings.Link22;
+            <a href="@link22"><img class="responsive-img" width="250" height="125" src="@picture22Url" /></a>
+            string link23 = string.IsNullOrEmpty(imagesSettings.Link23) ? "#" : imagesSettings.Link23;
+            <a href="@link23"><img class="responsive-img" width="250" height="125" src="@picture23Url" /></a>
+            string link24 = string.IsNullOrEmpty(imagesSettings.Link24) ? "#" : imagesSettings.Link24;
+            <a href="@link24"><img class="responsive-img" width="250" height="125" src="@picture24Url" /></a>
+            string link25 = string.IsNullOrEmpty(imagesSettings.Link25) ? "#" : imagesSettings.Link25;
+            <a href="@link25"><img class="responsive-img" width="250" height="125" src="@picture25Url" /></a>
+            string link26 = string.IsNullOrEmpty(imagesSettings.Link26) ? "#" : imagesSettings.Link26;
+            <a href="@link26"><img class="responsive-img" width="250" height="125" src="@picture26Url" /></a>
+            string link27 = string.IsNullOrEmpty(imagesSettings.Link27) ? "#" : imagesSettings.Link27;
+            <a href="@link27"><img class="responsive-img" width="250" height="125" src="@picture27Url" /></a>
+            string link28 = string.IsNullOrEmpty(imagesSettings.Link28) ? "#" : imagesSettings.Link28;
+            <a href="@link28"><img class="responsive-img" width="250" height="125" src="@picture28Url" /></a>
+            string link29 = string.IsNullOrEmpty(imagesSettings.Link29) ? "#" : imagesSettings.Link29;
+            <a href="@link29"><img class="responsive-img" width="250" height="125" src="@picture29Url" /></a>
+            string link30 = string.IsNullOrEmpty(imagesSettings.Link30) ? "#" : imagesSettings.Link30;
+            <a href="@link30"><img class="responsive-img" width="250" height="125" src="@picture30Url" /></a>
+            string link31 = string.IsNullOrEmpty(imagesSettings.Link31) ? "#" : imagesSettings.Link31;
+            <a href="@link31"><img class="responsive-img" width="250" height="125" src="@picture31Url" /></a>
+            string link32 = string.IsNullOrEmpty(imagesSettings.Link32) ? "#" : imagesSettings.Link32;
+            <a href="@link32"><img class="responsive-img" width="250" height="125" src="@picture32Url" /></a>
+            string link33 = string.IsNullOrEmpty(imagesSettings.Link33) ? "#" : imagesSettings.Link33;
+            <a href="@link33"><img class="responsive-img" width="250" height="125" src="@picture33Url" /></a>
+            string link34 = string.IsNullOrEmpty(imagesSettings.Link34) ? "#" : imagesSettings.Link34;
+            <a href="@link34"><img class="responsive-img" width="250" height="125" src="@picture34Url" /></a>
+            string link35 = string.IsNullOrEmpty(imagesSettings.Link35) ? "#" : imagesSettings.Link35;
+            <a href="@link35"><img class="responsive-img" width="250" height="125" src="@picture35Url" /></a>
+            string link36 = string.IsNullOrEmpty(imagesSettings.Link36) ? "#" : imagesSettings.Link36;
+            <a href="@link36"><img class="responsive-img" width="250" height="125" src="@picture36Url" /></a>
+            string link37 = string.IsNullOrEmpty(imagesSettings.Link37) ? "#" : imagesSettings.Link37;
+            <a href="@link37"><img class="responsive-img" width="250" height="125" src="@picture37Url" /></a>
+            string link38 = string.IsNullOrEmpty(imagesSettings.Link38) ? "#" : imagesSettings.Link38;
+            <a href="@link38"><img class="responsive-img" width="250" height="125" src="@picture38Url" /></a>
+        }
+    </div>
+}
+@*Collage*@
+
+@*Conjunto de 3*@
+<div class="container">
+    @await Component.InvokeAsync("TopicBlock", new { systemName = "HomePageText" })
+
+    @if (!string.IsNullOrEmpty(picture3Url) || !string.IsNullOrEmpty(picture4Url) || !string.IsNullOrEmpty(picture5Url))
+    {
+        <div class="row">
+            @if (!string.IsNullOrEmpty(picture3Url))
+            {
+                <div class="col s12 m4 custom-home-component">
+                    <div class="card">
+                        <div class="card-image">
+                            @if (!string.IsNullOrEmpty(imagesSettings.Link3))
+                            {
+                                <a href="@imagesSettings.Link3">
+                                    <img width="380" height="190" class="responsive-img" src="@picture3Url" alt="" title="@imagesSettings.Text3" />
+                                </a>
+                            }
+                            else
+                            {
+                                <img width="380" height="190" class="responsive-img" src="@picture3Url" alt="" title="@imagesSettings.Text3" />
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(imagesSettings.Text3))
+                        {
+                            <div class="card-action">
+                                <a href="@imagesSettings.Link3">
+                                    @Html.Raw(imagesSettings.Text3)
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(picture4Url))
+            {
+                <div class="col s12 m4 custom-home-component">
+                    <div class="card">
+                        <div class="card-image">
+                            @if (!string.IsNullOrEmpty(imagesSettings.Link4))
+                            {
+                                <a href="@imagesSettings.Link4">
+                                    <img width="380" height="190" class="responsive-img" src="@picture4Url" alt="" title="@imagesSettings.Text4" />
+                                </a>
+                            }
+                            else
+                            {
+                                <img width="380" height="190" class="responsive-img" src="@picture4Url" alt="" title="@imagesSettings.Text4" />
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(imagesSettings.Text4))
+                        {
+                            <div class="card-action">
+                                <a href="@imagesSettings.Link4">
+                                    @Html.Raw(imagesSettings.Text4)
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(picture5Url))
+            {
+                <div class="col s12 m4 custom-home-component">
+                    <div class="card">
+                        <div class="card-image">
+                            @if (!string.IsNullOrEmpty(imagesSettings.Link5))
+                            {
+                                <a href="@imagesSettings.Link5">
+                                    <img width="380" height="190" class="responsive-img" src="@picture5Url" alt="" title="@imagesSettings.Text5" />
+                                </a>
+                            }
+                            else
+                            {
+                                <img width="380" height="190" class="responsive-img" src="@picture5Url" alt="" title="@imagesSettings.Text5" />
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(imagesSettings.Text5))
+                        {
+                            <div class="card-action">
+                                <a href="@imagesSettings.Link5">
+                                    @Html.Raw(imagesSettings.Text5)
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+@*Conjunto de 3*@
+
+@*Parallax*@
+@if (!string.IsNullOrEmpty(picture1Url))
+{
+    @if (string.IsNullOrEmpty(imagesSettings.Link1))
+    {
+        <div class="parallax-container homepage-parallax">
+            <div class="parallax">
+                <img class="responsive-img" width="1200" height="1200" src="@picture1Url" title="@imagesSettings.Text1" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="parallax-container pointer homepage-parallax" onclick="setLocation('@imagesSettings.Link1')">
+            <div class="parallax">
+                <img class="responsive-img" width="1200" height="1200" src="@picture1Url" title="@imagesSettings.Text1" />
+            </div>
+        </div>
+    }
+}
+@*Parallax*@
+
+
+<div class="container">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_news" })
+    @await Component.InvokeAsync("HomepageNews")
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_products" })
+    @await Component.InvokeAsync("HomepageProducts")
+</div>
+
+@*Carrusel*@
+@if (!string.IsNullOrEmpty(picture7Url))
+{
+    <div class="container">
+        <div class="row">
+            @if (!string.IsNullOrEmpty(textCarousel))
+            {
+                <h4 id="color-carousel">@textCarousel</h4>
+            }
+            <div class="responsive-slick-element col s12 m12 sc">
+                @if (!string.IsNullOrEmpty(picture7Url))
+                {
+                    string link7 = string.IsNullOrEmpty(imagesSettings.Link7) ? "#" : imagesSettings.Link7;
+                    <div class="col s3 m3"><a href="@link7"><img width="250" height="375" class="responsive-img" src="@picture7Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture8Url))
+                {
+                    string link8 = string.IsNullOrEmpty(imagesSettings.Link8) ? "#" : imagesSettings.Link8;
+                    <div class="col s3 m3"><a href="@link8"><img width="250" height="375" class="responsive-img" src="@picture8Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture9Url))
+                {
+                    string link9 = string.IsNullOrEmpty(imagesSettings.Link9) ? "#" : imagesSettings.Link9;
+                    <div class="col s3 m3"><a href="@link9"><img width="250" height="375" class="responsive-img" src="@picture9Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture10Url))
+                {
+                    string link10 = string.IsNullOrEmpty(imagesSettings.Link10) ? "#" : imagesSettings.Link10;
+                    <div class="col s3 m3"><a href="@link10"><img width="250" height="375" class="responsive-img" src="@picture10Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture11Url))
+                {
+                    string link11 = string.IsNullOrEmpty(imagesSettings.Link11) ? "#" : imagesSettings.Link11;
+                    <div class="col s3 m3"><a href="@link11"><img width="250" height="375" class="responsive-img" src="@picture11Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture12Url))
+                {
+                    string link12 = string.IsNullOrEmpty(imagesSettings.Link12) ? "#" : imagesSettings.Link12;
+                    <div class="col s3 m3"><a href="@link12"><img width="250" height="375" class="responsive-img" src="@picture12Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture13Url))
+                {
+                    string link13 = string.IsNullOrEmpty(imagesSettings.Link13) ? "#" : imagesSettings.Link13;
+                    <div class="col s3 m3"><a href="@link13"><img width="250" height="375" class="responsive-img" src="@picture13Url" /></a></div>
+                }
+                @if (!string.IsNullOrEmpty(picture14Url))
+                {
+                    string link14 = string.IsNullOrEmpty(imagesSettings.Link14) ? "#" : imagesSettings.Link14;
+                    <div class="col s3 m3"><a href="@link14"><img width="250" height="375" class="responsive-img" src="@picture14Url" /></a></div>
+                }
+            </div>
+        </div>
+    </div>
+    <style>
+        #color-carousel {
+            color: @textColorCarousel;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.responsive-slick-element').slick({
+                    dots: false,
+                    infinite: true,
+                    speed: 300,
+                    slidesToShow: 4,
+                    slidesToScroll: 4,
+                    centerMode: true,
+                    responsive: [
+                        {
+                            breakpoint: 1024,
+                            settings: {
+                                slidesToShow: 3,
+                                slidesToScroll: 3,
+                                infinite: true,
+                                dots: false
+                            }
+                        },
+                        {
+                            breakpoint: 600,
+                            settings: {
+                                slidesToShow: 2,
+                                slidesToScroll: 2,
+                                arrows: false
+                            }
+                        },
+                        {
+                            breakpoint: 480,
+                            settings: {
+                                slidesToShow: 1,
+                                slidesToScroll: 1,
+                                arrows: false
+                            }
+                        }
+                        // You can unslick at a given breakpoint now by adding:
+                        // settings: "unslick"
+                        // instead of a settings object
+                    ]
+                });
+            }, 500);
+        });
+    </script>
+}
+@*Carrusel*@
+
+@*Parallax*@
+@if (!string.IsNullOrEmpty(picture2Url))
+{
+    @if (string.IsNullOrEmpty(imagesSettings.Link2))
+    {
+        <div class="parallax-container homepage-parallax" style="margin-bottom:23px;">
+            <div class="parallax">
+                <img class="responsive-img" width="1200" height="1200" src="@picture2Url" title="@imagesSettings.Text2" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="parallax-container pointer homepage-parallax" onclick="setLocation('@imagesSettings.Link1')">
+            <div class="parallax">
+                <img class="responsive-img" width="1200" height="1200" src="@picture2Url" title="@imagesSettings.Text2" />
+            </div>
+        </div>
+    }
+}
+@*Parallax*@
+
+<div class="container">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_best_sellers" })
+    @await Component.InvokeAsync("HomepageBestSellers")
+</div>
+
+@*Tags*@
+@if (imagesSettings.TagsEnable)
+{
+    <div class="container">
+        <div class="row">
+            <div id="tags-container" class="col s12 m12 center">
+
+            </div>
+        </div>
+    </div>
+    <style>
+        @@media only screen and (max-width: 601px) {
+            .btn-small-tags {
+                height: 22.4px;
+                line-height: 22.4px;
+                font-size: 10px;
+            }
+        }
+    </style>
+    <script type="text/javascript" asp-location="Footer">
+        $.ajax({
+            cache: false,
+            url: 'Admin/HomePageImages/AllTags',
+            type: 'GET',
+            success: function (data) {
+                var qty = @tagsQty;
+                var cond = qty > 0 ? qty : data.length;
+
+                for (var i = 0; i < data.length && i < cond; i++) {
+                    var item = data[i];
+                    if (item.ProductCount > 0) {
+                        var str = "<a href='producttag/" + item.Id + "/" + item.Name + "' class='producttag btn-small btn-small-tags' style='margin:5px;'>" + item.Name + " (" + item.ProductCount + ")</a>";
+                        $('#tags-container').append(str);
+                    }
+                }
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    </script>
+}
+@*Tags*@
+
+@*Cajas*@
+@if (!string.IsNullOrEmpty(picture15Url) && !string.IsNullOrEmpty(picture16Url) && !string.IsNullOrEmpty(picture17Url) && !string.IsNullOrEmpty(picture18Url))
+{
+    <div id="image-boxes" class="row">
+        <div class="col s12 m12">
+            @{
+                string link15 = string.IsNullOrEmpty(imagesSettings.Link15) ? "#" : imagesSettings.Link15;
+                <div style="padding:0" class="col s6 m3"><a href="@link15"><img width="500" height="750" class="responsive-img" src="@picture15Url" /></a></div>
+            }
+            @{
+                string link16 = string.IsNullOrEmpty(imagesSettings.Link16) ? "#" : imagesSettings.Link16;
+                <div style="padding:0" class="col s6 m3"><a href="@link16"><img width="500" height="750" class="responsive-img" src="@picture16Url" /></a></div>
+            }
+            @{
+                string link17 = string.IsNullOrEmpty(imagesSettings.Link17) ? "#" : imagesSettings.Link17;
+                <div style="padding:0" class="col s6 m3 cajas-margin-top"><a href="@link17"><img width="500" height="750" class="responsive-img" src="@picture17Url" /></a></div>
+            }
+            @{
+                string link18 = string.IsNullOrEmpty(imagesSettings.Link18) ? "#" : imagesSettings.Link18;
+                <div style="padding:0" class="col s6 m3 cajas-margin-top"><a href="@link18"><img width="500" height="750" class="responsive-img" src="@picture18Url" /></a></div>
+            }
+        </div>
+    </div>
+}
+@*Cajas*@
+
+<div class="container">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_categories" })
+    @await Component.InvokeAsync("HomepageCategories")
+
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_poll" })
+    @await Component.InvokeAsync("HomepagePolls")
+</div>
+
+@*WARNING MODAL*@
+@*<style>
+        .warning-modal-content {
+            text-align: center
+        }
+
+            .warning-modal-content #warning-data {
+                text-align: justify;
+                padding: 2em;
+                list-style-type: disc !important;
+            }
+
+        #warning-modal {
+            max-width: 700px !important;
+        }
+
+        #warning-data {
+            animation: 3s linear .1s;
+        }
+    </style>
+    <div id="warning-modal" class="modal" style="overflow: hidden">
+        <div class="warning-modal-content">
+            <div id="warning-initial">
+                <a href="#" onclick="warningReadMore()" style="font-weight:bold">
+                    <img style="width:100%" src="/Themes/TeedMaterialV2/Content/images/christmas-alert.jpg" alt="Alert" />
+                </a>
+            </div>
+            <div id="warning-data" style="display:none">
+                <h5 style="font-weight: bold">Central en Línea</h5>
+                <p>Comunicado a todos nuestros clientes</p>
+                <p>Reciban un cordial saludo. Por este medio se les informa que, con motivo de la celebración de las fiestas de fin de año, la atención de sus pedidos sufrirá los siguientes cambios:</p>
+                <ul style="list-style-type: disc !important;padding-left: 2em">
+                    <li style="list-style-type: disc !important;">Los días 25 de diciembre de 2019 y el 1 de enero de 2020 no se laborará, reanudando actividades normales el siguiente día hábil después de dichas fechas.</li>
+                    <li style="list-style-type: disc !important;">Asimismo, el horario de entrega para los días 24 y 31 de diciembre del presente será únicamente entre 13:00 a 15:00 hrs y 15:00 a 17:00 hrs.</li>
+                </ul>
+                <p>Por tal motivo, agradeceremos tomar en cuenta este comunicado para efecto de programar sus pedidos.</p>
+                <p>Sin más por el momento, agradecemos la atención que se le brinde a la presente.</p>
+                <p>Atentamente,</p>
+                <p>Dirección de Operaciones</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+        </div>
+    </div>
+    <button data-target="warning-modal" class="btn modal-trigger" id="btn-modal-warning" style="display:none"></button>
+    <script asp-location="Footer">
+        $(document).ready(function () {
+            if (document.cookie.indexOf("holidayWarning") < 0) {
+                $('#warning-modal').modal();
+                $('#btn-modal-warning').trigger('click');
+                const today = new Date();
+                const tomorrow = new Date(today)
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.cookie = "holidayWarning=true;" + tomorrow + "; path=/";
+            }
+        });
+
+        const warningReadMore = () => {
+            $("#warning-data").fadeToggle();
+        };
+    </script>*@
+@*WARNING MODAL*@
+
+@inject IPictureService pictureService
+@inject IStaticCacheManager cacheManager
+
+@functions {
+    public string GetPictureUrl(int pictureId)
+    {
+
+        var cacheKey = string.Format("Teed.Nop.plugins.widgets.nivoslider2.pictureurl-{0}", pictureId);
+        return cacheManager.Get(cacheKey, () =>
+        {
+        //little hack here. nulls aren't cacheable so set it to ""
+        var url = pictureService.GetPictureUrl(pictureId, showDefaultPicture: false) ?? "";
+            return url;
+        });
+    }
+}

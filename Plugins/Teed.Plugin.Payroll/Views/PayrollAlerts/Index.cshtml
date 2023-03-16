@@ -1,0 +1,339 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollAlerts.PayrollAlertsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Payroll.PayrollAlerts");
+}
+<style>
+    .ok {
+        /*text-align: center;
+            font-weight: bold;
+            #dff0d8
+        */
+        padding: 1em;
+        margin: 1em 0;
+        border-color: blue;
+        background-color: white;
+    }
+
+    .order-alert-danger {
+        margin-top: auto;
+        background-color: white;
+        border-radius: 5px;
+        border: solid 2px #3c8dbc;
+    }
+
+    .complete-list {
+        margin-top: auto;
+        font-size: 12px;
+        text-align: left;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #dff0d8;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Alertas de nómina
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group" style="margin:15px;margin-bottom: 0px">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="accordion" id="accordionExample">
+                        @if (Model.IncompleteEmployees.Where(x =>
+                   x.PendingInformation.Where(y => y.ToLower() == "sin empleo especificado" || y.ToLower() == "sin salario especificado").Any()).Any() ||
+                   Model.JobNoSchedules.Any())
+                        {
+                            <h4 style="margin-bottom: 20px; text-align: center; color: red;">
+                                Hay información aun no especificada para ciertos empleados que es indispensable para hacer los cálculos de pago en el área de Nomina quincenal
+                                (Empleo especificado, horario de trabajo especificado y salario del empleado), favor de llenar estos datos para que dichos empleados se tomen en cuenta en el área de nómina quincenal.
+                            </h4>
+                        }
+
+                        @if (Model.UpcomingBirthdays.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingFour">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Cumpleaños próximos en los siguientes 2 meses ( @(Model.UpcomingBirthdays.Count) )</i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.UpcomingBirthdays
+                                            .OrderBy(x => new DateTime(DateTime.Now.Year, x.Birthday.Month, x.Birthday.Day)))
+                                            {
+                                                <li><b>@item.Birthday.ToString("dd/MM") - @item.Name</b></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingFour">
+                                    <h3 class="mb-0 complete-list">No hay cumpleaños próximos en los siguientes 2 meses.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.IncompleteEmployees.Any())
+                        {
+                            <div class="card order-alert-danger text-left ok">
+                                <div class="card-header panel-heading" id="headingOne">
+                                    <h1 class="mb-0" style="margin-top: 10px; font-style: normal">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Expedientes incompletos de empleados activos ( @(Model.IncompleteEmployees.Count) )</i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                    <div class="card-body" style="margin: 30px;margin-top:0px">
+                                        <ul>
+                                            @foreach (var item in Model.IncompleteEmployees)
+                                            {
+                                                <li>
+                                                    <a target="_blank" href="/admin/payrollemployee/edit?id=@item.Id"><b>@item.FullName</b></a>
+                                                    <br />
+                                                    <span>Información pendiente:</span>
+                                                    @foreach (var info in item.PendingInformation)
+                                                    {
+                                                        <br />
+                                                        <span>- @info</span>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card complete-list">
+                                <div class="card-header" id="headingOne">
+                                    <h3 class="mb-0 complete-list" style="margin-top: 10px; font-style: normal">Todos los expedientes estan de empleados activos completos.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.EmployeesNoChecker.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingTwo">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Empleados no vinculados a bitácora de asistencia ( @(Model.EmployeesNoChecker.Count) )</i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.EmployeesNoChecker)
+                                            {
+                                                <li>
+                                                    <a target="_blank" href="/admin/payrollemployee/edit?id=@item.Id"><b>@item.FullName<b /></a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingTwo">
+                                    <h3 class="mb-0 complete-list">Todos los empleados están vinculados a la bitácora de asistencia.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.JobNoSchedules.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingThree">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Puestos de trabajo sin horario de trabajo asignado ( @(Model.JobNoSchedules.Count) )</i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.JobNoSchedules)
+                                            {
+                                                <li><a target="_blank" href="/admin/jobcatalog/edit?id=@item.Id"><b>@item.Name<b /></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingThree">
+                                    <h3 class="mb-0 complete-list">Todos los empleos cuentan con horario.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.DischargedWithoutDates.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingFive">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Empleados con baja sin fecha de salida ( @(Model.DischargedWithoutDates.Count) )</i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.DischargedWithoutDates)
+                                            {
+                                                <li><a target="_blank" href="/admin/payrollemployee/edit?id=@item.Id"><b>@item.Name<b /></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingFive">
+                                    <h3 class="mb-0 complete-list">Todos los empleados con baja tienen fecha de salida.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.ExEmployeeAndActives.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingSix">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal"> &nbsp &nbsp Exempleados con expedientes activos ( @(Model.ExEmployeeAndActives.Count) ) </i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.ExEmployeeAndActives)
+                                            {
+                                                <li><a target="_blank" href="/admin/payrollemployee/edit?id=@item.Id"><b>@item.Name<b /></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingSix">
+                                    <h3 class="mb-0 complete-list">No hay exempleados con expedientes activos.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.DischargedWithoutSatisfactoryDepartureProcesses.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingSeven">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal"> &nbsp &nbsp Exempleados pendientes de proceso de baja satisfactorio ( @(Model.DischargedWithoutSatisfactoryDepartureProcesses.Count) ) </i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.DischargedWithoutSatisfactoryDepartureProcesses)
+                                            {
+                                                <li><a target="_blank" href="/admin/payrollemployee/edit?id=@item.Id"><b>@item.Name<b /></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingSeven">
+                                    <h3 class="mb-0 complete-list">No hay exempleados pendientes de proceso de baja satisfactorio.</h3>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.JustifiablyDismissEmployee4AbcensesLast30Days.Any())
+                        {
+                            <div class="card order-alert-danger left ok">
+                                <div class="card-header panel-heading" id="headingEight">
+                                    <h1 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                                            <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                            <i class="pull-left" style="font-weight: bold; font-style: normal"> &nbsp &nbsp Empleados que pueden ser despedidos justificadamente por acumular 4 faltas en menos de 30 días ( @(Model.JustifiablyDismissEmployee4AbcensesLast30Days.Count) ) </i>
+                                        </button>
+                                    </h1>
+                                </div>
+                                <div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#accordionExample">
+                                    <div class="card-body">
+                                        <ul>
+                                            @foreach (var item in Model.JustifiablyDismissEmployee4AbcensesLast30Days)
+                                            {
+                                                <li><a target="_blank" href="/admin/payrollemployee/edit?id=@item.Id"><b>@item.Name<b /></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card">
+                                <div class="card-header" id="headingEight">
+                                    <h3 class="mb-0 complete-list">No hay empleados que pueden ser despedidos justificadamente por acumular 4 faltas en menos de 30 días.</h3>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleIcon(e) {
+        $(e.target)
+            .prev('.panel-heading')
+            .find(".more-less")
+            .toggleClass('glyphicon-plus glyphicon-minus');
+    }
+    $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+    $('.panel-group').on('shown.bs.collapse', toggleIcon);
+</script>

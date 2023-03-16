@@ -1,0 +1,206 @@
+﻿@model Nop.Web.Models.ShippingAreas.CoberturaViewModel
+@{
+    Layout = "~/Themes/TeedMaterialV2/Views/Shared/_ColumnsOne.cshtml";
+    Html.AppendPageCssClassParts("html-topic-page");
+}
+<style>
+    h2 {
+        font-size: 2em;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    h3 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    #map {
+        height: 600px;
+    }
+
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    @@media (max-width: 600px) {
+        .mobile-margin {
+            margin-top: 15px !important;
+        }
+    }
+</style>
+<input type="hidden" value="@(string.Join(",", Model.AreasData.Select(x => x.PostalCode)))" id="valid-postal-codes" />
+<div class="page topic-page" id="ph-topic">
+    <div class="page-title" id="ph-title">
+        <h1>Cobertura</h1>
+    </div>
+    <div class="page-body">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 m6 s12" style="margin-bottom: 2em">
+                    <div>
+                        <h2>Comprueba si llegamos a tu código postal</h2>
+                        <div class="input-field" style="margin-top: 2em">
+                            <i class="material-icons prefix mobile-margin" style="right:0; cursor:pointer" onclick="searchPostalCode()">search</i>
+                            <input value="" placeholder=" " id="postal-code" type="text" class="validate mobile-margin" style="margin-left:0" onkeypress="return validateField(event)">
+                            <label style="margin-left:0" for="postal-code">Ingresa aquí tu código postal para verificar la cobertura:</label>
+                            <div>
+                                <em style="color:red" id="error-message"></em>
+                                <strong style="color:green;display:none" id="valid-postal-code">Sí contamos con cobertura en tu código postal.</strong>
+                                <strong style="color:red;display:none" id="invalid-postal-code">Por el momento, no contamos con cobertura en tu código postal.</strong>
+                            </div>
+                            <div style="display:none" class="loading-container" id="loading-container">
+                                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                                    <div class="spinner-layer spinner-green-only">
+                                        <div class="circle-clipper left">
+                                            <div class="circle"></div>
+                                        </div><div class="gap-patch">
+                                            <div class="circle"></div>
+                                        </div><div class="circle-clipper right">
+                                            <div class="circle"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span style="margin-left: 10px">Verificando código postal...</span>
+                            </div>
+                        </div>
+                    </div>
+                    @foreach (var state in Model.AreasData.GroupBy(x => x.State))
+                    {
+                        <h4>@state.Key</h4>
+                        @foreach (var city in state.GroupBy(x => x.City))
+                        {
+                            <div style="margin: 1em 0 0 1em">
+                                <h3>@city.Key</h3>
+                                <p>@(string.Join(", ", city.Select(x => x.PostalCode)))</p>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="col l6 m6 s12">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const validateField = (evt) => {
+        if (evt.keyCode === 13) {
+            searchPostalCode();
+            return;
+        }
+
+        let currentValue = $('#postal-code').val();
+        let charCode = (evt.which) ? evt.which : evt.keyCode
+        if (currentValue.length >= 5 || (charCode > 31 && (charCode < 48 || charCode > 57)))
+            return false;
+        return true;
+    };
+
+    const searchPostalCode = () => {
+
+        $('#error-message').html('');
+        $('#valid-postal-code').hide();
+        $('#invalid-postal-code').hide();
+        $("#loading-container").hide();
+
+        $("#loading-container").show();
+
+        setTimeout(() => {
+            let postalCode = $('#postal-code').val();
+            if (postalCode.length < 5) {
+                $('#error-message').html('El código postal es inválido. Debe tener al menos 5 dígitos.');
+            }
+            else {
+                let validPostalCodes = $("#valid-postal-codes").val();
+                let isValid = validPostalCodes.split(',').indexOf(postalCode) > -1 ? true : false;
+                if (isValid)
+                    $('#valid-postal-code').show();
+                else {
+                    $('#invalid-postal-code').show();
+                    $.ajax({
+                        url: '/ShippingArea/RegisterInvalidPostalCode',
+                        data: { postalCode },
+                        method: 'POST',
+                        success: () => {
+                            //console.log('POSTAL CODE REGISTERED')
+                        },
+                        error: (error) => {
+                            console.log('ERROR REGISTERING POSTAL CODE: ', JSON.stringify(error))
+                        }
+                    })
+                }
+            }
+            $("#loading-container").hide();
+        }, 1500);
+    };
+
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 19.3170078, lng: -99.2090609 },
+            disableDefaultUI: true,
+            zoomControl: true,
+            zoom: 13
+        });
+        map.set('styles', myStyle);
+        map.data.loadGeoJson('/shippingarea/GetGeoJson');
+        map.data.setStyle({
+            fillColor: 'green',
+            strokeColor: '#628226',
+            strokeWeight: 3
+        });
+
+        // zoom to show all the features
+        var bounds = new google.maps.LatLngBounds();
+        map.data.addListener('addfeature', function (e) {
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            map.fitBounds(bounds);
+        });
+
+        // zoom on click
+        map.data.addListener('click', function (e) {
+            console.log(e);
+            var bounds = new google.maps.LatLngBounds();
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            map.fitBounds(bounds);
+        });
+    }
+
+    function processPoints(geometry, callback, thisArg) {
+        if (geometry instanceof google.maps.LatLng) {
+            callback.call(thisArg, geometry);
+        } else if (geometry instanceof google.maps.Data.Point) {
+            callback.call(thisArg, geometry.get());
+        } else {
+            geometry.getArray().forEach(function (g) {
+                processPoints(g, callback, thisArg);
+            });
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap"
+        async defer></script>

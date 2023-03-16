@@ -1,0 +1,111 @@
+﻿@model DateTime
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.DeliveryReportPrint");
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Impresiones de logística del @(Model.ToString("dddd dd 'de' MMMM 'del' yyyy", new System.Globalization.CultureInfo("es-MX")))
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <a href="/Admin/Order/ExportOrdersData?selectedDate=@(Model.ToString("dd-MM-yyyy"))&byRoute=true" target="_blank" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Por ruta
+                </a><br /><br />
+                <button type="button" onclick="displayRouteSelectDialog()" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Para clientes
+                </button><br /><br />
+                <a href="/Admin/Order/DeliveryPaymentCommitment?date=@(Model.ToString("dd-MM-yyyy"))" target="_blank" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Pagarés repartidores
+                </a><br /><br />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="for-clients" title="Selecciona una ruta">
+    <p>Selecciona la ruta para descargar la lista de compras para clientes del día <span class="selected-day"></span></p>
+    <div class="col-md-12">
+        <label class="control-label for-clients" for="for-clients">
+            Rutas:
+        </label>
+    </div>
+    <div class="col-md-12">
+        <div class="route-btns">
+            <strong id="loading-routes">Cargando rutas del día...</strong>
+        </div>
+    </div>
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <label id="routeError" class="text-red control-label">
+            Para generar el documento para clientes, todas las ordenes deben estar asignadas a una ruta. Para asignar las rutas para esta fecha, da clic <a style="color:#3c8dbc !important;" href="" target="_blank"> aqui </a>
+        </label>
+        <label id="noOrders" class="text-red control-label">
+            No hay ordenes en el día seleccionado
+        </label>
+    </div>
+</div>
+
+<script>
+    var dateForClients;
+
+    $("#for-clients").dialog({
+        autoOpen: false,
+        height: 300,
+        width: 450,
+        modal: true
+    });
+
+    function displayRouteSelectDialog() {
+        $('#loading-routes').show();
+        $('#routeError').hide();
+        $('#noOrders').hide();
+        $('.route-btns button').remove();
+        var parsedDate = '@(Model.ToString("dd-MM-yyyy"))';
+        dateForClients = parsedDate;
+        $('.selected-day').text(parsedDate);
+        $("#dialog").dialog("close");
+        $("#for-clients").dialog("open");
+        $('div[aria-describedby="for-clients"]').find('.ui-icon-closethick').unbind('click');
+        $('div[aria-describedby="for-clients"]').find('.ui-icon-closethick').click(function () {
+            $('#dialog').dialog('open');
+            $('#for-clients').dialog('close');
+        })
+
+        $.ajax({
+            url: '/Admin/Order/GetRoutesOfTheDay?selectedDate=' + parsedDate,
+            type: 'GET',
+            success: (data) => {
+                $('.route-btns button').remove();
+                $("#dialog").dialog("close");
+                $("#for-clients").dialog("open");
+                $.each(data, function (i, e) {
+                    $(".route-btns").append('<button type="button" onclick="hrefRoute(' + e.Id + ')" class="btn bg-secondary dialog-shipping">' +
+                        e.Name +
+                        '</button>');
+                });
+                $("#loading-routes").hide();
+            },
+            error: (error) => {
+                $('.route-btns button').remove();
+                $("#loading-routes").hide();
+                if (error.responseText == "route0") {
+                    $('#routeError').show();
+                    $('#routeError a').attr('href', '/Admin/ShippingRoute/AssignRouteOrder?date=' + parsedDate);
+                } else if (error.responseText == "noOrders") {
+                    $('#noOrders').show();
+                }
+                console.log(error);
+            }
+        });
+    };
+
+    function hrefRoute(id) {
+        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + dateForClients + '&forClient=true&routeId=' + id, '_blank');
+    }
+</script>

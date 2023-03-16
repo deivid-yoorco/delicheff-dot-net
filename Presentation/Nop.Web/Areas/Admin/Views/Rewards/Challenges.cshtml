@@ -1,0 +1,22 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.ChallengeModel
+@{
+    //page title
+    ViewBag.Title = "Editar configuración de Desafíos";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Rewards.Challenges");
+}
+
+<form asp-controller="Rewards" asp-action="Challenges" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Configuración de desafíos
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    @await Html.PartialAsync("_Challenges.Tabs", Model)
+</form>

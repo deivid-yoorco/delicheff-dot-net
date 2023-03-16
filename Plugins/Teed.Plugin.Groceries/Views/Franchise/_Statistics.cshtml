@@ -1,0 +1,152 @@
+﻿@model string
+@using Nop.Core
+@using Nop.Services.Common
+@inject IWorkContext workContext
+@{
+    Html.AppendScriptParts("~/lib/chartjs/Chart.min.js");
+
+    string prefix = Model;
+    string sub = Model.Split('-')[0];
+}
+
+<div class="box box-info" id="@(prefix)-box">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            <i class="fa fa-shopping-cart"></i>
+            @if (prefix.Contains("incidents"))
+            {
+                <text>Gráfica de incidencias semanales</text>
+            }
+            else
+            {
+                <text>Gráfica de puntualidad en las entregas</text>
+            }
+        </h3>
+    </div>
+    <div class="box-body">
+        <div class="chart" style="height: 300px;">
+            <canvas id="@(prefix)-chart" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+        var osConfig@(sub) = {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: "@T(prefix.Contains("incidents") ?
+                            "Incidencias" :
+                            "Puntualidad")",
+                        fillColor: "rgba(60,141,188,0.9)",
+                        strokeColor: "rgba(60,141,188,0.8)",
+                        pointColor: "#3b8bba",
+                        pointStrokeColor: "rgba(60,141,188,1)",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(60,141,188,1)",
+                        borderColor: 'rgba(60, 141, 188, 0.7)',
+                        backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                        pointBorderColor: 'rgba(37, 103, 142, 0.9)',
+                        pointBackgroundColor: 'rgba(60, 141, 188, 0.4)',
+                        pointBorderWidth: 1,
+                        data: []
+                    }
+                ]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        ticks: {
+                            userCallback: function (dataLabel, index) {
+                                if (window.orderStatistics && window.orderStatistics.config.data.labels.length > 12) {
+                                    return index % 5 === 0 ? dataLabel : '';
+                                }
+                                return dataLabel;
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            userCallback: function (dataLabel, index) {
+                                return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                            },
+                            min: 0
+                        }
+                    }]
+                },
+                showScale: true,
+                scaleShowGridLines: false,
+                scaleGridLineColor: "rgba(0,0,0,.05)",
+                scaleGridLineWidth: 1,
+                scaleShowHorizontalLines: true,
+                scaleShowVerticalLines: true,
+                bezierCurve: true,
+                pointDot: false,
+                pointDotRadius: 4,
+                pointDotStrokeWidth: 1,
+                pointHitDetectionRadius: 20,
+                datasetStroke: true,
+                datasetFill: true,
+                maintainAspectRatio: false,
+                responsive: true
+            }
+        };
+    $(document).ready(function () {
+        //var osCurrentPeriod;
+        changeOsPeriod@(sub)();
+        @*$('#@(prefix)-box').on('click', 'button[data-widget="collapse"]', function () {
+            var collapsed = !$('#@(prefix)-box').hasClass('collapsed-box');
+            saveUserPreferences('@(Url.Action("SavePreference", "Preferences"))', '@hidePanelAttributeName', collapsed);
+            if (!collapsed) {
+                $('#@(prefix)-box button[data-chart-role="toggle-chart"]').removeAttr('disabled');
+                if (!osCurrentPeriod) {
+                    $('#@(prefix)-box button[data-chart-role="toggle-chart"][data-chart-period="week"]').trigger('click');
+                }
+            } else {
+                $('#@(prefix)-box button[data-chart-role="toggle-chart"]').attr('disabled', 'disabled');
+            }
+        });
+
+        $('#@(prefix)-box button[data-chart-role="toggle-chart"]').on('click', function () {
+            var period = $(this).attr('data-chart-period');
+            osCurrentPeriod = period;
+            changeOsPeriod(period);
+            $('#@(prefix)-box button[data-chart-role="toggle-chart"]').removeClass('bg-light-blue');
+            $(this).addClass('bg-light-blue');
+        });*@
+    });
+
+        function changeOsPeriod@(sub)(period) {
+            var osLabels@(sub) = [];
+            var osData@(sub) = [];
+
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: '@Url.Action("LoadFranchiseStatistics", "Franchise")?prefixAndId=' + "@prefix",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        osLabels@(sub).push(data[i].date);
+                        osData@(sub).push(data[i].value);
+                    }
+                    setTimeout(function () {
+                        osConfig@(sub).data.labels = osLabels@(sub);
+                        osConfig@(sub).data.datasets[0].data = osData@(sub);
+                        osConfig@(sub).data.scales =
+                        window.orderStatistics = new Chart(document.getElementById("@prefix-chart").getContext("2d"), osConfig@(sub));
+                    }, 500);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Failed to load statistics.');
+                }
+            });
+        }
+</script>

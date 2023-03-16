@@ -1,0 +1,59 @@
+﻿@model Teed.Plugin.Emails.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+<form asp-controller="EmailsPlugin" asp-action="Configure" method="post">
+    <div class="panel-group">
+
+        <nop-tabs id="email-configure">
+            <nop-tab asp-name="tab-general" asp-title="General" asp-default="true">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureGeneral.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-welcome" asp-title="Bienvenida">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureWelcome.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-password" asp-title="Contraseña">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigurePassword.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-validate" asp-title="Validar correo">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureValidate.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-store" asp-title="Conoce la tienda">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureStore.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-payment" asp-title="Pago declinado">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigurePayment.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-paypal" asp-title="Pago con paypal">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigurePaypal.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-order-confirm" asp-title="Orden confirmada">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureOrderConfirm.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-order-sent" asp-title="Orden en camino">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureOrderSent.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-order-delivered" asp-title="Pedido entregado">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureOrderDelivered.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-abandon-sc" asp-title="Carrito abandonado">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureAbandonShoppingCart.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-reorder" asp-title="Recompra sugerida">
+                @await Html.PartialAsync("~/Plugins/Teed.Plugin.Emails/Views/_ConfigureReorder.cshtml", Model)
+            </nop-tab>
+        </nop-tabs>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,39 @@
+﻿@model Teed.Plugin.Medical.Models.Prescription.PrescriptionsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Prescriptions");
+    var now = DateTime.Now;
+    var patients = (IEnumerable<Teed.Plugin.Medical.Domain.Patient>)ViewData["Patients"];
+}
+
+<form asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Generar Receta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de recetas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <nop-tabs id="recipe">
+                            <nop-tab asp-name="tab-info" asp-title="Detalles" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Prescription/_Update.Info.cshtml", Model)</nop-tab>
+                            <nop-tab asp-name="tab-products" asp-title="Medicamentos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Prescription/_Update.Products.cshtml", Model)</nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

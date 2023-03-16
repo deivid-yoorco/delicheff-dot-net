@@ -1,0 +1,25 @@
+﻿@model ManufacturerModel
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Log
+                </div>
+                <div class="panel-body">
+                    @if (Model.ManufacturerLog != null)
+                    {
+                        @foreach (var item in Model.ManufacturerLog)
+                        {
+                            @item.Message
+                            <br />
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Component.InvokeAsync("Widget", new { widgetZone = "manufacturer-default-buyer-log", additionalData = Model.Id })

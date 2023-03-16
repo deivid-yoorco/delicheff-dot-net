@@ -1,0 +1,286 @@
+﻿@model CatalogPagingFilteringModel.SpecificationFilterModel
+@{
+    var notFilteredItemsGroups = Model.NotFilteredItems.GroupBy(x => x.SpecificationAttributeName);
+    var alreadyFilteredItemsGroups = Model.AlreadyFilteredItems.GroupBy(x => x.SpecificationAttributeName);
+}
+<script>
+    $(document).ready(function () {
+        $('.modal').modal();
+    });
+
+</script>
+@if (Model.Enabled)
+{
+    <style>
+
+        /*.color-collection .collection-item {
+            padding: 0px 0px !important;
+        }*/
+
+        .collapsible {
+            box-shadow: none !important;
+            border-right: none;
+            border-left: none;
+        }
+
+        .collapsible-header {
+            margin-bottom: 1em !important;
+        }
+
+        .collapsible-body {
+            padding: 0.3em;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.12), 0 1px 5px 0 rgba(0,0,0,.2);
+            margin-top: -1em;
+            margin-bottom: 1em;
+        }
+
+        .collapsible-header, .filter-header, .collapsible-body, .collection {
+            border-color: white;
+            border-style: none;
+            outline: none;
+        }
+
+        .filter-header {
+            height: 2em;
+            text-align: left;
+            text-transform: uppercase;
+            color: white;
+            padding-left: 0.5em;
+            padding-top: 0.3em;
+        }
+
+        .item {
+            text-align: left;
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+
+        .collection .collection-item {
+            background-color: #fff;
+            line-height:1rem;
+            padding: 3px 0px;
+        }
+        .filter-btn {
+            display:block;
+            text-align:center;
+            text-transform: none;
+            background-color: #FFF;
+            text-transform: none;
+            font-size: 16px;
+            box-shadow: none;
+            /*padding-bottom: 1em !important;
+            margin-left:1em;*/
+        }
+        #filtericon {
+            position: relative;
+            font-size: 1.5em;
+            top: 5px;
+            left: 0px;
+        }
+    </style>
+    @*ResponsiveFiltering*@
+    
+    @*<div class="row col offset-s7 s4"></div>*@
+        <a class="waves-effect waves-light btn-flat modal-trigger hide-on-large-only filter-btn teed-primary-text" href="#modalFilter"><i id="filtericon"class="material-icons">list</i><span >Filtrar</span></a>
+    
+    <div id="modalFilter" class="modal">
+        <div class="modal-content">
+            <h4>Filtrar por:</h4>
+            <div class="filter-content">
+                @if (Model.NotFilteredItems.Count > 0)
+                {
+                    <div class="available-items">
+                        <ul class="collapsible">
+
+                            @foreach (var group in notFilteredItemsGroups)
+                            {
+                                var groupList = group.ToList();
+
+                                <li>
+                                    <a class="collapsible-header filter-header teed-primary collection">
+                                        <strong>@groupList[0].SpecificationAttributeName</strong>
+                                    </a>
+                                    <div class="collapsible-body">
+                                        <ul class="collection group product-spec-group colum @(groupList.Any(x => !string.IsNullOrEmpty(x.SpecificationAttributeOptionColorRgb)) ? "product-spec-color" : null )" style="column-count:1">
+                                            @foreach (var spec in groupList)
+                                            {
+                                                <li class="collection-item item-filter  item@(!string.IsNullOrEmpty(spec.SpecificationAttributeOptionColorRgb) ? "color-item" : null)">
+                                                    @if (spec.SpecificationAttributeIcon != null)
+                                                    {
+                                                        <i class="tiny material-icons teed-primary-text" style="vertical-align: middle !important;padding-bottom: 3px;">@spec.SpecificationAttributeIcon</i>
+                                                    }
+                                                    <a href="@spec.FilterUrl">
+                                                        @if (string.IsNullOrEmpty(spec.SpecificationAttributeOptionColorRgb))
+                                                        {
+                                                            @spec.SpecificationAttributeOptionName
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="nav-wrapper color-collection">
+                                                                <style>
+                                                                    .collection .collection-item {
+                                                                        border-bottom: 1px #ccc;
+                                                                        margin-top: .4em;
+                                                                        margin-bottom: .3em;
+                                                                    }
+
+                                                                    .collection {
+                                                                        overflow: inherit;
+                                                                    }
+
+                                                                    .collection-item {
+                                                                        padding: 0px 0px !important;
+                                                                    }
+
+                                                                    #color-circle {
+                                                                        border: solid 1px #dbdbdb;
+                                                                        padding-left: 1em;
+                                                                        margin-left: 1em;
+                                                                        display: inline-block !important;
+                                                                        height: 20px !important;
+                                                                        margin: 6px 5px !important;
+                                                                        overflow: hidden;
+                                                                        padding: 0px !important;
+                                                                        width: 20px !important;
+                                                                    }
+                                                                </style>
+                                                                <div class="attribute-squares color-squares">
+                                                                    <div id="nav-mobile" class="left">
+                                                                        <span class=" attribute-square-container" title="@spec.SpecificationAttributeOptionName">
+                                                                            <span class="attribute-square circle" id="color-circle" style=" background-color: @(spec.SpecificationAttributeOptionColorRgb);">&nbsp;</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+
+                    </div>
+                }
+            </div>
+         </div>
+    </div>
+   
+    @*Non-Responsive*@
+    <div class="product-filter product-spec-filter">
+        <div class="filter-title hide-on-med-and-down">
+            <strong>@T("Filtering.SpecificationFilter")</strong>
+        </div>
+        <div class="filter-content hide-on-med-and-down">
+            @if (Model.NotFilteredItems.Count > 0)
+            {
+                <div class="available-items">
+                    <ul class="collapsible">
+
+                        @foreach (var group in notFilteredItemsGroups)
+                        {
+                            var groupList = group.ToList();
+
+                            <li>
+                                <a class="collapsible-header filter-header teed-primary collection">
+                                    <strong>@groupList[0].SpecificationAttributeName</strong>
+                                </a>
+                                <div class="collapsible-body">
+                                    <ul class="collection group product-spec-group colum @(groupList.Any(x => !string.IsNullOrEmpty(x.SpecificationAttributeOptionColorRgb)) ? "product-spec-color" : null )" style="column-count:1">
+                                        @foreach (var spec in groupList)
+                                        {
+                                            <li class="collection-item  item@(!string.IsNullOrEmpty(spec.SpecificationAttributeOptionColorRgb) ? "color-item" : null)">
+                                                @if (@spec.SpecificationAttributeIcon != null)
+                                                {
+                                                    <i class="tiny material-icons teed-primary-text" style="vertical-align: middle !important;padding-bottom: 3px;">@spec.SpecificationAttributeIcon</i>
+                                                }
+                                                <a href="@spec.FilterUrl">
+                                                    @if (string.IsNullOrEmpty(spec.SpecificationAttributeOptionColorRgb))
+                                                    {
+                                                        @spec.SpecificationAttributeOptionName
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="nav-wrapper color-collection">
+                                                            <style>
+                                                                .collection .collection-item {
+                                                                    border-bottom: none;
+                                                                    margin-top: .4em;
+                                                                    margin-bottom: .3em;
+                                                                }
+
+                                                                .collection {
+                                                                    overflow: inherit;
+                                                                }
+
+                                                                .collection-item {
+                                                                    padding: 0px 0px !important;
+                                                                }
+
+                                                                #color-circle {
+                                                                    border: solid 1px #dbdbdb;
+                                                                    padding-left: 1em;
+                                                                    margin-left: 1em;
+                                                                    display: inline-block !important;
+                                                                    height: 20px !important;
+                                                                    margin: 6px 5px !important;
+                                                                    overflow: hidden;
+                                                                    padding: 0px !important;
+                                                                    width: 20px !important;
+                                                                }
+                                                            </style>
+                                                            <div class="attribute-squares color-squares">
+                                                                <div id="nav-mobile" class="left">
+                                                                    <span class=" attribute-square-container" title="@spec.SpecificationAttributeOptionName">
+                                                                        <span class="attribute-square circle" id="color-circle" style=" background-color: @(spec.SpecificationAttributeOptionColorRgb);">&nbsp;</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+
+                </div>
+            }
+            @*@if (Model.AlreadyFilteredItems.Count > 0)
+                {
+                    <div class="filtered-items">
+                        <ul>
+                            <li class="title">
+                                @T("Filtering.SpecificationFilter.CurrentlyFilteredBy")
+                            </li>
+                            @foreach (var group in alreadyFilteredItemsGroups)
+                            {
+                                <li class="item">
+                                    <strong>@group.First().SpecificationAttributeName</strong>:
+                                    @group.ToList().Aggregate(string.Empty, (current, next) =>
+                                             $"{(string.IsNullOrEmpty(current) ? string.Empty : $"{current} {T("Filtering.SpecificationFilter.Separator")}")}{next.SpecificationAttributeOptionName}")
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="remove-filter">
+                        <a href="@Model.RemoveFilterUrl">@T("Filtering.SpecificationFilter.Remove")</a>
+                    </div>
+                }*@
+        </div>
+    </div>
+}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('.collapsible');
+        var instances = M.Collapsible.init(elems,
+            {
+                accordion: true
+            });
+    });
+</script>

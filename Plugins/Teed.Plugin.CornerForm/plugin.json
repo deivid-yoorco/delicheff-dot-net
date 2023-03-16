@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Teed Plugins",
+  "FriendlyName": "Teed Corner Form",
+  "SystemName": "Teed.Plugin.CornerForm",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.CornerForm.dll",
+  "Description": "Teed Corner Form Plugin"
+}

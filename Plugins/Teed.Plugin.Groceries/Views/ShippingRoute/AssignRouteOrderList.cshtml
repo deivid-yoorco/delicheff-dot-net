@@ -1,0 +1,90 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRouteOrder");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "ShippingRoute";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Asignar rutas a órdenes
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListOrderData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "Pending",
+                    title: "Estado",
+                },
+                {
+                    field: "Id",
+                    title: "Ver órdenes",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `#if(Pending == "Todas asignadas"){ #
+                                    <a class="btn btn-success" href="AssignRouteOrder?date=#=Date#"><i class="fa fa-eye"></i>Ver asignación</a>
+                                # }
+                                else if (Pending == "Pendientes por asignar") { #
+                                    <a class="btn btn-warning" href="AssignRouteOrder?date=#=Date#"><i class="fa fa-eye"></i>Asignar rutas</a>
+                                # }
+                                    else { #
+                                    <a class="btn btn-danger" href="AssignRouteOrder?date=#=Date#"><i class="fa fa-eye"></i>Asignar rutas</a>
+                                # }#
+                                `
+                }
+            ]
+        });
+    });
+</script>

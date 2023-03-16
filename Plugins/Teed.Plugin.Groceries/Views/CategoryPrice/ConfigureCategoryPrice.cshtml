@@ -1,0 +1,82 @@
+﻿@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries");
+}
+
+<form asp-controller="TeedApi" asp-action="Configure" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Precios por categoría
+        </h1>
+        <div class="pull-right">
+            <button type="button" id="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-data" asp-title="Datos" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/CategoryPrice/_ConfigureData.cshtml", null)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-parent" asp-title="Coeficiente">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/CategoryPrice/_ConfigureParent.cshtml", null)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-children" asp-title="% de utilidad">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/CategoryPrice/_ConfigureChildren.cshtml", null)
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        var date_input_ini = $('input[name="dateini"]');
+        var date_input_fin = $('input[name="datefin"]');
+        var container = $('.bootstrap-iso form').length > 0 ? $('.bootstrap-iso form').parent() : "body";
+        date_input_ini.datepicker({
+            dateFormat: 'dd/mm/yy',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        });
+        date_input_fin.datepicker({
+            dateFormat: 'dd/mm/yy',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        });
+
+        $("#save").on("click", function () {
+            $(this).prop('disabled', true);
+
+            var dataList = [];
+            $(".category").each(function () {
+                dataList.push({ Id: $(this).attr("id"), Value: $(this).val(), IsParent: $(this).hasClass("parent") });
+            });
+
+            var data = {
+                dataList: dataList
+            };
+
+            $.ajax({
+                method: 'POST',
+                cache: false,
+                url: '/Admin/CategoryPrice/SaveData',
+                data: data,
+                success: function (d) {
+                    $("#save").prop('disabled', false);
+                },
+                error: function (e) {
+                    console.log("ERROR");
+                }
+            });
+        });
+
+        SetOrgDates();
+    });
+</script>

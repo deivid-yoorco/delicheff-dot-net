@@ -1,0 +1,60 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+<form asp-controller="HomePageImages" asp-action="Configure" method="post">
+    <div class="panel-group">
+
+        <nop-tabs id="homepage-images">
+            <nop-tab asp-name="tab-slider" asp-title="Slider" asp-default="true">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureSlider.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-parallax" asp-title="Parallax">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureParallax.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-topthree" asp-title="Conjunto de 3">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureTopThree.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-dropdown" asp-title="Dropdown de categorias">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureCategoryDropdown.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-banners" asp-title="Banners">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureBanners.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-carousel" asp-title="Carrusel">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureCarousel.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-tags" asp-title="Tags">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureTags.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-cajas" asp-title="Cajas">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureCajas.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-manufacturer" asp-title="Manufacturer">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureManufacturer.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-collage" asp-title="Collage">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureCollage.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-popup" asp-title="Pop Up">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigurePopUp.cshtml", Model)
+            </nop-tab>
+            <nop-tab asp-name="tab-vendor" asp-title="Vendor">
+                @await Html.PartialAsync("~/Plugins/Widgets.HomePageImages/Views/_ConfigureVendor.cshtml", Model)
+            </nop-tab>
+        </nop-tabs>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

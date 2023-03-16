@@ -1,0 +1,139 @@
+﻿@inject AdminAreaSettings adminAreaSettings
+@using Nop.Core.Domain.Catalog
+
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @{
+                    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+                    var gridPageSizes = adminAreaSettings.GridPageSizes;
+                }
+                <div id="products-grid"></div>
+                <script type="text/javascript">
+                $(document).ready(function() {
+                    $("#products-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("LoadRewardsItems", "RewardItem"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("UpdateRewardItem", "RewardItem"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    destroy: {
+                                        url: "@Html.Raw(Url.Action("DeleteRewardItem", "RewardItem"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors",
+                                model: {
+                                    id: "Id",
+                                    fields: {
+                                        Name: { editable: false, type: "string" },
+                                        Price: { editable: false, type: "number" },
+                                        ProductCost: { editable: false, type: "number" },
+                                        Quantity: { editable: true, type: "number" },
+                                        BuyingBySecondary: { editable: true, type: "boolean" },
+                                        SelectedPropertyOption: { editable: false, type: "string" },
+                                        IsActive: { editable: true, type: "boolean" },
+                                        Id: {editable: false, type: "number"}
+                                    }
+                                }
+                            },
+                            requestEnd: function (e) {
+                                if (e.type == "update" || e.type == "destroy") {
+                                    this.read();
+                                }
+                            },
+                            error: function (e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            pageSize: @(defaultGridPageSize),
+                            serverPaging: true,
+                            serverFiltering: true,
+                            serverSorting: true
+                            },
+                        pageable: {
+                            refresh: true,
+                            numeric: false,
+                            previousNext: false,
+                            info: false,
+                            pageSizes: [@(gridPageSizes)],
+                            @await Html.PartialAsync("_GridPagerMessages")
+                        },
+                        editable: {
+                            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                            mode: "inline"
+                        },
+                        scrollable: false,
+                        columns: [
+                            {
+                                field: "Name",
+                                title: "@T("Admin.Catalog.Products.Fields.Name")",
+                                width: 300
+                            },{
+                                field: "Price",
+                                title: "@T("Admin.Catalog.Products.Fields.Price")",
+                                width: 150,
+                            }, {
+                                field: "ProductCost",
+                                title: "Costo",
+                                width: 150,
+                            }, {
+                                field: "Quantity",
+                                title: "Cantidad",
+                                width: 150,
+                            }, {
+                                field: "BuyingBySecondary",
+                                title: "Por cantidad secundaria",
+                                width: 150,
+                                template: '# if(BuyingBySecondary) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #',
+                            }, {
+                                field: "SelectedPropertyOption",
+                                title: "Propiedad de compra",
+                                width: 150,
+                            },{
+                                field: "IsActive",
+                                headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                headerAttributes: { style: "text-align:center" },
+                                attributes: { style: "text-align:center" },
+                                template: '# if(IsActive) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #',
+                                width: 50
+                            }, {
+                            command: [
+                                    {
+                                        name: "edit",
+                                        text: {
+                                            edit: "@T("Admin.Common.Edit")",
+                                            update: "@T("Admin.Common.Update")",
+                                            cancel: "@T("Admin.Common.Cancel")"
+                                        }
+                                    }, {
+                                        name: "destroy",
+                                        text: "@T("Admin.Common.Delete")"
+                                    }
+                                ],
+                            width: 200
+                            }
+                        ],
+                    });
+                });
+                </script>
+            </div>
+        </div>
+    </div>

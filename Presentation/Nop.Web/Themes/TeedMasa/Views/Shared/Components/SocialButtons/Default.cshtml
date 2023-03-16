@@ -1,0 +1,38 @@
+﻿@model SocialModel
+
+@if (!string.IsNullOrEmpty(Model.FacebookLink))
+{
+    <a class="btn-floating waves-effect waves-light btn-social facebook" href="@Model.FacebookLink" target="_blank" title="@T("Footer.FollowUs.Facebook")">
+        <i class="fab fa-facebook-f"></i>
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.TwitterLink))
+{
+    <a class="btn-floating waves-effect waves-light btn-social twitter" href="@Model.TwitterLink" target="_blank" title="@T("Footer.FollowUs.Twitter")">
+        <i class="fab fa-twitter"></i>
+    </a>
+}
+@if (Model.NewsEnabled)
+{
+    <a class="btn-floating waves-effect waves-light btn-social rss" href="@Url.RouteUrl("NewsRSS", new {languageId = Model.WorkingLanguageId})" target="_blank" title="@T("Footer.FollowUs.RSS")">
+        <i class="fas fa-rss"></i>
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.YoutubeLink))
+{
+    <a class="btn-floating waves-effect waves-light btn-social youtube" href="@Model.YoutubeLink" target="_blank" title="@T("Footer.FollowUs.Youtube")">
+        <i class="fab fa-youtube"></i>
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.GooglePlusLink))
+{
+    <a class="btn-floating waves-effect waves-light btn-social googleplus" href="@Model.GooglePlusLink" target="_blank" title="@T("Footer.FollowUs.GooglePlus")">
+        <i class="fab fa-google-plus-g"></i>
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.InstagramLink))
+{
+    <a style="background-color:#bc2a8d" class="btn-floating waves-effect waves-light btn-social instagram" href="@Model.InstagramLink" target="_blank" title="@T("Footer.FollowUs.Instagram")">
+        <i class="fab fa-instagram"></i>
+    </a>
+}

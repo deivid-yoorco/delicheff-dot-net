@@ -1,0 +1,332 @@
+﻿@model Teed.Plugin.Medical.Models.Appointment.AppointmentEditModel
+@using Teed.Plugin.Medical.Domain.Appointment
+@using Nop.Services
+@{
+    var now = DateTime.Now;
+    var patients = (IEnumerable<Teed.Plugin.Medical.Domain.Patient>)ViewData["Patients"];
+    var availableProducts = (List<SelectListItem>)ViewData["Treatments"];
+    var availableUsers = (List<SelectListItem>)ViewData["DoctorsAndNurses"];
+}
+
+@if (Model.IsManualAppointment)
+{
+    <script src="~/Plugins/Teed.Plugin.Medical/js/manual-appointment-edit.js"></script>
+}
+else
+{
+    <script src="~/Plugins/Teed.Plugin.Medical/js/appointment-edit.js"></script>
+}
+<link href="~/Plugins/Teed.Plugin.Medical/js/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Medical/js/ui-choose/ui-choose.js"></script>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="content">
+                        <div class="form-horizontal">
+                            <div>
+                                <div class="form-group">
+                                    <input type="hidden" asp-for="Id" />
+                                    <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <div class="col-md-3 text-right">
+                                        <label for="PatientId">Paciente</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="PatientId" type="hidden" id="patientId" />
+                                        <input id="patients" style="width: 100%;" />
+                                        <script>
+                                                $(document).ready(function () {
+                                                    $("#patients").kendoComboBox({
+                                                        placeholder: "Selecciona al paciente...",
+                                                        dataTextField: "Patient",
+                                                        dataValueField: "Id",
+                                                        filter: "contains",
+                                                        autoBind: true,
+                                                        minLength: 1,
+                                                        dataSource: {
+                                                            type: "json",
+                                                            transport: {
+                                                                read: {
+                                                                    url: "@Html.Raw(Url.Action("PatientListData", "Appointment"))",
+                                                                    type: "POST",
+                                                                    data: addAntiForgeryToken
+                                                                }
+                                                            }
+                                                        },
+                                                        dataBound: onDataBound,
+                                                        select: onSelect,
+                                                        change: onChange
+                                                    });
+                                                    function onDataBound(e) {
+                                                        if (@Model.PatientId != 0 && !$("#patients").data("kendoComboBox").value()) {
+                                                            $("#patients").data("kendoComboBox").value(@Model.PatientId);
+                                                            $("#patientId").val(@Model.PatientId);
+                                                        }
+                                                    };
+                                                    function onSelect(e) {
+                                                        $("#patientId").val(this.dataItem(e.item.index()).Id);
+                                                    };
+                                                    function onChange(e) {
+                                                        if (this.selectedIndex == -1) {
+                                                            $("#patients").data("kendoComboBox").value("");
+                                                        }
+                                                    };
+                                                });
+                                        </script>
+                                        <span asp-validation-for="PatientId"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Sucursal</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="BranchId" type="hidden" id="branchId" />
+                                        <input id="branches" style="width: 100%;" />
+                                        <span asp-validation-for="BranchId"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Responsable</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="DoctorUserId" type="hidden" id="doctorId" />
+                                        <input id="doctors" style="width: 100%;" />
+                                        <span asp-validation-for="DoctorUserId"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="AppointmentDate">Fecha</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="hidden" id="modelDate" asp-for="SelectedDate" />
+                                        @*<input autocomplete="off" id="datepicker" class="form-control" placeholder="Selecciona la fecha..." />*@
+                                        <div id="datepicker"></div>
+                                        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Hora</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <select id="timepickerValue" style="display:none">
+                                            @foreach (var item in Model.AppointmentTime)
+                                            {
+                                                <option value="@(new DateTime(item.Ticks).ToString("HH:mm:00"))">@(new DateTime(item.Ticks).ToString("HH:mm:00"))</option>
+                                            }
+                                        </select>
+                                        <select class="form-control" asp-for="AppointmentTime" id="timepicker" multiple></select>
+                                        <span asp-validation-for="AppointmentTime" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                @*<div class="form-group">
+                                        <div class="col-md-3 text-right">
+                                            <label>Hora</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="input-group">
+                                                <select class="form-control" asp-for="AppointmentTime" id="timepicker">
+                                                    <option value="" disabled selected>Selecciona la hora...</option>
+                                                </select>
+                                                <span class="input-group-btn">
+                                                    <button type="button" onclick="reserveTime()" id="reserveTimeButton" class="btn btn-info btn-flat">
+                                                        Reservar
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <span asp-validation-for="AppointmentTime" class="text-danger"></span>
+                                            <span id="reservationCountdown" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                    </div>*@
+                                <script>
+                                    function reserveTime() {
+                                        var postData = {
+                                            time: $("#timepicker").val(),
+                                            doctorId: $("#doctors").val(),
+                                            branchId: $("#branches").val(),
+                                            selectedDate: $("#modelDate").val()
+                                        };
+                                        addAntiForgeryToken(postData);
+                                        $.ajax({
+                                            cache: false,
+                                            type: "POST",
+                                            url: "/Admin/Appointment/ReserveTime",
+                                            data: postData,
+                                            success: function (data) {
+                                                $("#branches").data("kendoComboBox").enable(false);
+                                                $("#doctors").data("kendoComboBox").enable(false);
+                                                $('#datepicker').prop('disabled', true);
+                                                $('#timepicker').prop('disabled', true);
+                                                $('#reserveTimeButton').prop('disabled', true);
+                                                startCountdown();
+                                            },
+                                            error: function (xhr, ajaxOptions, thrownError) {
+                                                alert(xhr.responseText);
+                                            }
+                                        });
+                                    }
+
+                                    function startCountdown() {
+                                        var countdownDate = new Date(new Date().getTime() + (7 * 60000));
+                                        var x = setInterval(function () {
+                                            var now = new Date().getTime();
+                                            var distance = countdownDate - now;
+
+                                            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                            document.getElementById("reservationCountdown").innerHTML = "¡Se ha reservado el horario! " + "Tiempo restante para agendar la cita: " + parseNumber(minutes) + ":" + parseNumber(seconds);
+
+                                            if (distance < 0) {
+                                                clearInterval(x);
+                                                alert("Se ha agotado el tiempo para agendar la cita.");
+                                                location.reload();
+                                            }
+                                        }, 1000)
+                                    }
+
+                                    function parseNumber(number) {
+                                        if (number > 0 && number < 10) { return '0' + number; }
+                                        else if (number >= 10) { return number; }
+                                        else { return '0' + 0; }
+                                    }
+                                </script>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="VisitType">Tipo de visita</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="VisitType" asp-items="@Html.GetEnumSelectList<VisitType>()" class="ui-choose" id="visit-type" />
+                                        <span asp-validation-for="VisitType" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                @*<div class="form-group">
+                                        <div class="col-md-3 text-right">
+                                            <label>Otros participantes (Opcional)</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <nop-select asp-for="SelectedUsersIds" asp-items="availableUsers" asp-multiple="true" />
+                                        </div>
+                                    </div>*@
+                                <div class="form-group" style="display:none" id="procedure">
+                                    <div class="col-md-3 text-right">
+                                        <label for="Products">Procedimiento</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="SelectedProductsIds" asp-items="availableProducts" asp-multiple="true" id="procedures-list" />
+                                        <script type="text/javascript">
+                                                $(document).ready(function() {
+                                                    var productIdsInput = $('#@Html.IdFor(model => model.SelectedProductsIds)').data("kendoMultiSelect");
+                                                        productIdsInput.setOptions({
+                                                        autoClose: false,
+                                                        filter: "contains"
+                                                    });
+                                                    @if (availableProducts.Count == 0)
+                                                    {
+                                                        <text>
+                                                                productIdsInput.setOptions({
+                                                                enable: false,
+                                                                placeholder: 'No hay procedimientos disponibles.'
+                                                            });
+                                                            productIdsInput._placeholder();
+                                                            productIdsInput._enable();
+                                                        </text>
+                                                    }
+                                                });
+                                        </script>
+                                        <span asp-validation-for="SelectedProductsIds" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <script>
+                                        $(document).ready(function () {
+                                            var procedures = $('#@Html.IdFor(model => model.SelectedProductsIds)').data("kendoMultiSelect");
+                                            if (procedures.value().length > 0) {
+                                                $("#procedure").show();
+                                            }
+
+                                            $('#visit-type').ui_choose({
+                                                itemWidth: null,
+                                                skin: '',
+                                                multi: false,
+                                                active: 'selected',
+                                                full: false,
+                                                colNum: null,
+                                                dataKey: 'ui-choose',
+                                                change: function (data) {
+                                                    @*if (data == 8) {
+                                                        $("#procedure").show();
+                                                    }
+                                                    else {
+                                                        $("#procedure").hide();
+                                                        var procedures = $('#@Html.IdFor(model => model.SelectedProductsIds)').data("kendoMultiSelect");
+                                                        procedures.value([]);
+                                                    }*@
+                                                },
+                                                click: null
+                                            });
+                                        });
+                                </script>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Estado</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="Status" asp-items="@Html.GetEnumSelectList<AppointmentStatus>()" class="ui-choose" id="choose-status" />
+                                        <span asp-validation-for="Status" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        $('#choose-status').ui_choose({
+                                            itemWidth: null,
+                                            skin: '',
+                                            multi: false,
+                                            active: 'selected',
+                                            full: false,
+                                            colNum: null,
+                                            dataKey: 'ui-choose',
+                                            change: function (data) {
+                                                if (data == 3 || data == 7) {
+                                                    $("#status-note").show();
+                                                }
+                                                else {
+                                                    $("#status-note").hide();
+                                                }
+                                            },
+                                            click: null
+                                        });
+                                    });
+                                </script>
+                                <div class="form-group" style="display:none" id="status-note">
+                                    <div class="col-md-3 text-right">
+                                        <label>Razón</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="StatusNote" class="form-control"></textarea>
+                                        <span asp-validation-for="StatusNote" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="Comments">Comentarios</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="Comments" class="form-control"></textarea>
+                                        <span asp-validation-for="Comments" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

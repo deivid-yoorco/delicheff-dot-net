@@ -1,0 +1,111 @@
+﻿@model string
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Payroll.BiweeklyPayment");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "BiweeklyPayment";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Nómina quincenal - @Model
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="Index">regresar a la lista de nóminas</a>
+        </small>
+    </h1>
+    <div class="pull-right">
+        <a href="/Admin/BiweeklyPayment/DownloadBiweekly?date=@Model" class="btn bg-blue">
+            Descargar nóminas quincenales de esta fecha
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListPaymentsData", controllerName))?date=@Model",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Name",
+                    title: "Nombre",
+                },
+                {
+                    field: "BasePayment",
+                    title: "Sueldo base",
+                },
+                {
+                    field: "DiscountIncidents",
+                    title: "Descuentos por incidencias",
+                },
+                {
+                    field: "DiscountDelays",
+                    title: "Descuentos por inasistencias o retardos",
+                },
+                {
+                    field: "BonusTotal",
+                    title: "Total de bonos",
+                },
+                {
+                    field: "TotalBiweekly",
+                    title: "Nómina neta",
+                },
+                {
+                    field: "IsPaid",
+                    title: "Estatus",
+                },
+                {
+                    field: "Id",
+                    title: "Pagos",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-default" href="PaymentOfEmployee?Id=#=Id#&date=@Model"><i class="fa fa-eye"></i>Ver pago</a>`
+                }
+            ]
+        });
+    });
+</script>

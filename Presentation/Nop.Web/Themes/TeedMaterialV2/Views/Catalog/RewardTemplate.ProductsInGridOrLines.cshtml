@@ -1,0 +1,70 @@
+﻿@model ProductRewardModel
+@using Nop.Core.Domain.Seo
+@inject SeoSettings seoSettings
+@{
+    Layout = "_ColumnsOne";
+}
+<div class="page manufacturer-page">
+    <style>
+        .title-manufacturer-page {
+            margin-top: 0.5em;
+            padding: 0.3em;
+            text-align: center;
+            color: white;
+            padding-bottom: 0.4em;
+        }
+    </style>
+
+    @if (!string.IsNullOrEmpty(Model.Title))
+    {
+        <h1 class="category-page-title teed-primary title-manufacturer-page">@Model.Title</h1>
+    }
+    else
+    {
+        <div style="margin-top:3em"></div>
+    }
+
+    <div class="page-body">
+        <div class="col s12 m12" style="margin-bottom: 2%;">
+            @if (!string.IsNullOrEmpty(Model.Picture))
+            {
+                <div class="col s12 m12">
+                    <img class="img-responsive manufacturer-picture" src="@Model.PictureModel.FullSizeImageUrl" />
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <div class="manufacturer-description col s12 m12">
+                    @Html.Raw(Model.Description)
+                </div>
+            }
+        </div>
+        @if (Model.PagingFilteringContext.PriceRangeFilter.Enabled)
+        {
+            @await Html.PartialAsync("_FilterPriceBox", Model.PagingFilteringContext.PriceRangeFilter)
+        }
+        @if (Model.Products.Count > 0)
+        {
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "product-list" : "product-grid")">
+                <div class="row">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="btn-manufacturer col s6 m4" style="margin-bottom: 2em">
+                            @await Html.PartialAsync("_ProductBox", product)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+    </div>
+</div>

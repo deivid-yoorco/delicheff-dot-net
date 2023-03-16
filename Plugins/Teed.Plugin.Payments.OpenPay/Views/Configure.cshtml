@@ -1,0 +1,135 @@
+﻿@model Teed.Plugin.Payments.OpenPay.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="UseSandbox" />
+                        <span asp-validation-for="UseSandbox"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Production_MerchantId_OverrideForStore" asp-input="Production_MerchantId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Identificador de Merchant (ID) para producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Production_MerchantId" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Production_MerchantId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Production_PublicKey_OverrideForStore" asp-input="Production_PublicKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Llave pública para producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Production_PublicKey" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Production_PublicKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Production_PrivateKey_OverrideForStore" asp-input="Production_PrivateKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Llave privada para producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Production_PrivateKey" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Production_PrivateKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Production_Url_OverrideForStore" asp-input="Production_Url" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>URL para producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Production_Url" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Production_Url" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Sandbox_MerchantId_OverrideForStore" asp-input="Sandbox_MerchantId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Identificador de Merchant (ID) para pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Sandbox_MerchantId" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Sandbox_MerchantId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Sandbox_PublicKey_OverrideForStore" asp-input="Sandbox_PublicKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Llave pública para pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Sandbox_PublicKey" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Sandbox_PublicKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Sandbox_PrivateKey_OverrideForStore" asp-input="Sandbox_PrivateKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Llave privada para pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Sandbox_PrivateKey" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Sandbox_PrivateKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Sandbox_Url_OverrideForStore" asp-input="Sandbox_Url" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>URL para pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="Sandbox_Url" maxlength="256" class="form-control" />
+                        <span asp-validation-for="Sandbox_Url" class="text-danger"></span>
+                    </div>
+                </div>
+                @*<div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="AdditionalFee_OverrideForStore" asp-input="AdditionalFee" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Aplicar comisión</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="AdditionalFee" />
+                <span asp-validation-for="AdditionalFee"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="AdditionalFeePercentage_OverrideForStore" asp-input="AdditionalFeePercentage" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>¿La comisión es porcentaje?</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="AdditionalFeePercentage" />
+                <span asp-validation-for="AdditionalFeePercentage"></span>
+            </div>
+        </div>*@
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

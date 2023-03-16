@@ -1,0 +1,123 @@
+﻿@model Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.MarketingExpenseModel
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Tipo de gasto</label>
+                                <div title="Selecciona el tipo de gasto publicitario" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <select class="form-control" asp-items="@Model.MarketingExpenseTypes" asp-for="ExpenseTypeId"></select>
+                                <span asp-validation-for="ExpenseTypeId"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Monto</label>
+                                <div title="Ingresa el monto gastado en pesos mexicanos." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="number" asp-for="Amount" />
+                                <span asp-validation-for="Amount"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Fecha incial</label>
+                                <div title="Fecha a partir de que aplica el gasto." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="hidden" id="dateinput-init" asp-for="InitDateString" />
+                            <input type="text" id="datepicker-init" class="form-control" value="@(Model.InitDateString)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Fecha final</label>
+                                <div title="Fecha hasta la que aplica el gasto." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <input type="hidden" id="dateinput-end" asp-for="EndDateString" />
+                            <input type="text" id="datepicker-end" class="form-control" value="@(Model.EndDateString)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Comentarios</label>
+                                <div title="Si lo deseas puedes agregar un comentario a este gasto publicitario (opcional)." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <textarea style="z-index:0" class="form-control" type="text" asp-for="Comment"></textarea>
+                                <span asp-validation-for="Comment"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#datepicker-init").datepicker({
+        dateFormat: "dd-mm-yy",
+        defaultDate: '@(Model.InitDateString)',
+        onSelect: function (dateVal) {
+            let dateArray = dateVal.split("-");
+            let day = dateArray[0];
+            let month = parseInt(dateArray[1]) - 1;
+            let year = dateArray[2];
+            $("#dateinput-init").val(formatDate(new Date(year, month, day)));
+        },
+    });
+
+    $("#datepicker-end").datepicker({
+        dateFormat: "dd-mm-yy",
+        defaultDate: '@(Model.EndDateString)',
+        onSelect: function (dateVal) {
+            let dateArray = dateVal.split("-");
+            let day = dateArray[0];
+            let month = parseInt(dateArray[1]) - 1;
+            let year = dateArray[2];
+            $("#dateinput-end").val(formatDate(new Date(year, month, day)));
+        },
+    });
+
+    function formatDate(date) {
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+
+        let parsedMonth = month < 10 ? "0" + month : month;
+        let parsedDay = day < 10 ? "0" + day : day;
+
+        return parsedDay + "-" + parsedMonth + "-" + year;
+    }
+</script>

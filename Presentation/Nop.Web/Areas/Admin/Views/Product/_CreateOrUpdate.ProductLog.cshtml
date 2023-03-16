@@ -1,0 +1,20 @@
+﻿@model ProductModel
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Log
+                </div>
+                <div class="panel-body">
+                    @foreach (var item in Model.ProductLog)
+                    {
+                        @item.Message
+                        <br />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

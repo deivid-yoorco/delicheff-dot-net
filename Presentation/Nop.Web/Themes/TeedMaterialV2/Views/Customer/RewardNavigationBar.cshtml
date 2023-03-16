@@ -1,0 +1,21 @@
+﻿@{
+    var currentUrlPath = this.Url.ActionContext.HttpContext.Request.Path.Value;
+}
+
+<div class="row">
+    <div class="col s2">
+        <a href="@Url.RouteUrl("CustomerPoints")" @(currentUrlPath == "/customer/customerpoints" ? "class=teed-primary-text" : "class=grey-text")>
+            <i style="vertical-align: middle;" class="tiny material-icons">stars</i> Puntos
+        </a>
+    </div>
+    @*<div class="col s3">
+            <a href="@Url.RouteUrl("CustomerGetPoints")" @(currentUrlPath == "/customer/getpoints" ? "class=teed-primary-text" : "class=grey-text")>
+                <i style="vertical-align: middle;" class="tiny material-icons">add_location</i> Consigue puntos
+            </a>
+        </div>*@
+    <div class="col s3">
+        <a href="@Url.RouteUrl("CustomerBalance")" @(currentUrlPath == "/customer/customerbalance" ? "class=teed-primary-text" : "class=grey-text")>
+            <i style="vertical-align: middle;" class="tiny material-icons">monetization_on</i> Saldo
+        </a>
+    </div>
+</div>

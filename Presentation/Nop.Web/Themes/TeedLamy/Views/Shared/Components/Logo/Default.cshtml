@@ -1,0 +1,74 @@
+﻿@model LogoModel
+<div class="show-on-medium-and-down hide-on-med-and-up">
+    <ul class="left mobile-bar" style="height: 30px;">
+        @await Component.InvokeAsync("HeaderLinks", new { HideExtra = true })
+    </ul>
+</div>
+<div class="show-on-medium-and-down hide-on-med-and-up">
+    <a id="logo-container" href="/" class="brand-logo">
+        @*<img title="" alt="@Model.StoreName" src="@Model.LogoPath" />*@
+        <img title="" alt="@Model.StoreName" src="https://www.lamyshop.com.mx/Themes/TeedLamy/Content/images/brand_logo.svg" id="logo-image" />
+    </a>
+</div>
+<div class="row hide-on-med-and-down logo-banner" style="margin-bottom:0;display:flex;align-items:center;">
+    <div id="res1" class="col m6 lamy-resize">
+        <a id="logo-container" href="/" class="brand-logo" style="vertical-align:middle; position:relative;">
+            @*<img title="" alt="@Model.StoreName" src="@Model.LogoPath" id="logo-image" />*@
+            <img title="" alt="@Model.StoreName" src="https://www.lamyshop.com.mx/Themes/TeedLamy/Content/images/brand_logo.svg" id="logo-image" />
+        </a>
+    </div>
+    <div id="res2" class="col m6 lamy-resize">
+        <ul class="left">
+            @await Component.InvokeAsync("TaxTypeSelector")
+            @await Component.InvokeAsync("CurrencySelector")
+            @await Component.InvokeAsync("LanguageSelector")
+            @await Component.InvokeAsync("Widget", new { widgetZone = "header_selectors" })
+        </ul>
+        <ul class="right">
+            @await Component.InvokeAsync("HeaderLinks")
+        </ul>
+    </div>
+</div>
+@* <div class="col m12" style="color: black; line-height: normal !important; text-align: center; margin-bottom: 10px">
+    IMPORTANTE: Debido a la contingencia sanitaria actual, existe la posibilidad de que los tiempos de entrega se extiendan hasta a 12 días hábiles. Haremos todo lo posible para que sus pedidos lleguen en tiempo, pero le pedimos considerarlo y agradecemos su comprensión.
+</div> *@
+<style>
+    nav .sidenav-trigger i {
+        @* line-height: 0 !important; *@
+    }
+    .lamy-resize {
+        padding: 1.5rem 4.2rem !important;
+    }
+
+    .lamy-resize-small {
+        padding: 0.5rem 4.2rem !important;
+    }
+
+    @@media only screen and (max-width: 480px) {
+        #logo-image {
+            width: 160px;
+            margin: 25px 25px;
+        }
+
+        #logo-container {
+            height: 55px;
+        }
+    }
+</style>
+<script>
+    $(document).on("scroll", function () {
+        if ($(document).scrollTop() > 250) {
+            $('#res1').removeClass("lamy-resize");
+            $('#res2').removeClass("lamy-resize");
+            $('#res1').addClass("lamy-resize-small");
+            $('#res2').addClass("lamy-resize-small");
+            $('.categories-button').addClass("categories-button-extra");
+        } else {
+            $('#res1').addClass("lamy-resize");
+            $('#res2').addClass("lamy-resize");
+            $('#res1').removeClass("lamy-resize-small");
+            $('#res2').removeClass("lamy-resize-small");
+            $('.categories-button').removeClass("categories-button-extra");
+        }
+    });
+</script>

@@ -1,0 +1,104 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+   <TargetFramework>net461</TargetFramework>
+ </PropertyGroup>  
+ <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+   <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Emails</OutputPath>
+   <OutDir>$(OutputPath)</OutDir>
+ </PropertyGroup>
+ <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+   <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Emails</OutputPath>
+   <OutDir>$(OutputPath)</OutDir>
+ </PropertyGroup>
+ <!-- This target execute after "Build" target -->
+ <Target Name="NopTarget" AfterTargets="Build">
+   <!-- Delete unnecessary libraries from plugins path -->
+   <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+ </Target>
+ <ItemGroup>
+   <None Remove="logo.jpg" />
+   <None Remove="plugin.json" />
+   <None Remove="Views\Configure.cshtml" />
+   <None Remove="Views\_ConfigureAbandonShoppingCart.cshtml" />
+   <None Remove="Views\_ConfigureGeneral.cshtml" />
+   <None Remove="Views\_ConfigureOrderConfirm.cshtml" />
+   <None Remove="Views\_ConfigureOrderDelivered.cshtml" />
+   <None Remove="Views\_ConfigureOrderSent.cshtml" />
+   <None Remove="Views\_ConfigurePassword.cshtml" />
+   <None Remove="Views\_ConfigurePayment.cshtml" />
+   <None Remove="Views\_ConfigurePaypal.cshtml" />
+   <None Remove="Views\_ConfigureReorder.cshtml" />
+   <None Remove="Views\_ConfigureStore.cshtml" />
+   <None Remove="Views\_ConfigureValidate.cshtml" />
+   <None Remove="Views\_ConfigureWelcome.cshtml" />
+   <None Remove="Views\_ViewImports.cshtml" />
+ </ItemGroup>
+ <ItemGroup>
+   <Content Include="logo.jpg">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="plugin.json">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\Configure.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureReorder.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigurePayment.cshtml" />
+   <Content Include="Views\_ConfigurePaypal.cshtml" />
+   <Content Include="Views\_ConfigureOrderSent.cshtml" />
+   <Content Include="Views\_ConfigureOrderDelivered.cshtml" />
+   <Content Include="Views\_ConfigureStore.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureValidate.cshtml" />
+   <Content Include="Views\_ConfigureOrderConfirm.cshtml" />
+   <Content Include="Views\_ConfigurePassword.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureAbandonShoppingCart.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureWelcome.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ConfigureGeneral.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Include="Views\_ViewImports.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+ </ItemGroup>
+ <ItemGroup>
+   <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
+   <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
+   <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj">
+     <Private>false</Private>
+   </ProjectReference>
+   <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj">
+     <Private>false</Private>
+   </ProjectReference>
+ </ItemGroup>
+ <ItemGroup>
+   <Content Update="Views\_ConfigurePayment.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Update="Views\_ConfigurePaypal.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Update="Views\_ConfigureOrderSent.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Update="Views\_ConfigureOrderDelivered.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Update="Views\_ConfigureValidate.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <Content Update="Views\_ConfigureOrderConfirm.cshtml">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+ </ItemGroup>
+</Project>

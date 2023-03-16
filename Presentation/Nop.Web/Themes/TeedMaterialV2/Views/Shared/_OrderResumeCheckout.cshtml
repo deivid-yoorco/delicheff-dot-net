@@ -1,0 +1,521 @@
+﻿@model OnePageCheckoutModel
+@using System.Text.RegularExpressions
+@using Nop.Core
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+
+<div class="order-summary-content">
+    <div class="table-wrapper hide-on-small-only">
+        <table class="cart">
+            <colgroup>
+                <col width="1" />
+                <col />
+                <col width="1" />
+                <col width="1" />
+                <col width="1" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="product-picture">
+                        @T("ShoppingCart.Image")
+                    </th>
+                    <th class="product">
+                        @T("ShoppingCart.Product(s)")
+                    </th>
+                    @*<th class="unit-price">
+                            @T("ShoppingCart.UnitPrice")
+                        </th>*@
+                    <th class="quantity" style="width:100px">
+                        @T("ShoppingCart.Quantity")
+                    </th>
+                    <th class="subtotal">
+                        @T("ShoppingCart.ItemTotal")
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (var item in Model.CartModel.Items)
+                    {
+                        <tr>
+                            <td class="product-picture">
+                                @if (!string.IsNullOrEmpty(item.FancyDesign))
+                                {
+                                    string src = item.FancyDesign.Split('#').ToArray()[0];
+                                    src = src.Split('#').ToArray()[0];
+                                    <img alt="@item.Picture.AlternateText" class="responsive-img" src="@src" />
+                                }
+                                else
+                                {
+                                    <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" />
+                                }
+                            </td>
+
+                            <td class="product">
+                                <strong>@item.ProductName</strong>
+                                @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                {
+                                    <div class="attributes">
+                                        @Html.Raw(item.AttributeInfo)
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(item.SelectedPropertyOption))
+                                {
+                                    <div class="attributes">
+                                        @(item.SelectedPropertyOption.First().ToString().ToUpper())@(item.SelectedPropertyOption.Substring(1))
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(item.RecurringInfo))
+                                {
+                                    <div class="recurring-info">
+                                        @Html.Raw(item.RecurringInfo)
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(item.RentalInfo))
+                                {
+                                    <div class="rental-info">
+                                        @Html.Raw(item.RentalInfo)
+                                    </div>
+                                }
+                                @if (item.Warnings.Count > 0)
+                                {
+                                    <div class="message-error">
+                                        <ul>
+                                            @foreach (var warning in item.Warnings)
+                                            {
+                                                <li>@warning</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </td>
+                            @*<td class="unit-price">
+                                    <span class="product-unit-price">@item.UnitPrice</span>
+                                </td>*@
+                            <td class="quantity center">
+                                @if (item.RewardPointsRequired > 0)
+                                {
+                                    <span class="product-unit-price">@item.UnitPrice puntos</span>
+                                }
+                                else
+                                {
+                                    @if (item.EquivalenceCoefficient > 0 && item.BuyingBySecondary)
+                                    {
+                                        var type = "gr";
+                                        var value = (item.Quantity * 1000) / item.EquivalenceCoefficient;
+                                        if (value >= 1000)
+                                        {
+                                            value = value / 1000;
+                                            type = "kg";
+                                        }
+                                        <span>@(value.ToString("0.##")) @type</span>
+                                    }
+                                    else if (item.WeightInterval > 0)
+                                    {
+                                        var type = "gr";
+                                        var value = item.Quantity * item.WeightInterval;
+                                        if (value >= 1000)
+                                        {
+                                            value = value / 1000;
+                                            type = "kg";
+                                        }
+                                        <span>@(value.ToString("0.##")) @type</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@item.Quantity</span>
+                                    }
+                                }
+                            </td>
+                            <td class="subtotal">
+                                @if (item.GiftProductEnable || (item.IsRewardItem ?? false) == true ||
+                                    (!string.IsNullOrEmpty(item.AppliedByCodeByCoupon) && item.SubTotal == "$0.00"))
+                                {
+                                    <span>GRATIS</span>
+                                }
+                                else
+                                {
+                                    @if (!string.IsNullOrEmpty(item.Discount))
+                                    {
+                                        <del><span style="text-decoration:line-through;" class="red-text">@(GetOriginalPrice(item.SubTotal, item.Discount))</span></del>
+                                        <div class="discount">
+                                            @T("ShoppingCart.ItemYouSave", "-" + item.Discount)
+                                        </div>
+                                        <span class="product-subtotal" style="font-weight: bold">
+                                            @item.SubTotal @if (item.RewardPointsRequired > 0)
+                                            {<text> puntos @item.RewardPointsRequired</text>}
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="product-subtotal">
+                                            @item.SubTotal @if (item.RewardPointsRequired > 0)
+                                            {<text> puntos @item.RewardPointsRequired</text>}
+                                        </span>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col s12 m12 show-on-small hide-on-med-and-up" style="padding:0;">
+        <style>
+            .row-cards {
+                margin-bottom: 0;
+            }
+        </style>
+        @foreach (var item in Model.CartModel.Items)
+        {
+            <div class="card-panel">
+                <div class="row valign-wrapper row-cards">
+                    <div class="col s4">
+                        <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                    </div>
+                    <div class="col s8">
+                        <div>
+                            <strong>@item.ProductName</strong>
+                            @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                            {
+                                <div class="attributes">
+                                    @Html.Raw(item.AttributeInfo)
+                                </div>
+                                <br />
+                            }
+                            @if (!string.IsNullOrWhiteSpace(item.SelectedPropertyOption))
+                            {
+                                <div class="attributes">
+                                    @(item.SelectedPropertyOption.First().ToString().ToUpper())@(item.SelectedPropertyOption.Substring(1))
+                                </div>
+                            }
+                        </div>
+                        <div class="col s12">
+                            <div class="quantity right">
+                                @if (item.EquivalenceCoefficient > 0 && item.BuyingBySecondary)
+                                {
+                                    var type = "gr";
+                                    var value = (item.Quantity * 1000) / item.EquivalenceCoefficient;
+                                    if (value >= 1000)
+                                    {
+                                        value = value / 1000;
+                                        type = "kg";
+                                    }
+                                    <span>@(value.ToString("0.##")) @type</span>
+                                }
+                                else if (item.WeightInterval > 0)
+                                {
+                                    var type = "gr";
+                                    var value = item.Quantity * item.WeightInterval;
+                                    if (value >= 1000)
+                                    {
+                                        value = value / 1000;
+                                        type = "kg";
+                                    }
+                                    <span>@(value.ToString("0.##")) @type</span>
+                                }
+                                else
+                                {
+                                    <span>@item.Quantity</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col s12">
+                            <div class="subtotal right">
+                                @if (item.GiftProductEnable || (item.IsRewardItem ?? false) == true ||
+                                    (!string.IsNullOrEmpty(item.AppliedByCodeByCoupon) && item.SubTotal == "$0.00"))
+                                {
+                                    <span>GRATIS</span>
+                                }
+                                else
+                                {
+                                    @if (!string.IsNullOrEmpty(item.Discount))
+                                    {
+                                        <del><span style="text-decoration:line-through;" class="red-text">@(GetOriginalPrice(item.SubTotal, item.Discount))</span></del>
+                                        <div class="discount">
+                                            @T("ShoppingCart.ItemYouSave", "-" + item.Discount)
+                                        </div>
+                                        <span class="product-subtotal" style="font-weight: bold">
+                                            @item.SubTotal @if (item.RewardPointsRequired > 0)
+                                            {<text> puntos @item.RewardPointsRequired</text>}
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="product-subtotal">
+                                            @item.SubTotal @if (item.RewardPointsRequired > 0)
+                                            {<text> puntos @item.RewardPointsRequired</text>}
+                                        </span>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<style>
+    .td-total {
+        text-align: right;
+        padding: 0px;
+    }
+
+    .tr-total {
+        border-bottom: none;
+    }
+</style>
+<div class="total-info center-align row" style="margin-top:10px;">
+    <div class="col @if (Model.TotalModel.OrderTotalBalance > 0){ <text>s11</text> } else { <text>s12</text> }">
+        <table class="cart-total">
+            <tbody>
+                <tr class="order-subtotal tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.SubTotal"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary" id="calculate-subtotal">@Model.TotalModel.SubTotal</span>
+                    </td>
+                </tr>
+                @if (!string.IsNullOrEmpty(Model.TotalModel.SubTotalDiscount))
+                {
+                    <tr class="order-subtotal-discount tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.SubTotalDiscount"):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary" id="calculate-discount">@Model.TotalModel.SubTotalDiscount</span>
+                        </td>
+                    </tr>
+                }
+                @if (!string.IsNullOrEmpty(Model.TotalModel.ProductDiscounts))
+                {
+                    <tr class="order-subtotal-discount tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>Descuento a productos:</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary" id="calculate-item-discounts">@Model.TotalModel.ProductDiscounts</span>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.TotalModel.HideShippingTotal)
+                {
+                    <tr class="shipping-cost tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.Shipping"):</label>
+                            @*@if (Model.TotalModel.RequiresShipping && !string.IsNullOrEmpty(Model.TotalModel.SelectedShippingMethod))
+                                {
+                                    <span class="selected-shipping-method">@T("ShoppingCart.Totals.Shipping.Method", Model.TotalModel.SelectedShippingMethod)</span>
+                                }*@
+                        </td>
+                        <td class="cart-total-right td-total">
+                            @if (Model.TotalModel.RequiresShipping)
+                            {
+                                if (!string.IsNullOrEmpty(Model.TotalModel.Shipping))
+                                {
+                                    <span class="value-summary" id="calculate-shipping">@Model.TotalModel.Shipping</span>
+                                }
+                                else
+                                {
+                                    <span id="calculate-shipping">@T("ShoppingCart.Totals.CalculatedDuringCheckout")</span>
+                                }
+                            }
+                            else
+                            {
+                                <span>@T("ShoppingCart.Totals.Shipping.NotRequired")</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.TotalModel.OrderTotalBalance > 0)
+                {
+                    <tr class="balance tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>Saldo utilizable en esta orden:</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary teed-primary-text">@Model.TotalModel.OrderTotalBalance.ToString("C")</span>
+                        </td>
+                    </tr>
+                }
+                @if (!string.IsNullOrEmpty(Model.TotalModel.PaymentMethodAdditionalFee))
+                {
+                    <tr class="additional-fees tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.PaymentMethodAdditionalFee"):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary" id="calculate-additional-fee">@Model.TotalModel.PaymentMethodAdditionalFee</span>
+                        </td>
+                    </tr>
+                }
+                @if (Model.TotalModel.DisplayTaxRates && Model.TotalModel.TaxRates.Count > 0)
+                {
+                    foreach (var taxRate in Model.TotalModel.TaxRates)
+                    {
+                        <tr class="tax-rate tr-total">
+                            <td class="cart-total-left td-total">
+                                <label>@string.Format(T("ShoppingCart.Totals.TaxRateLine").Text, taxRate.Rate):</label>
+                            </td>
+                            <td class="cart-total-right td-total">
+                                <span>@taxRate.Value</span>
+                            </td>
+                        </tr>
+                    }
+                }
+                @if (Model.TotalModel.DisplayTax)
+                {
+                    <tr class="tax-value tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.Tax"):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary" id="calculate-tax">@Model.TotalModel.Tax</span>
+                        </td>
+                    </tr>
+                }
+                @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotalDiscount))
+                {
+                    <tr class="discount-total tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.OrderTotalDiscount"):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary" id="calculate-total-discount">@Model.TotalModel.OrderTotalDiscount</span>
+                        </td>
+                    </tr>
+                }
+                @if (Model.TotalModel.GiftCards.Count > 0)
+                {
+                    foreach (var gc in Model.TotalModel.GiftCards)
+                    {
+                        <tr class="giftcard-summary tr-total">
+                            <td class="cart-total-left td-total">
+                                <label>@T("ShoppingCart.Totals.GiftCardInfo"):</label>
+                                <span>@T("ShoppingCart.Totals.GiftCardInfo.Code", gc.CouponCode)</span>
+                                @if (Model.TotalModel.IsEditable)
+                                {
+                                    //little hack here with empty "value" element
+                                    <input type="submit" name="removegiftcard-@gc.Id" value=" " title="@T("Common.Remove")" class="remove-gift-card-button" />
+                                }
+                                <span class="giftcard-remaining">@string.Format(T("ShoppingCart.Totals.GiftCardInfo.Remaining").Text, gc.Remaining)</span>
+                            </td>
+                            <td class="cart-total-right td-total">
+                                <span class="value-summary">@gc.Amount</span>
+                            </td>
+                        </tr>
+                    }
+                }
+                @if (Model.TotalModel.RedeemedRewardPoints > 0)
+                {
+                    <tr class="reward-points tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@string.Format(T("ShoppingCart.Totals.RewardPoints").Text, Model.TotalModel.RedeemedRewardPoints):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary">@Model.TotalModel.RedeemedRewardPointsAmount</span>
+                        </td>
+                    </tr>
+                }
+                <tr class="order-total tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.OrderTotal"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotal))
+                        {
+                            <span class="value-summary"><strong id="calculate-total">@Model.TotalModel.OrderTotal</strong></span>
+                        }
+                        else
+                        {
+                            <span id="calculate-total">@T("ShoppingCart.Totals.CalculatedDuringCheckout")</span>
+                        }
+                    </td>
+                </tr>
+                @*@if (Convert.ToDecimal(Regex.Replace(Model.TotalModel.SubTotal, "[^-?\\d+\\.]", "")) > 899)
+                    {
+                        <tr class="order-total tr-total">
+                            <td class="cart-total-left td-total">
+                                <label>Envío GRATIS:</label>
+                            </td>
+                            <td class="cart-total-right td-total">
+                                @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotal))
+                                {
+                                    <span class="value-summary">GRATIS</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        decimal subTotal = Convert.ToDecimal(Regex.Replace(Model.TotalModel.SubTotal, "[^-?\\d+\\.]", ""));
+                        decimal envio = 900 - subTotal;
+
+                        <tr class="order-total tr-total">
+                            <td class="cart-total-left td-total">
+                                <label>Envío GRATIS:</label>
+                            </td>
+                            <td class="cart-total-right td-total">
+                                @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotal))
+                                {
+                                    <span class="value-summary">Agrega <strong>@string.Format("{0:C}", envio)</strong> para obtener tu envío gratis</span>
+                                }
+                            </td>
+                        </tr>
+                    }*@
+                @if (Model.TotalModel.WillEarnRewardPoints > 0)
+                {
+                    <tr class="earn-reward-points tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.RewardPoints.WillEarn"):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary">@string.Format(T("ShoppingCart.Totals.RewardPoints.WillEarn.Point").Text, Model.TotalModel.WillEarnRewardPoints)</span>
+                        </td>
+                    </tr>
+                }
+                @if (Model.TotalModel.RequiredRewardPointsValue > 0)
+                {
+                    <tr class="earn-reward-points tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>Puntos requeridos:</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <strong class="value-summary">@Model.TotalModel.RequiredRewardPoints puntos</strong>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalModel.OrderTotalBalance > 0)
+    {
+        <div class="balance-checkbox checkout col s1">
+            <p class="tooltipped" data-position="top" data-tooltip="Activar/Desactivar uso de tu saldo disponible.">
+                <label>
+                    <input type="checkbox" class="filled-in" @if (Model.TotalModel.IsPaymentWithBlanceActive) { <text> checked="checked" </text> } />
+                    <span></span>
+                </label>
+            </p>
+        </div>
+    }
+</div>
+
+@functions{
+    public string GetOriginalPrice(string newPriceString, string discountString)
+    {
+        decimal.TryParse(newPriceString.Replace("$", ""), out decimal newPrice);
+        decimal.TryParse(discountString.Replace("$", ""), out decimal discount);
+
+        if (newPrice == 0 && discount == 0)
+        {
+            return newPriceString;
+        }
+
+        return (newPrice + discount).ToString("C");
+    }
+}

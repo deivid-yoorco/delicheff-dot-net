@@ -1,0 +1,7 @@
+﻿@model ProductDetailsModel
+@if (Model.EmailAFriendEnabled)
+{
+    <button type="button" title="@T("Products.EmailAFriend")" class="btn-floating waves-effect waves-light" onclick="setLocation('@Url.RouteUrl("ProductEmailAFriend", new { productId = Model.Id })')">
+        <i class="material-icons">email</i>
+    </button>    
+}

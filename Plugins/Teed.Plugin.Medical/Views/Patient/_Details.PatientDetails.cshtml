@@ -1,0 +1,112 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var controllerName = "Patient";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Nombre del paciente:</strong> @Model.FirstName @Model.LastName</p>
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {<p><strong>Correo electrónico:</strong> @Model.Email</p>}
+                            @if (Model.DateOfBirth != null)
+                            { <p><strong>Fecha de nacimiento:</strong> @Model.DateOfBirth.Value.ToString("dd-MM-yyyy")</p> }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Phone1))
+                            {<p><strong>Teléfono 1:</strong> @Model.Phone1</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.Phone2))
+                            {<p><strong>Teléfono 2:</strong> @Model.Phone2</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.Phone3))
+                            {<p><strong>Teléfono 3:</strong> @Model.Phone3</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.StreetAddress))
+                            {<p><strong>Línea de dirección 1:</strong> @Model.StreetAddress</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.StreetAddress2))
+                            {<p><strong>Línea de dirección 2:</strong> @Model.StreetAddress2</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.ZipPostalCode))
+                            {<p><strong>Código Postal:</strong> @Model.ZipPostalCode</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.FamilyBackground))
+                            {<p><strong>Antecedentes heredo familiares:</strong> @Model.FamilyBackground</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.PersonalPathologicalHistory))
+                            {<p><strong>Antecedentes personales patológicos:</strong> @Model.PersonalPathologicalHistory</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.PersonalNonPathologicalHistory))
+                            {<p><strong>Antecedentes personales no patológicos:</strong> @Model.PersonalNonPathologicalHistory</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.CurrentConditions))
+                            {<p><strong>Padecimientos actuales:</strong> @Model.CurrentConditions</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.Allergies))
+                            {<p><strong>Alergias:</strong> @Model.Allergies</p>}
+                            @if (Model.ActiveUpdate)
+                            {<p><strong>Editar Activo:</strong> @Model.UrlActive</p>}
+                            @if (!string.IsNullOrWhiteSpace(Model.ReferedByUser))
+                            {<p><strong>Referido por:</strong> @Model.ReferedByUser </p>}
+                            <br /><p><strong>Última fecha de actualización:</strong> @Model.LastUpdateDate.ToLocalTime() </p>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="">
+                                <h3>Consultas</h3>
+                                <div id="visit-grid2"></div>
+                                <script type="text/javascript">
+                                        $(document).ready(function() {
+                                            $("#visit-grid2").kendoGrid({
+                                                dataSource: {
+                                                    type: "json",
+                                                    transport: {
+                                                        read: {
+                                                            url: "@Html.Raw(Url.Action("PatientVisits", controllerName, new { id = Model.Id }))",
+                                                            type: "POST",
+                                                            dataType: "json"
+                                                        }
+                                                    },
+                                                    schema: {
+                                                        data: "Data",
+                                                        total: "Total",
+                                                        errors: "Errors"
+                                                    },
+                                                    error: function(e) {
+                                                        display_kendoui_grid_error(e);
+                                                        // Cancel the changes
+                                                        this.cancelChanges();
+                                                    },
+                                                    pageSize: @(defaultGridPageSize),
+                                                    serverPaging: true,
+                                                    serverFiltering: true,
+                                                    serverSorting: true
+                                                },
+
+                                                editable: {
+                                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                                    mode: "inline"
+                                                },
+                                                scrollable: false,
+                                                columns: [
+                                                    {
+                                                        field: "CreationDate",
+                                                        title: "Fecha de consulta",
+                                                        template: '<a href="/Admin/Visit/Edit/#=Id#">#=CreationDate# - #=CreationTime#</a>'
+                                                    },
+                                                    {
+                                                        field: "Doctor",
+                                                        title: "Doctor"
+                                                    },
+                                                    //{
+                                                    //    field: "Branch",
+                                                    //    title: "Sucursal"
+                                                    //}
+                                                ]
+                                            });
+                                        });
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

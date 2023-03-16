@@ -1,0 +1,271 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.PurchaseOrder");
+    var controllerName = "PurchaseOrder";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+
+<form asp-controller="Plugin" asp-action="List" method="post" id="plugins-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Órdenes de compra
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.AddNew")
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <input type="hidden" id="filterDate" />
+        <div class="form-horizontal">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    @*<div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Sucursal</label>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input id="branches" />
+                            </div>
+                            <em>Selecciona para filtrar las ODC por sucursal.</em>
+                        </div>
+                    </div>*@
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Fecha</label>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" id="datepicker" />
+                            </div>
+                            <em>Selecciona la fecha para filtrar. <a style="display:none" id="removeDateFilter" href="#">Quitar este filtro</a></em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="grid-template" id="element-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div id="details"></div>
+<script>
+    $(document).ready(function () {
+
+        let data = {
+            showAllAvailable: true
+        };
+        addAntiForgeryToken(data);
+
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker();
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+            $("#element-grid-today").hide();
+            $("#today-appointmets-data").hide();
+            $("#removeDateFilter").show();
+            purchaseOrdersList();
+        });
+
+        $("#removeDateFilter").click(function () {
+            $("#datepicker").val("");
+            $("#filterDate").val("");
+            $('selector').datepicker('setDate', null);
+            $("#element-grid-today").show();
+            $("#today-appointmets-data").show();
+            $("#removeDateFilter").hide();
+            purchaseOrdersList();
+            return false;
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        //$("#branches").kendoComboBox({
+        //    placeholder: "Selecciona la sucursal...",
+        //    dataTextField: "Branch",
+        //    dataValueField: "Id",
+        //    filter: "contains",
+        //    autoBind: true,
+        //    minLength: 1,
+        //    dataSource: {
+        //        type: "json",
+        //        transport: {
+        //            read: {
+        //                url: "/Admin/PurchaseOrder/BranchListData",
+        //                type: "POST",
+        //                data: data
+        //            }
+        //        }
+        //    },
+        //    dataBound: function (e) {
+        //        if (!$("#branches").data("kendoComboBox").value()) {
+        //            $("#branches").data("kendoComboBox").value($("#userBranch").val());
+        //        }
+        //    },
+        //    select: function (e) {
+        //        $("#userBranch").val(this.dataItem(e.item.index()).Id);
+        //        todayAppointmentsList();
+        //        purchaseOrdersList();
+        //    }
+        //});
+
+        purchaseOrdersList();
+        function purchaseOrdersList() {
+            var data = {
+                filterDate: $("#filterDate").val()
+            };
+
+            $("#element-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                            type: "POST",
+                            dataType: "json",
+                            data: data
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors"
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                pageable: {
+                    refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "RequestedDate",
+                        title: "Fecha de creación",
+                        width: 150,
+                        template: '<a href="Edit/#=Id#">#=RequestedDate#</a>'
+                    },
+                    {
+                        field: "RequestedBy" ,
+                        title: "Creador por",
+                        width: 150,
+                    },
+                    {
+                        field: "Comments",
+                        width: 150,
+                        title: "Comentarios",
+                    },
+                    {
+                        field: "PurchaseOrderStatus",
+                        width: 150,
+                        title: "Estado",
+                    },
+                    {
+                        command: [{ text: "En revisión", click: reviewing, className: "btn bg-purple" },
+                                  { text: "Aprobada", click: approved, className: "btn bg-red" },
+                                  { text: "Solicitado al proveedor", click: requested, className: "btn bg-yellow" },
+                                  { text: "Entregado", click: delivered, className: "btn bg-green" }],
+                        title: "Opciones",
+                        width: 200
+                    }
+                ]
+            });
+
+            function requested(e) {
+                e.preventDefault();
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "RequestedPurchaseOrder/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                    }
+                });
+            };
+
+            function approved(e) {
+                e.preventDefault();
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "ApprovedPurchaseOrder/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                    }
+                });
+            };
+
+            function delivered(e) {
+                e.preventDefault();
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "DeliveredPurchaseOrder/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                    }
+                });
+            };
+
+            function reviewing(e) {
+                e.preventDefault();
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "ReviewingPurchaseOrder/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                    }
+                });
+            };
+        }
+    });
+</script>

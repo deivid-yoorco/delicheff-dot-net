@@ -1,0 +1,29 @@
+﻿/* MAKE SURE GET RID OF "!Important" IN "site.min.css" TO FIRST ".teed-primary-text{color:#######}" SO COLORS HERE CAN WORK PROPERLY */
+:root {
+    --main-color: #3E3A37;
+}
+
+.teed-primary-text {
+    color: var(--main-color) !important;
+}
+
+    .teed-primary-text a {
+        color: var(--main-color) !important;
+    }
+
+.card-action a .grey-text {
+    color: var(--main-color) !important;
+}
+
+.nav-wrapper.container li a {
+    color: var(--main-color) !important;
+}
+
+.nav-wrapper.container .material-icons {
+    color: var(--main-color) !important;
+}
+
+.product-page .full-description img {
+    max-width: 100%;
+    height: auto;
+}

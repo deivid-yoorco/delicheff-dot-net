@@ -1,0 +1,247 @@
+﻿@model Nop.Web.Areas.Admin.Models.RewardItem.RewardItemsModel
+
+@{
+    Layout = "_AdminLayout";
+    //active menu item (system name)
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar producto a apapachos
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a href="/Admin/RewardItem/RewardItem">regresar a lista de apapachos</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                Agregar
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="raw clearfix">
+                <div class="col-md-12">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="form-container" data-index="1">
+                                    <div class="form-group">
+                                        <div class="col-md-3">
+                                            <div class="label-wrapper">
+                                                <label class="control-label">Producto</label>
+                                                <div title="Producto a agregar"
+                                                     class="ico-help">
+                                                    <i class="fa fa-question-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="hidden" id="ProductId" name="ProductId" />
+                                            <input id="products" name="products" style="width: 100%;" />
+                                            <span asp-validation-for="ProductId"></span>
+                                            <input type="hidden" id="equivalence-selector" />
+                                            <input type="hidden" id="interval-selector" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="unit-container-selector" style="display:none">
+                                        <div class="col-md-3">
+                                            <div class="label-wrapper">
+                                                <label class="control-label">Unidad</label>
+                                                <div title="Selecciona la unidad de medida." class="ico-help">
+                                                    <i class="fa fa-question-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="input-group" style="width:25%">
+                                                <select class="form-control" id="BuyingBySecondary-select" name="BuyingBySecondary-select" onchange="updateQuantitySelect($(this).val())">
+                                                    <option value="false">Pieza</option>
+                                                    <option value="true">Peso</option>
+                                                </select>
+                                                <input type="hidden" id="BuyingBySecondary" name="BuyingBySecondary" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="quantity-container-selector">
+                                        <div class="col-md-3">
+                                            <div class="label-wrapper">
+                                                <label class="control-label">Cantidad</label>
+                                                <div title="Cantidad del producto para agregar al carrito. Debes seleccionar un producto para activar esta casilla." class="ico-help">
+                                                    <i class="fa fa-question-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="input-group" style="width:25%">
+                                                <select class="form-control" id="Quantity" name="Quantity" onchange="onQtyChange(this)" disabled=""></select>
+                                                <span id="equivalence-calc"></span>
+                                                <span id="interval-calc"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="property-container-selector" style="display:none">
+                                        <div class="col-md-3">
+                                            <div class="label-wrapper">
+                                                <label class="control-label">Propiedades del producto</label>
+                                                <div title="Selecciona las propiedades del producto" class="ico-help">
+                                                    <i class="fa fa-question-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="input-group" style="width:25%">
+                                                <select style="text-transform: uppercase" class="form-control" id="SelectedPropertyOption" name="SelectedPropertyOption"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var filtering;
+        $(document).ready(function () {
+            filtering = $("#products").kendoComboBox({
+                placeholder: "Buscar producto por nombre...",
+                dataTextField: "name",
+                dataValueField: "id",
+                filter: "contains",
+                autoBind: true,
+                select: function (e) {
+                    $("#ProductId").val(filtering.data("kendoComboBox").dataItem(e.item.index()).id);
+                },
+                change: (e) => onChange(e),
+            });
+            $('[name="products_input"]').on('keyup', function (e) {
+                if (e.which <= 90 && e.which >= 48) {
+                    setTimeout(function () {
+                        if (GetCurrentText().length > 2) {
+                            Getproducts(GetCurrentText());
+                        }
+                    }, 200);
+                }
+            });
+        });
+        function GetCurrentText() {
+            return $('[name="products_input"]').val();
+        }
+        function Getproducts(text = '') {
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "/Admin/RewardItem/GetProductFiltering?text=" + text,
+                success: function (data) {
+                    filtering.data("kendoComboBox").setDataSource($.isArray(data) ? data : [data]);
+                    filtering.data("kendoComboBox").value(data.name);
+                    if (!$('.k-animation-container').is(":visible"))
+                        $('.k-select').click();
+                },
+                error: function (e) {
+                    alert('Failed to retrieve products.');
+                    console.log(e);
+                },
+            });
+        }
+        function onChange(e) {
+            var productId = $("#products").data('kendoComboBox').dataItem()?.id;
+            if (!productId) return;
+
+            $("#unit-container-selector").hide();
+            $("#property-selector").hide();
+
+            $.ajax({
+                url: '/Admin/ShoppingCartUrl/GetProductData/' + productId,
+                type: 'GET',
+                success: (data) => {
+                    $("#Quantity").attr('disabled', false);
+                    $("#equivalence-selector").val(data.EquivalenceCoefficient);
+                    $("#interval-selector").val(data.WeightInterval);
+
+                    console.log(data);
+
+                    if (data.EquivalenceCoefficient > 0) {
+                        $("#unit-container-selector").show();
+                        updateQuantitySelect(false);
+                        $('#BuyingBySecondary').val(false);
+                    }
+                    else if (data.WeightInterval > 0) {
+                        updateQuantitySelect(true);
+                        $('#BuyingBySecondary').val(true);
+                    }
+                    else {
+                        updateQuantitySelect(false);
+                        $('#BuyingBySecondary').val(false);
+                    }
+
+                    if (data.PropertiesOptions) {
+                        $("#property-container-selector").show();
+                        showPropertiesSelector(data.PropertiesOptions.split(','));
+                    }
+                },
+                error: (error) => {
+                    console.log('ERROR GETTING PRODUCT DATA: ', error);
+                }
+            })
+        };
+        function onQtyChange(el) {
+            let qty = $(el).val();
+            let equivalence = $("#equivalence-selector").val();
+            let interval = $("#interval-selector").val();
+
+            console.log(qty);
+            console.log(equivalence);
+            console.log(interval);
+        }
+        function updateQuantitySelect(unit) {
+            if (Object.prototype.toString.call(unit) == '[object String]') {
+                // is a string
+                unit = unit == 'true';
+                $('#BuyingBySecondary').val(unit);
+            }
+            let select = $("#Quantity");
+            select.empty();
+            let options = select[0].options;
+
+            let equivalence = $("#equivalence-selector").val();
+            let interval = $("#interval-selector").val();
+
+            for (var i = 1; i < 100; i++) {
+                let type = unit ? " gr" : "";
+
+                let weightValue = i;
+                if (interval > 0 && unit) {
+                    weightValue = (i * interval).toFixed(2);
+                }
+                else if (equivalence > 0 && unit) {
+                    weightValue = ((i * 1000) / equivalence).toFixed(2);
+                }
+
+                if (weightValue >= 1000) {
+                    weightValue = (weightValue / 1000).toFixed(2);
+                    type = " kg";
+                }
+
+                let optionWeight = new Option(weightValue + type, i);
+                options.add(optionWeight);
+            }
+        }
+        function showPropertiesSelector(properties) {
+            let select = $("#SelectedPropertyOption");
+            select.show();
+            select.empty();
+            let options = select[0].options;
+            for (var i = 0; i < properties.length; i++) {
+                options.add(new Option(properties[i], properties[i]));
+            }
+        }
+    </script>
+</form>

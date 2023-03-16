@@ -1,0 +1,173 @@
+﻿@model DiscountModel
+@using Nop.Core.Domain.Discounts
+@using Nop.Services
+<div class="panel-group">
+    <div class="panel panel-default">
+        @if (Model.Id > 0)
+        {
+            <script>
+                $(document).ready(function () {
+                    checkActive();
+
+                    $('#IsAcitve').click(function () {
+                        checkActive();
+                    });
+                });
+
+                function checkActive() {
+                    var isAcitve = $('#IsAcitve').prop('checked');
+                    if (isAcitve)
+                        $('#special-promotion-take-get').show();
+                    else
+                        $('#special-promotion-take-get').hide();
+                }
+            </script>
+
+            <div class="panel-heading">
+                Llevate X, paga Y
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="IsAcitve" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="IsAcitve" />
+                        <span asp-validation-for="IsAcitve"></span>
+                    </div>
+                </div>
+                <div id="special-promotion-take-get">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="TakeAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="TakeAmount" />
+                            <span asp-validation-for="TakeAmount"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="PayAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="PayAmount" />
+                            <span asp-validation-for="PayAmount"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EntityTypeId" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="EntityTypeId" asp-items="@(((TakeXPayYEntityType)Model.EntityTypeId).ToSelectList())" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EntityId" />
+                        </div>
+                        <div class="col-md-9">
+                            <input id="EntityId" name="EntityId" type="hidden" value="@Model.EntityId" />
+                            <nop-select asp-for="EntityIds" asp-multiple="true" />
+                            <span asp-validation-for="EntityId"></span>
+                        </div>
+                        <script type="text/javascript">
+                            var entityIdInput;
+                            var $limitedEntityInput;
+                            $(document).ready(function () {
+                                entityIdInput = $('#@Html.IdFor(model => model.EntityIds)').data("kendoMultiSelect");
+                                entityIdInput.setOptions({
+                                    dataTextField: "name",
+                                    dataValueField: "id",
+                                    autoClose: false,
+                                    filter: "contains",
+                                    delay: 1000,
+                                    minLength: 3,
+                                    maxSelectedItems: 1,
+                                    change: function (e) {
+                                        var value = this.dataItems();
+                                        if (value.length > 0)
+                                            $('#EntityId').val(value[0].id);
+                                        else
+                                            $('#EntityId').val('0');
+                                    },
+                                });
+                                $limitedEntityInput = $('[aria-owns="EntityIds_taglist EntityIds_listbox"]');
+                                $limitedEntityInput.on('keyup', function (e) {
+                                    if (e.which <= 90 && e.which >= 48 &&
+                                        GetCurrentText($limitedEntityInput).length > 2 &&
+                                        !e.ctrlKey && !e.altKey) {
+                                        setTimeout(function () {
+                                            GetEntities(GetCurrentText($limitedEntityInput), $('#EntityTypeId').val());
+                                        }, 200);
+                                    }
+                                });
+                                $('#EntityTypeId').change(function () {
+                                    changeElementName(this);
+                                });
+                                @if (Model.EntityId > 0 && Model.EntityTypeId > 0)
+                                {
+                                <text>
+                                GetEntities('', $('#EntityTypeId').val(), '@Model.EntityId');
+                                </text>
+                                }
+                                changeElementName($('#EntityTypeId')[0]);
+                            });
+                            function changeElementName(elm) {
+                                entityIdInput.value([]);
+                                entityIdInput.setDataSource([]);
+                                entityIdInput.close();
+                                $('#EntityId').val('0');
+                                var type = $(elm).val();
+                                if (type == 0)
+                                    $('[for="EntityId"]').html('Elemento');
+                                else if (type == 1)
+                                    $('[for="EntityId"]').html('Producto');
+                                else if (type == 2)
+                                    $('[for="EntityId"]').html('Categoría');
+                            }
+                            function GetEntities(text = '', typeId = '', id = '') {
+                                entityIdInput.close();
+                                var data = {
+                                    Text: text,
+                                    TypeId: typeId,
+                                    ByIds: [id],
+                                }
+                                addAntiForgeryToken(data);
+                                $.ajax({
+                                    cache: false,
+                                    type: "POST",
+                                    url: "/Admin/Discount/GetEntitiesFiltering",
+                                    data: data,
+                                    success: function (data) {
+                                        if (data.set == true) {
+                                            entityIdInput.setDataSource(data.data);
+                                            var values = data.data.map(x => x.id);
+                                            entityIdInput.value(values);
+                                            $('#EntityId').val(values);
+                                        }
+                                        else if (data.length > 0) {
+                                            entityIdInput.setDataSource(data);
+                                            entityIdInput.open();
+                                        }
+                                    },
+                                    error: function (e) {
+                                        alert('Failed to retrieve entities.');
+                                        console.log(e);
+                                    },
+                                });
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="panel-body">
+                Necesitas crear el cupón antes de poder agregar promociones especiales.
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,19 @@
+﻿@{
+    var categories = (List<Teed.Plugin.Groceries.Models.CategoryPrice.CategoryPriceModel>)ViewData["Categories"];
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <p>Ingresa el porcentaje de utilidad para las categorías que corresponda. Si no aplica para alguna categoría, simplemente déjalo en cero.</p><br />
+        @foreach (var category in categories.Where(x => x.ParentCategoryId == 0).OrderBy(x => x.Name))
+        {
+            <div class="form-group">
+                <div class="col-md-3 text-right">
+                    <label>@category.Name</label>
+                </div>
+                <div class="col-md-9">
+                    <input id="@category.Id" class="form-control category parent" value="@category.Coefficient" />
+                </div>
+            </div>
+        }
+    </div>
+</div>

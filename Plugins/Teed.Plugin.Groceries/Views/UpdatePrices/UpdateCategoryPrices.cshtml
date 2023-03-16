@@ -1,0 +1,175 @@
+﻿@model List<Teed.Plugin.Groceries.Controllers.ProductPriceUpdateModel>
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Product";
+}
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Actualizar precios
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Guardando...</span>
+        </div>
+        <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+            <i class="fa fa-save"></i>
+            Actualizar precios
+        </button>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div>
+                    <p>Modifica los datos que quieras actualizar, una vez terminadas todas las modificaciones da clic en el botón "Guardar". Se actualizará precio y costo (de ser necesario) de cada producto. Aquellos campos que estén vacíos no serán actualizados.</p>
+                </div>
+                <div class="">
+                    <table class="table table-hover">
+                        <tr>
+                            <th>
+                                Producto
+                            </th>
+                            <th>
+                                Últimos costos reportados por compradores
+                            </th>
+                            <th>
+                                Margen bruto/último costo reportado por comprador
+                            </th>
+                            <th>
+                                Costo en plataforma
+                            </th>
+                            <th>
+                                Margen bruto/Costo plataforma
+                            </th>
+                            <th>
+                                Precio de venta
+                            </th>
+                            <th>
+                                Nuevo precio de venta
+                            </th>
+                            <th>
+                                Nuevo margen/Costo comprador
+                            </th>
+                            <th>
+                                Nuevo margen/Costo plataforma
+                            </th>
+                        </tr>
+                        @foreach (var item in Model.OrderBy(x => x.BuyerMargin))
+                        {
+                            <tr class="update-data" data-productid="@item.ProductId">
+                                <td>
+                                    <a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach (var cost in item.LastReportedCosts)
+                                        {
+                                            <li>@cost</li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td>
+                                    @item.BuyerMargin
+                                </td>
+                                <td>
+                                    <input id="current-cost-@(item.ProductId)" value="@item.CurrentCostValue" type="number" onkeyup="newPriceChangeHandler(@(item.ProductId), @(item.LastReportedCostValue))" />
+                                </td>
+                                <td>
+                                    @item.CurrentMargin
+                                </td>
+                                <td>
+                                    @item.CurrentPrice
+                                </td>
+                                <td>
+                                    <input id="new-price-@(item.ProductId)" onkeyup="newPriceChangeHandler(@(item.ProductId), @(item.LastReportedCostValue))" type="number" />
+                                </td>
+                                <td id="new-buyer-margin-@(item.ProductId)"></td>
+                                <td id="new-current-margin-@(item.ProductId)"></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function newPriceChangeHandler(productId, lastReportedCost) {
+        let newPriceValue = $("#new-price-" + productId).val();
+        let currentCost = $("#current-cost-" + productId).val();
+
+        if (!currentCost) return;
+
+        let newBuyerMargin = 0;
+        let newCurrentMargin = 0;
+        if (newPriceValue != 0) {
+            newBuyerMargin = (1 - (lastReportedCost / newPriceValue)) * 100;
+            newCurrentMargin = (1 - (currentCost / newPriceValue)) * 100;
+        }
+
+        if (newPriceValue) {
+            $("#new-buyer-margin-" + productId).html((Math.round(newBuyerMargin * 100) / 100) + '%');
+            $("#new-current-margin-" + productId).html((Math.round(newCurrentMargin * 100) / 100) + '%');
+        }
+        else {
+            $("#new-buyer-margin-" + productId).html("");
+            $("#new-current-margin-" + productId).html("");
+        }
+    }
+
+    const onSubmit = () => {
+        let productsToUpdate = [];
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        $("#saving-error").hide();
+
+        let allRows = $(".update-data");
+        $.each(allRows, function (index, element) {
+            var productId = $(element).data('productid');
+            var updatedPrice = $("#new-price-" + productId).val();
+            var updatedCost = $("#current-cost-" + productId).val();
+            productsToUpdate.push({
+                updatedPrice,
+                updatedCost,
+                productId
+            });
+        });
+
+        let body = {
+            data: productsToUpdate
+        }
+        console.log(body);
+
+        $.ajax({
+            url: '/Admin/Product/UpdateProductPrices',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#saving-error").show();
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

@@ -1,0 +1,1966 @@
+﻿@using Nop.Web.Models.HomePageImages
+@using Nop.Services.Media
+@using Nop.Services.Configuration
+@using Nop.Core
+@using Nop.Core.Caching
+@{
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/slick/slick.min.js");
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/js/gridify.js");
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/slick/slick.css");
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/slick/slick-theme.css");
+    Layout = "_NoContainer";
+
+    //page class
+    Html.AppendPageCssClassParts("html-home-page");
+
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+
+    string picture1Url = GetPictureUrl(imagesSettings.Picture1Id);
+    string picture2Url = GetPictureUrl(imagesSettings.Picture2Id);
+    string picture3Url = GetPictureUrl(imagesSettings.Picture3Id);
+    string picture4Url = GetPictureUrl(imagesSettings.Picture4Id);
+    string picture5Url = GetPictureUrl(imagesSettings.Picture5Id);
+    string picture6Url = GetPictureUrl(imagesSettings.Picture6Id);
+
+    string textCarousel = imagesSettings.TextCarousel;
+    string textColorCarousel = imagesSettings.TextColorCarousel;
+
+    string picture7Url = GetPictureUrl(imagesSettings.Picture7Id);
+    string picture8Url = GetPictureUrl(imagesSettings.Picture8Id);
+    string picture9Url = GetPictureUrl(imagesSettings.Picture9Id);
+    string picture10Url = GetPictureUrl(imagesSettings.Picture10Id);
+    string picture11Url = GetPictureUrl(imagesSettings.Picture11Id);
+    string picture12Url = GetPictureUrl(imagesSettings.Picture12Id);
+    string picture13Url = GetPictureUrl(imagesSettings.Picture13Id);
+    string picture14Url = GetPictureUrl(imagesSettings.Picture14Id);
+    string picture15Url = GetPictureUrl(imagesSettings.Picture15Id);
+    string picture16Url = GetPictureUrl(imagesSettings.Picture16Id);
+    string picture17Url = GetPictureUrl(imagesSettings.Picture17Id);
+    string picture18Url = GetPictureUrl(imagesSettings.Picture18Id);
+    string picture19Url = GetPictureUrl(imagesSettings.Picture19Id);
+    string picture20Url = GetPictureUrl(imagesSettings.Picture20Id);
+    string picture21Url = GetPictureUrl(imagesSettings.Picture21Id);
+    string picture22Url = GetPictureUrl(imagesSettings.Picture22Id);
+    string picture23Url = GetPictureUrl(imagesSettings.Picture23Id);
+    string picture24Url = GetPictureUrl(imagesSettings.Picture24Id);
+    string picture25Url = GetPictureUrl(imagesSettings.Picture25Id);
+    string picture26Url = GetPictureUrl(imagesSettings.Picture26Id);
+    string picture27Url = GetPictureUrl(imagesSettings.Picture27Id);
+    string picture28Url = GetPictureUrl(imagesSettings.Picture28Id);
+    string picture29Url = GetPictureUrl(imagesSettings.Picture29Id);
+    string picture30Url = GetPictureUrl(imagesSettings.Picture30Id);
+    string picture31Url = GetPictureUrl(imagesSettings.Picture31Id);
+    string picture32Url = GetPictureUrl(imagesSettings.Picture32Id);
+    string picture33Url = GetPictureUrl(imagesSettings.Picture33Id);
+    string picture34Url = GetPictureUrl(imagesSettings.Picture34Id);
+    string picture35Url = GetPictureUrl(imagesSettings.Picture35Id);
+    string picture36Url = GetPictureUrl(imagesSettings.Picture36Id);
+    string picture37Url = GetPictureUrl(imagesSettings.Picture37Id);
+    string picture38Url = GetPictureUrl(imagesSettings.Picture38Id);
+
+    string bannerPicUrlArrow = GetPictureUrl(imagesSettings.BannerPictureArrowId);
+
+    string bannerPicUrl1 = GetPictureUrl(imagesSettings.BannerPicture1Id);
+    string bannerPicUrl2 = GetPictureUrl(imagesSettings.BannerPicture2Id);
+    string bannerPicUrl3 = GetPictureUrl(imagesSettings.BannerPicture3Id);
+    string bannerPicUrl4 = GetPictureUrl(imagesSettings.BannerPicture4Id);
+    string bannerPicUrl5 = GetPictureUrl(imagesSettings.BannerPicture5Id);
+    string bannerPicUrl6 = GetPictureUrl(imagesSettings.BannerPicture6Id);
+    string newBannerPicUrl5 = GetPictureUrl(imagesSettings.NewBannerPicture5Id);
+    string newBannerPicUrl6 = GetPictureUrl(imagesSettings.NewBannerPicture6Id);
+
+    string text6 = imagesSettings.Text6;
+    string textColor6 = !string.IsNullOrEmpty(imagesSettings.TextColor6) ? imagesSettings.TextColor6 : "#ffffff";
+
+    string option1 = imagesSettings.TextDropdown1;
+    string linkOption1 = imagesSettings.LinkDropdown1;
+    string option2 = imagesSettings.TextDropdown2;
+    string linkOption2 = imagesSettings.LinkDropdown2;
+    string option3 = imagesSettings.TextDropdown3;
+    string linkOption3 = imagesSettings.LinkDropdown3;
+    string option4 = imagesSettings.TextDropdown4;
+    string linkOption4 = imagesSettings.LinkDropdown4;
+    string option5 = imagesSettings.TextDropdown5;
+    string linkOption5 = imagesSettings.LinkDropdown5;
+    string option6 = imagesSettings.TextDropdown6;
+    string linkOption6 = imagesSettings.LinkDropdown6;
+    string option7 = imagesSettings.TextDropdown7;
+    string linkOption7 = imagesSettings.LinkDropdown7;
+    string option8 = imagesSettings.TextDropdown8;
+    string linkOption8 = imagesSettings.LinkDropdown8;
+    string option9 = imagesSettings.TextDropdown9;
+    string linkOption9 = imagesSettings.LinkDropdown9;
+    string option10 = imagesSettings.TextDropdown10;
+    string linkOption10 = imagesSettings.LinkDropdown10;
+
+    string bannerTitle5 = imagesSettings.BannerTitle5;
+    string bannerSubTitle5 = imagesSettings.BannerSubTitle5;
+    string bannerTitleColor5 = imagesSettings.BannerTitleColor5;
+    string bannerSubTitleColor5 = imagesSettings.BannerSubTitleColor5;
+
+    string bannerTitle6 = imagesSettings.BannerTitle6;
+    string bannerSubTitle6 = imagesSettings.BannerSubTitle6;
+    string bannerTitleColor6 = imagesSettings.BannerTitleColor6;
+    string bannerSubTitleColor6 = imagesSettings.BannerSubTitleColor6;
+
+    int tagsQty = imagesSettings.TagsQty;
+
+    string picture39Url = GetPictureUrl(imagesSettings.Picture39Id);
+    string picture39RUrl = GetPictureUrl(imagesSettings.Picture39ResponsiveId);
+}
+
+
+<style>
+    html, body {
+        overflow-x: hidden;
+    }
+
+    @@media only screen and (max-width: 600px) {
+        body {
+            position: relative;
+        }
+    }
+
+    .tool-text {
+        border: 0;
+        font-size: 16px;
+        font-style: italic;
+        line-height: 1.222em;
+        color: #8e9ba0;
+    }
+
+    @@media (min-width: 1024px) {
+        .tool-text {
+            display: block;
+        }
+    }
+
+    .header-info-bar {
+        padding: 5px 0 15px;
+    }
+
+        .header-info-bar ul {
+            float: left;
+            text-align: center;
+        }
+
+            .header-info-bar ul li {
+                padding-right: 30px;
+                display: inline-block;
+                position: relative;
+            }
+
+        .header-info-bar .tooltipped {
+            visibility: hidden;
+            min-width: 120px;
+            background: #9ea9ad;
+            color: #fff;
+            border: 0;
+            padding: 10px 15px;
+            position: absolute;
+            z-index: 1000;
+            top: 100%;
+            left: 0;
+            margin-top: 15px;
+        }
+
+        .header-info-bar ul li:hover .tooltipped {
+            visibility: visible;
+        }
+
+        .header-info-bar .tooltipped::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -40px;
+            border-color: transparent transparent #9ea9ad transparent;
+            border-width: 10px;
+            border-style: solid;
+        }
+
+    @@media only screen and (max-width: 992px) {
+        .slick-prev:before,
+        .slick-next:before {
+            content: "";
+            background: url('@bannerPicUrlArrow') no-repeat;
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+        }
+    }
+
+    @@media only screen and (min-width: 992px) {
+        .slick-prev:before,
+        .slick-next:before {
+            content: "";
+            background: url('@bannerPicUrlArrow') no-repeat;
+            display: block;
+            width: 70px;
+            height: 70px;
+            background-size: contain;
+        }
+    }
+
+    .slick-prev, .slick-next {
+        width: auto !important;
+        height: auto !important;
+    }
+
+    .slick-prev {
+        transform: rotate(180deg) translate(0, 50%);
+        z-index: 1;
+        left: 1%;
+    }
+
+    .slick-next {
+        right: 1%;
+    }
+
+    .one-time .slick-prev {
+        left: 0.5%;
+    }
+
+    .one-time .slick-next {
+        right: 0.5%;
+    }
+
+    .video-container {
+        position: relative;
+        pointer-events: none;
+    }
+
+    .slick-dots {
+        position: relative;
+        margin-top: -4em;
+    }
+
+        .slick-dots li button:before {
+            color: white;
+            font-size: 12px;
+        }
+
+        .slick-dots li.slick-active button:before {
+            color: white !important;
+        }
+
+    .one-time img {
+        /*height: calc(50vh - 100px);*/
+        /*width: auto;*/
+        /*margin: 0 auto;*/
+        width: 100%;
+        height: 100%;
+    }
+
+    .videolink {
+        display: block;
+        position: relative;
+    }
+
+        .videolink::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate3d(-50%,-50%,0);
+            transform: translate3d(-50%,-50%,0);
+            width: 60px;
+            height: 60px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 100 100' style='enable-background:new 0 0 100 100' xml:space='preserve'%3E%3Cstyle type='text/css'%3E.st0%7Bfill:%23FFFFFF;%7D%3C/style%3E%3Ccircle class='st0' cx='50' cy='50' r='50'/%3E%3Cpath d='M58.6,62.7H36.8c-1.9,0-3.5-1.5-3.5-3.4V40.8c0-1.9,1.6-3.4,3.5-3.4h21.8c1.9,0,3.5,1.5,3.5,3.4v5l5.2-5.1 c0.5-0.5,1.2-0.7,1.8-0.5c0.7,0.2,1.2,0.7,1.5,1.4c0,0.1,0,0.1,0,0.2v16.6c0,0.1,0,0.1,0,0.2c-0.2,0.7-0.7,1.1-1.4,1.3 c-0.7,0.2-1.4-0.1-1.9-0.6l-5.2-5.1v5C62.1,61.1,60.6,62.7,58.6,62.7z M36.8,38.6c-1.2,0-2.2,1-2.2,2.1v18.5c0,1.2,1,2.1,2.2,2.1 h21.8c1.2,0,2.2-1,2.2-2.1v-6.5c0-0.3,0.2-0.5,0.5-0.6c0.3-0.1,0.6,0,0.7,0.3l6.2,6.1c0.2,0.2,0.5,0.3,0.7,0.2 c0.2,0,0.3-0.2,0.4-0.4V41.9c-0.1-0.2-0.2-0.4-0.5-0.5c-0.2,0-0.4,0-0.6,0.2l-6.2,6.1c-0.1,0.3-0.4,0.4-0.7,0.4 c-0.3-0.1-0.5-0.3-0.5-0.6v-6.6c0-1.2-1-2.1-2.2-2.1H36.8z'/%3E%3C/svg%3E");
+            background-size: contain;
+            z-index: 1;
+        }
+
+    .videocontent {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .hasVideo {
+        position: relative;
+        z-index: 100;
+    }
+
+    @@media (min-width: 768px) {
+        .videolink::before {
+            width: 100px;
+            height: 100px;
+        }
+    }
+
+    .teaserlink {
+        display: inline-block;
+        color: #000;
+        text-decoration: none;
+    }
+
+    .teaserlink-caption {
+        color: #888;
+    }
+
+    .discovery-slick .slick-next {
+        right: -11%;
+    }
+
+    .discovery-slick .slick-prev {
+        left: -11%;
+    }
+
+    .discovery-slick .slick-disabled {
+        display: none !important;
+    }
+
+    .categories-slick .category-slick img {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .categories-slick .slick-list {
+        width: 100%;
+    }
+
+    /* Slick dots */
+    .categories-slick .slick-dots {
+        width: 100%;
+        top: 60px;
+    }
+
+        .categories-slick .slick-dots li {
+            margin: 0;
+        }
+
+    .discovery-slick .slick-dots {
+        bottom: -45px !important;
+        width: 50% !important;
+        text-align: right !important;
+        left: 38% !important;
+    }
+
+        .discovery-slick .slick-dots li,
+        .categories-slick .slick-dots li {
+            width: 40px;
+            height: 3px;
+            background: #ccc;
+        }
+
+            .discovery-slick .slick-dots li button,
+            .categories-slick .slick-dots li button {
+                width: 40px;
+                height: 3px;
+            }
+
+            .discovery-slick .slick-dots li.slick-active,
+            .categories-slick .slick-dots li.slick-active {
+                background: black;
+            }
+
+            .discovery-slick .slick-dots li button,
+            .discovery-slick .slick-dots li button:before,
+            .categories-slick .slick-dots li button,
+            .categories-slick .slick-dots li button:before {
+                color: transparent;
+                opacity: 0;
+            }
+
+    .discovery-slick p {
+        text-align: justify;
+    }
+
+    .full-container {
+        width: 80% !important;
+        margin: 0 auto;
+        max-width: 1280px;
+    }
+
+    @@media (max-width: 768px) {
+
+        .categories-container {
+            padding-bottom: 10% !important;
+            padding-top: 10% !important;
+        }
+
+        .categories-slick .category-slick p {
+            margin-left: 10px;
+        }
+
+        .full-container {
+            width: 100% !important;
+        }
+
+        .teaserlink-desc {
+            display: none;
+        }
+
+        .discovery-slick .teaser-info {
+            display: contents;
+        }
+
+        .story-slick .teaser-info {
+            display: block;
+            padding-left: 0;
+        }
+
+        .responsive-img {
+            height: auto !important;
+            width: 100% !important;
+        }
+
+        .info-slick.slick-initialized.slick-slider {
+            width: 100% !important;
+        }
+
+        .teaserlink-img {
+            width: auto !important;
+            padding: 0px .75rem 0px 0px !important;
+        }
+
+        .discovery-slick .slick-dots {
+            text-align-last: left;
+            width: auto !important;
+            left: auto !important;
+            bottom: auto !important;
+            top: 40px;
+        }
+
+        .info-slick .slick-dots {
+            margin-top: 0 !important;
+            text-align-last: left;
+            width: auto !important;
+            left: auto !important;
+            bottom: auto !important;
+            top: 0px;
+        }
+
+        .discovery-slick .slick-list,
+        .story-slick .slick-list {
+            padding: 0 20% 0 0 !important;
+        }
+
+        .story-slick .right .slick-list {
+            padding-left: 32px !important;
+        }
+
+        .margin-category {
+            margin-bottom: 2rem !important;
+        }
+
+        .left-margin .margin-category,
+        .left-margin .slick-dots,
+        .left-margin .teaser-info {
+            padding-left: 1.5rem;
+        }
+
+        .first-slick {
+            margin-top: -25px !important;
+        }
+    }
+
+    .info-slick h3 {
+        margin: -0.05333rem 0 1.168rem 0 !important;
+    }
+
+    .info-slick .slick-next {
+        right: -11%;
+    }
+
+    .info-slick.right .slick-next {
+        right: -8.5% !important;
+    }
+
+    .info-slick .slick-prev {
+        left: -15%;
+    }
+
+    .info-slick.left .slick-prev {
+        left: -8.5% !important;
+    }
+
+    .info-slick .slick-disabled {
+        display: none !important;
+    }
+
+    .info-slick .slick-dots {
+        margin-top: 0;
+        bottom: 15px;
+        width: 50%;
+        text-align: right;
+        left: 29%;
+    }
+
+        .info-slick .slick-dots li {
+            width: 40px;
+            height: 3px;
+            background: #ccc;
+        }
+
+            .info-slick .slick-dots li button {
+                width: 40px;
+                height: 3px;
+            }
+
+            .info-slick .slick-dots li.slick-active {
+                background: black;
+            }
+
+            .info-slick .slick-dots li button,
+            .info-slick .slick-dots li button:before {
+                color: transparent;
+                opacity: 0;
+            }
+
+    .info-slick p {
+        text-align: justify;
+    }
+
+    .info-slick .slick-slide {
+        width: 746px;
+    }
+
+    .info-slick.slick-initialized.slick-slider {
+        width: 75%;
+    }
+</style>
+
+
+@if (imagesSettings.PopUpEnable)
+{
+    <div id="modal-home" class="modal" style="overflow: hidden;">
+        <img src="@picture39Url" class="hide-on-small-only" style="z-index:-1;position:fixed;width:100%;" />
+        <img src="@picture39RUrl" class="hide-on-med-and-up" style="z-index:-1;position:fixed;width:100%;" />
+        <div class="modal-content">
+            <div class="row">
+                <div class="col s12 m12" style="margin-top:2%;">
+                    <div class="col s12 m6"></div>
+                    <div class="col s12 m6">
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                <input placeholder="" id="first_name" type="text" class="validate" style="color:white;">
+                                <label for="first_name">Nombre</label>
+                            </div>
+                            <div class="input-field col s12 m6">
+                                <input placeholder="" id="last_name" type="text" class="validate" style="color:white;">
+                                <label for="last_name">Apellido</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12 m12">
+                                <input placeholder="" id="email" type="email" class="validate" style="color:white;">
+                                <label for="email">Correo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m6"></div>
+                    <div class="col s12 m6 center">
+                        <a href="#!" class="modal-close waves-effect waves-red btn-flat" style="color:white;">No gracias</a>
+                        <a href="#!" class="modal-close waves-effect waves-green btn" onclick="registerAjax();">Enviar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="modal-footer">
+            </div>*@
+    </div>
+    <button data-target="modal-home" class="btn modal-trigger" id="btn-modal" style="display:none;"></button>
+}
+
+<div class="one-time hide-on-small-only show-on-medium-and-up" style="display:none !important;">
+    @if (!string.IsNullOrEmpty(imagesSettings.VideoId))
+    {
+        <div>
+            <div class="video-container">
+                <div id="player"></div>
+            </div>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl1))
+    {
+        string link1 = string.IsNullOrEmpty(imagesSettings.BannerLink1) ? "#" : imagesSettings.BannerLink1;
+        <a href="@link1"><img class="responsive-img" src="@bannerPicUrl1"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl2))
+    {
+        string link2 = string.IsNullOrEmpty(imagesSettings.BannerLink2) ? "#" : imagesSettings.BannerLink2;
+        <a href="@link2"><img class="responsive-img" src="@bannerPicUrl2"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl3))
+    {
+        string link3 = string.IsNullOrEmpty(imagesSettings.BannerLink3) ? "#" : imagesSettings.BannerLink3;
+        <a href="@link3"><img class="responsive-img" src="@bannerPicUrl3"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl4))
+    {
+        string link4 = string.IsNullOrEmpty(imagesSettings.BannerLink4) ? "#" : imagesSettings.BannerLink4;
+        <a href="@link4"><img class="responsive-img" src="@bannerPicUrl4"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl5))
+    {
+        string link5 = string.IsNullOrEmpty(imagesSettings.NewBannerLink5) ? "#" : imagesSettings.NewBannerLink5;
+        <a href="@link5"><img class="responsive-img" src="@newBannerPicUrl5"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl6))
+    {
+        string link6 = string.IsNullOrEmpty(imagesSettings.NewBannerLink6) ? "#" : imagesSettings.NewBannerLink6;
+        <a href="@link6"><img class="responsive-img" src="@newBannerPicUrl6"></a>
+    }
+</div>
+<div class="one-time show-on-small hide-on-med-and-up first-slick" style="display:none !important; margin-top: 25px;">
+    @if (!string.IsNullOrEmpty(bannerPicUrl1))
+    {
+        string link1 = string.IsNullOrEmpty(imagesSettings.BannerLink1) ? "#" : imagesSettings.BannerLink1;
+        <a href="@link1"><img class="responsive-img" src="@bannerPicUrl1"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl2))
+    {
+        string link2 = string.IsNullOrEmpty(imagesSettings.BannerLink2) ? "#" : imagesSettings.BannerLink2;
+        <a href="@link2"><img class="responsive-img" src="@bannerPicUrl2"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl3))
+    {
+        string link3 = string.IsNullOrEmpty(imagesSettings.BannerLink3) ? "#" : imagesSettings.BannerLink3;
+        <a href="@link3"><img class="responsive-img" src="@bannerPicUrl3"></a>
+    }
+    @if (!string.IsNullOrEmpty(bannerPicUrl4))
+    {
+        string link4 = string.IsNullOrEmpty(imagesSettings.BannerLink4) ? "#" : imagesSettings.BannerLink4;
+        <a href="@link4"><img class="responsive-img" src="@bannerPicUrl4"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl5))
+    {
+        string link5 = string.IsNullOrEmpty(imagesSettings.NewBannerLink5) ? "#" : imagesSettings.NewBannerLink5;
+        <a href="@link5"><img class="responsive-img" src="@newBannerPicUrl5"></a>
+    }
+    @if (!string.IsNullOrEmpty(newBannerPicUrl6))
+    {
+        string link6 = string.IsNullOrEmpty(imagesSettings.NewBannerLink6) ? "#" : imagesSettings.NewBannerLink6;
+        <a href="@link6"><img class="responsive-img" src="@newBannerPicUrl6"></a>
+    }
+</div>
+<div class="tool-text">
+    <section class="header-info-bar">
+        <div class="container">
+            <ul>
+                <li>Tienda oficial en México <div class="tooltipped">Encuentra el catálogo más amplio de productos Lamy solo con nosotros.</div></li>
+                <li>Garantía <div class="tooltipped less-margin">3 meses contra cualquier defecto de fabricación o imperfección de materiales</div></li>
+                <li>Envíos gratis <div class="tooltipped less-margin">Enviamos a todo México y es gratis a partir de pedidos de $1,200.</div></li>
+                <li>¿Tienes dudas? <div class="tooltipped less-margin">Escríbenos a nuestro Whatsapp al 5512314239</div></li>
+            </ul>
+        </div>
+    </section>
+</div>
+
+@if (!string.IsNullOrEmpty(imagesSettings.VideoId))
+{
+    <script>
+        $(document).ready(function () {
+            $('.one-time').slick({
+                mobileFirst: true,
+                dots: true,
+                infinite: false,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                adaptiveHeight: true,
+                arrows: false
+            }).on('afterChange', function (event, slick, currentSlide, nextSlide) {
+                if (currentSlide != 0) {
+                    $('#player').each(function () {
+                        $(this)[0].contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                    });
+                } else {
+                    $('#player').each(function () {
+                        $(this)[0].contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                    });
+                }
+            });
+        });
+    </script>
+}
+else
+{
+    <script>
+        $(document).ready(function () {
+            $('.one-time').slick({
+                mobileFirst: true,
+                dots: true,
+                infinite: true,
+                autoplaySpeed: 6000,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                fade: true,
+                adaptiveHeight: true,
+                arrows: true,
+                autoplay: true
+            });
+        });
+    </script>
+}
+
+@*@if (!string.IsNullOrEmpty(text6))
+    {
+        <div class="parallax-container-categories center valign-wrapper">
+            <div class="parallax-categories"><img class="responsive-img" src="@picture6Url" style="width:100%;"></div>
+            <div class="container" id="container6">
+                <div class="row" style="margin-bottom:0;">
+                    <div class="col s12 m6 textColor6">
+                        <h5 id="fontTextColor6" style="margin-top:3.5%;">@text6</h5>
+                    </div>
+                    <div class="col s12 m5" style="margin-top:1%;">
+                        <select id="select-categories" style="padding-left:1%;" onchange="redirectCategory()">
+                            <option value="0" selected>Elige una categoría...</option>
+                            @if (!string.IsNullOrEmpty(option1))
+                            {
+                                <option value="@linkOption1">@option1</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option2))
+                            {
+                                <option value="@linkOption2">@option2</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option3))
+                            {
+                                <option value="@linkOption3">@option3</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option4))
+                            {
+                                <option value="@linkOption4">@option4</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option5))
+                            {
+                                <option value="@linkOption5">@option5</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option6))
+                            {
+                                <option value="@linkOption6">@option6</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option7))
+                            {
+                                <option value="@linkOption7">@option7</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option8))
+                            {
+                                <option value="@linkOption8">@option8</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option9))
+                            {
+                                <option value="@linkOption9">@option9</option>
+                            }
+                            @if (!string.IsNullOrEmpty(option10))
+                            {
+                                <option value="@linkOption10">@option10</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col s1 m1 hide-on-small-only"></div>
+                </div>
+            </div>
+        </div>
+        <style>
+            .textColor6 {
+                color: @textColor6 !important;
+            }
+
+            .select-wrapper input.select-dropdown {
+                background-color: white !important;
+                padding-left: 2%;
+            }
+
+            .select-wrapper .caret {
+                z-index: 1;
+            }
+
+            .dropdown-content {
+                top: 0px !important;
+                height: 220px !important;
+            }
+
+            .parallax-container-categories {
+                min-height: 100px !important;
+            }
+
+            .parallax-categories {
+                position: absolute;
+                left: 0;
+                right: 0;
+                z-index: -1;
+                overflow: hidden;
+                height: 100px;
+            }
+
+            @@media only screen and (max-width: 601px) {
+                .dropdown-content {
+                    height: 190px !important;
+                }
+
+                #container6{
+                    margin-top: -1%;
+                }
+
+                #fontTextColor6 {
+                    font-size: 1.5em;
+                }
+            }
+
+             @@media only screen and (max-width: 321px) {
+                #fontTextColor6 {
+                    font-size: 1.3em;
+                }
+
+                .parallax-container-categories {
+                    margin-bottom: -1%;
+                }
+            }
+        </style>
+        <script type="text/javascript" asp-location="Footer">
+            function redirectCategory() {
+                var page = $('#select-categories').val();
+                if (page != 0) {
+                    window.location.href = window.location.href + page;
+                }
+            }
+        </script>
+    }*@
+
+@if (!string.IsNullOrEmpty(bannerPicUrl5))
+{
+    string link5 = string.IsNullOrEmpty(imagesSettings.BannerLink5) ? "#" : imagesSettings.BannerLink5;
+    <a href="@link5">
+        <div id="parallax-container5" class="parallax-container center valign-wrapper">
+            <div class="parallax"><img class="responsive-img" src="@bannerPicUrl5"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col s10 m6">
+                        <h2 id="bannerTitleColor5">@bannerTitle5</h2>
+                        <h3 id="bannerSubTitleColor5" style="margin-top:5%;">@bannerSubTitle5</h3>
+                    </div>
+                    <div class="col s2 m6"></div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <style>
+        #bannerTitleColor5 {
+            color: @bannerTitleColor5 !important;
+        }
+
+        #bannerSubTitleColor5 {
+            color: @bannerSubTitleColor5 !important;
+        }
+
+        .parallax-container .parallax img {
+            min-height: 0;
+        }
+
+        @@media only screen and (max-width: 1024px)
+        {
+            #parallax-container5 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 768px)
+        {
+            #parallax-container5 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 601px) {
+            #parallax-container5 {
+                min-height: 0px !important;
+                margin-top: -0.5%;
+            }
+
+            .parallax-container5 {
+                min-height: 0;
+                height: 200px;
+            }
+
+            #bannerTitleColor5 {
+                font-size: 1.5em;
+            }
+
+            #bannerSubTitleColor5 {
+                font-size: 1em;
+            }
+
+            .row {
+                margin-bottom: 18px;
+            }
+        }
+    </style>
+}
+
+@if (!string.IsNullOrEmpty(bannerPicUrl6))
+{
+    string link6 = string.IsNullOrEmpty(imagesSettings.BannerLink6) ? "#" : imagesSettings.BannerLink6;
+    <a href="@link6">
+        <div id="parallax-container6" class="parallax-container center valign-wrapper">
+            <div class="parallax"><img src="@bannerPicUrl6"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col s10 m6">
+                        <h2 id="bannerTitleColor6">@bannerTitle6</h2>
+                        <h3 id="bannerSubTitleColor6" style="margin-top:5%;">@bannerSubTitle6</h3>
+                    </div>
+                    <div class="col s2 m6"></div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <style>
+        #bannerTitleColor6 {
+            color: @bannerTitleColor6 !important;
+        }
+
+        #bannerSubTitleColor6 {
+            color: @bannerSubTitleColor6 !important;
+        }
+
+        @@media only screen and (max-width: 1024px) {
+            #parallax-container6 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 768px) {
+            #parallax-container6 {
+                min-height: 0;
+            }
+        }
+
+        @@media only screen and (max-width: 601px) {
+            #parallax-container6 {
+                min-height: 0px !important;
+            }
+
+            .parallax-container6 {
+                min-height: 0;
+                height: 200px;
+            }
+
+            #bannerTitleColor6 {
+                font-size: 1.5em;
+            }
+
+            #bannerSubTitleColor6 {
+                font-size: 1em;
+            }
+        }
+
+         @@media only screen and (max-width: 768px) {
+            .parallax-container {
+                min-height: 0;
+            }
+        }
+    </style>
+}
+
+@if (imagesSettings.CollageEnable)
+{
+    <style>
+        .margin-category {
+            margin-top: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-slick .slick-dots {
+            margin-top: 1em;
+        }
+
+            .category-slick .slick-dots li {
+                width: 58px;
+                height: 3px;
+                background: #ccc;
+                margin: 0;
+            }
+
+                .category-slick .slick-dots li button {
+                    width: 58px;
+                    height: 3px;
+                }
+
+                .category-slick .slick-dots li.slick-active {
+                    background: black;
+                }
+
+                .category-slick .slick-dots li button,
+                .category-slick .slick-dots li button:before {
+                    color: transparent;
+                    opacity: 0;
+                }
+    </style>
+    <div class="container" style="padding-top:8%;">
+        <div class="row">
+            <h4 class="margin-category">Categorías</h4>
+        </div>
+        <div class="row">
+            <div class="category-slick col s12 m12">
+                @{
+
+                    string link19 = string.IsNullOrEmpty(imagesSettings.Link19) ? "#" : imagesSettings.Link19;
+                    <div><a href="@link19"><img class="responsive-img" src="@picture19Url" /></a></div>
+                    string link20 = string.IsNullOrEmpty(imagesSettings.Link20) ? "#" : imagesSettings.Link20;
+                    <div><a href="@link20"><img class="responsive-img" src="@picture20Url" /></a></div>
+                    string link21 = string.IsNullOrEmpty(imagesSettings.Link21) ? "#" : imagesSettings.Link21;
+                    <div><a href="@link21"><img class="responsive-img" src="@picture21Url" /></a></div>
+                    string link22 = string.IsNullOrEmpty(imagesSettings.Link22) ? "#" : imagesSettings.Link22;
+                    <div><a href="@link22"><img class="responsive-img" src="@picture22Url" /></a></div>
+                    string link23 = string.IsNullOrEmpty(imagesSettings.Link23) ? "#" : imagesSettings.Link23;
+                    <div><a href="@link23"><img class="responsive-img" src="@picture23Url" /></a></div>
+                    string link24 = string.IsNullOrEmpty(imagesSettings.Link24) ? "#" : imagesSettings.Link24;
+                    <div><a href="@link24"><img class="responsive-img" src="@picture24Url" /></a></div>
+                    string link25 = string.IsNullOrEmpty(imagesSettings.Link25) ? "#" : imagesSettings.Link25;
+                    <div><a href="@link25"><img class="responsive-img" src="@picture25Url" /></a></div>
+                    string link26 = string.IsNullOrEmpty(imagesSettings.Link26) ? "#" : imagesSettings.Link26;
+                    <div><a href="@link26"><img class="responsive-img" src="@picture26Url" /></a></div>
+                    string link27 = string.IsNullOrEmpty(imagesSettings.Link27) ? "#" : imagesSettings.Link27;
+                    <div><a href="@link27"><img class="responsive-img" src="@picture27Url" /></a></div>
+                    string link28 = string.IsNullOrEmpty(imagesSettings.Link28) ? "#" : imagesSettings.Link28;
+                    <div><a href="@link28"><img class="responsive-img" src="@picture28Url" /></a></div>
+                    string link29 = string.IsNullOrEmpty(imagesSettings.Link29) ? "#" : imagesSettings.Link29;
+                    <div><a href="@link29"><img class="responsive-img" src="@picture29Url" /></a></div>
+                    string link30 = string.IsNullOrEmpty(imagesSettings.Link30) ? "#" : imagesSettings.Link30;
+                    <div><a href="@link30"><img class="responsive-img" src="@picture30Url" /></a></div>
+                    string link31 = string.IsNullOrEmpty(imagesSettings.Link31) ? "#" : imagesSettings.Link31;
+                    <div><a href="@link31"><img class="responsive-img" src="@picture31Url" /></a></div>
+                    string link32 = string.IsNullOrEmpty(imagesSettings.Link32) ? "#" : imagesSettings.Link32;
+                    <div><a href="@link32"><img class="responsive-img" src="@picture32Url" /></a></div>
+                    string link33 = string.IsNullOrEmpty(imagesSettings.Link33) ? "#" : imagesSettings.Link33;
+                    <div><a href="@link33"><img class="responsive-img" src="@picture33Url" /></a></div>
+                    string link34 = string.IsNullOrEmpty(imagesSettings.Link34) ? "#" : imagesSettings.Link34;
+                    <div><a href="@link34"><img class="responsive-img" src="@picture34Url" /></a></div>
+                    string link35 = string.IsNullOrEmpty(imagesSettings.Link35) ? "#" : imagesSettings.Link35;
+                    <div><a href="@link35"><img class="responsive-img" src="@picture35Url" /></a></div>
+                    string link36 = string.IsNullOrEmpty(imagesSettings.Link36) ? "#" : imagesSettings.Link36;
+                    <div><a href="@link36"><img class="responsive-img" src="@picture36Url" /></a></div>
+                    string link37 = string.IsNullOrEmpty(imagesSettings.Link37) ? "#" : imagesSettings.Link37;
+                    <div><a href="@link37"><img class="responsive-img" src="@picture37Url" /></a></div>
+                    string link38 = string.IsNullOrEmpty(imagesSettings.Link38) ? "#" : imagesSettings.Link38;
+                    <div><a href="@link38"><img class="responsive-img" src="@picture38Url" /></a></div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<div class="full-container left-margin categories-container" style="padding-top:2%;padding-bottom:2%;">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="margin-category">Categorías</h4>
+            <div class="categories-slick">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="full-container" style="padding-top:2%;padding-bottom:5%;">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="videowrapper">
+                <a href="" class="videolink" onclick="$('.videocontent').show(); $('.videocontent').addClass('hasVideo'); $(this).hide();">
+                    <img class="responsive-img" src="~/images/Home/Home-Lamy-2018-Video.jpg" width="1280" height="500" alt="" />
+                </a>
+                <iframe class="videocontent" src="https://www.youtube.com/embed/GXCETSt8LLo?autoplay=0" frameborder="0" width="983" height="500" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <h4 class="margin-category">Descubre más</h4>
+        <div class="discovery-slick col s12 m12">
+            <div>
+                <div class="col s8 m8 teaserlink-img">
+                    <a href="/descubre-m%C3%A1s">
+                        <img class="responsive-img" src="~/images/Home/LAM_Teaser_Int_eShop_640x375_About_Us_RZ0702.jpg" width="750" height="512" alt="Lamy en el mundo" />
+                    </a>
+                </div>
+                <div class="col s3 m3 teaser-info">
+                    <h4><a href="/descubre-m%C3%A1s" class="teaser-title teaserlink teaserlink-headlink">LAMY en el mundo</a></h4>
+                    <p><a href="/descubre-m%C3%A1s" class="teaserlink teaserlink-desc" teaserlink-caption>¿Quieres saber dónde comprar productos LAMY en tu país?<br><u>Descúbrelo aquí</u></a></p>
+                </div>
+            </div>
+            <div>
+                <div class="col s8 m8 teaserlink-img">
+                    <a href="/categorias/regalos-especiales"><img class="responsive-img" src="~/images/Home/LAM_Teaser_Int_eShop_640x375_Gift_Ideas_RZ1302_.jpg" width="750" height="512" alt="Special Gifts" /></a>
+                </div>
+                <div class="col s4 m4 teaser-info">
+                    <h4><a href="/categorias/regalos-especiales" class="teaser-title teaserlink teaserlink-headlink">Regalos especiales</a></h4>
+                    <p>
+                        <a href="/categorias/regalos-especiales" class="teaserlink teaserlink-desc" teaserlink-caption>
+                            Contamos con instrumentos para diferentes edades y personalidades.
+                            Tu ser querido quedará fascinado cuando reciba una LAMY. Si necesitas un poco de ayuda, aquí algunas sugerencias.<br><u>Explora las ideas de regalos</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s8 m8 teaserlink-img">
+                    <a href="/categorias/libretas">
+                        <img class="responsive-img" src="~/images/Home/supplements-paper.png" width="750" height="512" alt="Supplements Paper" />
+                    </a>
+                </div>
+                <div class="col s4 m4 teaser-info">
+                    <h4><a href="/categorias/libretas" class="teaser-title teaserlink teaserlink-headlink">paper - Las libretas de LAMY</a></h4>
+                    <p>
+                        <a href="/categorias/libretas" class="teaserlink teaserlink-desc" teaserlink-caption>
+                            Nuestras libretas de gran calidad serán el mejor aliado de tus instrumentos de escritura. <br> <u>Mira nuestros modelos</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s8 m8 teaserlink-img">
+                    <a href="/manuales-e-informaci%C3%B3n-de-cuidado"><img class="responsive-img" src="~/images/Home/LAMY_WLS_Care-Tips.jpg" width="750" height="512" alt="Care Tips" /></a>
+                </div>
+                <div class="col s4 m4 teaser-info">
+                    <h4><a href="/manuales-e-informaci%C3%B3n-de-cuidado" class="teaser-title teaserlink teaserlink-headlink">Tutoriales y tips de cuidado</a></h4>
+                    <p>
+                        <a href="/manuales-e-informaci%C3%B3n-de-cuidado" class="teaserlink teaserlink-desc" teaserlink-caption>
+                            Aquí encontrarás manuales y tips para el cuidado tus instrumentos LAMY.
+                            <br>
+                            <u>Descúbrelos</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="container">
+        @await Component.InvokeAsync("TopicBlock", new { systemName = "HomePageText" })
+
+        @if (!string.IsNullOrEmpty(picture3Url) || !string.IsNullOrEmpty(picture4Url) || !string.IsNullOrEmpty(picture5Url))
+        {
+            string newStyle = "";
+
+            if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+            {
+                newStyle = "class=\"row font-size-16\"";
+            }
+            else
+            {
+                newStyle = "class=\"row\"";
+            }
+
+            int picture1Count = !string.IsNullOrEmpty(picture3Url) ? 1 : 0;
+            int picture2Count = !string.IsNullOrEmpty(picture4Url) ? 1 : 0;
+            int picture3Count = !string.IsNullOrEmpty(picture5Url) ? 1 : 0;
+
+            int picturesCount = picture1Count + picture2Count + picture3Count;
+            string gridClass = picturesCount == 1 ? "m12" : picturesCount == 2 ? "m6" : "m4";
+
+            <div @Html.Raw(newStyle)>
+                @if (!string.IsNullOrEmpty(picture3Url))
+                {
+                    <div class="col s12 @gridClass custom-home-component">
+                        <div style="width:100%">
+                            <div>
+                                @if (!string.IsNullOrEmpty(imagesSettings.Link3))
+                                {
+                                    <a href="@imagesSettings.Link3">
+                                        <img style="width:100%" src="@picture3Url" alt="" title="@imagesSettings.Text3" />
+                                    </a>
+                                }
+                                else
+                                {
+                                    <img style="width:100%" src="@picture3Url" alt="" title="@imagesSettings.Text3" />
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(imagesSettings.Text3))
+                            {
+                                if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                {
+                                    newStyle = "class=\"card-action center\"";
+                                }
+                                else
+                                {
+                                    newStyle = "class=\"card-action\"";
+                                }
+                                <div @Html.Raw(newStyle)>
+                                    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                    {
+                                        newStyle = "class=\"teed-secondary-text\"";
+                                    }
+                                    else
+                                    {
+                                        newStyle = "";
+                                    }
+                                    <a href="@imagesSettings.Link3" @Html.Raw(newStyle)>
+                                        @Html.Raw(imagesSettings.Text3)
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(picture4Url))
+                {
+                    <div class="col s12 @gridClass custom-home-component">
+                        <div>
+                            <div>
+                                @if (!string.IsNullOrEmpty(imagesSettings.Link4))
+                                {
+                                    <a href="@imagesSettings.Link4">
+                                        <img style="width:100%" src="@picture4Url" alt="" title="@imagesSettings.Text4" />
+                                    </a>
+                                }
+                                else
+                                {
+                                    <img style="width:100%" src="@picture4Url" alt="" title="@imagesSettings.Text4" />
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(imagesSettings.Text4))
+                            {
+                                if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                {
+                                    newStyle = "class=\"card-action center\"";
+                                }
+                                else
+                                {
+                                    newStyle = "class=\"card-action\"";
+                                }
+                                <div @Html.Raw(newStyle)>
+                                    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                    {
+                                        newStyle = "class=\"teed-secondary-text\"";
+                                    }
+                                    else
+                                    {
+                                        newStyle = "";
+                                    }
+                                    <a href="@imagesSettings.Link4" @Html.Raw(newStyle)>
+                                        @Html.Raw(imagesSettings.Text4)
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(picture5Url))
+                {
+                    <div class="col s12 @gridClass custom-home-component">
+                        <div>
+                            <div>
+                                @if (!string.IsNullOrEmpty(imagesSettings.Link5))
+                                {
+                                    <a href="@imagesSettings.Link5">
+                                        <img style="width:100%" src="@picture5Url" alt="" title="@imagesSettings.Text5" />
+                                    </a>
+                                }
+                                else
+                                {
+                                    <img style="width:100%" src="@picture5Url" alt="" title="@imagesSettings.Text5" />
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(imagesSettings.Text5))
+                            {
+                                if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                {
+                                    newStyle = "class=\"card-action center\"";
+                                }
+                                else
+                                {
+                                    newStyle = "class=\"card-action\"";
+                                }
+                                <div @Html.Raw(newStyle)>
+                                    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                    {
+                                        newStyle = "class=\"teed-secondary-text\"";
+                                    }
+                                    else
+                                    {
+                                        newStyle = "";
+                                    }
+                                    <a href="@imagesSettings.Link5" @Html.Raw(newStyle)>
+                                        @Html.Raw(imagesSettings.Text5)
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>*@
+
+@if (!string.IsNullOrEmpty(picture1Url))
+{
+    @if (string.IsNullOrEmpty(imagesSettings.Link1))
+    {
+        <div class="parallax-container homepage-parallax">
+            <div class="parallax">
+                <img src="@picture1Url" title="@imagesSettings.Text1" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="parallax-container pointer homepage-parallax" onclick="setLocation('@imagesSettings.Link1')">
+            <div class="parallax">
+                <img src="@picture1Url" title="@imagesSettings.Text1" />
+            </div>
+        </div>
+    }
+}
+
+<div class="container">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_news" })
+    @await Component.InvokeAsync("HomepageNews")
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_products" })
+    @await Component.InvokeAsync("HomepageProducts")
+</div>
+
+@*@if (!string.IsNullOrEmpty(picture7Url))
+    {
+        <div class="container">
+            <div class="row">
+                @if (!string.IsNullOrEmpty(textCarousel))
+                {
+                    <h4 id="color-carousel">@textCarousel</h4>
+                }
+                <div class="responsive col s12 m12 sc">
+                    @if (!string.IsNullOrEmpty(picture7Url))
+                    {
+                        string link7 = string.IsNullOrEmpty(imagesSettings.Link7) ? "#" : imagesSettings.Link7;
+                        <div class="col s3 m3"><a href="@link7"><img class="responsive-img" src="@picture7Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture8Url))
+                    {
+                        string link8 = string.IsNullOrEmpty(imagesSettings.Link8) ? "#" : imagesSettings.Link8;
+                        <div class="col s3 m3"><a href="@link8"><img class="responsive-img" src="@picture8Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture9Url))
+                    {
+                        string link9 = string.IsNullOrEmpty(imagesSettings.Link9) ? "#" : imagesSettings.Link9;
+                        <div class="col s3 m3"><a href="@link9"><img class="responsive-img" src="@picture9Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture10Url))
+                    {
+                        string link10 = string.IsNullOrEmpty(imagesSettings.Link10) ? "#" : imagesSettings.Link10;
+                        <div class="col s3 m3"><a href="@link10"><img class="responsive-img" src="@picture10Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture11Url))
+                    {
+                        string link11 = string.IsNullOrEmpty(imagesSettings.Link11) ? "#" : imagesSettings.Link11;
+                        <div class="col s3 m3"><a href="@link11"><img class="responsive-img" src="@picture11Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture12Url))
+                    {
+                        string link12 = string.IsNullOrEmpty(imagesSettings.Link12) ? "#" : imagesSettings.Link12;
+                        <div class="col s3 m3"><a href="@link12"><img class="responsive-img" src="@picture12Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture13Url))
+                    {
+                        string link13 = string.IsNullOrEmpty(imagesSettings.Link13) ? "#" : imagesSettings.Link13;
+                        <div class="col s3 m3"><a href="@link13"><img class="responsive-img" src="@picture13Url" /></a></div>
+                    }
+                    @if (!string.IsNullOrEmpty(picture14Url))
+                    {
+                        string link14 = string.IsNullOrEmpty(imagesSettings.Link14) ? "#" : imagesSettings.Link14;
+                        <div class="col s3 m3"><a href="@link14"><img class="responsive-img" src="@picture14Url" /></a></div>
+                    }
+                </div>
+            </div>
+        </div>
+        <style>
+            #color-carousel {
+                color: @textColorCarousel;
+            }
+
+            .slick-prev:before {
+                color: black;
+            }
+
+            .slick-next:before {
+                color: black;
+            }
+
+            .slick-slide {
+                text-align: center;
+            }
+
+            .sc div {
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            .sc img {
+                margin: auto;
+            }
+        </style>
+        <script>
+            $(document).ready(function () {
+                $('.responsive').slick({
+                    dots: false,
+                    infinite: true,
+                    speed: 300,
+                    slidesToShow: 4,
+                    slidesToScroll: 4,
+                    centerMode: true,
+                    responsive: [
+                        {
+                            breakpoint: 1024,
+                            settings: {
+                                slidesToShow: 3,
+                                slidesToScroll: 3,
+                                infinite: true,
+                                dots: false
+                            }
+                        },
+                        {
+                            breakpoint: 600,
+                            settings: {
+                                slidesToShow: 2,
+                                slidesToScroll: 2,
+                                arrows: false
+                            }
+                        },
+                        {
+                            breakpoint: 480,
+                            settings: {
+                                slidesToShow: 1,
+                                slidesToScroll: 1,
+                                arrows: false
+                            }
+                        }
+                        // You can unslick at a given breakpoint now by adding:
+                        // settings: "unslick"
+                        // instead of a settings object
+                    ]
+                });
+            });
+        </script>
+    }*@
+<div class="container">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_best_sellers" })
+    @*@await Component.InvokeAsync("HomepageBestSellers")*@
+</div>
+
+<div class="full-container story-slick left-margin">
+    <div class="row">
+        <h4 class="margin-category" style="margin-top: 4rem;">Hecho en Alemania</h4>
+        <div class="info-slick left">
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/design-made-in-germany">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_DESIGN_MADE_IN_GERMANY.png" width="750" height="512" alt="Design made in germany" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/design-made-in-germany" class="teaserlink teaserlink-headlink teaser-title">Design. Made in Germany.</a></h4>
+                    <p>
+                        <a href="/design-made-in-germany" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Para Lamy, la expresión "Made in Germany" es más que una indicación
+                            de su origen <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/valor-de-marca">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_BRAND_VALUE_.png" width="750" height="512" alt="Brand Value" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/valor-de-marca" class="teaserlink teaserlink-headlink teaser-title">Valor de marca</a></h4>
+                    <p>
+                        <a href="/valor-de-marca" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Claridad, honestidad, balance, creatividad e importancia de la marca. <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/arquitectura-y-arte-2">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_ARCHITECTURE_ART.png" width="750" height="512" alt="Architecture and Art" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/arquitectura-y-arte-2" class="teaserlink teaserlink-headlink teaser-title">Arquitectura y arte</a></h4>
+                    <p>
+                        <a href="/arquitectura-y-arte-2" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Arte que inspira: La Galería LAMY y el Jardín de Esculturas. <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/gu%C3%ADa-de-heidelberg">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_HEIDELBERG_GUIDE.png" width="750" height="512" alt="Heiderlbert Guide" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/gu%C3%ADa-de-heidelberg" class="teaserlink teaserlink-headlink teaser-title">Guía de Heidelberg</a></h4>
+                    <p>
+                        <a href="/gu%C3%ADa-de-heidelberg" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            10 lugares que necesitas visitar en Heidelberg <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="info-slick right">
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/dise%C3%B1adores-lamy">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_DESIGNERS.png" width="750" height="512" alt="Lamy designers" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/dise%C3%B1adores-lamy" class="teaserlink teaserlink-headlink teaser-title">Diseñadores Lamy</a></h4>
+                    <p>
+                        <a href="/dise%C3%B1adores-lamy" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Los instrumentos de escritura de Lamy son creados en colaboración con renombrados diseñadores y estudios de diseño internacionales.
+                            <br>
+                            <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/lamy-specs">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_LAMY_SPECS_1.png" width="750" height="512" alt="Specs" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/lamy-specs" class="teaserlink teaserlink-headlink teaser-title">Lamy specs</a></h4>
+                    <p>
+                        <a href="/lamy-specs" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Nuestras revistas LAMY specs te sumergirán en el increíble y emocionante universo de LAMY.
+                            <br>
+                            <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/thinking-tools">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_THINKING_TOOLS.png" width="750" height="512" alt="Thinking tools" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/thinking-tools" class="teaserlink teaserlink-headlink teaser-title">thinking tools.</a></h4>
+                    <p>
+                        <a href="/thinking-tools" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Después de un exitoso comienzo en el Museo de Arte Aplicado de Frankfurt, la exhibición "Herramientas para pensar. Diseño como proceso - para la creación de instrumentos de escritura"
+                            hará un tour internacional. <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/premios-y-reconocimientos">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_Awards.png" width="750" height="512" alt="Awards" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/premios-y-reconocimientos" class="teaserlink teaserlink-headlink teaser-title">Premios y reconocimientos</a></h4>
+                    <p>
+                        <a href="/premios-y-reconocimientos" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Lamy constantemente gana premios por sus instrumentos de escritura, empaque y material promocional - probando su extraordinaria calidad y diseño.
+                            <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="info-slick left">
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/cultura-organizacional">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_COMPANY_CULTURE.png" width="750" height="512" alt="Company culture" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/cultura-organizacional" class="teaserlink teaserlink-headlink teaser-title">Cultura organizacional</a></h4>
+                    <p>
+                        <a href="/cultura-organizacional" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Conoce cuáles son los principios de LAMY <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/nuestra-historia">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_LAMY_SPECS_1.png" width="750" height="512" alt="Company History" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/nuestra-historia" class="teaserlink teaserlink-headlink teaser-title">Nuestra historia</a></h4>
+                    <p>
+                        <a href="/nuestra-historia" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Desde la pequeña fábrica de instrumentos de escritura en Heidelberg hasta el éxito de Lamy en el mercado y su reputación mundial.
+                            <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/lamy-alrededor-del-mundo">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_LAMY_WORLDWIDE.png" width="750" height="512" alt="Lamy worldwide" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/lamy-alrededor-del-mundo" class="teaserlink teaserlink-headlink teaser-title">Lamy en el mundo</a></h4>
+                    <p>
+                        <a href="/lamy-alrededor-del-mundo" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Descubre nuestras tiendas y puntos de venta del mundo. <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <div class="col s12 m6 teaserlink-img">
+                    <a href="/hechos-y-cifras">
+                        <img class="responsive-img" src="~/images/slick/WL_Home_CompanyTeaser_FACTS_AND_FIGURES.png" width="750" height="512" alt="Facts and Figures" />
+                    </a>
+                </div>
+                <div class="col s12 m5 teaser-info">
+                    <h4><a href="/hechos-y-cifras" class="teaserlink teaserlink-headlink teaser-title">Hechos y cifras</a></h4>
+                    <p>
+                        <a href="/hechos-y-cifras" class="teaserlink teaserlink-desc small-text" teaserlink-caption>
+                            Por más de 85 años, Lamy ha sido reconocido por los más altos niveles de calidad y diseño innovador. <br> <u>Lee más</u>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(picture2Url))
+{
+    @if (string.IsNullOrEmpty(imagesSettings.Link2))
+    {
+        <div class="parallax-container homepage-parallax" style="margin-bottom:23px;">
+            <div class="parallax">
+                <img src="@picture2Url" title="@imagesSettings.Text2" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="parallax-container pointer homepage-parallax" onclick="setLocation('@imagesSettings.Link1')">
+            <div class="parallax">
+                <img src="@picture2Url" title="@imagesSettings.Text2" />
+            </div>
+        </div>
+    }
+}
+
+@if (imagesSettings.TagsEnable)
+{
+    <div class="container">
+        <div class="row">
+            <div id="tags-container" class="col s12 m12 center">
+
+            </div>
+        </div>
+    </div>
+    <style>
+        @@media only screen and (max-width: 601px) {
+            .btn-small-tags {
+                height: 22.4px;
+                line-height: 22.4px;
+                font-size: 10px;
+            }
+        }
+    </style>
+    <script type="text/javascript" asp-location="Footer">
+        $.ajax({
+            cache: false,
+            url: 'Admin/HomePageImages/AllTags',
+            type: 'GET',
+            success: function (data) {
+                var qty = @tagsQty;
+                var cond = qty > 0 ? qty : data.length;
+
+                for (var i = 0; i < data.length && i < cond; i++) {
+                    var item = data[i];
+                    if (item.ProductCount > 0) {
+                        var str = "<a href='producttag/" + item.Id + "/" + item.Name + "' class='producttag btn-small btn-small-tags' style='margin:5px;'>" + item.Name + " (" + item.ProductCount + ")</a>";
+                        $('#tags-container').append(str);
+                    }
+                }
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+        $(document).ready(function () {
+            if (document.cookie.indexOf("runOnce") < 0) {
+                $('#modal-home').modal();
+                $('#btn-modal').trigger('click');
+                var d = new Date();
+                d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
+                var expires = "expires=" + d.toGMTString();
+                document.cookie = "runOnce=true;" + expires + "; path=/";
+            }
+        });
+
+        function registerAjax() {
+            var name = $('#first_name').val();
+            var lastName = $('#last_name').val();
+            var email = $('#email').val();
+
+            var data = {
+                name: name,
+                lastName: lastName,
+                mail: email
+            };
+
+            $.ajax({
+                cache: false,
+                url: 'Customer/RegisterAjax',
+                data: data,
+                type: 'POST',
+                success: function () {
+                },
+                error: function () {
+                    alert('Error de conexión');
+                }
+            });
+        }
+    </script>
+}
+
+@*@if (!string.IsNullOrEmpty(picture15Url) && !string.IsNullOrEmpty(picture16Url) && !string.IsNullOrEmpty(picture17Url) && !string.IsNullOrEmpty(picture18Url))
+    {
+        <div class="row">
+            <div class="col s12 m12" style="padding:0">
+                @{
+                    string link15 = string.IsNullOrEmpty(imagesSettings.Link15) ? "#" : imagesSettings.Link15;
+                    <div style="padding:0" class="col s6 m3"><a href="@link15"><img class="responsive-img" src="@picture15Url" /></a></div>
+                }
+                @{
+                    string link16 = string.IsNullOrEmpty(imagesSettings.Link16) ? "#" : imagesSettings.Link16;
+                    <div style="padding:0" class="col s6 m3"><a href="@link16"><img class="responsive-img" src="@picture16Url" /></a></div>
+                }
+                @{
+                    string link17 = string.IsNullOrEmpty(imagesSettings.Link17) ? "#" : imagesSettings.Link17;
+                    <div style="padding:0" class="col s6 m3 cajas-margin-top"><a href="@link17"><img class="responsive-img" src="@picture17Url" /></a></div>
+                }
+                @{
+                    string link18 = string.IsNullOrEmpty(imagesSettings.Link18) ? "#" : imagesSettings.Link18;
+                    <div style="padding:0" class="col s6 m3 cajas-margin-top"><a href="@link18"><img class="responsive-img" src="@picture18Url" /></a></div>
+                }
+            </div>
+        </div>
+        <style>
+            @@media only screen and (max-width: 601px) {
+                .cajas-margin-top {
+                    margin-top: -5px;
+                }
+            }
+        </style>
+    }*@
+
+<div class="container">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_categories" })
+    @await Component.InvokeAsync("HomepageCategories")
+
+    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_before_poll" })
+    @await Component.InvokeAsync("HomepagePolls")
+</div>
+
+@inject IPictureService pictureService
+@inject IStaticCacheManager cacheManager
+
+@functions {
+    public string GetPictureUrl(int pictureId)
+    {
+
+        var cacheKey = string.Format("Teed.Nop.plugins.widgets.nivoslider2.pictureurl-{0}", pictureId);
+        return cacheManager.Get(cacheKey, () =>
+        {
+        //little hack here. nulls aren't cacheable so set it to ""
+        var url = pictureService.GetPictureUrl(pictureId, showDefaultPicture: false) ?? "";
+            return url;
+        });
+    }
+}
+<script>
+    $('.videocontent').hide();
+    $('.videolink').click(function (e) {
+        e.preventDefault();
+    });
+
+        window.onload = function () {
+            //var options =
+            //    {
+            //        srcNode: 'img',             // grid items (class, node)
+            //        margin: '5px',              // margin in pixel, default: 0px
+            //        width: '250px',             // grid item width in pixel, default: 220px
+            //        max_width: '',              // dynamic gird item width if specified, (pixel)
+            //        resizable: true,            // re-layout if window resize
+            //        transition: 'all 0.5s ease' // support transition for CSS3, default: all 0.5s ease
+            //    }
+            //document.querySelector('.grid').gridify(options);
+        }
+        $(document).ready(function () {
+            $('.category-slick').slick({
+                mobileFirst: true,
+                slidesToShow: 5,
+                slidesToScroll: 1,
+                swipeToSlide: true,
+                arrows: false,
+                dots: true,
+                speed: 200,
+                infinite: false,
+                touchThreshold: 100,
+                responsive: [
+                    {
+                        breakpoint: 1024,
+                        settings: {
+                            slidesToShow: 4,
+                            slidesToScroll: 1,
+                            infinite: false,
+                            dots: true
+                        }
+                    },
+                    {
+                        breakpoint: 600,
+                        settings: {
+                            slidesToShow: 3,
+                            slidesToScroll: 1
+                        }
+                    },
+                    {
+                        breakpoint: 480,
+                        settings: {
+                            slidesToShow: 2,
+                            slidesToScroll: 1
+                        }
+                    }
+                ]
+            });
+            if ($('.slick-slider:hidden')) {
+                $('.slick-slider').show();
+            }
+            $('.info-slick').slick({
+                mobileFirst: true,
+                dots: true,
+                infinite: false,
+                arrows: true
+            });
+            $('.discovery-slick').slick({
+                mobileFirst: true,
+                dots: true,
+                infinite: false,
+                arrows: true
+            });
+            $(function () {
+                $('#header_nav').data('size', 'big');
+            });
+
+            $(window).scroll(function () {
+                if ($(document).scrollTop() > 0) {
+                    if ($('#header_nav').data('size') == 'big') {
+                        $('#header_nav').data('size', 'small');
+                        $('#header_nav').stop().animate({
+                            height: '40px'
+                        }, 600);
+                    }
+                }
+                else {
+                    if ($('#header_nav').data('size') == 'small') {
+                        $('#header_nav').data('size', 'big');
+                        $('#header_nav').stop().animate({
+                            height: '100px'
+                        }, 600);
+                    }
+                }
+            });
+            $.ajax({
+                type: "GET",
+                url: "@(Url.Action("GetCategoriesModal", "Catalog"))?isHome=true",
+                success: function (data) {
+                    var count = 0;
+                    $.each(data, function (i, e) {
+                        $('.categories-slick').append('<a href="/categorias/'
+                            + e.SeNames + '" class="category-slick">' +
+                            '<div>' +
+                            (e.ImgUrl.indexOf("default-image.png") > 0 ? '' : '<img src="' + e.ImgUrl + '" title="" />') +
+                            '<p>' + e.Name + '</p>' +
+                            '</div>' +
+                            '</a>');
+                    });
+                    $('.categories-slick').slick({
+                      infinite: false,
+                      slidesToShow: 5,
+                      slidesToScroll: 1,
+                      arrows: true,
+                      mobileFirst: false,
+                      dots: true,
+                      responsive: [
+                        {
+                          breakpoint: 768,
+                          settings: {
+                            slidesToShow: 2
+                          }
+                        }]
+                    });
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                    console.log('err loading categories');
+                }
+            });
+        });
+            // 2. This code loads the IFrame Player API code asynchronously.
+            var tag = document.createElement('script');
+
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            // 3. This function creates an <iframe> (and YouTube player)
+            //    after the API code downloads.
+            var player;
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    videoId: '@imagesSettings.VideoId',
+                    playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'showinfo': 0, 'disablekb': 1, 'enablejsapi': 1, 'modestbranding': 1, 'loop': 1 },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+
+            // 4. The API will call this function when the video player is ready.
+            function onPlayerReady(event) {
+                event.target.playVideo();
+            }
+
+            // 5. The API calls this function when the player's state changes.
+            //    The function indicates that when playing a video (state=1),
+            //    the player should play for six seconds and then stop.
+            function onPlayerStateChange(event) {
+                if (event.data == YT.PlayerState.ENDED) {
+                    player.playVideo();
+                }
+            }
+</script>

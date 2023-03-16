@@ -1,0 +1,485 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.IncidentsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Incidents");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <input hidden asp-for="FranchiseId" id="franchise-id" value="@(Model.FranchiseId)" />
+    <input hidden asp-for="VehicleId" id="vehicle-id" value="@(Model.VehicleId)" />
+    <input hidden asp-for="DateString" id="date" value="@(Model.DateString)" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nueva incidencia
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="IncidentsList" asp-route-date="@Model.DateString" asp-route-franchiseId="@Model.FranchiseId" asp-route-vehicleId="@Model.VehicleId">regresar a lista de incidencias</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue post-button">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-franchise" asp-title="Franquicia" asp-default="true">
+                        <div class="content">
+                            <div class="form-horizontal">
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="col-md-12">
+                                                <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                                <div class="col-md-12">
+                                                    <div class="col-md-3"></div>
+                                                    <div class="col-md-9">
+                                                        <div style="margin-bottom: 1em;background-color: #f1f1f1; padding: 1em;">
+                                                            <p>Si la incidencia corresponde a una semana con la comisión ya calculada, y esta comisión tiene un bono por no incidencias, el bono será restado de la comisión.</p>
+                                                            <p><strong>Fecha:</strong> @(Model.Date.ToString("dddd, dd-MM-yyyy", new System.Globalization.CultureInfo("es-MX")))</p>
+                                                            <p><strong>Franquicia:</strong> @(Model.FranchiseName)</p>
+                                                            <p><strong>Vehículo:</strong> @(Model.VehicleName)</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Código de incidencia</label>
+                                                            <div title="Selecciona el tipo de incidencia." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <nop-select asp-for="IncidentCode" asp-items="Model.Penalties" />
+                                                        <span asp-validation-for="IncidentCode"></span>
+                                                        <span id="code-description">
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Autorizar</label>
+                                                            <div title="Selecciona si deseas autorizar esta incidencia. Las incidencias no autorizadas no serán tomadas en cuenta para la facturación" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <nop-select asp-for="AuthorizedStatusId" asp-items="@Model.Status" />
+                                                        <span asp-validation-for="AuthorizedStatusId"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Comentarios</label>
+                                                            <div title="Agrega algún comentario a la incidencia." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        @Html.TextAreaFor(m => m.Comments, 4, 20, new { @class = "form-control" })
+                                                        <span asp-validation-for="Comments" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                @if (Model.OrderIdsList != null && Model.OrderIdsList.Count > 0)
+                                                {
+                                                    <div class="form-group" id="order-selector-container">
+                                                        <div class="col-md-3 text-right">
+                                                            <div class="label-wrapper">
+                                                                <label class="control-label">Orden de la incidencia</label>
+                                                                <div title="La orden que será afectada por esta incidencia." class="ico-help">
+                                                                    <i class="fa fa-question-circle"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <p>@(string.Join(", ", Model.OrderIdsList.Select(x => "#" + x)))</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="form-group" style="display: none;" id="order-selector-container">
+                                                        <div class="col-md-3 text-right">
+                                                            <div class="label-wrapper">
+                                                                <label class="control-label">Orden de la incidencia</label>
+                                                                <div title="Selecciona la(s) orden(es) que fueron afectadas por esta incidencia." class="ico-help">
+                                                                    <i class="fa fa-question-circle"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <div class="input-group input-group-required">
+                                                                <select>
+                                                                </select>
+                                                                <nop-select asp-for="OrderIdsList" asp-multiple="true" />
+                                                                <div class="input-group-btn">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <div class="form-group" style="display: none;" id="product-selector-container">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Producto de la incidencia</label>
+                                                            <div title="Selecciona el/los producto(s) que fueron afectados por esta incidencia." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <div class="input-group input-group-required">
+                                                            <nop-select asp-for="OrderItemIdsList" asp-multiple="true" />
+                                                            <div class="input-group-btn">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="display: none;">
+                                                    <nop-editor asp-for="OrderIds" />
+                                                    <nop-editor asp-for="OrderItemIds" />
+                                                </div>
+                                                <div class="form-group" style="display: none;" id="quantities-container">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Cantidad para la incidencia</label>
+                                                            <div title="Seleccionar la cantidad que NO se entregó del producto seleccionado." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <select class="form-control valid" id="SelectedQuantity" name="SelectedQuantity">
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group" style="display: none;" id="amount-container">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Monto a reportar</label>
+                                                            <div title="Indica el monto a reportar del incidente (ej, el valor de la multa)." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <nop-editor asp-for="ReportedAmount" />
+                                                        <span asp-validation-for="ReportedAmount"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        var date_input_ini = $('#Date');
+        var container = $('.bootstrap-iso form').length > 0 ? $('.bootstrap-iso form').parent() : "body";
+        date_input_ini.datepicker({
+            dateFormat: 'dd/mm/yy',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        });
+        SetOrgDates();
+    });
+
+    function SetOrgDates() {
+        var dt = new Date();
+        var time =
+            ((dt.getDate() > 9) ? dt.getDate() : ('0' + dt.getDate())) + '/' + ((dt.getMonth() > 8) ? (dt.getMonth() + 1) : ('0' + (dt.getMonth() + 1))) + '/' + dt.getFullYear();
+
+        var dtl = new Date();
+        dtl.setDate(dt.getDate() - 30)
+        var timeLess =
+            ((dtl.getDate() > 9) ? dtl.getDate() : ('0' + dtl.getDate())) + '/' + ((dtl.getMonth() > 8) ? (dtl.getMonth() + 1) : ('0' + (dtl.getMonth() + 1))) + '/' + dtl.getFullYear();
+        $("#Date").val(timeLess);
+    }
+</script>
+<script>
+    (function ($) {
+            @if (!string.IsNullOrEmpty(Model.OrderItemIds))
+            {
+                var orderItemIds = Model.OrderItemIds.Split(',');
+            <text>
+        var orderItemIds = [
+            @foreach (var id in orderItemIds)
+            {
+                <text>"@id",</text>
+            }
+        ];
+            </text>
+            }
+        @if (!string.IsNullOrEmpty(Model.OrderIds)) {
+            var orderIds = Model.OrderIds.Split(',');
+            <text>
+                var orderIds = [
+            @foreach (var id in orderIds)
+            {
+                <text>"@id",</text>
+            }
+                ];
+            </text>
+        }
+        $(document).ready(function () {
+            GetDataSelect();
+
+    var data = [
+        { Text: "Sin elementos", Value: "0" },
+    ];
+            var orderIdsInput = $('#OrderIdsList').data("kendoMultiSelect");
+            var idsInput = $('#OrderItemIdsList').data("kendoMultiSelect");
+            idsInput.setOptions({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                idsInput: false,
+                filter: "contains",
+                dataSource: data,
+                maxSelectedItems: 1,
+                change: function (e) {
+                    $("#quantities-container").hide();
+                    var value = this.value();
+                    $('#OrderItemIds').val(value.length > 1 ? value.join(',') : value.length == 1 ? value[0] : "");
+                    if (value.length > 0)
+                        $.ajax({
+                            type: "GET",
+                            url: "@(Url.Action("GetAllowedQuantitiesAndOriginalQuantity", "Incidents"))?orderItemId=" + value[0],
+                            success: function (data) {
+                                $("#SelectedQuantity option").remove();
+                                $.each(data.items, function (i, e) {
+                                    $("#SelectedQuantity").append('<option value="' + e.Value + '" >' + e.Text + '</option>');
+                                });
+                                $("#SelectedQuantity").val(data.originalQuantity);
+                                $("#quantities-container").show();
+                            },
+                            error: function (e) {
+                                console.log(e);
+                            }
+                        });
+                }
+            });
+
+            if (orderIdsInput !== null) {
+                orderIdsInput.setOptions({
+                    dataTextField: "Text",
+                    dataValueField: "Value",
+                    orderIdsInput: false,
+                    filter: "contains",
+                    dataSource: data,
+                    maxSelectedItems: 1,
+                    change: function (e) {
+                        var value = this.value();
+                        if ($('#IncidentCode').val() == "R01" ||
+                            $('#IncidentCode').val() == "R02" ||
+                            $('#IncidentCode').val() == "R06" ||
+                            $('#IncidentCode').val() == "R11") {
+                            $('#OrderIds').val(value.length > 1 ? value.join(',') : value.length == 1 ? value[0] : "");
+                            if (value.length > 0 &&
+                                $('#IncidentCode').val() != "R06" &&
+                                $('#IncidentCode').val() != "R11") {
+                                LoadProducts(value, idsInput);
+                            }
+                        } else {
+                            $('#product-selector-container').hide();
+                            $("#quantities-container").hide();
+                        }
+                    }
+                });
+            }
+            else {
+                @if(Model.OrderIdsList != null)
+                {
+                    <text>
+                        LoadProducts([@(Model.OrderIdsList.FirstOrDefault())], idsInput);
+                    </text>
+                }
+            }
+
+
+    $('#IncidentCode').on('change', function () {
+        GetDataSelect();
+    });
+    $('#code-description').text($('#IncidentCode option:selected').text());
+    $('#IncidentCode').trigger('change');
+    $('#order-selector-container select').first().remove();
+    $('#product-selector-container select').first().remove();
+        });
+
+        function LoadProducts(orderIds, idsInput) {
+            var postData = {
+                type: "products",
+                date: $("#date").val(),
+                franchiseId: $("#franchise-id").val(),
+                vehicleId: $("#vehicle-id").val(),
+                ids: orderIds,
+            };
+            addAntiForgeryToken(postData);
+            var formData = new FormData();
+            $.each(postData, function (name, value) {
+                formData.append(name, value);
+            });
+
+            $.ajax({
+                contentType: false,
+                processData: false,
+                type: "POST",
+                url: "@(Url.Action("SelectIdsData", "Incidents"))",
+                data: formData,
+                success: function (data) {
+                    idsInput.dataSource.data([]);
+                    if (data.length > 0) {
+                        var multiData = []; //multiSelect.dataSource.data();
+                        $.each(data, function (i, e) {
+                            multiData.push({
+                                Text: e.Text,
+                                Value: e.Id
+                            })
+                        });
+                        idsInput.dataSource.data(multiData);
+                        $('#product-selector-container').show();
+                        $('#no-orders').hide();
+                        $('.post-button').removeAttr('disabled', 'disabled');
+                    } else {
+                        $('.post-button').attr('disabled', 'disabled');
+                        $('#no-orders').show();
+                    }
+                    if (typeof orderItemIds != 'undefined') {
+                        idsInput.value(orderItemIds);
+                        orderItemIds = [];
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        }
+
+function GetDataSelect() {
+
+    $('#code-description').text($('#IncidentCode option:selected').text());
+    if ($('#IncidentCode').val() == "R01" ||
+        $('#IncidentCode').val() == "R02" ||
+        $('#IncidentCode').val() == "R06" ||
+        $('#IncidentCode').val() == "R11") {
+        if ($('#IncidentCode').val() == "R06" ||
+            $('#IncidentCode').val() == "R11") {
+            $('#product-selector-container').hide();
+            $("#quantities-container").hide();
+        }
+        if ($('#IncidentCode').val() == "R09" ||
+            $('#IncidentCode').val() == "R10" ||
+            $('#IncidentCode').val() == "D01") {
+            $('#amount-container').show();
+        } else {
+            $('#amount-container').hide();
+        }
+
+        @if ((Model.OrderIdsList == null || Model.OrderIdsList.Count == 0))
+        {
+            <text>
+        if ($('#IncidentCode').val() != "Z00") {
+            var postData = {
+                type: "orders",
+                date: $("#date").val(),
+                franchiseId: $("#franchise-id").val(),
+                vehicleId: $("#vehicle-id").val()
+            };
+            addAntiForgeryToken(postData);
+            var formData = new FormData();
+            $.each(postData, function (name, value) {
+                formData.append(name, value);
+            });
+
+            $.ajax({
+                contentType: false,
+                processData: false,
+                type: "POST",
+                url: "@(Url.Action("SelectIdsData", "Incidents"))",
+                data: formData,
+                success: function (data) {
+                    $('#OrderIdsList').data("kendoMultiSelect").dataSource.data([]);
+                    var multiData = []; //multiSelect.dataSource.data();
+                    if (data.length > 0) {
+                        $.each(data, function (i, e) {
+                            multiData.push({
+                                Text: e.Text,
+                                Value: e.Id
+                            })
+                        });
+                        $('#OrderIdsList').data("kendoMultiSelect").dataSource.data(multiData);
+                        $('#order-selector-container').show();
+                        $('#no-orders').hide();
+                        $('.post-button').removeAttr('disabled', 'disabled');
+                    } else {
+                        $('.post-button').attr('disabled', 'disabled');
+                        $('#no-orders').show();
+                        $('#product-selector-container').hide();
+                        $("#quantities-container").hide();
+                        $('#order-selector-container').hide();
+                    }
+                    if (typeof orderIds != 'undefined') {
+                        $('#OrderIdsList').data("kendoMultiSelect")
+                            .value(orderIds);
+                        $('#OrderIdsList').data("kendoMultiSelect")
+                            .trigger("change");
+                        orderIds = [];
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        }
+        else
+            $('.post-button').removeAttr('disabled');
+            </text>
+        }
+        else
+        {
+            <text>
+                $('#order-selector-container').show();
+        $('#product-selector-container').show();
+            </text>
+        }
+    } else {
+        $('#order-selector-container').hide();
+        $('#product-selector-container').hide();
+        $("#quantities-container").hide();
+        if ($('#IncidentCode').val() == "R09" ||
+            $('#IncidentCode').val() == "R10" ||
+            $('#IncidentCode').val() == "D01" ||
+            $('#IncidentCode').val() == "Z00") {
+            $('#amount-container').show();
+        } else {
+            $('#amount-container').hide();
+        }
+    }
+}
+})(jQuery);
+</script>

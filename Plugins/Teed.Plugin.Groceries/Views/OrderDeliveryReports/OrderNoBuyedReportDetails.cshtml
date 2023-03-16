@@ -1,0 +1,438 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderDeliveryReports.OrderReportDetailsViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var deliveryDate = Model.OrderShippigDate.ToString("dd-MM-yyyy");
+    var countProducts = 0;
+    var controllerName = "OrderDeliveryReports";
+    bool.TryParse(Context.Request.Query["btnEneableOrderFolio"].ToString(), out bool btnEneableOrderFolio);
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Liquidación de productos no comprados: @Model.DayOfWeek @deliveryDate
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="OrderReportStatus" asp-route-id="@(Model.OrderShippigDate.ToString("dd-MM-yyyy"))">Regresar a: Liquidación de compradores @Model.DayOfWeek @deliveryDate</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            @if (!btnEneableOrderFolio)
+            {
+                <button type="submit" asp-action="OrderNoBuyedReportDetails" asp-route-date="@deliveryDate" asp-route-btnEneableOrderFolio="true" class="btn bg-blue">
+                    Ordenar por folio
+                </button>
+            }
+            else
+            {
+                <button type="submit" asp-action="OrderNoBuyedReportDetails" asp-route-date="@deliveryDate" class="btn btn-danger">
+                    Quitar orden por folio
+                </button>
+            }
+        </div>
+        @*@if (Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)
+            {
+                <div class="pull-right">
+                    <a class="btn btn-danger" onclick="confirmOrderReportAlert(@Model.BuyerId, '@Model.BuyerName', '@(Model.OrderShippigDate.ToString("dd-MM-yyyy"))')">Confirmar cuentas</a>
+                </div>
+            }*@
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @if (ViewBag.mensaje != null)
+                        {
+                            <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                @ViewBag.mensaje
+                            </h2>
+                        }
+                        <div>
+                            <div class="table-responsive">
+                                <table class="table-responsive" style="width:100%">
+                                    <tr>
+                                        <td style="background-color:khaki;">Nombre</td>
+                                        <td style="background-color:khaki;width:300px;text-align:center">Costo por unidad (pz/kg)</td>
+                                        <td style="background-color:khaki;width:130px;text-align:center">Costo total del producto</td>
+                                        <td style="background-color:khaki;width:130px;text-align:center">Cantidad total comprada</td>
+                                        <td style="background-color:khaki">Bodega</td>
+                                        <td style="background-color:khaki">Razón de no compra</td>
+                                        <td style="background-color:khaki;width:100px;text-align:center">Folio</td>
+                                    </tr>
+                                    @foreach (var item in Model.Products)
+                                    {
+                                <tr>
+                                    <td hidden><input hidden id="productId-@countProducts" value="@item.ProductId" /></td>
+                                    <td hidden><input hidden id="productName-@countProducts" value="@item.ProductName" /> </td>
+                                    <td hidden><input hidden id="productBuyerId-@countProducts" value="@item.BuyerId" /> </td>
+
+                                    <td style="text-align:left">
+                                        <strong>  @item.ProductName</strong><br />
+                                        <small>
+                                            Producto en @item.NumberOrders orden |
+                                            @(item.RequestedQuantity < 1 ? item.RequestedQuantity * 1000 : item.RequestedQuantity)
+                                            @(item.RequestedUnit == "kg" && item.RequestedQuantity < 1 ? "gr" : item.RequestedUnit)
+                                        </small>
+                                    </td>
+                                    @*<td style="text-align:left;width:130px">$<input style="width:100px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="productUnitCost-@countProducts" value="@item.ProductCostKgPz" type="number" min="0" data-maxcost="@item.MaxCost" /><small>Costo máximo histórico: $@item.MaxCost</small></td>*@
+                                    <td style="text-align:left;width:140px">
+                                        $<input style="width:110px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="productUnitCost-@countProducts" value="@item.ProductCostKgPz" type="number" min="0" /><br />
+                                        <small style="font-weight: bold">Últimos costos reportados:</small><br />
+                                        @if (item.PreviousCostList.Count > 0)
+                                        {
+                                            foreach (var cost in item.PreviousCostList)
+                                            {
+                                                <small>- @Html.Raw(cost)</small><br />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <small>No se ha reportado ningún costo anteriormente.</small>
+                                        }
+                                    </td>
+                                    <td style="text-align:left;width:130px">$<input style="width:100px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="productUnitCost-@countProducts" value="@item.ProductCostKgPz" type="number" min="0" /></td>
+                                    <td style="text-align:left;width:130px">$<input style="width:100px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="productRequestCost-@countProducts" value="@item.ProductAmountTotal" type="number" min="0" /></td>
+                                    <td style="text-align:left;width:130px"><input style="width:100px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="productQuantity-@countProducts" value="@item.ProductQuantity" type="number" min="0" /></td>
+                                    <td style="text-align:center">
+                                        <select style="width:150px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" onchange="showInputShoppingId(@countProducts)" id="productManufacturer-@countProducts" class="productManufacturerId">
+                                            @if (item.ManufacturerId == -1)
+                                            {
+                                                <option selected value="-1">Otro</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="-1">Otro</option>
+                                            }
+                                            @if (Model.Manufacturers != null && Model.Manufacturers.Count() > 0)
+                                            {
+                                                @foreach (var manufacturer in Model.Manufacturers)
+                                                {
+                                                    @if (item.ManufacturerId == int.Parse(manufacturer.Value))
+                                                    {
+                                                        <option selected value="@manufacturer.Value">@manufacturer.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@manufacturer.Value">@manufacturer.Text</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                        <input style="margin-top:5px;width:150px;display:none" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="shoppingId-@countProducts" value="@item.Manufacturer" class="shoppingStoreId" placeholder="Bodega..." />
+                                    </td>
+                                    <td style="text-align:center"> @item.NoBuyedReazon</td>
+                                    <td style="text-align:center">
+                                        <strong>@item.Invoice</strong>
+                                    </td>
+                                    <span style="color:red" id="valueRegisterCeroOrEmpty-@countProducts"></span>
+                                </tr>
+                                        countProducts++;
+                                    }
+                                </table>
+                            </div>
+                            <hr />
+                            <div>
+                                <h2>Totales</h2>
+                                <div style="font-size:large">
+                                    <div class="col-sm-6" style="margin-left:100px">
+                                        <label>Monto gastado: </label><strong class="pull-right">@Model.Products.Select(x => x.ProductAmountTotal).DefaultIfEmpty().Sum().ToString("C")</strong>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                            @*<h2>Comprobantes</h2>
+                                <ul class="images">
+                                        @foreach (var file in Model.Files)
+                                        {
+                                            <li>
+                                                <a href="@(file.FileUrl)" target="_blank">
+                                                    <img style="width: 150px;height: 200px;" alt="@(file.FileName)" src="@(file.FileUrl)" />
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>*@
+                        </div>
+                        <input id="JsonData" asp-for="JsonData" type="hidden" />
+                        <input asp-for="BuyerId" type="hidden" />
+                        <input asp-for="OrderShippigDate" type="hidden" />
+                        @*@if (Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Pending)
+                            {*@
+                        <div class="pull-right">
+                            <button type="submit" asp-action="UpdateReportsNoBuyedOrder" onclick="return createOrderReportJson()" class="btn bg-blue">
+                                Guardar cambios
+                            </button>
+                        </div>
+                        @*}*@
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<style>
+    ul.images {
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+        ul.images li {
+            display: inline-block;
+            width: 160px;
+            height: 210px;
+        }
+
+    .max-cost {
+        background-color: #ffb8b8;
+        color: #ff0000;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        for (var i = 0; i < @countProducts; i++) {
+            showInputShoppingId(i);
+        }
+        //$('[data-maxcost]').on("change keyup", function () {
+        //    var $input = $(this);
+        //    var maxCost = parseFloat($input.data('maxcost'));
+        //    if (maxCost > 0) {
+        //        if (maxCost < $input.val())
+        //            $input.addClass('max-cost');
+        //        else
+        //            $input.removeClass('max-cost');
+        //    }
+        //});
+    });
+
+
+    function createExpenseJson() {
+        var expenseData = [];
+        if (countClick != 0) {
+
+            for (var i = 0; i < countClick; i++) {
+                var expenseAmount = 0
+                if (document.getElementById('amountExpense' + i).value != "") {
+                    expenseAmount = document.getElementById('amountExpense' + i).value;
+                }
+                var expenseDescription = document.getElementById('descriptionExpense' + i).value;
+                var Data = {
+                    ExpenseAmount: expenseAmount,
+                    ExpenseDescription : expenseDescription
+
+                }
+                expenseData.push(Data);
+            }
+            var expenseDataTypeJson = JSON.stringify(expenseData);
+            console.log(expenseDataTypeJson);
+            DataExpenseJson(expenseDataTypeJson);
+        }
+    }
+
+    function DataExpenseJson(dataJsonExpense) {
+        var jsonExpense = dataJsonExpense;
+        document.getElementById('ExpenseJsonData').value = jsonExpense;
+
+    }
+
+    function createOrderReportJson() {
+        var productReportData = [];
+
+        for (var i = 0; i < @countProducts; i++) {
+            var productId = document.getElementById('productId-' + i).value;
+            var productUnitCost = document.getElementById('productUnitCost-' + i).value;
+            var productRequestCost = document.getElementById('productRequestCost-' + i).value;
+            var productQuantity = document.getElementById('productQuantity-' + i).value;
+            var productManufacturer = $("#productManufacturer-" + i).val();
+            var shoppingId = $("#shoppingId-" + i).val();
+            var productBuyerId = $("#productBuyerId-" + i).val();
+
+            if (productUnitCost != "") {
+                if (productUnitCost == "0") {
+                    document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "No puedes registrar 0's en el producto " + document.getElementById('productName-' + i).value + ". ";
+                    alert('[Alerta] Registraste algun cero en el producto: ' + document.getElementById('productName-' + i).value + '.');
+                    return false;
+                } else {
+                    document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "";
+                }
+            }
+            else {
+                document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "Todos los campos deben ser llenados en el producto " + document.getElementById('productName-' + i).value + ". ";
+                alert('[Alerta] Dejaste campos vacios en el producto: ' + document.getElementById('productName-' + i).value + '.');
+                return false;
+            }
+
+            var Data = {
+                ProductId: productId,
+                ProductUnitCost: productUnitCost,
+                ProductRequestCost: productRequestCost,
+                ProductQuantity: productQuantity,
+                ManufacturerId: productManufacturer,
+                ShoppingStoreId: shoppingId,
+                buyerId: productBuyerId,
+            }
+            productReportData.push(Data);
+        }
+
+        var productsReportJson = JSON.stringify(productReportData);
+        console.log(productsReportJson);
+        document.getElementById('JsonData').value = productsReportJson;
+        //updateDataProducts(productsReportJson);
+    };
+
+    function updateDataProducts(jsonProductsData) {
+        var body = {
+            BuyerId: '@Model.BuyerId',
+            Date: '@deliveryDate',
+            ProductsJson: jsonProductsData,
+        }
+
+        console.log(body);
+
+        $.ajax({
+            url:"@Html.Raw(Url.Action("UpdateReportsOrder", controllerName))",
+            type: 'Post',
+            data: body,
+            success: function (data) {
+                $("#success-message").html("Se actualizaron correctamente los reportes, por favor espere...");
+                $("#success-message").show();
+                location.reload();
+            },
+            error: function (e) {
+                $("#error-message").html(e.responseText);
+                $("#error-message").show();
+            }
+        });
+
+    }
+
+    function DataJson(Json) {
+        var jsonData = Json;
+        document.getElementById('JsonData').value = jsonData;
+    }
+
+    var countClick = 0;
+    function countClickAdd() {
+        countClick += 1;
+        console.log(countClick);
+    }
+    function countClickRest() {
+        countClick -= 1;
+        console.log(countClick);
+    }
+
+    function addNewExpense() {
+        createNewExpense(countClick);
+        countClickAdd();
+    }
+
+    function createNewExpense(currentClickExpense) {
+        var currentExpense = currentClickExpense;
+        $('#tablesExpenseContainer').append(
+            '<table id="tableExpense' + currentExpense + '" class="tableExpense" style = "width:100%" >'
+                + '<tr>'
+                    + '<td class="tdExpense" style="width:30%; text-align:right;">Monto Gastado: $ <input id="amountExpense' + currentExpense + '" class="amountExpense" type="number" min="0" style="width:65%; text-align:center" placeholder="Ingresa la cantidad del gasto..." /> </td>'
+                        + '<td class="tdExpense" style="text-align:right; width:8%">Descripción: </td>'
+                        + '<td class="tdExpense" style="width:30%"><textarea id="descriptionExpense' + currentExpense + '" class="descriptionExpense" style="width:100%" placeholder="Registra el concepto del gasto..."></textarea></td>'
+                    + '<td class="tdExpense" style="width:12%"><button id="deleteExpense' + currentExpense + '" class="deleteExpense btn btn-danger"  type="button" onclick="deleteTableAndReorderIds(this)">Borrar gasto</button></td>'
+                +'</tr>'
+            +'</table >'
+        );
+    }
+
+    function deleteTableAndReorderIds(element) {
+
+        var idButton = element.id;
+        var numberTableId = idButton.substring(idButton.length - 1, idButton.length)
+        console.log(idButton);
+        console.log(numberTableId);
+
+
+        $('#tableExpense' + numberTableId).remove();
+        countClickRest();
+
+        var tableExpense = document.getElementsByClassName('tableExpense');
+        $.each(tableExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'tableExpense' + index);
+        });
+
+        var amountExpense = document.getElementsByClassName('amountExpense');
+        $.each(amountExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'amountExpense' + index);
+        });
+
+        var descriptionExpense = document.getElementsByClassName('descriptionExpense');
+        $.each(descriptionExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'descriptionExpense' + index);
+        });
+
+        var deleteExpense = document.getElementsByClassName('deleteExpense');
+        $.each(deleteExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'deleteExpense' + index);
+        });
+
+    }
+
+    function confirmOrderReportAlert(buyerId, buyerName, date) {
+        var alert = confirm("¿Seguro quieres confirmar la cuenta de " + buyerName + "? Recuerda que una vez confirmados no se podrán modificar.");
+        if (alert == true) {
+            $.ajax({
+            url: "@Html.Raw(Url.Action("ConfirmOrderReport", controllerName))?buyerId=" + buyerId + "&date=" + date,
+                type: 'Post',
+
+            success: function (data) {
+                $("#success-message").html("Se confirmó correctamente la cuenta, por favor espere...");
+                $("#success-message").show();
+                location.reload();
+            },
+            error: function (e) {
+                $("#error-message").html(e.responseText);
+                $("#error-message").show();
+            }
+        });
+        }
+    }
+
+    function showInputShoppingId(number) {
+        if ($("#productManufacturer-" + number).val() == "-1") {
+            $("#shoppingId-" + number).show();
+        }
+        else {
+            $("#shoppingId-" + number).hide();
+        }
+    }
+
+
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    .tableExpense {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tdExpense, .thExpense {
+        border: 1px solid #ffffff;
+        text-align: center;
+        padding: 8px;
+    }
+</style>

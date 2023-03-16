@@ -1,0 +1,103 @@
+﻿@model Teed.Plugin.RecentProducts.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="RecentProductsConfigure" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+
+                <!--Texto enriquesido Body-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Contenido </label>
+                            <div title="Escriba el mensaje que aparecerá como título de la página" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Body" asp-template="RichEditor" />
+                        <span asp-validation-for="Body"></span>
+                    </div>
+                </div>
+
+                <!--Activo inactivo-->
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">¿Activar?</label>
+                            <div title="¿Deseas activar la vista de productos recién agregados? Si está desactivada los usuarios no podrán acceder a la vista" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Active" />
+                        <span asp-validation-for="Active"></span>
+                    </div>
+                </div>
+
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Texto en el menú</label>
+                            <div title="Escriba el texto que desea aparezca en el menú" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="TextMenu" />
+                        <span asp-validation-for="TextMenu"></span>
+                    </div>
+                </div>
+
+                <!--Productos por pagina-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Cantidad de días a mostrar productos</label>
+                            <div title="¿De cuantos días atrás requiere que se muestren los productos?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ProductsBeforeDays" />
+                        <span asp-validation-for="ProductsBeforeDays"></span>
+                    </div>
+                </div>
+
+                <!--Cantidad de productos-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">
+                                Productos por página
+                            </label>
+                            <div title="¿Cuántos productos desea que aparezcan por cada página?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ProductsPerPage" />
+                        <span asp-validation-for="ProductsPerPage"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

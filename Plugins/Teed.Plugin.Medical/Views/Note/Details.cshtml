@@ -1,0 +1,40 @@
+﻿@model Teed.Plugin.Medical.Models.Note.NotesDetailsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Notes");
+}
+
+<form asp-controller="Plugin" asp-action="List" method="post" id="plugins-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Información de la receta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de recetas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn bg-blue">
+                <i class="fa fa-pencil"></i>
+                @T("Admin.Common.Edit")
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-9 col-md-offset-3">
+                                <p><strong>Nombre del paciente:</strong> @Model.PatientFullName (<a asp-action="Details" asp-controller="Patient" asp-route-id="@Model.PatientId">Ir a expediente</a>)</p>
+                                <p><strong>Fecha de creación:</strong> @Model.CreationDate - @Model.CreationTime</p>
+                                <p><strong>Nota:</strong> @Model.Text</p>                             
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

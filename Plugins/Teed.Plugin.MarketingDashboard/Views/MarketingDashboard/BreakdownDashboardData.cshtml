@@ -1,0 +1,147 @@
+﻿@model List<Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.BreakdownExpensesModel>
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MarketingExpenses.BreakdownDashboardData");
+
+    var dates = Model.Where(x => x.EntityId <= 0).OrderByDescending(x => x.InitDate)
+        .Select(x => new
+        {
+            x.InitDate,
+            x.EndDate
+        }).Distinct().ToList();
+    var groupedEntities = Model.OrderBy(x => x.EntityName)
+        .GroupBy(x => x.EntityId).ToList();
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Deslgose de gastos
+        <small>
+            @*<i class="fa fa-clock-o"></i>*@
+            @*<span>Última actualización: @(Model.ControlDate != DateTime.MinValue ? Model.ControlDate.ToString("dd-MM-yyyy hh:mm:ss tt") : "---")</span>*@
+        </small>
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Actualizando, favor de esperar...</span>
+        </div>
+        <button type="button" id="submit-button" class="btn bg-blue" onclick="refreshData()">
+            <i class="fa fa-refresh"></i>
+            Actualizar datos
+        </button>
+        <a asp-action="ExportBreakdownDataExcel" class="btn bg-blue">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar datos
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Indicadores semanales de MKT
+                                </th>
+                                @foreach (var data in dates.OrderByDescending(x => x.InitDate))
+                                {
+                                    <th>@(data.InitDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                            <tr>
+                                @*<th>
+                                        ID
+                                    </th>*@
+                                <th>
+                                    Indicador semanal
+                                </th>
+                                @foreach (var data in dates.OrderByDescending(x => x.EndDate))
+                                {
+                                    <th>@(data.EndDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                        </thead>
+                        @for (int i = 0; i < groupedEntities.Count; i++)
+                        {
+                            var item = groupedEntities[i];
+                            if (item.Key > 0)
+                            {
+                                <tr>
+                                    <td>
+                                        ‌@item.FirstOrDefault().EntityName
+                                    </td>
+                                    @foreach (var date in dates)
+                                    {
+                                        var currentData = item.Where(x => (x.InitDate <= date.InitDate && date.InitDate <= x.EndDate) || (x.InitDate <= date.EndDate && date.EndDate <= x.EndDate)).ToList();
+                                        if (currentData.Any())
+                                        {
+                                            var amountTotal = (decimal)0;
+                                            foreach (var data in currentData)
+                                            {
+                                                var datesBetween = Enumerable.Range(0, 1 + data.EndDate.Subtract(data.InitDate).Days)
+                                                 .Select(offset => data.InitDate.AddDays(offset))
+                                                 .ToList();
+                                                var dailyAmount = data.Amount / datesBetween.Count();
+                                                var daysCount = datesBetween.Where(x => date.InitDate <= x && x <= date.EndDate).Count();
+
+                                                amountTotal += dailyAmount * daysCount;
+                                            }
+                                            <td>@(amountTotal.ToString("C"))</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@(((decimal)0).ToString("C"))</td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>
+                                        ‌@item.FirstOrDefault().EntityName
+                                    </td>
+                                    @foreach (var data in item)
+                                    {
+                                        <td>@(data.Amount.ToString("C"))</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const refreshData = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        $.ajax({
+            url: '/Admin/MarketingDashboard/GenerateAutomaticDashboardData',
+            type: 'GET',
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

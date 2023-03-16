@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Replacement",
+  "SystemName": "Payments.Replacement",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.Replacement.dll",
+  "Description": "This payment module allows you to enable \"Replacement\" option in your store"
+}

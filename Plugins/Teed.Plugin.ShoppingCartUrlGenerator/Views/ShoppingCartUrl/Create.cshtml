@@ -1,0 +1,92 @@
+﻿@model Teed.Plugin.ShoppingCartUrlGenerator.Models.ShoppingCartUrlModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("ShoppingCartUrlGenerator");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nueva url para carrito de compras
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de carritos de compra</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @(await Html.PartialAsync("~/Plugins/Teed.Plugin.ShoppingCartUrlGenerator/Views/ShoppingCartUrl/_CreateOrUpdate.cshtml"))
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    createForm();
+
+    const onSubmit = () => {
+        $("#error-message").html('');
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        let result = [];
+        let products = $(".form-container");
+
+        $.each(products, (index, element) => {
+            let productIndex = $(element).data("index");
+
+            let productId = $("#product-selector-" + productIndex).data('kendoComboBox').dataItem()?.Id;
+            let productUnit = $("#unit-selector-" + productIndex).val();
+            let productQty = $("#quantity-selector-" + productIndex).val();
+            let productProperty = $("#properties-selector-" + productIndex).val();
+
+            result.push({ productId, productUnit, productQty, productProperty });
+        });
+
+        let body = {
+            products: result,
+            body: tinyMCE.activeEditor.getContent({ format: 'raw' }),
+            urlCode: $("#Code").val(),
+            isActive: $("#IsActive").val()
+        };
+
+        $.ajax({
+            url: '/Admin/ShoppingCartUrl/CreateShoppingCartUrl',
+            type: 'POST',
+            data: body,
+            success: (result) => {
+                window.location.href = "/Admin/ShoppingCartUrl/Edit/" + result
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#error-message").html(error.responseText);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

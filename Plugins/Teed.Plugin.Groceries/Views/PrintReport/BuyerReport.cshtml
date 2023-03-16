@@ -1,0 +1,154 @@
+﻿@model DateTime
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.BuyerReportPrint");
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Impresiones de compras del @(Model.ToString("dddd dd 'de' MMMM 'del' yyyy", new System.Globalization.CultureInfo("es-MX")))
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <button type="button" onclick="displayBuyerSelectDialog()" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Por comprador
+                </button><br /><br />
+
+                <a href="/Admin/Order/ExportOrdersData?selectedDate=@(Model.ToString("dd-MM-yyyy"))&labels=true" target="_blank" class="btn bg-gray dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Etiquetas
+                </a><br /><br />
+
+                <a href="/Admin/Order/ExportOrdersData?selectedDate=@(Model.ToString("dd-MM-yyyy"))&labelsV2=true" target="_blank" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Etiquetas V2
+                </a><br /><br />
+
+                <a href="/Admin/Order/ExportOrdersData?selectedDate=@(Model.ToString("dd-MM-yyyy"))&buyerLabels=true" target="_blank" class="btn bg-gray dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Etiquetas para efectivo
+                </a><br /><br />
+
+                <a href="/Admin/Order/ExportOrdersData?selectedDate=@(Model.ToString("dd-MM-yyyy"))&buyerLabelsV2=true" target="_blank" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Etiquetas para efectivo V2
+                </a><br /><br />
+
+                <button type="button" onclick="displayManufacturerSelectDialog()" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Por fabricante
+                </button><br /><br />
+
+                <a href="/Admin/Order/BuyerPaymentCommitment?date=@(Model.ToString("dd-MM-yyyy"))" target="_blank" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Pagarés compradores
+                </a><br /><br />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog-buyer" title="Selecciona el comprador">
+    <p>Selecciona el comprador de la lista que deseas descargar.</p>
+    <strong id="loading-buyers">Cargando compradores...</strong>
+    <strong id="buyers-error" style="color:red; display: none">Ocurrió un problema al cargar los compradores.</strong>
+    <select style="display: none" id="buyer-picker"></select>
+</div>
+
+<div id="dialog-manufacturer" title="Selecciona el fabricante">
+    <p>Selecciona el fabricante de la lista que deseas descargar.</p>
+    <strong id="loading-manufacturers">Cargando fabricantes...</strong>
+    <strong id="manufacturers-error" style="color:red; display: none">Ocurrió un problema al cargar los fabricantes.</strong>
+    <select style="display: none" id="manufacturer-picker"></select>
+</div>
+
+<script>
+    $("#dialog-buyer").dialog({
+        autoOpen: false,
+        height: 450,
+        width: 450,
+        modal: true,
+        buttons: {
+            "Descargar": function () {
+                window.open('/Admin/Order/ExportOrdersData?selectedDate=' + '@(Model.ToString("dd-MM-yyyy"))' + '&byBuyer=true&buyerId=' + $("#buyer-picker").val(), '_blank');
+            }
+        }
+    });
+
+    $("#dialog-manufacturer").dialog({
+        autoOpen: false,
+        height: 450,
+        width: 450,
+        modal: true,
+        buttons: {
+            "Descargar": function () {
+                window.open('/Admin/Order/ExportOrdersData?selectedDate=' + '@(Model.ToString("dd-MM-yyyy"))' + '&byManufacturer=true&manufacturerId=' + $("#manufacturer-picker").val(), '_blank');
+            }
+        }
+    });
+
+    function displayBuyerSelectDialog() {
+        $("#loading-buyers").show();
+        $("#buyer-picker").hide();
+        $("#buyers-error").hide();
+        $.ajax({
+            url: '/Admin/OrderItemBuyer/GetBuyersSelectList',
+            success: (data) => {
+                $("#loading-buyers").hide();
+                let select = $("#buyer-picker");
+                select.show();
+                select.empty();
+                let options = select[0].options;
+                options.add(new Option("Todos los compradores", 0));
+                $.each(data, (index, value) => {
+                    options.add(new Option(value.Name, value.Id));
+                });
+            },
+            error: (error) => {
+                $("#buyers-error").show();
+                let select = $("#buyer-picker");
+                select.show();
+                select.empty();
+                let options = select[0].options;
+                options.add(new Option("Todos los compradores", 0));
+                $("#loading-buyers").hide();
+                console.log(error);
+            }
+        })
+        $("#dialog-buyer").dialog("open");
+    };
+
+    function displayManufacturerSelectDialog() {
+        $("#loading-manufacturers").show();
+        $("#manufacturer-picker").hide();
+        $("#manufacturers-error").hide();
+        $.ajax({
+            url: '/Admin/Order/GetManufacturersSelectList',
+            success: (data) => {
+                $("#loading-manufacturers").hide();
+                let select = $("#manufacturer-picker");
+                select.show();
+                select.empty();
+                let options = select[0].options;
+                options.add(new Option("Todos los fabricantes", 0));
+                $.each(data, (index, value) => {
+                    options.add(new Option(value.Name, value.Id));
+                });
+            },
+            error: (error) => {
+                $("#manufacturers-error").show();
+                let select = $("#manufacturer-picker");
+                select.show();
+                select.empty();
+                let options = select[0].options;
+                options.add(new Option("Todos los compradores", 0));
+                $("#loading-manufacturers").hide();
+                console.log(error);
+            }
+        })
+        $("#dialog-manufacturer").dialog("open");
+    };
+</script>

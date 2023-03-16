@@ -1,0 +1,920 @@
+﻿@model Teed.Plugin.Groceries.Controllers.ShippingRouteOrderModel
+@using Teed.Plugin.Groceries.Controllers
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@inject Nop.Services.Common.IAddressAttributeFormatter addressAttributeFormatter
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRouteOrder");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var orderBy = (int)ViewBag.OrderBy;
+    var isPreviousDay = DateTime.Now.Date > Model.Date;
+    var isPostDay = DateTime.Now.Date < Model.Date;
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+</style>
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar ruta a las órdenes con fecha de entrega @(Model.Date.ToString("dd-MM-yyyy"))
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="AssignRouteOrderList">regresar a la lista de fechas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        @if (isPostDay)
+                        {
+                            <h2 style="color:red;text-align: center;">ESTA ASIGNACIÓN DE RUTAS CORRESPONDE A UN DIA FUTURO</h2>
+                        }
+                        @if (Model.Orders.Count == Model.Orders.SelectMany(x => x).Where(x => x.RouteId != 0).Count())
+                        {
+                            <a class="btn bg-olive" style="margin: 1em" href="/Admin/ShippingRouteUser/AssignRoutes?date=@(Model.Date.ToString("dd-MM-yyyy"))">
+                                Asignar responsable de rutas para esta fecha
+                            </a>
+                        }
+                        @*<button type="button" class="btn bg-gray" data-toggle="modal" data-target="#autoAssignModal" style="margin: 1em">
+                                Asignación automática (original)
+                            </button>*@
+                        <!-- Modal -->
+                        @*<div class="modal fade" id="autoAssignModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold" id="exampleModalLabel">Asignación automática</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="modal-info">
+                                                Se realizará la distribución automática de las rutas. <strong style="color:red">Al seleccionar continuar se sobreescribirá cualquier asignación realizada previamente.</strong>.
+                                            </div>
+                                            <div>
+                                                <strong>Selecciona las rutas que SI se deben considerar para la asignación:</strong>
+                                                <div>
+                                                    <select multiple class="massive-route-selector ui-choose-modal">
+                                                        @foreach (var route in Model.Routes.Where(x => x.Value != "0"))
+                                                        {
+                                                            <option value="@(route.Value)">@(route.Text)</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div id="modal-error" style="display: none">
+                                                <strong style="color:red" id="modal-error-text"></strong>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div id="auto-assign-buttons">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-primary" id="auto-assing-button">Continuar</button>
+                                            </div>
+                                            <button id="loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Asignando rutas...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                        <button @if (isPreviousDay) { <text> disabled</text> } type="button" class="btn bg-olive" data-toggle="modal" data-target="#newAutoAssignModal" style="margin: 1em">
+                            Asignación automática (sin agrupar por horario)
+                        </button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="newAutoAssignModal" tabindex="-1" role="dialog" aria-labelledby="newAutoAssignModal" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" style="font-weight: bold" id="newExampleModalLabel">Asignación automática</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="modal-info">
+                                            Se realizará la distribución automática de las rutas sin agruparlas por horario. Unicamente se ordenan primero por la zona, luego por CP y luego por colonia. Cuando ya las rutas tienen las ordenes asignadas, se ordenan por horario y se envían a Google. <strong style="color:red">Al seleccionar continuar se sobreescribirá cualquier asignación realizada previamente.</strong>.
+                                        </div>
+                                        <div>
+                                            <strong>Selecciona las rutas que SI se deben considerar para la asignación:</strong>
+                                            <div>
+                                                <select multiple class="massive-route-selector new-ui-choose-modal">
+                                                    @foreach (var route in Model.Routes.Where(x => x.Value != "0"))
+                                                    {
+                                                        <option value="@(route.Value)">@(route.Text)</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div id="new-modal-error" style="display: none">
+                                            <strong style="color:red" id="new-modal-error-text"></strong>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div id="new-auto-assign-buttons">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                            <button type="button" class="btn btn-primary" id="new-auto-assing-button">Continuar</button>
+                                        </div>
+                                        <button id="new-loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Asignando rutas...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*<button type="button" class="btn bg-red" data-toggle="modal" data-target="#onlyOptimizeModal" style="margin: 1em;background-color: red !important; color: white!important">
+                                Optimizar rutas
+                            </button>*@
+                        <!-- Modal -->
+                        @*<div class="modal fade" id="onlyOptimizeModal" tabindex="-1" role="dialog" aria-labelledby="onlyOptimizeModal" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" style="font-weight: bold" id="newExampleModalLabel">Optimizar rutas</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="modal-info">
+                                                Se correrá el proceso de optimización para las rutas como están actualmente, solo podría haber movimientos dentro de la misma ruta, no se cambiarán órdenes de una ruta a otra. Debe utilizarse cuando se hacen cambios manuales en las rutas. <strong style="color:red">Recuerda guardar tus cambios antes de continuar, cualquier cambio manual no guardado no se tomará en cuenta para la optimización (se borrarán cambios no guardados)</strong>.
+                                            </div>
+                                            <div>
+                                                <br />
+                                                <strong>Selecciona las ruta que deseas optimizar (si no seleccionas ninguna se optimizarán todas las rutas):</strong>
+                                                <br />
+                                                <div>
+                                                    <select multiple class="massive-route-selector optimize-ui-choose-modal">
+                                                        @foreach (var route in Model.Routes.Where(x => x.Value != "0"))
+                                                        {
+                                                            <option value="@(route.Value)">@(route.Text)</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div id="optimize-modal-error" style="display: none">
+                                                <strong style="color:red" id="optimize-modal-error-text"></strong>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div id="optimize-buttons">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-primary" id="optimize-button">Continuar</button>
+                                            </div>
+                                            <button id="optimize-loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Optimizando rutas...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                        <button @if (isPreviousDay) { <text> disabled</text> } type="button" class="btn bg-red" data-toggle="modal" data-target="#onlyOptimizeModal2" style="margin: 1em;background-color: red !important; color: white!important">
+                            Optimizar rutas V2
+                        </button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="onlyOptimizeModal2" tabindex="-1" role="dialog" aria-labelledby="onlyOptimizeModal2" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" style="font-weight: bold" id="newExampleModalLabel">Optimizar rutas</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="modal-info">
+                                            Se correrá el proceso de optimización para las rutas como están actualmente, solo podría haber movimientos dentro de la misma ruta, no se cambiarán órdenes de una ruta a otra. Debe utilizarse cuando se hacen cambios manuales en las rutas. <strong style="color:red">Recuerda guardar tus cambios antes de continuar, cualquier cambio manual no guardado no se tomará en cuenta para la optimización (se borrarán cambios no guardados)</strong>.
+                                        </div>
+                                        <div>
+                                            <br />
+                                            <strong>Selecciona las ruta que deseas optimizar (si no seleccionas ninguna se optimizarán todas las rutas):</strong>
+                                            <br />
+                                            <div>
+                                                <select multiple class="massive-route-selector optimize-ui-choose-modal2">
+                                                    @foreach (var route in Model.Routes.Where(x => x.Value != "0"))
+                                                    {
+                                                        <option value="@(route.Value)">@(route.Text)</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div id="optimize-modal-error2" style="display: none">
+                                            <strong style="color:red" id="optimize-modal-error-text2"></strong>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div id="optimize-buttons2">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                            <button type="button" class="btn btn-primary" id="optimize-button2">Continuar</button>
+                                        </div>
+                                        <button id="optimize-loading-button-modal2" class="btn btn-primary" type="button" disabled style="display: none">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Optimizando rutas...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn bg-purple" data-toggle="modal" data-target="#transferTimeModal" style="margin: 1em">
+                            Calcular tiempos de traslado
+                        </button>
+                        @*Modal*@
+                        <div class="modal fade" id="transferTimeModal" tabindex="-1" role="dialog" aria-labelledby="transferTimeModal" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" style="font-weight: bold" id="newExampleModalLabel">Calcular tiempos de traslado</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="modal-info">
+                                            Se correrá el proceso para calcular los tiempos de traslado entre las coordenadas de un pedido y las coordenadas del pedido anterior. En caso de ser el primer pedido, el tiempo se calculará con respecto a las coordenadas del punto de origen (agencia), se considerarán las rutas como están distribuidas actualmente. <strong style="color:red">Recuerda guardar tus cambios antes de continuar, cualquier cambio manual no guardado no se tomará en cuenta para el cálculo de traslado (se borrarán cambios no guardados)</strong>.
+                                        </div>
+                                        <div>
+                                            <br />
+                                            <strong>Selecciona las rutas a las que le deseas calcular los tiempos de traslado (si no seleccionas ninguna se hará el cálculo para todas las rutas):</strong>
+                                            <br />
+                                            <div>
+                                                <select multiple class="massive-route-selector calulate-time-ui-choose-modal">
+                                                    @foreach (var route in Model.Routes.Where(x => x.Value != "0"))
+                                                    {
+                                                        <option value="@(route.Value)">@(route.Text)</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div id="transfer-modal-error" style="display: none">
+                                            <strong style="color:red" id="transfer-modal-error-text"></strong>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div id="transfer-buttons">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                            <button type="button" class="btn btn-primary" id="transfer-button">Continuar</button>
+                                        </div>
+                                        <button id="transfer-loading-button-modal" class="btn btn-primary" type="button" disabled style="display: none">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Calculando tiempos...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/Admin/ShippingRoute/routemap?date=@(Model.Date.ToString("dd-MM-yyyy"))" class="btn bg-blue" style="margin: 1em">
+                            Ver mapa de distribución de rutas
+                        </a>
+                        @if (!isPreviousDay)
+                        {
+                            <a href="/Admin/ShippingVehicle/AssignVehicles?date=@(Model.Date.ToString("dd-MM-yyyy"))" class="btn bg-blue" style="margin: 1em">
+                                Asignar vehículos
+                            </a>
+                        }
+                        @{
+                            var allPedidosCount = Model.Orders.Count();
+                            var pedidosWithRoute = Model.Orders.Where(x => x.Where(y => y.RouteId > 0).Any()).Count();
+                        }
+                        <div class="col-md-12">
+                            <strong>Total de pedidos:</strong> @(allPedidosCount) <br />
+                            <strong>Pedidos asignados a una ruta:</strong> @(pedidosWithRoute)<br />
+                            <strong>Pedidos pendientes por asignar a una ruta:</strong> @(allPedidosCount - pedidosWithRoute)<br />
+                            
+                            @*<div>
+                                    Ordenar por (recuerda guardar tus cambios antes de ordenar la lista):
+                                    <select id="orderBy">
+                                        <option value="0">Código postal</option>
+                                        @if (orderBy == 0 || orderBy == 2)
+                                        {
+                                            <option value="1">Orden para mostrar</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="1" selected>Orden para mostrar</option>
+                                        }
+
+                                        @if (orderBy == 0 || orderBy == 1)
+                                        {
+                                            <option value="2">Colonia</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="2" selected>Colonia</option>
+                                        }
+
+                                    </select>
+                                </div>*@
+                        </div>
+                    </div>
+                    @{
+                        var groups = Model.Orders.SelectMany(x => x).GroupBy(x => x.RouteId).OrderBy(x => x.Key);
+                    }
+                    <div class="row" style="margin: 1em">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label style="text-align:right" for="AllowDownload">¿Permitir descargar la lista de compras por fabricante?</label>
+                                        <div title="Selecciona si deseas que se pueda descargar la lista de compras por fabricante" class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <input id="allow-download" type="checkbox" asp-for="AllowManufacturerListDownload" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <a data-toggle="collapse" href="#collapseRouteData" role="button" aria-expanded="false" aria-controls="collapseRouteData">
+                                <h3 style="text-align: center; background-color: #f3f3f3; padding: 1em; margin-bottom: 1em;"> <i class="fa fa-bars" aria-hidden="true"></i>  Datos de ruta</h3>
+                            </a>
+                        </div>
+                        <div class="collapse" id="collapseRouteData">
+                            <div class="col-md-12">
+                                <div class="col-md-3">
+                                    <h4>Rutas ordenadas por venta</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm">
+                                            <tr>
+                                                <th>Ruta</th>
+                                                <th>Venta</th>
+                                            </tr>
+                                            @foreach (var item in groups.OrderByDescending(x => x.Select(y => y.OrderTotal).Sum()))
+                                            {
+                                                var route = Model.Routes.Where(x => x.Value == item.Key.ToString()).FirstOrDefault();
+                                                <tr>
+                                                    <td>@(route == null || route.Value == "0" ? Html.Raw("Sin ruta asignada") : Html.Raw(route.Text))</td>
+                                                    <td>@(item.Select(x => x.OrderTotal).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4>Rutas ordenadas por ticket promedio</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm">
+                                            <tr>
+                                                <th>Ruta</th>
+                                                <th>Ticket promedio</th>
+                                            </tr>
+                                            @{
+                                                List<Teed.Plugin.Groceries.Models.ShippingRoute.ShippingRouteViewModel> list = groups.Select(x => new Teed.Plugin.Groceries.Models.ShippingRoute.ShippingRouteViewModel()
+                                                {
+                                                    RouteId = x.Key,
+                                                    AverageTicket = Teed.Plugin.Groceries.Utils.OrderUtils.GetPedidosGroupByList(x.Select(y => y).ToList()).Select(y => y.Select(z => z.OrderTotal).DefaultIfEmpty().Sum()).DefaultIfEmpty().Average()
+                                                }).ToList();
+                                            }
+                                            @foreach (var item in list.OrderByDescending(x => x.AverageTicket))
+                                            {
+                                                var route = Model.Routes.Where(x => x.Value == item.RouteId.ToString()).FirstOrDefault();
+                                                <tr>
+                                                    <td>@(route == null || route.Value == "0" ? Html.Raw("Sin ruta asignada") : Html.Raw(route.Text))</td>
+                                                    <td>@(item.AverageTicket.ToString("C"))</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4>Rutas ordenadas por tiempo</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm">
+                                            <tr>
+                                                <th>Ruta</th>
+                                                <th>Tiempo</th>
+                                            </tr>
+                                            @foreach (var item in groups.OrderByDescending(x => x.Select(y => y.PreviousPointTransferTime).Sum()))
+                                            {
+                                                var route = Model.Routes.Where(x => x.Value == item.Key.ToString()).FirstOrDefault();
+                                                <tr>
+                                                    <td>@(route == null || route.Value == "0" ? Html.Raw("Sin ruta asignada") : Html.Raw(route.Text))</td>
+                                                    <td>@(Math.Round(((decimal)item.Select(y => y.PreviousPointTransferTime).Sum() / (decimal)60), 2)) minutos</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4>Rutas ordenadas por distancia</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm">
+                                            <tr>
+                                                <th>Ruta</th>
+                                                <th>Distancia</th>
+                                            </tr>
+                                            @foreach (var item in groups.OrderByDescending(x => x.Select(y => y.PreviousPointTransferDistance).Sum()))
+                                            {
+                                                var route = Model.Routes.Where(x => x.Value == item.Key.ToString()).FirstOrDefault();
+                                                <tr>
+                                                    <td>@(route == null || route.Value == "0" ? Html.Raw("Sin ruta asignada") : Html.Raw(route.Text))</td>
+                                                    <td>@(Math.Round(((decimal)item.Select(y => y.PreviousPointTransferDistance).Sum() / (decimal)1000), 2)) km</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <h4>Datos de rutas</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm">
+                                            <tr>
+                                                <th>Ruta</th>
+                                                <th>Número de pedidos</th>
+                                                <th>Número de productos</th>
+                                                <th>Venta total</th>
+                                                <th>Ticket promedio</th>
+                                                <th>Tiempo de traslado</th>
+                                                <th>Distancia</th>
+                                            </tr>
+                                            @foreach (var item in groups)
+                                            {
+                                                var route = Model.Routes.Where(x => x.Value == item.Key.ToString()).FirstOrDefault();
+                                                var pedidos = Teed.Plugin.Groceries.Utils.OrderUtils.GetPedidosGroupByList(item.Select(x => x).ToList());
+                                                <tr>
+                                                    <td>@(route == null || route.Value == "0" ? Html.Raw("Sin ruta asignada") : Html.Raw(route.Text))</td>
+                                                    <td>@(pedidos.Count())</td>
+                                                    <td>@(item.Select(x => x.OrderItems.Count).Sum())</td>
+                                                    <td>@(Math.Round(item.Select(x => x.OrderTotal).DefaultIfEmpty().Sum(), 2).ToString("C"))</td>
+                                                    <td>@(Math.Round(pedidos.Select(x => x.Select(y => y.OrderTotal).DefaultIfEmpty().Sum()).DefaultIfEmpty().Average(), 2).ToString("C"))</td>
+                                                    <td>@(Math.Round(((decimal)item.Select(y => y.PreviousPointTransferTime).Sum() / (decimal)60), 2)) minutos</td>
+                                                    <td>@(Math.Round(((decimal)item.Select(y => y.PreviousPointTransferDistance).Sum() / (decimal)1000), 2)) km</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin: 1em">
+                        <h3 style="font-weight: bold; text-align: center">Distribución actual</h3>
+                        @foreach (var group in groups)
+                        {
+                            var route = Model.Routes.Where(x => x.Value == group.Key.ToString()).FirstOrDefault();
+                            var vehicle = route != null && route.Value != "0" ? string.IsNullOrWhiteSpace(route.AssignedVehicle) ? "<span style='color:red'>(Vehículo no asignado)</span>" : $"({route.AssignedVehicle})" : "";
+                            <h4 style="font-weight: bold">
+                                @(route == null || route.Value == "0" ? Html.Raw("Sin ruta asignada") : Html.Raw(route.Text + $" {vehicle}")) (@(group.Count()) órdenes) (@(Teed.Plugin.Groceries.Utils.OrderUtils.GetPedidosGroupByList(group.Select(x => x).ToList()).Count()) pedidos)
+                            </h4>
+                            @if (route.CapacityExceeded)
+                            {
+                                <div style="margin-bottom: 10px">
+                                    <span style="color:red;"><strong>ATENCIÓN:</strong> Esta ruta excede los límites teóricos de capacidad de la camioneta asignada</span>
+                                </div>
+                            }
+                            <table class="table" style="width:100%">
+                                <tr>
+                                    <th>Hora de entrega</th>
+                                    <th>Pedido</th>
+                                    <th>Cliente</th>
+                                    <th>Dirección</th>
+                                    <th>Colonia</th>
+                                    <th>Código postal</th>
+                                    <th>Zona</th>
+                                    <th>Productos</th>
+                                    <th>Lat/Long</th>
+                                    <th title="Tiempo de traslado con respecto a punto anterior">Tiempo de traslado</th>
+                                    <th title="Distancia con respecto al punto anterior">Distancia</th>
+                                </tr>
+                                @foreach (var pedido in Teed.Plugin.Groceries.Utils.OrderUtils.GetPedidosGroupByList(group.OrderBy(x => x.RouteDisplayOrder).ToList()))
+                                {
+                                    <tr>
+                                        <td>@(pedido.FirstOrDefault().SelectedShippingTime)</td>
+                                        <td>@(string.Join(", ", pedido.Select(x => "#" + x.CustomOrderNumber)))</td>
+                                        <td>
+                                            @(pedido.FirstOrDefault().ShippingAddress.FirstName) @(pedido.FirstOrDefault().ShippingAddress.LastName)
+                                        </td>
+                                        <td>
+                                            @(pedido.FirstOrDefault().ShippingAddress.Address1)
+                                            <a target="_blank" href="/Admin/Customer/AddressEdit?customerId=@(pedido.FirstOrDefault().CustomerId)&addressid=@(pedido.FirstOrDefault().ShippingAddress.Id)">
+                                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                        <td>@(pedido.FirstOrDefault().ShippingAddress.Address2)</td>
+                                        <td>@(pedido.FirstOrDefault().ShippingAddress.ZipPostalCode)</td>
+                                        <td>@(pedido.FirstOrDefault().ZoneId.HasValue && pedido.FirstOrDefault().ZoneId.Value > 0 ? Model.Zones.Where(x => x.Id == pedido.FirstOrDefault().ZoneId.Value).FirstOrDefault().ZoneName : "S/I")</td>
+                                        <td>@(pedido.FirstOrDefault().OrderItems.Count)</td>
+                                        <td>
+                                            <a target="_blank" href="http://www.google.com/maps/place/@(pedido.FirstOrDefault().ShippingAddress.Latitude),@(pedido.FirstOrDefault().ShippingAddress.Longitude)">
+                                                @(pedido.FirstOrDefault().ShippingAddress.Latitude)/@(pedido.FirstOrDefault().ShippingAddress.Longitude) <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                                            </a>
+                                        </td>
+                                        <td style="@(!pedido.FirstOrDefault().PreviousPointTransferTime.HasValue ? "color:red;font-weight: bold" : "")">
+                                            @(pedido.FirstOrDefault().PreviousPointTransferTime.HasValue ? Math.Round(((decimal)pedido.Select(x => x.PreviousPointTransferTime).DefaultIfEmpty().Sum() / (decimal)60), 2) + " minutos" : "S/I")
+                                        </td>
+                                        <td style="@(!pedido.FirstOrDefault().PreviousPointTransferDistance.HasValue ? "color:red;font-weight: bold" : "")">
+                                            @(pedido.FirstOrDefault().PreviousPointTransferDistance.HasValue ? Math.Round(((decimal)pedido.Select(x => x.PreviousPointTransferDistance).DefaultIfEmpty().Sum() / (decimal)1000), 2) + " km" : "S/I")
+                                        </td>
+                                    </tr>
+                                }
+                                @{
+                                    var totalTime = group.Where(x => !x.PreviousPointTransferTime.HasValue).Any() ? 0 : group.Select(x => x.PreviousPointTransferTime.Value).DefaultIfEmpty().Sum();
+                                    var totalDistance = group.Where(x => !x.PreviousPointTransferDistance.HasValue).Any() ? 0 : group.Select(x => x.PreviousPointTransferDistance.Value).DefaultIfEmpty().Sum();
+                                }
+                                <tr>
+                                    <td colspan="9" style="text-align:right; font-weight: bold">
+                                        TOTAL:
+                                    </td>
+                                    <td style="@(totalTime == 0 ? "color:red;font-weight: bold" : "")">
+                                        @(totalTime == 0 ? "S/I" : Math.Round(((decimal)totalTime / (decimal)60), 2) + " minutos")
+                                    </td>
+                                    <td style="@(totalDistance == 0 ? "color:red;font-weight: bold" : "")">
+                                        @(totalDistance == 0 ? "S/I" : Math.Round(((decimal)totalDistance / (decimal)1000), 2) + " km")
+                                    </td>
+                                </tr>
+                            </table>
+                        }
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @foreach (var order in Model.Orders.OrderBy(x => x.Select(y => y.RouteId).FirstOrDefault()).ThenBy(x => x.Select(y => y.RouteDisplayOrder).FirstOrDefault()))
+                            {
+                                <div style="margin-bottom: 1em">
+                                    <h3 style="margin-bottom:0">
+                                        @for (int i = 0; i < order.Count(); i++)
+                                        {
+                                            <a target="_blank" href="/Admin/Order/Edit/@(order.ElementAt(i).Id)">Orden #@(order.ElementAt(i).CustomOrderNumber)</a>
+                                            if (order.Count() > 0 && (i + 1) < order.Count())
+                                            {
+                                                <span>, </span>
+                                            }
+                                        }
+                                    </h3>
+                                    <strong>Dirección: </strong><span>@(order.FirstOrDefault().ShippingAddress.Address1) @(order.FirstOrDefault().ShippingAddress.Address2) CP: @(order.FirstOrDefault().ShippingAddress.ZipPostalCode)</span><br />
+                                    <strong>Horario de entrega: </strong><span>@(order.FirstOrDefault().SelectedShippingTime)</span>
+
+                                    @if (!string.IsNullOrWhiteSpace(order.FirstOrDefault().ShippingAddress.CustomAttributes))
+                                    {
+                                        <p>@Html.Raw(addressAttributeFormatter.FormatAttributes(order.FirstOrDefault().ShippingAddress.CustomAttributes))</p>
+                                    }
+                                </div>
+                                <div class="order">
+                                    <div style="margin-bottom: 10px">
+                                        Orden para mostrar:
+                                        <select style="width: 50px" class="displayOrder">
+                                            @for (int i = 1; i <= Model.Orders.Count; i++)
+                                            {
+                                                @if (order.FirstOrDefault().RouteDisplayOrder == i)
+                                                {
+                                                    <option selected value="@i">@i</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i">@i</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <input type="hidden" value="@(string.Join(",", order.Select(x => x.Id)))" />
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <div class="input-group" style="width:100%">
+                                                <select class="ui-choose buyer">
+                                                    @foreach (var route in Model.Routes)
+                                                    {
+                                                        if (order.FirstOrDefault().RouteId.ToString() == route.Value)
+                                                        {
+                                                            <option selected value="@(route.Value)">@(route.Text)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(route.Value)">@(route.Text)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $('#autoAssignModal').on('show.bs.modal', function (e) {
+        $('#autoAssignModal ul.ui-choose').remove();
+        $('.ui-choose-modal').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose-modal',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $('#newAutoAssignModal').on('show.bs.modal', function (e) {
+        $('#newAutoAssignModal ul.ui-choose').remove();
+        $('.new-ui-choose-modal').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'new-ui-choose-modal',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $('#onlyOptimizeModal').on('show.bs.modal', function (e) {
+        $('#onlyOptimizeModal ul.ui-choose').remove();
+        $('.optimize-ui-choose-modal').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'optimize-ui-choose-modal',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $('#onlyOptimizeModal2').on('show.bs.modal', function (e) {
+        $('#onlyOptimizeModal2 ul.ui-choose').remove();
+        $('.optimize-ui-choose-modal2').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'optimize-ui-choose-modal2',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $('#transferTimeModal').on('show.bs.modal', function (e) {
+        $('#transferTimeModal ul.ui-choose').remove();
+        $('.calulate-time-ui-choose-modal').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'calulate-time-ui-choose-modal',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    });
+
+    $('.ui-choose').ui_choose({
+        itemWidth: null,
+        skin: '',
+        multi: true,
+        active: 'selected',
+        full: false,
+        colNum: null,
+        dataKey: 'ui-choose',
+        change: function (data) {
+            console.log(data);
+        },
+        click: null
+    });
+
+    $("#auto-assing-button").on('click', () => {
+
+        let routeIds = $(".ui-choose-modal").val();
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            routeIds: routeIds
+        };
+
+        $("#loading-button-modal").show();
+        $("#auto-assign-buttons").hide();
+        $("#modal-error").hide();
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/AutoAssignRoutes',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-button-modal").hide();
+                $("#auto-assign-buttons").show();
+                $("#modal-error").show();
+                $("#modal-error-text").html(error.responseText);
+
+            }
+        })
+    });
+
+    $("#new-auto-assing-button").on('click', () => {
+
+        let routeIds = $(".new-ui-choose-modal").val();
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            routeIds: routeIds
+        };
+
+        $("#new-loading-button-modal").show();
+        $("#new-auto-assign-buttons").hide();
+        $("#new-modal-error").hide();
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/NewAutoAssignRoutes',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#new-loading-button-modal").hide();
+                $("#new-auto-assign-buttons").show();
+                $("#new-modal-error").show();
+                $("#new-modal-error-text").html(error.responseText);
+
+            }
+        })
+    });
+
+    $("#optimize-button").on('click', () => {
+
+        let routeIds = $(".optimize-ui-choose-modal").val();
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            routeIds: routeIds
+        };
+
+        $("#optimize-loading-button-modal").show();
+        $("#optimize-buttons").hide();
+        $("#optimize-modal-error").hide();
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/OnlyOptimizeWithGoogle',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#optimize-loading-button-modal").hide();
+                $("#optimize-buttons").show();
+                $("#optimize-modal-error").show();
+                $("#optimize-modal-error-text").html(error.responseText);
+
+            }
+        })
+    });
+
+    $("#optimize-button2").on('click', () => {
+
+        let routeIds = $(".optimize-ui-choose-modal2").val();
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            routeIds: routeIds
+        };
+
+        $("#optimize-loading-button-modal2").show();
+        $("#optimize-buttons2").hide();
+        $("#optimize-modal-error2").hide();
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/OnlyOptimizeWithGoogle2',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#optimize-loading-button-modal2").hide();
+                $("#optimize-buttons2").show();
+                $("#optimize-modal-error2").show();
+                $("#optimize-modal-error-text2").html(error.responseText);
+
+            }
+        })
+    });
+
+    $("#transfer-button").on('click', () => {
+
+        let routeIds = $(".calulate-time-ui-choose-modal").val();
+        let body = {
+            date: '@Model.Date.ToString("dd-MM-yyyy")',
+            routeIds: routeIds
+        };
+
+        $("#transfer-loading-button-modal").show();
+        $("#transfer-buttons").hide();
+        $("#transfer-modal-error").hide();
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/CalculateTimesWithGoogle',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#transfer-loading-button-modal").hide();
+                $("#transfer-buttons").show();
+                $("#transfer-modal-error").show();
+                $("#transfer-modal-error-text").html(error.responseText);
+
+            }
+        })
+    });
+
+    $('#orderBy').change(function() {
+        window.location.href = window.location.href.split('&')[0] + '&orderBy=' + $(this).val();
+    });
+
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        let result = [];
+        let orders = $(".order");
+        $.each(orders, (index, element) => {
+            let orderId = $(element).find('input').val();
+            let selectedRouteId = $(element).find('select.buyer').val();
+            let routeDisplayOrder = $(element).find('select.displayOrder').val();
+            result.push({ orderIds: orderId, routeId: selectedRouteId, routeDisplayOrder });
+        });
+
+        let body = {
+            date: '@Model.Date',
+            result: result,
+            allowManufacturerListDownload: $("#allow-download").is(":checked")
+        };
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/AssignRouteOrder',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

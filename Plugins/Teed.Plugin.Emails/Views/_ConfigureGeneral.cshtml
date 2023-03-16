@@ -1,0 +1,136 @@
+﻿@model Teed.Plugin.Emails.Models.ConfigurationModel
+@{ 
+    var color = "El valor del texto debe ser escrito en código hexadecimal. Por ej: #C1C7C9";
+    var imageNote = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es: ";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Configuración general
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Dirección</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Address" />
+                <span asp-validation-for="Address"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Aviso</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Aviso" />
+                <span asp-validation-for="Aviso"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color de la tienda</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreColor" />
+                <span asp-validation-for="StoreColor"></span>
+                <em>@color</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagenes del encabezado
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="HeaderEmailPicture1Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="HeaderEmailPicture1Id" />
+                    <span asp-validation-for="HeaderEmailPicture1Id"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="HeaderEmailPicture2Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="HeaderEmailPicture2Id" />
+                    <span asp-validation-for="HeaderEmailPicture2Id"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="HeaderEmailPicture3Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="HeaderEmailPicture3Id" />
+                    <span asp-validation-for="HeaderEmailPicture3Id"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="HeaderEmailPicture4Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="HeaderEmailPicture4Id" />
+                    <span asp-validation-for="HeaderEmailPicture4Id"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="HeaderEmailPicture5Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="HeaderEmailPicture5Id" />
+                    <span asp-validation-for="HeaderEmailPicture5Id"></span>
+                </div>
+            </div>
+        </div>
+        <br />
+        <em>@imageNote 1000x1000 píxeles.</em>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagenes del envío
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="ShippingEmailPicture1Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ShippingEmailPicture1Id" />
+                    <span asp-validation-for="ShippingEmailPicture1Id"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="ShippingEmailPicture2Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ShippingEmailPicture2Id" />
+                    <span asp-validation-for="ShippingEmailPicture2Id"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-3">
+                    <nop-label asp-for="ShippingEmailPicture3Id" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ShippingEmailPicture3Id" />
+                    <span asp-validation-for="ShippingEmailPicture3Id"></span>
+                </div>
+            </div>
+        </div>
+        <br />
+        <em>@imageNote 1000x120 píxeles.</em>
+    </div>
+</div>

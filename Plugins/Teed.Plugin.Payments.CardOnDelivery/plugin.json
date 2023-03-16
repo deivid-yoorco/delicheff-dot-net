@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Card On Delivery (COD)",
+  "SystemName": "Payments.CardOnDelivery",
+  "Version": "1.40",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.CardOnDelivery.dll",
+  "Description": "This payment module allows you to enable \"Card on delivery\" option in your store"
+}

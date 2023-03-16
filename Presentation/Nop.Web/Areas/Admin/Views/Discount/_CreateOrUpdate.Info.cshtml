@@ -1,0 +1,678 @@
+﻿@model DiscountModel
+@using Nop.Core.Domain.Discounts
+@using Nop.Services
+@using Microsoft.AspNetCore.Mvc
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#@Html.IdFor(model => model.DiscountTypeId)").change(toggleDiscountType);
+        $("#@Html.IdFor(model => model.UsePercentage)").click(toggleUsePercentage);
+        $("#@Html.IdFor(model => model.RequiresCouponCode)").click(toggleRequiresCouponCode);
+        $("#@Html.IdFor(model => model.DiscountLimitationId)").change(toggleLimitation);
+
+        toggleDiscountType();
+        toggleLimitation();
+        toggleUsePercentage();
+        toggleRequiresCouponCode();
+    });
+
+    function toggleDiscountType() {
+        var selectedDiscountTypeId = $("#@Html.IdFor(model => model.DiscountTypeId)").val();
+        if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToCategories).ToString())) {
+            $('[data-tab-name=tab-applied-to-categories]').show();
+        $('[data-tab-name=tab-applied-to-manufacturers]').hide();
+        $('[data-tab-name=tab-applied-to-products]').hide();
+        $('#pnlMaximumDiscountedQuantity').show();
+        $('#pnlAppliedToSubCategories').show();
+        $('#pnlShouldAddProducts').hide();
+    } else if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToManufacturers).ToString())) {
+        $('[data-tab-name=tab-applied-to-categories]').hide();
+        $('[data-tab-name=tab-applied-to-manufacturers]').show();
+        $('[data-tab-name=tab-applied-to-products]').hide();
+        $('#pnlMaximumDiscountedQuantity').show();
+        $('#pnlAppliedToSubCategories').hide();
+        $('#pnlShouldAddProducts').hide();
+    } else if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToSkus).ToString())) {
+        $('[data-tab-name=tab-applied-to-categories]').hide();
+        $('[data-tab-name=tab-applied-to-manufacturers]').hide();
+        $('[data-tab-name=tab-applied-to-products]').show();
+        $('#pnlMaximumDiscountedQuantity').show();
+        $('#pnlAppliedToSubCategories').hide();
+        $('#pnlShouldAddProducts').show();
+    } else {
+            $('[data-tab-name=tab-applied-to-categories]').hide();
+    $('[data-tab-name=tab-applied-to-manufacturers]').hide();
+    $('[data-tab-name=tab-applied-to-products]').hide();
+    $('#pnlMaximumDiscountedQuantity').hide();
+    $('#pnlAppliedToSubCategories').hide();
+        $('#pnlShouldAddProducts').hide();
+    }
+    }
+
+    function toggleLimitation() {
+        var selectedDiscountLimitationId = $("#@Html.IdFor(model => model.DiscountLimitationId)").val();
+        if (selectedDiscountLimitationId == @(((int) DiscountLimitationType.NTimesOnly).ToString()) || selectedDiscountLimitationId == @(((int) DiscountLimitationType.NTimesPerCustomer).ToString())) {
+            //'N Times Only' or 'N Times Per Customer'
+            $('#pnlLimitationTimes').show();
+    } else {
+            $('#pnlLimitationTimes').hide();
+    }
+    }
+
+    function toggleUsePercentage() {
+        if ($('#@Html.IdFor(model => model.UsePercentage)').is(':checked')) {
+            $('#pnlDiscountPercentage').show();
+            $('#pnlDiscountAmount').hide();
+            $('#pnlMaximumDiscountAmount').show();
+        } else {
+            $('#pnlDiscountPercentage').hide();
+            $('#pnlDiscountAmount').show();
+            $('#pnlMaximumDiscountAmount').hide();
+        }
+    }
+
+    function toggleRequiresCouponCode() {
+        if ($('#@Html.IdFor(model => model.RequiresCouponCode)').is(':checked')) {
+            $('#pnlCouponCode').show();
+        } else {
+            $('#pnlCouponCode').hide();
+        }
+    }
+</script>
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_discount_details_info_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="PictureId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="PictureId" />
+                    <span asp-validation-for="PictureId"></span>
+                    <em>Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es 300*142 píxeles.</em>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <nop-label asp-for="DisplayToCustomer" />
+                        <div title="Al activarlo se mostrara la imagen del cupón al cliente." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="DisplayToCustomer" />
+                    <span asp-validation-for="DisplayToCustomer"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Name" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="Name" asp-required="true" />
+                    <span asp-validation-for="Name"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DiscountTypeId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="DiscountTypeId" asp-items="@((DiscountType) Model.DiscountTypeId).ToSelectList()" />
+                    <span asp-validation-for="DiscountTypeId"></span>
+                </div>
+            </div>
+            <div class="form-group" id="pnlShouldAddProducts">
+                <div class="col-md-3">
+                    <nop-label asp-for="ShouldAddProducts" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ShouldAddProducts" />
+                    <span asp-validation-for="ShouldAddProducts"></span>
+                </div>
+            </div>
+            <div class="form-group" id="pnlAppliedToSubCategories">
+                <div class="col-md-3">
+                    <nop-label asp-for="AppliedToSubCategories" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AppliedToSubCategories" />
+                    <span asp-validation-for="AppliedToSubCategories"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    @*<nop-label asp-for="IsPopUpDiscount" />*@
+                    <label style="float:right;">Descuento para popup</label>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsPopUpDiscount" />
+                    <span asp-validation-for="IsPopUpDiscount"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="UsePercentage" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="UsePercentage" />
+                    <span asp-validation-for="UsePercentage"></span>
+                </div>
+            </div>
+            <nop-nested-setting asp-for="UsePercentage">
+                <div class="form-group" id="pnlDiscountPercentage">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DiscountPercentage" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DiscountPercentage" />
+                        <span asp-validation-for="DiscountPercentage"></span>
+                    </div>
+                </div>
+                <div class="form-group" id="pnlMaximumDiscountAmount">
+                    <div class="col-md-3">
+                        <nop-label asp-for="MaximumDiscountAmount" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MaximumDiscountAmount" asp-postfix="@Model.PrimaryStoreCurrencyCode" />
+                        <span asp-validation-for="MaximumDiscountAmount"></span>
+                    </div>
+                </div>
+            </nop-nested-setting>
+            <div class="form-group" id="pnlDiscountAmount">
+                <div class="col-md-3">
+                    <nop-label asp-for="DiscountAmount" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="DiscountAmount" asp-postfix="@Model.PrimaryStoreCurrencyCode" />
+                    <span asp-validation-for="DiscountAmount"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="RequiresCouponCode" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="RequiresCouponCode" />
+                    <span asp-validation-for="RequiresCouponCode"></span>
+                </div>
+            </div>
+            <nop-nested-setting asp-for="RequiresCouponCode">
+                <div class="form-group" id="pnlCouponCode">
+                    <div class="col-md-3">
+                        <nop-label asp-for="CouponCode" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="CouponCode" />
+                        <span asp-validation-for="CouponCode"></span>
+                    </div>
+                </div>
+            </nop-nested-setting>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="StartDateUtc" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="StartDateUtc" />
+                    <span asp-validation-for="StartDateUtc"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="EndDateUtc" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="EndDateUtc" />
+                    <span asp-validation-for="EndDateUtc"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="IsCumulative" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsCumulative" />
+                    <span asp-validation-for="IsCumulative"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DiscountLimitationId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="DiscountLimitationId" asp-items="@(((DiscountLimitationType)Model.DiscountLimitationId).ToSelectList())" />
+                    <span asp-validation-for="DiscountLimitationId"></span>
+                </div>
+            </div>
+            <div class="form-group" id="pnlLimitationTimes">
+                <div class="col-md-3">
+                    <nop-label asp-for="LimitationTimes" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="LimitationTimes" />
+                    <span asp-validation-for="LimitationTimes"></span> @T("Admin.Promotions.Discounts.Fields.LimitationTimes.Times")
+                </div>
+            </div>
+            <div class="form-group" id="pnlMaximumDiscountedQuantity">
+                <div class="col-md-3">
+                    <nop-label asp-for="MaximumDiscountedQuantity" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="MaximumDiscountedQuantity" />
+                    <span asp-validation-for="MaximumDiscountedQuantity"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label">
+                            Monto mínimo de compra
+                        </label>
+                        <div title="Ingresa el monto mínimo de compra para poder utilizar este cupón. El monto se calcula tomando como base el subtotal de la orden. Dejar en 0 si no tiene mínimo de compra." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="OrderMinimumAmount" />
+                    <span asp-validation-for="OrderMinimumAmount"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3 emails-not-found" style="color: #ff0000"></div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label">
+                            Limitado a usuario
+                        </label>
+                        <div title="Ingresa los correos electrónicos de los únicos clientes que podrá utilizar este cupón." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <nop-select asp-for="LimitedToCustomerIds" asp-items="Model.AvailableCustomers" asp-multiple="true" />
+                        <div class="input-group-btn">
+                            <button type="button" id="emails-clear" onclick="clearSelection('.emails-not-found', customerIdsInput, $('.dummy-element-not-used'))" class="btn btn-default">
+                                Eliminar selección
+                            </button>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        var customerIdsInput;
+                        var $limitedInput;
+                        $(document).ready(function () {
+                            customerIdsInput = $('#@Html.IdFor(model => model.LimitedToCustomerIds)').data("kendoMultiSelect");
+                            customerIdsInput.setOptions({
+                                dataTextField: "name",
+                                dataValueField: "id",
+                                autoClose: false,
+                                filter: "contains",
+                                delay: 1000,
+                                minLength: 3,
+                            });
+                            $limitedInput = $('[aria-owns="LimitedToCustomerIds_taglist LimitedToCustomerIds_listbox"]');
+                            $limitedInput.on('keyup', function (e) {
+                                if (e.which <= 90 && e.which >= 48 &&
+                                    GetCurrentText($limitedInput).length > 2 &&
+                                    !e.ctrlKey && !e.altKey) {
+                                    setTimeout(function () {
+                                        GetCustomers(GetCurrentText($limitedInput));
+                                    }, 200);
+                                }
+                            });
+                            @if (Model.LimitedToCustomerIds.Any())
+                            {
+                            <text>
+                            GetCustomers('', '@(string.Join(",", Model.LimitedToCustomerIds))');
+                            </text>
+                            }
+                            $limitedInput.on('paste', function (evt) {
+                                catchPaste(evt, this, function (clipData) {
+                                    if (clipData.includes(',')) {
+                                        var count = clipData.split(',').length;
+                                        if (confirm("Se buscarán y agregarán " + count + " emails, ¿Estás seguro de que deseas continuar? (Se sustituirán todos los emails que ya estaban ingresados)")) {
+                                            GetCustomers(clipData);
+                                        }
+                                    } else {
+                                        GetCustomers(clipData);
+                                    }
+                                });
+                            });
+                        });
+                        function GetCurrentText($element) {
+                            return $element.val();
+                        }
+                        function GetCustomers(text = '', ids = '') {
+                            customerIdsInput.close();
+                            var idsList = [];
+                            var emailsList = [];
+                            if (ids != '')
+                                idsList = ids.includes(',') ? ids.split(',') : [ids];
+                            if (text != '' && text.includes(',')) {
+                                emailsList = text.split(',');
+                                text = '';
+                            }
+                            var data = {
+                                Text: text,
+                                ByIds: idsList,
+                                Texts: emailsList
+                            }
+                            addAntiForgeryToken(data);
+                            $.ajax({
+                                cache: false,
+                                type: "POST",
+                                url: "/Admin/Discount/GetCustomersFiltering",
+                                data: data,
+                                success: function (data) {
+                                    $('.emails-not-found').children().remove();
+                                    if (typeof data.setAll != 'undefined') {
+                                        if (data.setAll == true) {
+                                            customerIdsInput.setDataSource(data.customers);
+                                            var values = data.customers.map(x => x.id);
+                                            customerIdsInput.value(values);
+                                            if (data.notFound.length > 0) {
+                                                var append = '<span style="display: block;margin-top: 20px;">No se encontraron los siguientes emails:</span><ul>';
+                                                $.each(data.notFound, function (i, e) {
+                                                    append += '<li>' + e + '</li>';
+                                                });
+                                                append += '</ul>';
+                                                $('.emails-not-found').append(append);
+                                            }
+                                        }
+                                    }
+                                    else if (data.length > 0) {
+                                        customerIdsInput.setDataSource(data);
+                                        if (ids !== '') {
+                                            var values = data.map(x => x.id);
+                                            customerIdsInput.value(values);
+                                        }
+                                        else
+                                            customerIdsInput.open();
+                                    }
+                                    setClearButtonHeight('#emails-clear', $('#emails-clear').parent().height() + 'px', '0 12px');
+                                },
+                                error: function (e) {
+                                    alert('Failed to retrieve customers.');
+                                    console.log(e);
+                                    setClearButtonHeight('#emails-clear', $('#emails-clear').parent().height() + 'px', '0 12px');
+                                },
+                            });
+                        }
+                        function clearSelection(clearElement, $listElement, $textElement) {
+                            $(clearElement).children().remove();
+                            $listElement.value([]);
+                            setClearButtonHeight('#emails-clear', 'auto', '6px 12px');
+                            $listElement.enable(true);
+                            $listElement.options.enabled = true;
+                            $textElement.val('');
+                        }
+                        function catchPaste(evt, elem, callback) {
+                            if (navigator.clipboard && navigator.clipboard.readText) {
+                                // modern approach with Clipboard API
+                                navigator.clipboard.readText().then(callback);
+                            } else if (evt.originalEvent && evt.originalEvent.clipboardData) {
+                                // OriginalEvent is a property from jQuery, normalizing the event object
+                                callback(evt.originalEvent.clipboardData.getData('text'));
+                            } else if (evt.clipboardData) {
+                                // used in some browsers for clipboardData
+                                callback(evt.clipboardData.getData('text/plain'));
+                            } else if (window.clipboardData) {
+                                // Older clipboardData version for Internet Explorer only
+                                callback(window.clipboardData.getData('Text'));
+                            } else {
+                                // Last resort fallback, using a timer
+                                setTimeout(function () {
+                                    callback(elem.value)
+                                }, 100);
+                            }
+                        }
+                        function setClearButtonHeight(elm, height, padding) {
+                            $(elm).attr('style', 'height: ' + height + '; padding: ' + padding + ';z-index: auto;');
+                        }
+                    </script>
+                    <span asp-validation-for="LimitedToCustomerIds" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-3" style="display: none;">
+                <nop-editor asp-for="ParentId" />
+                <nop-editor asp-for="NumSeries" />
+            </div>
+            @if (!Context.Request.Path.Value.Contains("Edit"))
+            {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Creación masiva</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="checkbox" name="MassiveCreation" id="massive-toggle" asp-for="MassiveCreation" />
+                        <span asp-validation-for="MassiveCreation"></span>
+                    </div>
+                </div>
+                <div id="massive-info" style="display:none">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Cantidad de cupones a crear</label>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="MassiveCreationQty" />
+                            <span asp-validation-for="MassiveCreationQty"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Cantidad de caracteres alfanuméricos aleatorios</label>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="MassiveCharacterCount" />
+                            <span asp-validation-for="MassiveCharacterCount"></span>
+                            <em>Se utilizará el código de cupón asignado como prefijo de los nuevos cupones.</em>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $("form").submit(function (event) {
+                        if ($("#massive-toggle").is(":checked")) {
+                            $("button").attr("disabled", true);
+                        }
+                    });
+                </script>
+            }
+
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3 discounts-not-found" style="color: #ff0000"></div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label">
+                            Descuento vsible en cards de productos
+                        </label>
+                        <div title="Seleccionar si se desea mostrar este descuento en las cards de productos en la plataforma (para ser visualizados también necesita tener codigo de cupón)." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsExtraVisible" />
+                    <span asp-validation-for="IsExtraVisible"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label">
+                            Uso limitado con otros descuentos
+                        </label>
+                        <div title="Ingresa los cupones con los cuales NO debe de poderse usar este descuento, si se desea deshabilitar el uso del descuento con todos dar clic en el botón 'Todos'." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <input id="ExclusiveUsageAgainstIds" name="ExclusiveUsageAgainstIds" value=@Model.ExclusiveUsageAgainstIds type="hidden" />
+                        <nop-select asp-for="ExclusiveUsageIds" asp-items="Model.AvailableDiscounts" asp-multiple="true" />
+                        <div class="input-group-btn">
+                            <button type="button" id="discounts-all" onclick="selectAll()" class="btn btn-default">
+                                Todos
+                            </button>
+                            <button type="button" id="discounts-clear" onclick="clearSelection('.discounts-not-found', exclusiveUsageIds, $('#ExclusiveUsageAgainstIds'))" class="btn btn-default">
+                                Eliminar selección
+                            </button>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                    var exclusiveUsageIds;
+                    var $exclusiveInput;
+                        $(document).ready(function () {
+                            exclusiveUsageIds = $('#@Html.IdFor(model => model.ExclusiveUsageIds)').data("kendoMultiSelect");
+                            exclusiveUsageIds.setOptions({
+                                dataTextField: "name",
+                                dataValueField: "id",
+                                autoClose: false,
+                                filter: "contains",
+                                delay: 1000,
+                                minLength: 3,
+                            });
+                            $exclusiveInput = $('[aria-owns="ExclusiveUsageIds_taglist ExclusiveUsageIds_listbox"]');
+                            $exclusiveInput.on('keyup', function (e) {
+                                if (e.which <= 90 && e.which >= 48 &&
+                                    GetCurrentText($exclusiveInput).length > 2 &&
+                                    !e.ctrlKey && !e.altKey) {
+                                    setTimeout(function () {
+                                        GetDiscounts(GetCurrentText($exclusiveInput));
+                                    }, 200);
+                                }
+                            });
+                            @if (Model.ExclusiveUsageIds.Any())
+                            {
+                                if (Model.ExclusiveUsageIds.FirstOrDefault() == 0)
+                                {
+                            <text>
+                            selectAll();
+                            </text>
+                                }
+                                else
+                                {
+                            <text>
+                            GetDiscounts('', '@(string.Join(",", Model.ExclusiveUsageIds))');
+                            </text>
+                                }
+                            }
+                            $exclusiveInput.on('paste', function (evt) {
+                                catchPaste(evt, this, function (clipData) {
+                                    if (clipData.includes(',')) {
+                                        var count = clipData.split(',').length;
+                                        if (confirm("Se buscarán y agregarán " + count + " cupones, ¿Estás seguro de que deseas continuar? (Se sustituirán todos los cupones que ya estaban ingresados)")) {
+                                            GetDiscounts(clipData);
+                                        }
+                                    } else {
+                                        GetDiscounts(clipData);
+                                    }
+                                });
+                            });
+                        });
+                        function GetDiscounts(text = '', ids = '') {
+                            exclusiveUsageIds.close();
+                            var idsList = [];
+                            var emailsList = [];
+                            if (ids != '')
+                                idsList = ids.includes(',') ? ids.split(',') : [ids];
+                            if (text != '' && text.includes(',')) {
+                                emailsList = text.split(',');
+                                text = '';
+                            }
+                            var data = {
+                                Text: text,
+                                ByIds: idsList,
+                                Emails: emailsList
+                            }
+                            addAntiForgeryToken(data);
+                            $.ajax({
+                                cache: false,
+                                type: "POST",
+                                url: "/Admin/Discount/GetDiscountsFiltering",
+                                data: data,
+                                success: function (data) {
+                                    $('.discounts-not-found').children().remove();
+                                    if (typeof data.setAll != 'undefined') {
+                                        if (data.setAll == true) {
+                                            exclusiveUsageIds.setDataSource(data.customers);
+                                            var values = data.customers.map(x => x.id);
+                                            exclusiveUsageIds.value(values);
+                                            if (data.notFound.length > 0) {
+                                                var append = '<span style="display: block;margin-top: 20px;">No se encontraron los siguientes descuentos:</span><ul>';
+                                                $.each(data.notFound, function (i, e) {
+                                                    append += '<li>' + e + '</li>';
+                                                });
+                                                append += '</ul>';
+                                                $('.discounts-not-found').append(append);
+                                            }
+                                        }
+                                    }
+                                    else if (data.length > 0) {
+                                        exclusiveUsageIds.setDataSource(data);
+                                        if (ids !== '') {
+                                            var values = data.map(x => x.id);
+                                            exclusiveUsageIds.value(values);
+                                        }
+                                        else
+                                            exclusiveUsageIds.open();
+                                    }
+                                    setClearButtonHeight('#discounts-clear', $('#discounts-clear').parent().height() + 'px', '0 12px');
+                                },
+                                error: function (e) {
+                                    alert('Failed to retrieve customers.');
+                                    console.log(e);
+                                    setClearButtonHeight('#discounts-clear', $('#discounts-clear').parent().height() + 'px', '0 12px');
+                                },
+                            });
+                        }
+                        function selectAll() {
+                            if (exclusiveUsageIds.options.enabled) {
+                                exclusiveUsageIds.setDataSource([{ id: '0', name: 'Todos' }]);
+                                exclusiveUsageIds.value([0]);
+                                exclusiveUsageIds.enable(false);
+                                exclusiveUsageIds.options.enabled = false;
+                                $('#ExclusiveUsageAgainstIds').val('0');
+                            } else {
+                                exclusiveUsageIds.setDataSource([]);
+                                exclusiveUsageIds.value([]);
+                                exclusiveUsageIds.enable(true);
+                                exclusiveUsageIds.options.enabled = true;
+                                $('#ExclusiveUsageAgainstIds').val('');
+                            }
+                        }
+                    </script>
+                    <span asp-validation-for="ExclusiveUsageIds" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_discount_details_info_bottom", additionalData = Model.Id })
+</div>
+<script>
+    $("#massive-toggle").on('change', function () {
+        if ($(this).is(":checked")) {
+            $("#massive-info").show();
+        }
+        else {
+            $("#massive-info").hide();
+        }
+    });
+</script>

@@ -1,0 +1,50 @@
+﻿@model ManufacturerNavigationModel
+@if (Model.Manufacturers.Count > 0)
+{
+    <div class="block block-manufacturer-navigation hide-on-med-and-down">
+        <h5>@T("Manufacturers")</h5>
+
+        <div class="listbox">
+            <ul class="categories-navigation collection">
+                @foreach (var manufacturer in Model.Manufacturers)
+                {
+                    <li class="@(manufacturer.IsActive ? "active" : "inactive") collection-item"><a href="@Url.RouteUrl("Manufacturer", new { SeName = manufacturer.SeName })">@manufacturer.Name</a>
+                    </li>
+                }
+            </ul>
+            @if (Model.TotalManufacturers > Model.Manufacturers.Count)
+            {
+                <p class="right-align">
+                    <a href="@Url.RouteUrl("ManufacturerList")">@T("Manufacturers.ViewAll")</a>
+                </p>
+            }
+        </div>
+    </div>
+
+    <div class="hide-on-large-only">
+        <ul class="collapsible z-depth-0">
+            <li>
+                <div class="collapsible-header">
+                    @T("Manufacturers")
+                </div>
+                <div class="collapsible-body">
+                    <div class="listbox">
+                        <ul class="categories-navigation collection">
+                            @foreach (var manufacturer in Model.Manufacturers)
+                            {
+                                <li class="@(manufacturer.IsActive ? "active" : "inactive") collection-item"><a href="@Url.RouteUrl("Manufacturer", new { SeName = manufacturer.SeName })">@manufacturer.Name</a>
+                                </li>
+                            }
+                        </ul>
+                        @if (Model.TotalManufacturers > Model.Manufacturers.Count)
+                        {
+                            <p class="right-align">
+                                <a href="@Url.RouteUrl("ManufacturerList")">@T("Manufacturers.ViewAll")</a>
+                            </p>
+                        }
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+}

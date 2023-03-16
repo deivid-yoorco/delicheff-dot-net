@@ -1,0 +1,57 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+@{
+    var availableCategories = (List<SelectListItem>)ViewData["Categories"];
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Categorías destacadas:</strong><br />
+        Las categorías seleccionadas se mostrarán en la pantalla principal de la aplicación móvil según el "orden para mostrar", por favor asegúrate que las categorías seleccionadas tienen asignada una imagen de 500x250
+    </div>
+    <br />
+    <div class="panel-body">
+
+        <div class="form-group">
+            <div class="col-md-3"  style="text-align:right">
+                <label>Activar</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="IsActiveCategories" />
+            </div>
+            @*<div class="col-md-3" style="text-align:right">
+                <label>Título (opcional)</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CategoriesHeader" />
+            </div>*@
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Categorías para mostrar</label>
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="SelectedCategoriesIds" asp-items="availableCategories" asp-multiple="true" />
+                <script type="text/javascript">
+                $(document).ready(function() {
+                    var categoriesIdsInput = $('#@Html.IdFor(model => model.SelectedCategoriesIds)').data("kendoMultiSelect");
+                        categoriesIdsInput.setOptions({
+                        autoClose: false,
+                        filter: "contains"
+                    });
+                    @if (availableCategories.Count == 0)
+                    {
+                        <text>
+                            categoriesIdsInput.setOptions({
+                                enable: false,
+                                    placeholder: 'No hay categorías disponibles.'
+                            });
+                            categoriesIdsInput._placeholder();
+                            categoriesIdsInput._enable();
+                        </text>
+                    }
+                });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

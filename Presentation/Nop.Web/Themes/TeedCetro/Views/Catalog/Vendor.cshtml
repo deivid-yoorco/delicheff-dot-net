@@ -1,0 +1,94 @@
+﻿@model VendorModel
+@using Nop.Core.Domain.Seo
+@inject SeoSettings seoSettings
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(!string.IsNullOrEmpty(Model.MetaTitle) ? Model.MetaTitle : Model.Name);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-vendor-page");
+
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var vendorUrl = Url.RouteUrl("Vendor", new { SeName = Model.SeName }, this.Url.ActionContext.HttpContext.Request.Scheme);
+        Html.AddCanonicalUrlParts(vendorUrl, seoSettings.QueryStringInCanonicalUrlsEnabled);
+    }
+}
+<div class="page vendor-page">
+    <style>
+        .title-vendor-page {
+            margin-top: 0.5em;
+            padding: 0.3em;
+            text-align: center;
+            color: white;
+            padding-bottom: 0.4em;
+        }
+    </style>
+    <h1 class="category-page-title teed-primary title-vendor-page">@Model.Name</h1>
+
+    @*<div class="page-title">
+        <h1>@Model.Name</h1>
+    </div>*@
+    <div class="page-body">
+        @await Component.InvokeAsync("Widget", new { widgetZone = "vendordetails_top", additionalData = Model.Id })
+        <div class="col s12 m12" style="margin-bottom: 2%;">
+            <div class="col s12 m6">
+                <img class="img-responsive" src="@Model.PictureModel.FullSizeImageUrl" style="width:100%;" />
+            </div>
+            @*description*@
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <div class="vendor-description col s12 m6">
+                    @Html.Raw(Model.Description)
+                </div>
+            }
+        </div>
+        @*contact vendor*@
+        @if (Model.AllowCustomersToContactVendors)
+        {
+            <div class="contact-vendor">
+                <input type="button" value="@T("ContactVendor")" class="btn contact-vendor-button" onclick="setLocation('@Url.RouteUrl("ContactVendor", new { vendorId = Model.Id })')" />
+            </div>
+        }
+        @if (Model.Products.Count > 0)
+        {
+            @await Html.PartialAsync("_CatalogSelectors", Model.PagingFilteringContext)
+        }
+        @*product list*@
+        @if (Model.Products.Count > 0)
+        {
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "product-list" : "product-grid")">
+                @*<div class="item-grid">
+                        @foreach (var product in Model.Products)
+                        {
+                            <div class="item-box">
+                                @await Html.PartialAsync("_ProductBox", product)
+                            </div>
+                        }
+                    </div>*@
+                <div class="row">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="col s6 m4">
+                            @await Html.PartialAsync("_ProductBox", product)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "vendordetails_bottom", additionalData = Model.Id })
+    </div>
+</div>

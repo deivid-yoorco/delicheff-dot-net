@@ -1,0 +1,554 @@
+﻿@model HeaderLinksModel
+@inject Nop.Core.IWorkContext  _workContext;
+@using System.Text.Encodings.Web
+@using Nop.Services.Common
+@using Nop.Core.Domain.Customers
+@{
+    var att = "@";
+}
+@await Component.InvokeAsync("Widget", new { widgetZone = "header_links_before" })
+
+@if (Url.RouteUrl(ViewContext.RouteData.Values) != "/onepagecheckout")
+{
+    @if (Model.ParentIsLogoContainer == null)
+    {
+        <li>
+            <a class="modal-trigger" href="#search-modal">
+                <i class="material-icons">search</i>
+            </a>
+        </li>
+
+        @if (Model.CompareProductsEnabled)
+        {
+            <li>
+                <a href="@Url.RouteUrl("compareproducts")" class="tooltipped hide-on-med-and-down" data-position="bottom" data-tooltip="@Model.CompareProducstItems">
+                    <i class="material-icons">compare</i>
+                </a>
+
+                <a href="@Url.RouteUrl("compareproducts")" class="show-on-med-and-down">
+                    <i class="material-icons">compare</i>
+                </a>
+            </li>
+        }
+
+        @if (Model.WishlistEnabled)
+        {
+            <li>
+                <a href="@Url.RouteUrl("Wishlist")" class="tooltipped hide-on-med-and-down wishlist-qty" data-position="bottom" data-tooltip="@Model.WishlistItems">
+                    <i class="material-icons">favorite_border</i>
+                </a>
+                <a href="@Url.RouteUrl("Wishlist")" class="hide-on-large-only">
+                    <i class="material-icons">favorite_border</i>
+                </a>
+            </li>
+        }
+    }
+    else if (Model.ParentIsLogoContainer.Value == true)
+    {
+        <style>
+            .header-links.single-line {
+                display: flex !important;
+                position: absolute !important;
+                right: 0px !important;
+            }
+
+            .notify-bubble {
+                top: 31px !important;
+            }
+
+            .flyout-cart {
+                /*right: 13% !important;*/
+                top: 6% !important;
+            }
+
+            @@media only screen and (max-width: 992px) {
+                @* .main-logo-container .brand-logo {
+                    left: 40% !important;
+                } *@
+
+                #pop-cart {
+                    margin-top: -20px !important;
+                }
+
+                .main-logo-container .z-depth-1 {
+                    box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 3px 5px 0 rgb(0 0 0 / 20%);
+                }
+            }
+
+            @@media only screen and (max-width: 760px) {
+                .account-link {
+                    padding: 0 !important;
+                }
+            }
+
+            @@media only screen and (min-width: 600px) and (max-width: 992px) {
+                #pop-cart {
+                    margin-top: -24px !important;
+                }
+            }
+
+            @@media only screen and (max-width: 700px) {
+                #logo-container #logo {
+                    height: auto !important;
+                    width: 170px !important;
+                }
+            }
+
+            @@media only screen and (max-width: 360px) {
+                #logo-container #logo {
+                    height: auto !important;
+                    width: 140px !important;
+                }
+
+                .header-links.single-line .material-icons {
+                    font-size: 20px !important;
+                }
+            }
+
+            @* @@media only screen and (min-width: 993px) {
+                .main-logo-container .brand-logo {
+                    left: 30% !important;
+                }
+            } *@
+
+            @* @@media only screen and (min-width: 1367px) {
+                .main-logo-container .brand-logo {
+                    left: 40% !important;
+                }
+            } *@
+        </style>
+    }
+
+    @if (Model.ParentIsLogoContainer == null || (Model.ParentIsLogoContainer != null && Model.ParentIsLogoContainer.Value == true))
+    {
+        <li class="logo-container-search" style="height: 30px;align-self: center;">
+            @await Component.InvokeAsync("SearchBox", new { showAsDiv = true })
+        </li>
+        if (Model.ShoppingCartEnabled)
+        {
+            if (Model.ShoppingCartItems > 9)
+            {
+                <style>
+                    #pop-cart {
+                        margin-left: -4px;
+                    }
+                </style>
+            }
+
+
+            <li id="topcartlink">
+                <a href="@Url.RouteUrl("ShoppingCart")" @*class="tooltipped" data-position="bottom" data-tooltip="@Model.ShoppingCartItems" *@>
+                    <i class="material-icons">shopping_cart</i>
+                    <div class="notify-bubble center teed-primary">
+                        <div id="pop-cart" style="margin-top:-24px;">
+                            @(Model.ShoppingCartItems)
+                        </div>
+                    </div>
+                </a>
+            </li>
+        }
+
+        if (Model.AllowPrivateMessages)
+        {
+            <li>
+                <a href="@Url.RouteUrl("PrivateMessages", new { tab = "" })" class="tooltipped hide-on-med-and-down" data-position="bottom" data-tooltip="@Model.UnreadPrivateMessages">
+                    <i class="material-icons">chat</i>
+                </a>
+
+                <a href="@Url.RouteUrl("PrivateMessages", new { tab = "" })" class="show-on-med-and-down">
+                    <i class="material-icons">chat</i>
+                </a>
+            </li>
+        }
+    }
+}
+@if (Model.ParentIsLogoContainer == null || (Model.ParentIsLogoContainer != null && Model.ParentIsLogoContainer.Value == true))
+{
+    if (Model.IsAuthenticated)
+    {
+        var firstName = _workContext.CurrentCustomer.GetAttribute<string>(SystemCustomerAttributeNames.FirstName);
+        <li style="align-self: center; margin-top: -2px;">
+            <a style="padding: 0 0;" href="@Url.RouteUrl("CustomerInfo")" class="tooltipped hide-on-med-and-down account-link" data-position="bottom" data-tooltip="@T("Account.MyAccount")">
+                @if (!string.IsNullOrEmpty(Model.CustomerProfilePicture))
+                {
+                    <div style="display: flex;">
+                        <div class="responsive-img circle" style="background-image: url('@Model.CustomerProfilePicture'); background-size: cover; background-position: center center;margin-right: 10px;"></div>
+                        <div style="font-weight: bold;line-height: 19px; align-self: center;max-width: 61px;@if (firstName.Replace(" ", "").Length > 6) { <text>font-size:smaller;</text> }">
+                            @(firstName)
+                            @if (Model.GamificationIsActive)
+                            {
+                                <div style="font-weight: initial;line-height: 19px; align-self: center;max-width: 61px;">
+                                    @(((int)Model.CustomerPointsBalance).ToString("N0"))<text>&nbsp;puntos</text>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <i class="material-icons account-icon">person</i><text>&nbsp;</text>
+                    <div style="font-weight: bold;line-height: 19px; align-self: center;max-width: 61px;@if (firstName.Replace(" ", "").Length > 6) { <text>font-size:smaller;</text> }">
+                        @(firstName)
+                        @if (Model.GamificationIsActive)
+                        {
+                            <div style="font-weight: initial;line-height: 19px; align-self: center;max-width: 61px;">
+                                @(((int)Model.CustomerPointsBalance).ToString("N0"))<text>&nbsp;puntos</text>
+                            </div>
+                        }
+                    </div>
+                }
+            </a>
+
+            <a style="padding: 0 10px;" href="@Url.RouteUrl("CustomerInfo")" class="hide-on-large-only account-link">
+                @if (!string.IsNullOrEmpty(Model.CustomerProfilePicture))
+                {
+                    <div class="responsive-img circle" style="background-image: url('@Model.CustomerProfilePicture'); background-size: cover; background-position: center center;"></div><text>&nbsp;</text>
+                    @GetCustomerInitials()
+                }
+                else
+                {
+                    <i class="material-icons">person</i> @GetCustomerInitials()
+                }
+            </a>
+        </li>
+        @*<li>
+                <a href="@Url.RouteUrl("Logout")" class="tooltipped hide-on-med-and-down" data-position="bottom" data-tooltip="@T("Account.Logout")">
+                    <i class="material-icons">exit_to_app</i>
+                </a>
+
+                <a href="@Url.RouteUrl("Logout")" class="hide-on-large-only">
+                    <i class="material-icons">exit_to_app</i>
+                </a>
+            </li>*@
+        if (Model.WishlistEnabled)
+        {
+            <li>
+                <a href="@Url.RouteUrl("Wishlist")" class="tooltipped hide-on-med-and-down wishlist-qty" data-position="bottom" data-tooltip="@Model.WishlistItems">
+                    <i class="material-icons">favorite_border</i>
+                </a>
+                <a href="@Url.RouteUrl("Wishlist")" class="hide-on-large-only" style="padding: 0 10px;">
+                    <i class="material-icons">favorite_border</i>
+                </a>
+            </li>
+        }
+    }
+    else
+    {
+        <li>
+            <a href="@Url.RouteUrl("Login")" class="tooltipped hide-on-med-and-down" data-position="bottom" data-tooltip="@T("Account.Login")">
+                <i class="material-icons">person</i>
+                @if (Url.RouteUrl(ViewContext.RouteData.Values) == "/onepagecheckout")
+                {
+                    <span>Iniciar sesión</span>
+                    <style>
+                        nav [class*=mdi-], nav [class^=mdi-], nav i, nav i.material-icons {
+                            display: inline-flex;
+                            vertical-align: top;
+                        }
+                    </style>
+                }
+            </a>
+            <a href="@Url.RouteUrl("Login")" class="show-on-med-and-down hide-on-large-only">
+                <i class="material-icons">person</i>
+
+            </a>
+        </li>
+        //Model for zip code check
+        <style>
+            #checkZipCode {
+                min-height: 425px;
+            }
+
+            .absolute-button {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .message-box {
+                background-color: #fffffff0;
+                padding: 5px;
+                border-radius: 40px;
+                box-shadow: 0 30px 40px rgb(0 0 0 / 10%);
+            }
+
+            #checkZipCode {
+                background-color: white !important;
+                background-image: url(/images/modals/zip-code-desktop.jpg);
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+
+            .button-text {
+                font-size: smaller !important;
+            }
+
+            @@media only screen and (max-width: 600px) {
+                #checkZipCode .modal-footer {
+                    display: inline-block !important;
+                }
+
+                #checkZipCode {
+                    background-image: url(/images/modals/zip-code-mobile.jpg) !important;
+                }
+            }
+
+            @@media only screen and (max-width: 1245px) {
+                .button-text {
+                    display: none;
+                }
+
+                .mobile-center {
+                    text-align: center !important;
+                    /*margin: 0 !important;*/
+                }
+            }
+
+            @@media only screen and (min-width: 1000px) {
+                .page-footer .modal {
+                    width: 45% !important;
+                    max-width: 615px;
+                }
+            }
+        </style>
+
+        <div style="display: none;">
+            <div id="checkZipCode" class="modal footer-modal">
+                <div class="modal-content" style="color: rgba(0,0,0,0.87) !important;">
+                    <div style="text-align: center;">
+                        <h4>¿En dónde quieres recibir tu súper?</h4>
+                        <p>Antes de continuar, verifica la disponibilidad en tu zona.</p>
+                    </div>
+                    <div class="row zip-code-first">
+                        <div class="col s12 m6 center">
+                            <div class="input-field col s12">
+                                <input id="postal-code" type="number" class="validate">
+                                <label for="postal-code">Código postal</label>
+                            </div>
+                            <div class="input-field col s12">
+                                <a onclick="changeModalBool()" class="verify-zip-code waves-effect waves-light btn"><i class="material-icons right mobile-center">search</i><span>Verificar</span></a>
+                            </div>
+                            <div class="col s12">¿Ya tienes cuenta?<br /><a href="@Url.RouteUrl("Login")">Inicia sesión.</a></div>
+                        </div>
+                    </div>
+                    <div class="row center zip-code-second">
+                        <div class="col s12" id="zip-code-avilable" style="display: none;">
+                            <div class="col s12 message-box zip-code-ok">
+                                <span style="font-weight: bold; font-size: large;">Sí contamos con cobertura en tu código postal.</span>
+                            </div>
+                        </div>
+                        <div class="col s12" id="zip-code-unavilable" style="display: none;">
+                            <div class="col s12 message-box">
+                                <span class="error-unavilable" style="font-weight: bold; color: red; font-size: large;">Por el momento no contamos con cobertura en tu código postal.</span>
+                            </div>
+                            <div class="col s12 m6 email-input">
+                                <div class="input-field col s12">
+                                    <span>
+                                        <a style="text-decoration: underline;" target="_blank" href="/cobertura">
+                                            Revisa nuestra zona de cobertura aquí
+                                        </a>
+                                        o ingresa tu correo electrónico para que te avisemos cuando tengamos cobertura en tu dirección:
+                                    </span>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input id="email-for-notification" type="text" class="validate">
+                                    <label for="email-for-notification">Correo electrónico</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <a onclick="sendEmail()" class="send-email waves-effect waves-light btn"><i class="material-icons right">email</i>Confirmar notificación</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col s12" style="margin-top: 10px;">
+                            <div class="col s12 done-email message-box" style="display: none;">
+                                <span style="font-weight: bold; font-size: large;">¡Listo! Te avisaremos cuando tengamos cobertura en tu código postal.</span>
+                            </div>
+                            <div class="col s12 err-email message-box" style="display: none;">
+                                <span style="font-weight: bold; color: red; font-size: large;"></span>
+                            </div>
+                        </div>
+                        <div class="col s12">
+                            <div class="preloader-wrapper active" style="display: none;">
+                                <div class="spinner-layer">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div><div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div><div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <a href="#!" class="modal-close waves-effect waves-green btn" style="float: right;">Cerrar</a>
+                        <p style="float: left;margin: 2px 5px 0 0;" class="message-box">
+                            <label>
+                                <input id="zipCodeHide" type="checkbox">
+                                <span style="color: red;font-weight: bold;">No volver a preguntar</span>
+                            </label>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@if (Model.ParentIsLogoContainer == null || (Model.ParentIsLogoContainer != null && Model.ParentIsLogoContainer.Value == false))
+{
+    <style>
+
+        #checkZipCode {
+            min-height: 425px;
+        }
+
+        .absolute-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .message-box {
+            background-color: #fffffff0;
+            padding: 5px;
+            border-radius: 40px;
+            box-shadow: 0 30px 40px rgb(0 0 0 / 10%);
+        }
+
+        #checkZipCode {
+            background-color: white !important;
+            background-image: url(/images/modals/zip-code-desktop.jpg);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .button-text {
+            font-size: smaller !important;
+        }
+
+        @@media only screen and (max-width: 600px) {
+            #checkZipCode .modal-footer {
+                display: inline-block !important;
+            }
+
+            #checkZipCode {
+                background-image: url(/images/modals/zip-code-mobile.jpg) !important;
+            }
+        }
+
+        @@media only screen and (max-width: 1245px) {
+            .button-text {
+                display: none;
+            }
+
+            .mobile-center {
+                text-align: center !important;
+                /*margin: 0 !important;*/
+            }
+        }
+
+        @@media only screen and (min-width: 1000px) {
+            .page-footer .modal {
+                width: 45% !important;
+                max-width: 615px;
+            }
+        }
+
+        #checkZipCode, #popupModal {
+            background-color: white !important;
+        }
+
+            #popupModal img {
+                width: 100%;
+                height: auto;
+            }
+
+        .button-text {
+            font-size: smaller !important;
+        }
+
+        @@media only screen and (max-width: 1245px) {
+            .button-text {
+                display: none;
+            }
+
+            .mobile-center {
+                text-align: center !important;
+                margin: 0 !important;
+            }
+        }
+
+        @@media only screen and (min-width: 1000px) {
+            .footer-modal {
+                width: 30% !important;
+            }
+        }
+
+        @@media only screen and (min-width: 600px) {
+            .mobile-popup {
+                display: none !important;
+            }
+        }
+
+        @@media only screen and (max-width: 600px) {
+            .desktop-popup {
+                display: none !important;
+            }
+        }
+    </style>
+
+    @* Modal for popups *@
+    <div style="display: none;">
+        <div id="popupModal" class="modal footer-modal">
+            <div class="modal-content" style="color: rgba(0,0,0,0.87) !important;">
+                <div class="row">
+                    <div class="col s12 center">
+                        <img src="" alt="Popup" class="mobile-popup" />
+                        <img src="" alt="Popup-Desktop" class="desktop-popup" />
+                    </div>
+                </div>
+                <div class="row right">
+                    <a href="#!" class="modal-close waves-effect waves-green btn">Cerrar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.AllowPrivateMessages && !string.IsNullOrEmpty(Model.AlertMessage))
+    {
+        <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+            Materialize.toast('@Html.Raw(JavaScriptEncoder.Default.Encode(Model.AlertMessage))', 8000)
+        });
+        </script>
+    }
+
+    @functions {
+        private string GetCustomerInitials()
+        {
+            string firstName = _workContext.CurrentCustomer.GetAttribute<string>(SystemCustomerAttributeNames.FirstName);
+            string lastName = _workContext.CurrentCustomer.GetAttribute<string>(SystemCustomerAttributeNames.LastName);
+
+            if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
+            {
+                return string.Concat(firstName.ToUpper().First(), lastName.ToUpper().First());
+            }
+
+            return string.Empty;
+        }
+    }
+    @*<li style="height: 30px;align-self: center;">
+            @await Component.InvokeAsync("SearchBox", new { showAsDiv = true })
+        </li>*@
+    <li class="cobertura">
+        <a href="/cobertura">
+            Zona de cobertura
+        </a>
+    </li>
+}
+
+@await Component.InvokeAsync("Widget", new { widgetZone = "header_links_after" })

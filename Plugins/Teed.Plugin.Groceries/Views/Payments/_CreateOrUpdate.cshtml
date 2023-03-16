@@ -1,0 +1,128 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.PaymentModel
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Fraquicia</label>
+                                    <div title="La franquicia a la que se le realiza el pago" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="FranchiseId" asp-items="@Model.Franchises" />
+                                <span asp-validation-for="FranchiseId"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Comentarios</label>
+                                    <div title="Comentario que se quiera incluir al pago (opcional)" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextAreaFor(m => m.Comment, 4, 20, new { @class = "form-control" })
+                                <span asp-validation-for="Comment"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Monto</label>
+                                    <div title="El monto del pago" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="PaymentAmount" style="z-index: 0" />
+                                <span asp-validation-for="PaymentAmount"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Estado del pago</label>
+                                    <div title="Indica cuál es el estado actual del pago" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <select class="form-control" asp-for="StatusId" id="payment-status" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Groceries.Domain.Franchise.PaymentStatus>())"></select>
+                                <span asp-validation-for="StatusId"></span>
+                            </div>
+                        </div>
+                        <div id="payment-date-container" style="display: @(Model.StatusId == 0 ? "none" : "block")">
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Fecha de pago</label>
+                                        <div title="Indica la fecha de pago" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="hidden" id="dateinput" asp-for="PaymentDateString" />
+                                    <input type="text" id="datepicker" class="form-control" value="@(Model.PaymentDateString)">
+                                    @*<nop-editor asp-for="PaymentDate" />*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $("#datepicker").datepicker({
+            dateFormat: "dd-mm-yy",
+            defaultDate: '@(Model.PaymentDateString)',
+            onSelect: function (dateVal) {
+                let dateArray = dateVal.split("-");
+                let day = dateArray[0];
+                let month = parseInt(dateArray[1]) - 1;
+                let year = dateArray[2];
+                console.log(formatDate(new Date(year, month, day)));
+                $("#dateinput").val(formatDate(new Date(year, month, day)));
+            },
+        });
+
+        $("#payment-status").on("change", function () {
+            console.log($(this).val())
+            if ($(this).val() == 0) {
+                $("#dateinput").val("");
+                $("#payment-date-container").hide();
+            }
+            else {
+                $("#payment-date-container").show();
+            }
+        });
+    });
+
+    function formatDate(date) {
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+
+        let parsedMonth = month < 10 ? "0" + month : month;
+        let parsedDay = day < 10 ? "0" + day : day;
+
+        return parsedDay + "-" + parsedMonth + "-" + year;
+    }
+</script>

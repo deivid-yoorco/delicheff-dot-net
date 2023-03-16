@@ -1,0 +1,74 @@
+﻿@model Teed.Plugin.TicketControl.Models.Schedule.CreateOrEditModel
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Información principal
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Name" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Name" />
+                            <span asp-validation-for="Name"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="DisplayOrder" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="DisplayOrder" />
+                            <span asp-validation-for="DisplayOrder"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Quantity" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Quantity" />
+                            <span asp-validation-for="Quantity"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Hour" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Hour" />
+                            <span asp-validation-for="Hour"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#Hour").attr('min', '1');
+        $("#Hour").attr('max', '24');
+        @if (Model.Id < 1)
+        {
+        <text>
+        $("#Hour").val('1');
+        </text>
+        }
+        $("#Hour").on(
+            'change mouseup mousedown keyup', function () {
+                var max = parseInt($(this).attr('max'));
+                var min = parseInt($(this).attr('min'));
+                if ($(this).val() > max) {
+                    $(this).val(max);
+                }
+                else if ($(this).val() < min) {
+                    $(this).val(min);
+                }
+            });
+    });
+</script>

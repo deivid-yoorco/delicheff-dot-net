@@ -1,0 +1,58 @@
+﻿@model CustomerLeaderboardsListModel
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts("Leaderboards");
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-order-list-page");
+    var count = 0;
+}
+@section left
+{
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.Leaderboards })
+}
+<div class="page account-page points-list-page section ">
+    <div class="">
+        <h1 class="category-page-title" style="font-size: 2.5em;">Leaderboards</h1>
+    </div>
+    <div class="page-body">
+        @if (Model.Leaders.Count > 0)
+        {
+            <table style="text-align-last: center;" class="highlight">
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Usuario</th>
+                        <th>Puntos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var leader in Model.Leaders)
+                    {
+                        count++;
+                        <tr @if (leader.IsCurrentUser) { <text> class="leader" </text> }>
+                            <td>@count</td>
+                            <td>@leader.User</td>
+                            <td class="point">@leader.Points</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <script>
+                $(document).ready(function () {
+                    var color = $('#pop-cart').parent().css('background-color');
+                    $('.leader').css('background', color.replace(")", ", 0.3)"));
+                    $('.leader').css('font-weight', 'bold');
+                });
+            </script>
+        }
+        else
+        {
+            <div class="no-data">
+                Aún no tienes puntos
+            </div>
+        }
+    </div>
+</div>

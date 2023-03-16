@@ -1,0 +1,491 @@
+﻿@model Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.MarketingDashboardDataModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MarketingDashboard.DashboardHq3");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    Html.AppendScriptParts("https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.min.js");
+    var filteredData = Model.Data.OrderByDescending(x => x.InitDate).Take(26).OrderBy(x => x.InitDate).ToList();
+}
+<style>
+    .element-title {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        padding: 5px;
+    }
+</style>
+@if (!Model.FromAdmin)
+{
+    <style>
+        body {
+            font-size: 20px;
+        }
+
+        h4 {
+            font-size: 50px;
+        }
+    </style>
+    <script>
+        setTimeout(function () {
+            $(".navbar").hide();
+            $(".main-header").hide();
+            $(".main-sidebar").hide();
+            $(".main-footer").hide();
+            $(".content-wrapper").css("margin-left", 0);
+            $("#map").css("height", 1015);
+        }, 500);
+    </script>
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div>
+                    <h4 class="element-title">Gasto publicitario vs. Número de pedidos</h4>
+                    <div class="chart" style="height: 350px;">
+                        <canvas id="chart-1" height="330"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="element-title">Gasto publicitario vs. Nuevos clientes</h4>
+                    <div class="chart" style=" height: 350px;">
+                        <canvas id="chart-2" height="330"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="element-title">Costo por registro vs. costo por adquisición de cliente</h4>
+                    <div class="chart" style="height: 350px;">
+                        <canvas id="chart-3" height="330"></canvas>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm @(Model.FromAdmin? "text-nowrap" : null)" style="margin-top:30px">
+                        <thead>
+                            <tr>
+                                <th colspan="2">
+                                    Indicadores semanales de MKT
+                                </th>
+                                @foreach (var data in filteredData)
+                                {
+                                    <th>@(data.InitDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                            <tr>
+                                <th>
+                                    ID
+                                </th>
+                                <th>
+                                    Indicador semanal
+                                </th>
+                                @foreach (var data in filteredData)
+                                {
+                                    <th>@(data.EndDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td>
+                                MK0001
+                            </td>
+                            <td>
+                                Costo por nuevo registro
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.NewRegisterCost.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0002
+                            </td>
+                            <td>
+                                CAC (Costo por adquisición de cliente)
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.AdquisitionCost.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0003
+                            </td>
+                            <td>
+                                Tasa de registros a compras
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(Math.Round(data.BuyinRegister * 100, 2))%</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0004
+                            </td>
+                            <td>
+                                Promedio de pedidos diarios
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(Math.Round(data.DailyPedidosAverage, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0005
+                            </td>
+                            <td>
+                                Promedio de venta diaria
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.DailySalesAverage.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0006A
+                            </td>
+                            <td>
+                                Ticket promedio
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.AverageTicket.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0007
+                            </td>
+                            <td>
+                                Recurrencia mensual
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(Math.Round(data.Recurrence, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0009
+                            </td>
+                            <td>
+                                Tasa de retención estabilizada
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@data.RetentionRate120Days</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0010
+                            </td>
+                            <td>
+                                Costumer Annual Value
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.CustomerAnnualValue.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0011
+                            </td>
+                            <td>
+                                Costumer Annual Contribution
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0012
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (mensual) * Tasa de Retención
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContributionRetention, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0014
+                            </td>
+                            <td>
+                                [Costumer Annual Contribution (mensual) * Tasa de Retención] / CAC
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(Math.Round(data.CustomFormula2, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0001
+                            </td>
+                            <td>
+                                Gasto publicitario
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.MarketingExpenses.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0002
+                            </td>
+                            <td>
+                                Nuevos registros
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.NewRegisteredUsersCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0003
+                            </td>
+                            <td>
+                                Nuevas cuentas activas
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.NewActiveCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0004
+                            </td>
+                            <td>
+                                Total de pedidos
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.PedidosCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0005
+                            </td>
+                            <td>
+                                Total de ventas
+                            </td>
+                            @foreach (var data in filteredData)
+                            {
+                                <td>@(data.SalesTotal.ToString("C"))</td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const labels = @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.EndDate.ToString("dd-MM-yyyy")))));
+    var osConfig = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Gasto publicitario",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.MarketingExpenses)))
+                },
+                {
+                    label: "Número de pedidos",
+                    borderColor: 'rgba(221,75,57, 0.7)',
+                    backgroundColor: 'rgba(221,75,57, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y1',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.PedidosCount)))
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: @(!Model.FromAdmin ? 25 : 10)
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        min: 0
+                    }
+                },
+                y1: {
+                    display: true,
+                    position: 'right',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        min: 0
+                    }
+                }
+            }
+        }
+    };
+
+    var osConfig2 = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Gasto publicitario",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.MarketingExpenses)))
+                },
+                {
+                    label: "Clientes nuevos",
+                    borderColor: 'rgba(221,75,57, 0.7)',
+                    backgroundColor: 'rgba(221,75,57, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y1',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.NewRegisteredUsersCount)))
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: @(!Model.FromAdmin ? 25 : 10)
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        min: 0
+                    }
+                },
+                y1: {
+                    display: true,
+                    position: 'right',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        min: 0
+                    }
+                }
+            }
+        }
+    };
+
+    var osConfig3 = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "MK0001 Costo por nuevo registro",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.NewRegisterCost)))
+                },
+                {
+                    label: "MK0002 CAC (Costo por adquisición de cliente)",
+                    borderColor: 'rgba(221,75,57, 0.7)',
+                    backgroundColor: 'rgba(221,75,57, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.AdquisitionCost)))
+                },
+                {
+                    label: "MK0003 Tasa de registros a compras",
+                    borderColor: 'rgba(42,43,45, 0.7)',
+                    backgroundColor: 'rgba(42,43,45, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y1',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => (x.BuyinRegister * 100))))
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: @(!Model.FromAdmin ? 25 : 10)
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        min: 0
+                    }
+                },
+                y1: {
+                    display: true,
+                    position: 'right',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            console.log('userCallback', userCallback);
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        callback: function (value) {
+                            return value + "%"
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    window.orderStatistics = new Chart(document.getElementById("chart-1").getContext("2d"), osConfig);
+    window.orderStatistics = new Chart(document.getElementById("chart-2").getContext("2d"), osConfig2);
+    window.orderStatistics = new Chart(document.getElementById("chart-3").getContext("2d"), osConfig3);
+</script>

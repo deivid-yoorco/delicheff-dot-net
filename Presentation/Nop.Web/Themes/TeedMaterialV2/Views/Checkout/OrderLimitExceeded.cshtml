@@ -1,0 +1,57 @@
+﻿@model List<Nop.Core.Domain.Orders.Order>
+@{
+    Layout = "_ColumnsOne";
+}
+<div class="page checkout-page order-completed-page">
+    <div class="page-title">
+        <h1>Límite de órdenes excedido</h1>
+    </div>
+    <div class="page-body checkout-data">
+        <div class="section order-completed">
+            <div class="title">
+                <span>Has alcanzado el máximo de órdenes en proceso permitidas. Por favor espera a completar las órdenes que tienes pendiente antes de crear una nueva.</span>
+            </div>
+            <br />
+            <h5>Órdenes en proceso:</h5>
+            @foreach (var item in Model)
+            {
+                <div class="row">
+                    <div class="col s6" style="text-align: right">
+                        <strong>
+                            Número de orden
+                        </strong>
+                    </div>
+                    <div class="col s6">
+                        <a style="font-weight: bold" href="/orderdetails/@(item.Id)" title="Ver detalles de la orden">
+                            #@(item.CustomOrderNumber)
+                        </a>
+                    </div>
+                    <div class="col s6" style="text-align: right">
+                        <strong>
+                            Fecha de entrega
+                        </strong>
+                    </div>
+                    <div class="col s6">
+                        <span>
+                            @(item.SelectedShippingDate.Value.ToString("D", new System.Globalization.CultureInfo("es-MX")))
+                        </span>
+                    </div>
+                    <div class="col s6" style="text-align: right">
+                        <strong>
+                            Horario de entrega
+                        </strong>
+                    </div>
+                    <div class="col s6">
+                        <span>
+                            @(item.SelectedShippingTime)
+                        </span>
+                    </div>
+                </div>
+            }
+            <br />
+            <div class="buttons">
+                <input type="button" value="Regresar" class="btn order-completed-continue-button" onclick="setLocation('@Url.RouteUrl("HomePage")')" />
+            </div>
+        </div>
+    </div>
+</div>

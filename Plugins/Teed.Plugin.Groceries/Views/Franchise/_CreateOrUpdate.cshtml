@@ -1,0 +1,93 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.FranchiseData
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @if (Model.ExistigDeliveries != null && Model.ExistigDeliveries.Count > 0)
+                    {
+                    <div style="padding: 2em;background-color: #ffe7e7;margin-bottom: 2em;">
+                        <strong>Los siguientes repartidores ya fueron asignados a otra franquicia:</strong>
+                        <ul>
+                            @foreach (var item in Model.ExistigDeliveries)
+                            {
+                                <li>@item</li>
+                            }
+                        </ul>
+                    </div>
+                    }
+                    <div class="col-md-6">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input asp-for="Id" hidden />
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Nombre de la franquicia</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Encargado</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="UserInChargeId" asp-items="Model.AvailablesFranchisee" />
+                                <span asp-validation-for="UserInChargeId"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Esta activa</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="IsActive" />
+                                <span asp-validation-for="IsActive"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Repartidores</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group input-group-required">
+                                    <nop-select asp-for="SelectedBuyersIds" asp-items="Model.AvailablesBuyers" asp-multiple="true" />
+                                    <div class="input-group-btn">
+                                        <nop-required />
+                                    </div>
+                                </div>
+                                <script type="text/javascript">
+                                        $(document).ready(function() {
+                                            var buyersIdsInput = $('#@Html.IdFor(model => model.SelectedBuyersIds)').data("kendoMultiSelect");
+                                            buyersIdsInput.setOptions({
+                                                buyersIdsInput: false,
+                                                filter: "contains"
+                                            });
+
+                                            @if (Model.AvailablesBuyers.Count == 0)
+                                            {
+                                                <text>
+                                                    buyersIdsInput.setOptions({
+                                                        enable: false,
+                                                        placeholder: 'No hay repartidores disponibles'
+                                                    });
+                                                    buyersIdsInput._placeholder();
+                                                    buyersIdsInput._enable();
+                                                </text>
+                                            }
+                                        });
+                                </script>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

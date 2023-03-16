@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Emails",
+  "SystemName": "Teed.Plugin.Emails",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Emails.dll",
+  "Description": "This plugin allows you to change the contents of the emails"
+}

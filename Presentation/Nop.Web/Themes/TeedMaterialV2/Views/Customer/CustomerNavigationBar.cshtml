@@ -1,0 +1,21 @@
+﻿@{
+    var currentUrlPath = this.Url.ActionContext.HttpContext.Request.Path.Value;
+}
+
+<div class="row">
+    <div class="col s2">
+        <a href="@Url.RouteUrl("CustomerInfo")" @(currentUrlPath == "/customer/info" ? "class=teed-primary-text" : "class=grey-text")>
+            <i style="vertical-align: middle;" class="tiny material-icons">account_circle</i> Pefil
+        </a>
+    </div>
+    <div class="col s3">
+        <a href="@Url.RouteUrl("CustomerAddresses")" @(currentUrlPath == "/customer/addresses" ? "class=teed-primary-text" : "class=grey-text")>
+            <i style="vertical-align: middle;" class="tiny material-icons">add_location</i> Direcciones
+        </a>
+    </div>
+    <div class="col s3">
+        <a href="@Url.RouteUrl("CustomerChangePassword")" @(currentUrlPath == "/customer/changepassword" ? "class=teed-primary-text" : "class=grey-text")>
+            <i style="vertical-align: middle;" class="tiny material-icons">lock</i> Contraseña
+        </a>
+    </div>
+</div>

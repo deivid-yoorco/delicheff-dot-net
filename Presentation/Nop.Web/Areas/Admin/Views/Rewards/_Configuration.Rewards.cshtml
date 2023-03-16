@@ -1,0 +1,51 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.RewardModel
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div>
+                        <p>Esta es una página donde se muestran todos los productos que pueden ser comprados con los puntos acumulados por el cliente. Se muestra como un micrositio. Los productos que aparecen en esta página son los que están publicados y que la cantidad de puntos requeridos sea mayor a cero.</p>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Title" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Title" />
+                            <span asp-validation-for="Title"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Description" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Description" asp-template="RichEditor" />
+                            <span asp-validation-for="Description"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ImageId" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ImageId" />
+                            <span asp-validation-for="ImageId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Active" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Active" />
+                            <span asp-validation-for="Active"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,165 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingVehicle.CreateEditViewModel
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Marca y submarca</label>
+                                    <div title="Ingresa la marca y submarca del vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Brand" />
+                                <span asp-validation-for="Brand" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Modelo (año)</label>
+                                    <div title="Ingresa el año del vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Year" />
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Placas</label>
+                                    <div title="Ingresa las placas del vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Plates" />
+                                <span asp-validation-for="Plates" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Capacidad de carga</label>
+                                    <div title="Ingresa la capacidad de carga del vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="LoadingCapacity" />
+                                <span asp-validation-for="LoadingCapacity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Volumen de nevera</label>
+                                    <div title="Ingresa el volumen de nevera del vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="FridgeVolume" />
+                                <span asp-validation-for="FridgeVolume" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Volumen de manojo</label>
+                                    <div title="Ingresa el volumen de manojo del vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="BunchVolume" />
+                                <span asp-validation-for="BunchVolume" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Activo</label>
+                                    <div title="Indica si el vehículo está activo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Active" />
+                                <span asp-validation-for="Active" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Franquicia</label>
+                                    <div title="Selecciona la franquicia a la que pertenece el vehículo" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="FranchiseId" asp-items="Model.AvailablesFranchises" />
+                                <span asp-validation-for="FranchiseId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Fecha de instalación de GPS</label>
+                                    <div title="Indica la fecha de instalación del GPS para la generación de cobros automáticos" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="hidden" id="dateinput" asp-for="InstallationDateString" />
+                                <input type="text" id="datepicker" class="form-control" value="@(Model.InstallationDateString)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#datepicker").datepicker({
+            dateFormat: "dd-mm-yy",
+            defaultDate: '@(Model.InstallationDateString)',
+            onSelect: function (dateVal) {
+                let dateArray = dateVal.split("-");
+                let day = dateArray[0];
+                let month = parseInt(dateArray[1]) - 1;
+                let year = dateArray[2];
+                console.log(formatDate(new Date(year, month, day)));
+                $("#dateinput").val(formatDate(new Date(year, month, day)));
+            },
+    });
+
+    function formatDate(date) {
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+
+        let parsedMonth = month < 10 ? "0" + month : month;
+        let parsedDay = day < 10 ? "0" + day : day;
+
+        return parsedDay + "-" + parsedMonth + "-" + year;
+    }
+</script>

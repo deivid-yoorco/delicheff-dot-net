@@ -1,0 +1,146 @@
+﻿<div id="payment-netpay-form-container" style="display:none; margin-top:1em">
+    <div id="netpay-msi" style="display: none">
+        <h5>¿Quieres pagar a meses sin intereses?</h5>
+        <select id="netpay-msi-select" class="address-select browser-default"></select>
+    </div>
+    <div id="netpay-form"></div>
+    <div style="margin:1em 0;display:none" id="netPay-processing">
+        <span style="font-weight:bold;color:green;">Estamos procesando tu pago, por favor espera.</span>
+    </div>
+    <div id="netPay-error" style="font-weight:bold;color:red;display:none;margin-top:1em"></div>
+</div>
+<script>
+    const netPaySuccess = (e) => {
+        $("#third-step-billing-address-select-new").attr('disabled', true);
+        $('#loading-confirm').addClass('active');
+        const addressId = $("#third-step-billing-address-select-new").val();
+
+        //SAVE PAYMENT METHOD
+        var payment = $('#payment-method-select-container').val();
+        var points = false;
+        var url = 'Checkout/SelectPaymentMethodNew?paymentmethod=' + payment + '&UseRewardPoints=' + points;
+        $.ajax({
+            cache: false,
+            url: url,
+            type: 'POST',
+            success: function () {
+                // PLACE ORDER
+                var placeOrderBody = {
+                    messagegift: $('#message-gift').val(),
+                    signsgift: $('#name-signs-gift').val()
+                };
+
+                $.ajax({
+                    cache: false,
+                    url: 'Checkout/CreateOrderV2/',
+                    data: placeOrderBody,
+                    type: 'post',
+                    success: function (response) {
+                        if (response.error) {
+                            $("#netPay-error").show();
+                            $("#netPay-error").html("Ocurrió un problema, por favor intenta con otra forma de pago.");
+                            $('#loading-confirm').removeClass('active');
+                            $("#third-step-billing-address-select-new").attr('disabled', false);
+                            return;
+                        }
+
+                        let dataObject = $.parseJSON(e.message.data);
+                        let body = {
+                            token: dataObject.token,
+                            billingAddressId: addressId,
+                            lastFourDigits: dataObject.lastFourDigits,
+                            brand: dataObject.brand,
+                            orderId: response.orderId,
+                            msiValue: $("#netpay-msi-select option:selected")?.val()
+                        };
+
+                        $.ajax({
+                            cache: false,
+                            url: '/Admin/PaymentNetPay/ProcessPayment',
+                            type: 'POST',
+                            data: body,
+                            success: function (result) {
+                                console.log("PROCESS RESULT", result);
+                                window.location.replace(result.RedirectUrl);
+                            },
+                            error: function () {
+                                $("#netPay-error").show();
+                                $("#netPay-error").html("Ocurrió un problema, por favor intenta con otra forma de pago.");
+                                $('#loading-confirm').removeClass('active');
+                                $("#third-step-billing-address-select-new").attr('disabled', false);
+                            }
+                        });
+                    },
+                    error: function () {
+                        $("#netPay-error").show();
+                        $("#netPay-error").html("Ocurrió un problema, por favor intenta con otra forma de pago.");
+                        $('#loading-confirm').removeClass('active');
+                        $("#third-step-billing-address-select-new").attr('disabled', false);
+                    }
+                });
+            },
+            error: function () {
+                $("#netPay-error").show();
+                $("#netPay-error").html("La tarjeta ingresada no es válida.");
+                $('#loading-confirm').removeClass('active');
+                return;
+            }
+        });
+    };
+
+    const netPayError = (e) => {
+        console.log(e);
+        $("#netPay-error").show();
+        $("#netPay-error").html("Ocurrió un problema, por favor intenta con otra forma de pago.");
+        $('#loading-confirm').removeClass('active');
+        $("#third-step-billing-address-select-new").attr('disabled', false);
+    };
+
+    const buildNetPayForm = () => {
+        $("#netpay-msi").hide();
+        $("#netpay-msi-select").empty();
+        $("#payment-netpay-form-container").hide();
+        $('#loading-confirm').addClass('active');
+        $('#PaymentAlert').empty().html(' ');
+        $('#PaymentAlert').show();
+        $('#PaymentAlert').append('<label>Ingresa la información solicitada para pagar de forma segura con tu tarjeta de crédito o débito.</label>');
+        $("#netPay-error").hide();
+        $("#confirm-button-disable").hide();
+
+        $.ajax({
+            cache: false,
+            url: '/Admin/PaymentNetPay/GetPaymentData',
+            type: 'GET',
+            success: function (data) {
+
+                // GET MSI DATA
+                $.ajax({
+                    cache: false,
+                    url: '/Admin/PaymentNetPay/GetMsiOptions',
+                    type: 'GET',
+                    success: function (data) {
+                        $("#netpay-msi-select").empty();
+                        if (data) {
+                            $("#netpay-msi").show();
+                            $("#netpay-msi-select").append(data);
+                        }
+                    },
+                    error: function (error) {
+                        console.log('ERROR GETTING MSI DATA:', error);
+                    }
+                });
+                NetPay.setApiKey(data.publicKey);
+                NetPay.setSandboxMode(data.sandboxMode);
+                $("#payment-netpay-form-container").show();
+                NetPay.form.generate("netpay-form", netPaySuccess, netPayError, { title: "", submitText: "" });
+                $('#loading-confirm').removeClass('active');
+                $("#confirm-button-disable").hide();
+            },
+            error: function () {
+                $("#netPay-error").show();
+                $("#netPay-error").html("Ocurrió un problema, por favor intenta con otra forma de pago.");
+                $('#loading-confirm').removeClass('active');
+            }
+        });
+    };
+</script>

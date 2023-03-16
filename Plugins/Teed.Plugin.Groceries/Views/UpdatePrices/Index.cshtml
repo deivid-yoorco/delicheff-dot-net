@@ -1,0 +1,101 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Product";
+}
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Actualizar precios
+    </h1>
+    <div class="pull-right">
+        <a href="/admin/product/DownloadPricesReport?days=90" class="btn bg-blue" target="_blank">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar reporte de margen bruto 90 dias
+        </a>
+        <a href="/admin/product/DownloadPricesReport?days=30" class="btn bg-blue" target="_blank">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar reporte de margen bruto 30 dias
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("UpdateCategoryPricesData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: false,
+                serverFiltering: false,
+                serverSorting: false
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "CategoryName",
+                    title: "Categoría hijo",
+                },
+                {
+                    field: "CurrentMargin",
+                    title: "Margen / Costo plataforma",
+                },
+                {
+                    field: "CategoryId",
+                    title: "Reporte de categoría",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a target="_blank" class="btn btn-primary" href="DownloadPricesReportByProduct?categoryId=#=CategoryId#&days=90"><i class="fa fa-file-excel-o"></i>Descargar reporte 90 dias</a><br />
+                               <a target="_blank" class="btn btn-primary" href="DownloadPricesReportByProduct?categoryId=#=CategoryId#&days=30"><i class="fa fa-file-excel-o"></i>Descargar reporte 30 dias</a>`
+                },
+                {
+                    field: "CategoryId",
+                    title: "Modificar precios",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-primary" href="UpdateCategoryPrices?categoryId=#=CategoryId#"><i class="fa fa-edit"></i>Modificar precios</a>`
+                }
+            ]
+        });
+    });
+</script>

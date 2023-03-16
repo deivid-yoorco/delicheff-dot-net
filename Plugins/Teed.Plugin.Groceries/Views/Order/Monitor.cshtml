@@ -1,0 +1,110 @@
+﻿@model Teed.Plugin.Groceries.Models.Order.DailyOrdersModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderMonitor");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Order";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Monitoreo de pedidos @(Model.SelectedDate.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-MX")))
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="MonitorDateList">regresar a la lista de fechas</a>
+        </small>
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div style="margin: 1em">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <tr>
+                                <th></th>
+                                <th>Pedidos actuales</th>
+                                <th>Límite de pedidos</th>
+                            </tr>
+                            <tr>
+                                <td>1:00 PM - 3:00 PM</td>
+                                <td>@(Model.OrdersTime1)</td>
+                                <td>@(Model.OrdersTime1Limit)</td>
+                            </tr>
+                            <tr>
+                                <td>3:00 PM - 5:00 PM</td>
+                                <td>@(Model.OrdersTime2)</td>
+                                <td> @(Model.OrdersTime2Limit)</td>
+                            </tr>
+                            <tr>
+                                <td>5:00 PM - 7:00 PM</td>
+                                <td>@(Model.OrdersTime3)</td>
+                                <td>@(Model.OrdersTime3Limit)</td>
+                            </tr>
+                            <tr>
+                                <td>7:00 PM - 9:00 PM</td>
+                                <td>@(Model.OrdersTime4)</td>
+                                <td>@(Model.OrdersTime4Limit)</td>
+                            </tr>
+                            @{
+                                var limitReached = Model.OrdersTotal >= Model.OrdersTotalLimit;
+                            }
+                            <tr>
+                                <td style="font-weight: bold; color: @(limitReached ? "green" : "red")">TOTAL</td>
+                                <td style="font-weight: bold; color: @(limitReached ? "green" : "red")">@(Model.OrdersTotal)</td>
+                                <td style="font-weight: bold; color: @(limitReached ? "green" : "red")">@(Model.OrdersTime1Limit + Model.OrdersTime2Limit + Model.OrdersTime3Limit+ Model.OrdersTime4Limit)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div style="margin: 1em">
+                    <h3>Pedidos por región</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Región</th>
+                                <th>1:00 PM - 3:00 PM</th>
+                                <th>3:00 PM - 5:00 PM</th>
+                                <th>5:00 PM - 7:00 PM</th>
+                                <th>7:00 PM - 9:00 PM</th>
+                                <th>TOTAL</th>
+                            </tr>
+                            @foreach (var region in Model.Regions)
+                            {
+                                <tr>
+                                    <td>@region.RegionName</td>
+                                    <td>@region.OrdersTime1 / @region.OrdersTime1Limit</td>
+                                    <td>@region.OrdersTime2 / @region.OrdersTime2Limit</td>
+                                    <td>@region.OrdersTime3 / @region.OrdersTime3Limit</td>
+                                    <td>@region.OrdersTime4 / @region.OrdersTime4Limit</td>
+                                    <td>@(region.OrdersTotal) / @(region.OrdersTotalLimit) (@Math.Round(((decimal)region.OrdersTotal / (decimal)region.OrdersTotalLimit) * 100)%)</td>
+                                </tr>
+                            }
+                            <tr>
+                                @{
+                                    var total1 = Model.Regions.Select(x => x.OrdersTime1).DefaultIfEmpty().Sum();
+                                    var total1Limit = Model.Regions.Select(x => x.OrdersTime1Limit).DefaultIfEmpty().Sum();
+                                    var total2 = Model.Regions.Select(x => x.OrdersTime2).DefaultIfEmpty().Sum();
+                                    var total2Limit = Model.Regions.Select(x => x.OrdersTime2Limit).DefaultIfEmpty().Sum();
+                                    var total3 = Model.Regions.Select(x => x.OrdersTime3).DefaultIfEmpty().Sum();
+                                    var total3Limit = Model.Regions.Select(x => x.OrdersTime3Limit).DefaultIfEmpty().Sum();
+                                    var total4 = Model.Regions.Select(x => x.OrdersTime4).DefaultIfEmpty().Sum();
+                                    var total4Limit = Model.Regions.Select(x => x.OrdersTime4Limit).DefaultIfEmpty().Sum();
+                                }
+                                <td style="font-weight: bold">TOTAL</td>
+                                <td style="font-weight: bold">@total1 / @total1Limit</td>
+                                <td style="font-weight: bold">@total2 / @total2Limit</td>
+                                <td style="font-weight: bold">@total3 / @total3Limit</td>
+                                <td style="font-weight: bold">@total4 / @total4Limit</td>
+                                <td style="font-weight: bold">@(total1 + total2+ total3 +total4) / @(total1Limit+ total2Limit+ total3Limit+ total4Limit) (@Math.Round(((decimal)(total1 + total2 + total3 + total4) / (decimal)(total1Limit + total2Limit + total3Limit + total4Limit)) * 100)%)</td>
+
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

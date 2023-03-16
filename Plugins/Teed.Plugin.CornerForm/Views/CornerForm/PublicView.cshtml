@@ -1,0 +1,179 @@
+﻿@model Teed.Plugin.CornerForm.CornerFormSettings
+
+@*CORNER FORM*@
+<style>
+    .open-button {
+        background-color: @(Model.ButtonColor);
+        color: @(Model.ButtonTextColor);
+        padding: 16px 20px;
+        border: none;
+        cursor: pointer;
+        opacity: 0.8;
+        position: fixed;
+        bottom: 23px;
+        right: 28px;
+        max-width: 40%;
+        text-align: center;
+    }
+
+    /* The popup chat - hidden by default */
+    .chat-popup {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        right: 15px;
+        border: 3px solid #f1f1f1;
+        z-index: 100;
+        background-color: white;
+    }
+
+    /* Add styles to the form container */
+    .form-container {
+        max-width: 300px;
+        padding: 10px;
+        background-color: white;
+        color: black;
+    }
+
+        /* Full-width textarea */
+        .form-container textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            background: #f1f1f1;
+            resize: none;
+            min-height: 200px;
+        }
+
+            /* When the textarea gets focus, do something */
+            .form-container textarea:focus {
+                background-color: #ddd;
+                outline: none;
+            }
+
+        /* Set a style for the submit/send button */
+        .form-container .btn {
+            background-color: @(Model.ButtonColor);
+            color: @(Model.ButtonTextColor);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        /* Add a red background color to the cancel button */
+        .form-container .cancel {
+            background-color: red;
+        }
+
+        /* Add some hover effects to buttons */
+        .form-container .btn:hover, .open-button:hover {
+            opacity: 1;
+        }
+
+        .form-container h6 {
+            margin-bottom: 1em;
+            text-align: center;
+            font-weight: bold;
+        }
+
+    .success-msg {
+        color: green;
+        font-style: italic;
+    }
+
+    .error-msg {
+        color: red;
+        font-style: italic;
+    }
+
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin: 10px 0 15px 0;
+    }
+
+    #buttons-container {
+        margin-top: 20px
+    }
+</style>
+<div id="corner-form">
+    <div class="show-on-medium-and-up hide-on-small-only">
+        <button class="open-button" id="form-button" onclick="openCornerForm()">@(Model.MinimizedText)</button>
+        <div class="chat-popup" id="myCornerForm">
+            <div style="width: 100%; text-align: right; background-color: white; max-width: 300px">
+                <button type="button" class="btn-flat cancel cancel-button" onclick="closeCornerForm()">
+                    <span style="color: black" class="pull-right clickable close-icon" data-effect="fadeOut"><i class="small material-icons">close</i></span>
+                </button>
+            </div>
+            <form class="form-container">
+                <h6 class="corner-form-title">@(Model.Question)</h6>
+                <label for="msg"><b>Respuesta</b></label>
+                <textarea placeholder="Escribe tu respuesta aquí" name="msg" class="form-answer" required></textarea>
+                <div style="margin: 10px 0; display: none" class="success-msg">
+                    <span class="success-msg">¡Gracias! Tu mensaje fue enviado correctamente.</span>
+                </div>
+                <div style="margin: 10px 0; display: none" class="error-msg">
+                    <span class="error-msg">Ocurrió un problema enviando tu mensaje. Por favor, inténtalo de nuevo.</span>
+                </div>
+                <div style="display: none" class="loading-container">
+                    <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                        <div class="spinner-layer spinner-green-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div><div class="gap-patch">
+                                <div class="circle"></div>
+                            </div><div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span style="margin-left: 10px">Enviando...</span>
+                </div>
+                <div id="buttons-container">
+                    <button type="button" class="btn send-button" onclick="onCornerFormSubmit()">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="show-on-small hide-on-med-and-up">
+        <a class="open-button modal-trigger" id="form-button" href="#modal-corner-form" onclick="openCornerForm()">@(Model.MinimizedText)</a>
+        <div id="modal-corner-form" class="modal">
+            <div style="width: 100%; text-align: right; background-color: white;">
+                <button type="button" class="btn-flat cancel cancel-button modal-close" onclick="closeCornerForm()">
+                    <span style="color: black" class="pull-right clickable close-icon" data-effect="fadeOut"><i class="small material-icons">close</i></span>
+                </button>
+            </div>
+            <form class="form-container" style="width:100%;max-width:100%">
+                <h6 class="corner-form-title">@(Model.Question)</h6>
+                <label for="msg"><b>Respuesta</b></label>
+                <textarea placeholder="Escribe tu respuesta aquí" name="msg" class="form-answer" required></textarea>
+                <div style="margin: 10px 0; display: none" class="success-msg">
+                    <span class="success-msg">¡Gracias! Tu mensaje fue enviado correctamente.</span>
+                </div>
+                <div style="margin: 10px 0; display: none" class="error-msg">
+                    <span class="error-msg">Ocurrió un problema enviando tu mensaje. Por favor, inténtalo de nuevo.</span>
+                </div>
+                <div style="display: none" class="loading-container">
+                    <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                        <div class="spinner-layer spinner-green-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div><div class="gap-patch">
+                                <div class="circle"></div>
+                            </div><div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span style="margin-left: 10px">Enviando...</span>
+                </div>
+                <div id="buttons-container">
+                    <button type="button" class="btn send-button" onclick="onCornerFormSubmit()">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/Plugins/Teed.Plugin.CornerForm/src/js/custom.js"></script>

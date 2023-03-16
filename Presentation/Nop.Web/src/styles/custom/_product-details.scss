@@ -1,0 +1,34 @@
+﻿
+h1.product-name {
+    font-size: 30px;
+    margin-top: 0;
+}
+
+.thumb-item {
+    float: left;
+    padding-left: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+
+.product-reviews-overview {
+
+    padding: 10px 0;
+
+    .product-description-rating i {
+        color: $stars_color;
+        font-size: 16px;
+        margin-left: -5px;
+    }
+}
+
+.old-product-price {
+    text-decoration: line-through;
+    font-size: 18px;
+    color: $error-color;
+}
+
+.product-price span, .non-discounted-price span{
+    font-weight: bold;
+    font-size: 20px;
+}

@@ -1,0 +1,50 @@
+﻿@model AdminHeaderLinksModel
+
+@if (Model.IsCustomerImpersonated || Model.DisplayAdminLink)
+{
+    <div class="navbar-fixed top-small-navbar">
+        <nav class="black z-depth-0">
+            <div class="nav-wrapper container">
+                <ul class="left">
+                    @if (Model.IsCustomerImpersonated)
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("Logout")" title="@T("Account.ImpersonatedAs.Finish.Hint")">
+                                @T("Account.ImpersonatedAs.Finish")
+                            </a>
+                        </li>
+                    }
+                    @if (Model.DisplayAdminLink)
+                    {
+                        <li>
+                            <a href="@Url.Content("~/Admin")">
+                                @T("Account.Administration")
+                            </a>
+                        </li>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.EditPageUrl))
+                    {
+                        <li>
+                            <a href="@Model.EditPageUrl">
+                                @T("Common.ManagePage")
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    </div>
+}
+<div class="navbar-fixed top-small-navbar">
+    <nav class="z-depth-0" style="background-color: #b9e9ff;">
+        <div class="nav-wrapper container">
+            <ul class="left">
+                <li>
+                    <a href="@Url.Content("~/medidas-sanitarias")">
+                        CONOCE NUESTRAS MEDIDAS SANITARIAS
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>

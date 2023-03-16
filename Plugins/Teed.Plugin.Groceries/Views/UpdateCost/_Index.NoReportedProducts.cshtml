@@ -1,0 +1,137 @@
+﻿@model Teed.Plugin.Groceries.Controllers.ReportGroupModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div id="grid-3"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#grid-3").kendoGrid({
+            dataSource: {
+                data: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.NoReportedProducts).Replace("'", ""))),
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: false,
+                serverFiltering: false,
+                serverSorting: false,
+                schema: {
+                    model: {
+                        id: "ProductId",
+                        fields: {
+                            CurrentCostValue: { editable: true, type: "number" },
+                            ProductName: { editable: false },
+                            Published: { editable: false },
+                            LastReportedCost: { editable: false },
+                            AverageCost: { editable: false },
+                            MedianCost: { editable: false },
+                            CurrentCost: { editable: false },
+                        }
+                    }
+                },
+                transport: {
+                    update: function (options) {
+                        let postData = {
+                            ProductId: options.data.ProductId,
+                            NewCost: options.data.CurrentCostValue
+                        };
+                        $.ajax({
+                            url: '/Admin/UpdateCost/UpdateProductCost',
+                            method: 'POST',
+                            data: postData,
+                            success: () => {
+
+                            },
+                            error: (error) => {
+                                alert("NO FUE POSIBLE ACTUALIZAR EL COSTO DEL PRODUCTO. INTÉNTALO DE NUEVO.")
+                                console.log('ERROR UPDATING PRODUCT COST:', error)
+                            }
+                        });
+                        options.success(options.data.CurrentCostValue);
+                    },
+                    read: function (options) {
+                        options.success(@(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.NoReportedProducts).Replace("'", ""))));
+                    },
+                },
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "ProductName",
+                    title: "Producto",
+                    template: function (dataItem) {
+                        return "<a target='_blank' href='/Admin/Product/Edit/" + dataItem.ProductId + "'>" + dataItem.ProductName + "<a/>";
+                    }
+                },
+                {
+                    field: "Published",
+                    title: "Publicado",
+                    attributes: { style: "text-align:center" },
+                    template: '# if(Published) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                },
+                {
+                    field: "LastReportedCost",
+                    title: "Últimos 10 costos reportados por compradores",
+                    template: function (dataItem) {
+                        let list = "<ul>";
+                        $.each(dataItem.LastReportedCost, function (i, e) {
+                            list += "<li>" + e + "</li>";
+                        });
+                        list += "</ul>";
+                        return list;
+                    }
+                },
+                {
+                    field: "AverageCost",
+                    title: "Promedio de últimos 3 costos reportados por compradores, mediana de últimos 3 costos reportados por compradores y costo en plataforma",
+                    template: function (dataItem) {
+                        let list = "<ul>";
+                        list += "<li>Promedio de últimos 3 costos reportados por compradores: " + dataItem.AverageCost + "</li>";
+                        list += "<li>Mediana de últimos 3 costos reportados por compradores: " + dataItem.MedianCost + "</li>";
+                        list += "<li>Costo en plataforma: " + dataItem.CurrentCost + "</li>";
+                        list += "</ul>";
+                        return list;
+                    }
+                },
+                {
+                    field: "CurrentCostValue",
+                    title: "Nuevo costo en plataforma"
+                },
+                {
+                    command: [
+                        {
+                            name: "edit",
+                            text: {
+                                edit: "Editar",
+                                update: "Actualizar",
+                                cancel: "Cancelar"
+                            }
+                        }
+                    ]
+                }
+            ],
+            dataBound: function (e) {
+                $('#grid-3 tr').each(function (i, e) { console.log($(e).find('td').last().css('width', '15%')) })
+            },
+        });
+    });
+</script>

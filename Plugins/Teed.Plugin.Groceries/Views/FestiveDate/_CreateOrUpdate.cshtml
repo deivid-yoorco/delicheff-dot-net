@@ -1,0 +1,167 @@
+﻿@model Teed.Plugin.Groceries.Models.FestiveDate.FestiveDateModel
+@{
+    var currentSelectedDate = Model.Date == DateTime.MinValue ? DateTime.Now.ToString("dd-MM-yyyy") : Model.AppliesYearly ? Model.Date.ToString("dd-MM") : Model.Date.ToString("dd-MM-yyyy");
+    var dateForFirst = Model.Date == DateTime.MinValue ? DateTime.Now.ToString("MM-dd-yyyy") : Model.AppliesYearly ? Model.Date.ToString("MM-dd") : Model.Date.ToString("MM-dd-yyyy");
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input asp-for="Id" hidden />
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Fecha festiva</label>
+                                    <div title="Fecha en que aplica la festividad." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9 datepicker-container">
+                                <input type="hidden" id="Date" asp-for="Date" />
+                                <input type="text" id="datepicker" class="form-control" value="@(currentSelectedDate)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Aplica de forma anual</label>
+                                    <div title="Especifica si la fecha seleccionada aplica de forma anual, es decir que el mes y día seleccionados se aplicaran como fecha festiva para todos los años por igual." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="AppliesYearly" />
+                                <span asp-validation-for="AppliesYearly" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <div class="label-wrapper">
+                                    <label class="control-label">No aplica para area de nómina</label>
+                                    <div title="Activar esta opción para NO utilizar esta fecha en el área de nómina, donde, de NO estar activar esta opción, se utilizará para no agregar nuevas incidencias en dichas fechas." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="DontApplyToPayroll" />
+                                <span asp-validation-for="DontApplyToPayroll" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <script>
+                            var takenDates = [];
+                            $(document).ready(function () {
+                                $('#Date').val('@dateForFirst');
+                                @if (Model.Id > 0)
+                                {
+                                    if (Model.AppliesYearly)
+                                    {
+                                <text>
+                                yearlyDatePicker();
+                                </text>
+                                    }
+                                    else
+                                    {
+                                <text>
+                                normalDatePicker();
+                                </text>
+                                    }
+                                }
+                                else
+                                {
+                                <text>
+                                normalDatePicker();
+                                </text>
+                                }
+                                @foreach (var date in Model.TakenDates)
+                                {
+                                <text>
+                                takenDates.push('@(!date.AppliesYearly ? date.Date.ToString("dd-MM-yyyy") : (new DateTime(DateTime.Now.Year, date.Date.Month, date.Date.Day)).ToString("dd-MM-yyyy"))');
+                                </text>
+                                }
+                                $("#AppliesYearly").on("change", function () {
+                                    var checked = $(this).prop('checked');
+                                    var dateSplit = $('#Date').val().split("-");
+                                    var input = '<input type="text" id="datepicker" class="form-control" value="' +
+                                        (checked ? dateSplit[1] + "-" + dateSplit[0] : dateSplit[1] + "-" + dateSplit[0] + "-" + dateSplit[2])
+                                        + '">';
+
+                                    $('#datepicker').remove();
+                                    $('.datepicker-container').append(input);
+                                    if (checked)
+                                        yearlyDatePicker();
+                                    else
+                                        normalDatePicker();
+                                    });
+                            });
+
+                            function normalDatePicker() {
+                                $("#datepicker").datepicker({
+                                    dateFormat: "dd-mm-yy",
+                                    defaultDate: '@(currentSelectedDate)',
+                                    onSelect: function (dateVal) {
+                                        let dateArray = dateVal.split("-");
+                                        let day = dateArray[0];
+                                        let month = parseInt(dateArray[1]) - 1;
+                                        let year = dateArray[2];
+                                        console.log(formatDate(new Date(year, month, day)));
+                                        $("#Date").val(formatDate(new Date(year, month, day)));
+                                        $("#Date").attr('value', (month + 1) + "-" + day + "-" + year);
+                                    },
+                                    beforeShowDay: function (date) {
+                                        var string = jQuery.datepicker.formatDate('dd-mm-yy', date);
+                                        return [takenDates.indexOf(string) == -1]
+                                    }
+                                });
+                            }
+
+                            function yearlyDatePicker() {
+                                $('#datepicker').datepicker({
+                                    changeYear: false,
+                                    dateFormat: 'dd-mm',
+                                    defaultDate: '@(currentSelectedDate)',
+                                    onSelect: function (dateVal) {
+                                        let dateArray = dateVal.split("-");
+                                        let day = dateArray[0];
+                                        let month = parseInt(dateArray[1]) - 1;
+                                        let year = new Date().getFullYear();
+                                        console.log(formatDate(new Date(year, month, day)));
+                                        $("#Date").val(formatDate(new Date(year, month, day)));
+                                        $("#Date").attr('value', (month + 1) + "-" + day + "-" + new Date().getFullYear());
+                                    },
+                                    beforeShowDay: function (date) {
+                                        var string = jQuery.datepicker.formatDate('dd-mm-yy', date);
+                                        return [takenDates.indexOf(string) == -1]
+                                    }
+                                }).focus(function () {
+                                    $(".ui-datepicker-year").hide();
+                                });
+                            }
+
+                            function formatDate(date) {
+                                let year = date.getFullYear();
+                                let month = date.getMonth() + 1;
+                                let day = date.getDate();
+
+                                let parsedMonth = month < 10 ? "0" + month : month;
+                                let parsedDay = day < 10 ? "0" + day : day;
+
+                                return parsedDay + "-" + parsedMonth + "-" + year;
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,94 @@
+﻿@model Teed.Plugin.MessageBird.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+    Html.SetActiveMenuItemSystemName("MessageBird.Configure");
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="IsSandbox_OverrideForStore" asp-input="IsSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="IsSandbox" />
+                        <span asp-validation-for="IsSandbox"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SandboxApiKey_OverrideForStore" asp-input="SandboxApiKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>API Key de pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SandboxApiKey" class="form-control" />
+                        <span asp-validation-for="SandboxApiKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SandboxWhatsAppChannelId_OverrideForStore" asp-input="SandboxWhatsAppChannelId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Id canal WhatsApp de pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SandboxWhatsAppChannelId" class="form-control" />
+                        <span asp-validation-for="SandboxWhatsAppChannelId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SandboxNameSpace_OverrideForStore" asp-input="SandboxNameSpace" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Namespace de pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SandboxNameSpace" class="form-control" />
+                        <span asp-validation-for="SandboxNameSpace" class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="ApiKey_OverrideForStore" asp-input="ApiKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>API Key de producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="ApiKey" class="form-control" />
+                        <span asp-validation-for="ApiKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="WhatsAppChannelId_OverrideForStore" asp-input="WhatsAppChannelId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Id canal WhatsApp de producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="WhatsAppChannelId" class="form-control" />
+                        <span asp-validation-for="WhatsAppChannelId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="NameSpace_OverrideForStore" asp-input="NameSpace" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Namespace de producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="NameSpace" class="form-control" />
+                        <span asp-validation-for="NameSpace" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

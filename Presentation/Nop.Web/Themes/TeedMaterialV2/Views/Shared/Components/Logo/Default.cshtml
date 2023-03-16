@@ -1,0 +1,20 @@
+﻿@model LogoModel
+<style>
+    @@media only screen and (max-width: 600px) {
+        #logo {
+            max-width: none !important;
+        }
+    }
+</style>
+<a id="logo-container" href="/" class="brand-logo">
+    @{ string newStyle = ""; }
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+    {
+        newStyle = "style=\"height: 50px;\"";
+    }
+    else
+    {
+        newStyle = "";
+    }
+    <img id="logo"  width="250" height="40" title="" alt="@Model.StoreName" src="@Model.LogoPath" @Html.Raw(newStyle)/>
+</a>

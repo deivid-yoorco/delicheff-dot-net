@@ -1,0 +1,38 @@
+﻿@model Teed.Plugin.Payroll.Components.EmployeeNumberEditorModel
+@if (Model.ShowEditor)
+{
+    <div class="form-group">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="control-label">Número de empleado</label>
+                <div title="El número de empleado se utiliza en las descargas de asistencias del reloj checador, si este no está especificado no se incluirá a este usuario dentro de dichos reportes." class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="input-group">
+                <input type="number" id="employee-number" name="employee-number" class="form-control text-box single-line" value="@(Model.EmployeeNumber)">
+                <div class="input-group-btn">
+                    <button type="button" id="submit-employee-number-button" class="btn btn-info" onclick="saveEmployeeNumber()">
+                        Actualizar número de empleado
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        const saveEmployeeNumber = () => {
+            $.ajax({
+                url: '/Admin/Customer/UpdateEmployeeNumber/@Model.CustomerId/' + $('#employee-number').val(),
+                method: 'GET',
+                success: () => {
+                    window.location.reload();
+                },
+                error: () => {
+                    $("#submit-employee-number-button").html("No fue posible guardar el perfil operativo.");
+                }
+            });
+        };
+    </script>
+} 

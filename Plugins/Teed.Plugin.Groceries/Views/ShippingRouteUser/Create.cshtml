@@ -1,0 +1,152 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingUserRoute.CreateViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRouteUser");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Crear responsable de ruta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de responsables de ruta</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div>
+                            <input asp-for="SelectedDate" type="hidden" id="filterDate" />
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Fecha</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group" style="width:100%">
+                                        <input class="form-control" id="datepicker" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Usuario encargado</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="UserInChargeId" type="hidden" id="userId" />
+                                    <input id="users" style="width: 100%;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Ruta</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="ShippingRouteId" type="hidden" id="shippingRouteId" />
+                                    <input id="shippingRoutes" style="width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+    $(document).ready(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker();
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        $("#users").kendoComboBox({
+            placeholder: "Selecciona al usuario...",
+            dataTextField: "User",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/ShippingRouteUser/UserListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#users").data("kendoComboBox").value()) {
+                    $("#users").data("kendoComboBox").value($("#userId").val());
+                }
+            },
+            select: function (e) {
+                $("#userId").val(this.dataItem(e.item.index()).Id);
+            }
+        });
+
+        $("#shippingRoutes").kendoComboBox({
+            placeholder: "Selecciona la ruta...",
+            dataTextField: "Route",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/ShippingRouteUser/RouteListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#shippingRoutes").data("kendoComboBox").value()) {
+                    $("#shippingRoutes").data("kendoComboBox").value($("#shippingRouteId").val());
+                }
+            },
+            select: function (e) {
+                $("#shippingRouteId").val(this.dataItem(e.item.index()).Id);
+            }
+        });
+    });
+</script>

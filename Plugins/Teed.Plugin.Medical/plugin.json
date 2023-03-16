@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Teed Plugins",
+  "FriendlyName": "Teed Medical Plugin",
+  "SystemName": "Teed.Medical",
+  "Version": "1.30",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Medical.dll",
+  "Description": "Teed Medical Page"
+}

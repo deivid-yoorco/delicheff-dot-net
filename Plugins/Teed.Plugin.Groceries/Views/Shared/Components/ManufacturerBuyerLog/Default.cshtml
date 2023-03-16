@@ -1,0 +1,15 @@
+﻿@model string
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Bitácora de asignación de comprador default
+                </div>
+                <div class="panel-body">
+                    @Html.Raw(Model?.Replace("\n", "<br />"))
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

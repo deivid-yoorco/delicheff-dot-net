@@ -1,0 +1,38 @@
+﻿@model SocialModel
+
+@if (!string.IsNullOrEmpty(Model.FacebookLink))
+{
+    <a style="margin-right: 5px" href="@Model.FacebookLink" target="_blank" title="@T("Footer.FollowUs.Facebook")">
+        <img src="/images/icons/FB.png" width="35" height="35" alt="Facebook" />
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.TwitterLink))
+{
+    <a style="margin-right: 5px" href="@Model.TwitterLink" target="_blank" title="@T("Footer.FollowUs.Twitter")">
+        <img src="/images/icons/TW.png" width="35" height="35" alt="Twitter" />
+    </a>
+}
+@if (Model.NewsEnabled)
+{
+    <a style="margin-right: 5px" href="@Url.RouteUrl("NewsRSS", new {languageId = Model.WorkingLanguageId})" target="_blank" title="@T("Footer.FollowUs.RSS")">
+        <i class="fas fa-rss"></i>
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.YoutubeLink))
+{
+    <a style="margin-right: 5px" href="@Model.YoutubeLink" target="_blank" title="@T("Footer.FollowUs.Youtube")">
+        <img src="/images/icons/YTB.png" width="35" height="35" alt="Youtube" />
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.GooglePlusLink))
+{
+    <a style="margin-right: 5px" href="@Model.GooglePlusLink" target="_blank" title="@T("Footer.FollowUs.GooglePlus")">
+        <i class="fab fa-google-plus-g"></i>
+    </a>
+}
+@if (!string.IsNullOrEmpty(Model.InstagramLink))
+{
+    <a style="margin-right: 5px" href="@Model.InstagramLink" target="_blank" title="Instagram">
+        <img src="/images/icons/IG.png" width="35" height="35" alt="Instagram" />
+    </a>
+}

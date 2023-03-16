@@ -1,0 +1,342 @@
+﻿@model Teed.Plugin.Medical.Models.Visit.VisitModel
+@{
+    var selectedUser = (int)ViewData["SelectedUser"];
+    var branchId = (int)ViewData["BranchId"];
+    var isAdmin = (bool)ViewData["IsAdmin"] ? 1 : 0;
+    var isDoctor = (bool)ViewData["IsDoctor"] ? 1 : 0;
+    var availableUsers = (List<SelectListItem>)ViewData["DoctorsAndNurses"];
+    var availableProducts = (List<SelectListItem>)ViewData["Treatments"];
+}
+<script>
+    $(document).ready(function () {
+    if ($("#isAdmin").val() == 1) {
+        $("#doctors").kendoComboBox({
+        placeholder: "Selecciona el doctor...",
+        dataTextField: "Doctor",
+        dataValueField: "Id",
+        filter: "contains",
+        autoBind: true,
+        minLength: 1,
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: "@Html.Raw(Url.Action("DoctorListData", "Visit"))",
+                    type: "POST",
+                    data: addAntiForgeryToken
+                }
+            }
+        },
+        dataBound: function (e) {
+            var combobox = $("#doctors").data('kendoComboBox');
+            if (combobox.dataSource.data().length == 1) {
+                var id = combobox.dataSource.data()[0].Id;
+                combobox.value(id);
+                $("#doctorId").val(id);
+            }
+            if (!$("#doctorId").val()) {
+                $("#doctors").data("kendoComboBox").value($("#doctorId").val());
+            }
+        },
+        select: function (e) {
+            $("#doctorId").val(this.dataItem(e.item.index()).Id);
+            //updateAppointments();
+        },
+        change: function (e) {
+            if (this.selectedIndex == -1) {
+                $("#doctors").data("kendoComboBox").value("");
+            }
+            //updateAppointments();
+        }
+        });
+    }
+
+    $("#appointments").kendoComboBox({
+        placeholder: "Selecciona la cita..."
+    });
+
+    $("#patients").kendoComboBox({
+        placeholder: "Selecciona al paciente...",
+        dataTextField: "Patient",
+        dataValueField: "Id",
+        filter: "contains",
+        autoBind: true,
+        minLength: 1,
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: "@Html.Raw(Url.Action("PatientListData", "Visit"))",
+                    type: "POST",
+                    data: addAntiForgeryToken
+                }
+            }
+        },
+        dataBound: function (e) {
+
+            if (@selectedUser != 0 && !$("#patientId").val()) {
+                $("#patients").data("kendoComboBox").value(@selectedUser);
+                $("#patientId").val(@selectedUser);
+            }
+        },
+        select: function (e) {
+            $("#patientId").val(this.dataItem(e.item.index()).Id);
+            //updateAppointments();
+        },
+        change: function (e) {
+            if (this.selectedIndex == -1) {
+                $("#patients").data("kendoComboBox").value("");
+            }
+            //updateAppointments();
+        }
+    });
+
+    $("#branches").kendoComboBox({
+        placeholder: "Selecciona la sucursal...",
+        dataTextField: "Branch",
+        dataValueField: "Id",
+        filter: "contains",
+        autoBind: true,
+        minLength: 1,
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: "@Html.Raw(Url.Action("BranchListData", "Visit"))",
+                    type: "POST",
+                    data: addAntiForgeryToken
+                }
+            }
+        },
+        dataBound: function (e) {
+            var combobox = $("#branches").data('kendoComboBox');
+            if (combobox.dataSource.data().length == 1) {
+                var id = combobox.dataSource.data()[0].Id;
+                combobox.value(id);
+                $("#branchId").val(id);
+            }
+            if (!$("#branchId").val()) {
+                $("#branchId").val(@branchId);
+                $("#branches").data("kendoComboBox").value($("#branchId").val());
+            }
+        },
+        select: function (e) {
+            $("#branchId").val(this.dataItem(e.item.index()).Id);
+            //updateAppointments();
+        },
+        change: function (e) {
+            if (this.selectedIndex == -1) {
+                $("#branches").data("kendoComboBox").value("");
+            }
+            //updateAppointments();
+        }
+    });
+
+    function updateAppointments() {
+        $("#appointments").data("kendoComboBox").value("");
+        $("#appointmentId").val("");
+        var postData = {
+            doctorId: $("#doctors").val(),
+            branchId: $("#branches").val(),
+            patientId: $("#patients").val()
+        };
+        addAntiForgeryToken(postData);
+        $("#appointments").kendoComboBox({
+            placeholder: "Selecciona la cita...",
+            dataTextField: "Appointment",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("AppointmentListData", "Visit"))",
+                        type: "POST",
+                        data: postData
+                    }
+                }
+            },
+            dataBound: function (e) {
+                var combobox = $("#appointments").data('kendoComboBox');
+                if (combobox.dataSource.data().length == 1) {
+                    var id = combobox.dataSource.data()[0].Id;
+                    combobox.value(id);
+                    $("#appointmentId").val(id);
+                }
+                if (!$("#appointmentId").val()) {
+                    $("#appointments").data("kendoComboBox").value($("#appointmentId").val());
+                }
+            },
+            select: function (e) {
+                $("#appointmentId").val(this.dataItem(e.item.index()).Id);
+            },
+            change: function (e) {
+                if (this.selectedIndex == -1) {
+                    $("#appointments").data("kendoComboBox").value("");
+                }
+            }
+        });
+    }
+});
+</script>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div>
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input value="@isAdmin" type="hidden" id="isAdmin" />
+                        @if (isAdmin == 1)
+                        {
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Responsable</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="DoctorId" type="hidden" id="doctorId" />
+                                    <input id="doctors" style="width: 100%;" />
+                                </div>
+                            </div>
+                        }
+
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Paciente</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="PatientId" type="hidden" id="patientId" />
+                                <input id="patients" style="width: 100%;" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Sucursal</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="BranchId" type="hidden" id="branchId" />
+                                <input id="branches" style="width: 100%;" />
+                            </div>
+                        </div>
+                        @*<div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Cita</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="AppointmentId" type="hidden" id="appointmentId" />
+                                    <input id="appointments" style="width: 100%;" />
+                                </div>
+                            </div>*@
+                        @if (isAdmin == 1 || isDoctor == 1)
+                        {
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Otros participantes (Opcional)</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select asp-for="SelectedUsersIds" asp-items="availableUsers" asp-multiple="true" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Padecimiento Actual</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="CurrentCondition" class="form-control"></textarea>
+                                    <span asp-validation-for="CurrentCondition" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Evolución</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Evolution" class="form-control"></textarea>
+                                    <span asp-validation-for="Evolution" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>TX Previos</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="PreviousTx" class="form-control"></textarea>
+                                    <span asp-validation-for="PreviousTx" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Antecedentes de Importancia</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="ImportantRecord" class="form-control"></textarea>
+                                    <span asp-validation-for="ImportantRecord" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Diagnóstico</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Diagnosis" class="form-control"></textarea>
+                                    <span asp-validation-for="Diagnosis" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Pronóstico</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Prognostic" class="form-control"></textarea>
+                                    <span asp-validation-for="Prognostic" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Tratamiento</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Treatment" class="form-control"></textarea>
+                                    <span asp-validation-for="Treatment" class="text-danger"></span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Comments">Observaciones</label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea asp-for="Comment" class="form-control"></textarea>
+                                <span asp-validation-for="Comment" class="text-danger"></span>
+                            </div>
+                        </div>
+                        @*@if (isAdmin == 1 || isDoctor == 1 && false)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Tratamiento aplicado</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="SelectedProductsIds" asp-items="availableProducts" asp-multiple="true" />
+                                    </div>
+                                </div>
+                            }*@
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Precio de la consulta</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Price" asp-postfix="MXN" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

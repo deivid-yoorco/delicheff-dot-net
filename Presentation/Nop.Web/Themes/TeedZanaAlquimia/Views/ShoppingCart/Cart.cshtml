@@ -1,0 +1,23 @@
+﻿@model ShoppingCartModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.ShoppingCart").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-shopping-cart-page");
+}
+@if (!Model.OnePageCheckoutEnabled)
+{
+    @await Component.InvokeAsync("CheckoutProgress", new {step = CheckoutProgressStep.Cart})
+}
+<div class="page shopping-cart-page section">
+    <h1 class="category-page-title">@T("ShoppingCart")</h1>
+    <p><b>Información importante si pides lechitas:</b></p>
+    <p>Al ser un producto totalmente natural que no contiene gomas ni espesantes, sus ingredientes se separan, pero es completamente normal, solo agita muy bien antes de tomar y ¡listo!</p>
+    <p>Al ser libres de conservadores y no estar pasteurizadas, recomendamos consumirlas antes de que se cumplan los 4 días de envasado (tomando en cuenta que se producen entre 7am y 11am el mismo día que las recibes). Es muy importante mantenerlas siempre en refrigeración.</p>
+
+    <div class="page-body">
+        @await Component.InvokeAsync("OrderSummary", new { overriddenModel = Model })
+    </div>
+</div>

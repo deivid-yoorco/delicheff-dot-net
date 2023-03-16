@@ -1,0 +1,90 @@
+﻿@model string
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.FirstOrderList");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Order";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Primeras órdenes del día @Model
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="FirstOrdersDates">regresar a lista de fechas</a>
+        </small>
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("FirstOrderListData", controllerName, new { date = Model }))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: false,
+                serverFiltering: false,
+                serverSorting: false
+            },
+            pageable: {
+                refresh: false,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "RouteName",
+                    title: "Ruta",
+                },
+                {
+                    field: "OrderId",
+                    title: "Orden",
+                },
+                {
+                    field: "CustomerName",
+                    title: "Cliente",
+                },
+                {
+                    field: "Id",
+                    title: "Ver orden",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-success" href="/Admin/Order/Edit/#=OrderId#"><i class="fa fa-eye"></i>Ver orden</a>`
+                }
+            ]
+        });
+    });
+</script>

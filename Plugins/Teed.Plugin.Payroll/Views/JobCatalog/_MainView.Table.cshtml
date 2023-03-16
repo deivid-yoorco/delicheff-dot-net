@@ -1,0 +1,571 @@
+﻿@model Teed.Plugin.Payroll.Models.JobCatalog.JobCatalogModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+@using Teed.Plugin.Payroll.Domain.PayrollEmployees
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h3 style="text-align: center;margin-top: 0px !important;margin-bottom: 20px !important;">Catálogo de puestos</h3>
+            <div id="jobs-grid"></div>
+
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    //Interval loop
+                    var refreshIntervalId = window.setInterval(function () {
+                        if ($('.k-grid-edit-row td').next().eq(7).length > 0 &&
+                            $('.k-grid-edit-row td').next().eq(7).find('select').length < 1) {
+                            $('.k-grid-edit-row td').next().eq(7).find('span').css('display', 'none');
+                            var currentId = $('.k-grid-edit-row span[data-id]').data('id');
+                            var forAppend = "";
+                            forAppend += '<select><option value="0">Sin puesto padre</option>';
+                            @foreach (var job in Model.Jobs)
+                            {
+                            <text>if (currentId != @job.Value) {
+                                forAppend += '<option value="@job.Value">@job.Text</option>'
+                            }</text>
+                            }
+                            forAppend += '</select>';
+                            $('.k-grid-edit-row td').next().eq(7).prepend(forAppend);
+                            var currentParentId = $('.k-grid-edit-row [data-parentid]').data('parentid');
+                            if ($('.k-grid-edit-row td').next().eq(7)
+                                .find('select option[value="' + currentParentId + '"]').length > 0) {
+                                $('.k-grid-edit-row td').next().eq(7)
+                                    .find('select option[value="' + currentParentId + '"]').attr('selected', 'selected');
+                            }
+                            $('.k-grid-edit-row td').next().eq(7).find('select').on('change', function () {
+                                $('.k-grid-update').attr('onclick', 'UpdateParentId(' + currentId + ')');
+                            });
+                        }
+                    }, 200);
+                });
+                function UpdateParentId(currentId) {
+                    $.ajax({
+                        contentType: false,
+                        processData: false,
+                        type: "POST",
+                        url: "@(Url.Action("JobCatalogUpdateParent", "JobCatalog"))?parentId=" +
+                            $('.k-grid-edit-row td').next().eq(7).find('select').val() +
+                            "&jobId=" + currentId,
+                        success: function () {
+                            var grid = $("#jobs-grid");
+                            grid.data('kendoGrid').dataSource.read();
+                        }
+                    });
+                }
+                $(document).ready(function () {
+                    $('#@Html.IdFor(model => model.AddJobCatalog.JobParentId)').prepend('<option selected value="0">Sin puesto padre</option>');
+                        $("#jobs-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("JobCatalogList", "JobCatalog"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("JobCatalogUpdate", "JobCatalog"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    destroy: {
+                                        url: "@Html.Raw(Url.Action("JobCatalogDelete", "JobCatalog"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            Id: { editable: false, type: "int" },
+                                            Name: { editable: true, type: "string" },
+                                            Description: { editable: true, type: "string" },
+                                            DisplayOrder: { editable: true, type: "int" },
+                                            SalaryMin: { editable: true, type: "decimal" },
+                                            SalaryMax: { editable: true, type: "deciaml" },
+                                            ParentJob: { editable: false, type: "string" },
+                                            EmployeeCount: { editable: false, type: "int" },
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            editable: {
+                                confirmation: "confirmar",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            dataBound: function (data) {
+                                $('#jobs-grid tr').each(function (i, e) {
+                                    if (i > 0) {
+                                        var div = $(e).find('td').first().next().next();
+                                        if (div.text().includes('<') && div.text().includes('>') && div.text().includes('/')) {
+                                            div.html(div.text());
+                                        }
+                                    }
+                                });
+                            },
+                            columns: [
+                                {
+                                    field: "Id",
+                                    template: "<span data-id='#=Id#'></span>",
+                                    hidden: true
+                                },
+                            {
+                                field: "Name",
+                                title: "Nombre",
+                                width: 150
+                            }, {
+                                field: "DisplayOrder",
+                                title: "Orden para mostrar",
+                                width: 150
+                            }, {
+                                field: "WorkSchedule",
+                                title: "Horario de trabajo",
+                                template: function (dataItem) {
+                                    return "<div style='font-size:12px'>" + dataItem.WorkSchedule + "</div>";
+                                },
+                                width: 250
+                            }, {
+                                field: "Salary",
+                                title: "Sueldo mínimo/máximo",
+                                width: 150
+                            },
+                                {
+                                field: "ParentJob",
+                                title: "Puesto padre",
+                                template: function(dataItem) {
+                                    return "<span data-parentId='" + kendo.htmlEncode(dataItem.ParentJobId) + "'>" + kendo.htmlEncode(dataItem.ParentJob) + "</span>";
+                                },
+                                width: 150
+                                },
+                                {
+                                field: "EmployeeCount",
+                                title: "# de empleados con este puesto",
+                                width: 150
+                                },
+                                {
+                                    field: "Id",
+                                    title: "@T("Admin.Common.Edit")",
+                                    width: 50,
+                                    headerAttributes: { style: "text-align:center" },
+                                    attributes: { style: "text-align:center" },
+                                    template: '<a class="btn btn-default" href="JobCatalog/Edit/#=Id#"><i class="fa fa-pencil"></i>@T("Admin.Common.Edit")</a>'
+                                },
+                                {
+                                command: [
+                                    {
+                                        name: "destroy",
+                                        text: "Borrar"
+                                    }
+                                ],
+                                width: 200
+                            }
+                            ],
+                        });
+                    });
+            </script>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Agregar puesto
+        </div>
+        <div class="panel-body">
+            <script type="text/javascript">
+                $(document).ready(function () {
+                        $('#addJobCatalog').click(function() {
+                            $('.job-error').hide();
+                            var name = $("#@Html.IdFor(model => model.AddJobCatalog.Name)").val();
+                            var description = tinyMCE.activeEditor.getContent();
+                            var displayOrder = $("#@Html.IdFor(model => model.AddJobCatalog.DisplayOrder)").val();
+                            var salaryMin = $("#@Html.IdFor(model => model.AddJobCatalog.SalaryMin)").val();
+                            var salaryMax = $("#@Html.IdFor(model => model.AddJobCatalog.SalaryMax)").val();
+                            var jobParentId = $("#@Html.IdFor(model => model.AddJobCatalog.JobParentId)").val();
+                            // Take times
+                            var workSchedule = "";
+                            var days = [];
+                            $.each($('input[id*="Works_"]:checked'), function (i, e) {
+                                var day = $(e).attr('id').split('Works_')[1];
+                                var inHour = $('#' + day + 'InHour').val();
+                                var inMinutes = $('#' + day + 'InMinutes').val();
+                                var outHour = $('#' + day + 'OutHour').val();
+                                var outMinutes = $('#' + day + 'OutMinutes').val();
+                                days.push(day + '-' + inHour + ':' + inMinutes + '-' + outHour + ':' + outMinutes);
+                            });
+                            if (days.length > 0)
+                                workSchedule = days.join('|');
+
+                            if (name == "" || typeof name == 'undefined') {
+                                $('.job-error').show();
+                                return false;
+                            }
+
+                            $('#addJobCatalog').attr('disabled', true);
+
+                            var postData = {
+                                name: name,
+                                description: description,
+                                displayOrder: displayOrder,
+                                salaryMin: salaryMin,
+                                salaryMax: salaryMax,
+                                jobParentId: jobParentId,
+                                workSchedule: workSchedule,
+                                };
+                            addAntiForgeryToken(postData);
+                            var formData = new FormData();
+                            $.each(postData, function (name, value) {
+                                formData.append(name, value);
+                            });
+
+                            $.ajax({
+                                contentType: false,
+                                processData: false,
+                                type: "POST",
+                                url: "@(Url.Action("JobCatalogAdd", "JobCatalog"))",
+                                data: formData,
+                                success: function(data) {
+                                    var grid = $("#jobs-grid");
+                                    grid.data('kendoGrid').dataSource.read();
+                                    $('#addJobCatalog').attr('disabled', false);
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    alert('Failed to add employee file.');
+                                    $('#addJobCatalog').attr('disabled', false);
+                                }
+                            });
+                        });
+                    });
+            </script>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.Name" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AddJobCatalog.Name" />
+                    <span asp-validation-for="AddJobCatalog.Name"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.JobParentId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="AddJobCatalog.JobParentId" asp-items="@(Model.Jobs)" />
+                    <span asp-validation-for="AddJobCatalog.JobParentId"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.Description" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AddJobCatalog.Description" asp-template="RichEditor" />
+                    <span asp-validation-for="AddJobCatalog.Description"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.DisplayOrder" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AddJobCatalog.DisplayOrder" />
+                    <span asp-validation-for="AddJobCatalog.DisplayOrder"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.SalaryMin" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AddJobCatalog.SalaryMin" />
+                    <span asp-validation-for="AddJobCatalog.SalaryMin"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.SubjectToWorkingHours" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AddJobCatalog.SubjectToWorkingHours" />
+                    <span asp-validation-for="AddJobCatalog.SubjectToWorkingHours"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="AddJobCatalog.SalaryMax" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AddJobCatalog.SalaryMax" />
+                    <span asp-validation-for="AddJobCatalog.SalaryMax"></span>
+                </div>
+            </div>
+            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/JobCatalog/_WorkSchedule.cshtml", Model.AddJobCatalog)
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-3 col-md-9 job-error" style="color: red;display: none;margin-bottom: 10px;">
+                El nombre es requerido para agregar un nuevo puesto
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                <button type="button" id="addJobCatalog" class="btn btn-primary">Agregar nuevo puesto</button>
+            </div>
+        </div>
+    </div>
+
+
+    @*<div class="panel panel-default">
+            <div class="panel-body">
+                <h3 style="text-align: center;margin-top: 0px !important;">Prestaciones de empleo</h3>
+                <div id="benefits-grid"></div>
+
+                <script type="text/javascript">
+                        function getUrlBenefits(id) {
+                            return "@Html.Raw(Url.Action("BenefitList", "PayrollEmployee"))?Id=" + id + "&ForSalary=false";
+                        }
+                        $(document).ready(function() {
+                            $("#benefits-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("BenefitList", "PayrollEmployee", new {Id = Model.JobCatalogs.FirstOrDefault().Id, ForSalary = false }))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        },
+                                        destroy: {
+                                            url: "@Html.Raw(Url.Action("BenefitDelete", "PayrollEmployee"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors",
+                                        model: {
+                                            id: "Id",
+                                            fields: {
+                                                Name: { editable: false, type: "string" },
+                                                Description: { editable: false, type: "string" },
+                                                Amount: { editable: false, type: "decimal" },
+                                            }
+                                        }
+                                    },
+                                    requestEnd: function(e) {
+                                        if (e.type == "update") {
+                                            this.read();
+                                        }
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    numeric: false,
+                                    previousNext: false,
+                                    info: false,
+                                    @await Html.PartialAsync("_GridPagerMessages")
+                                },
+                                editable: {
+                                    confirmation: "confirmar",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "Id",
+                                        template: "<span data-id='#=Id#'></span>",
+                                        hidden: true
+                                    },
+                                {
+                                    field: "Name",
+                                    title: "Nombre",
+                                    width: 200
+                                }, {
+                                    field: "Description",
+                                    title: "Descripción",
+                                    width: 150
+                                }, {
+                                    field: "Amount",
+                                    title: "Monto",
+                                    width: 150
+                                }, {
+                                    command: [
+                                    {
+                                        name: "destroy",
+                                        text: "Borrar"
+                                    }
+                                    ],
+                                    width: 200
+                                }
+                                ],
+                            });
+                        });
+                </script>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Agregar nueva prestación
+            </div>
+            <div class="panel-body">
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $('#Jobs').change(function () {
+                            $('#benefits-grid').data('kendoGrid').dataSource.transport.options.read.url = getUrlBenefits(parseInt($('#Jobs').val()));
+                            $('#benefits-grid').data('kendoGrid').dataSource.read();
+                            $('#benefits-grid').data('kendoGrid').refresh();
+                        });
+                            $('#BenefitTypes').change(function () {
+                                var value = $(this).val();
+                                if (value == "Otras prestaciones") {
+                                    $('.name-input').show();
+                                    $('.desc-input').show();
+                                    $("#@Html.IdFor(model => model.AddBenefit.Name)").val('');
+                                    $("#@Html.IdFor(model => model.AddBenefit.Description)").val('');
+                                } else {
+                                    $('.name-input').hide();
+                                    $('.desc-input').hide();
+                                    $("#@Html.IdFor(model => model.AddBenefit.Name)").val(value);
+                                    $("#@Html.IdFor(model => model.AddBenefit.Description)").val(value);
+                                }
+                            });
+                        $('#BenefitTypes').change();
+                            $('#addBenefit').click(function() {
+                                var name = $("#@Html.IdFor(model => model.AddBenefit.Name)").val();
+                                var description = $("#@Html.IdFor(model => model.AddBenefit.Description)").val();
+                                var amount = $("#@Html.IdFor(model => model.AddBenefit.Amount)").val();
+
+                                $('#addBenefit').attr('disabled', true);
+
+                                var postData = {
+                                    name: name,
+                                    description: description,
+                                    amount: amount,
+                                    isForSalary: false,
+                                    linkId: $('#Jobs').val(),
+                                };
+                                addAntiForgeryToken(postData);
+                                var formData = new FormData();
+                                $.each(postData, function (name, value) {
+                                    formData.append(name, value);
+                                });
+
+                                $.ajax({
+                                    contentType: false,
+                                    processData: false,
+                                    type: "POST",
+                                    url: "@(Url.Action("BenefitAdd", "PayrollEmployee"))",
+                                    data: formData,
+                                    success: function(data) {
+                                        var grid = $("#jobs-grid");
+                                        grid.data('kendoGrid').dataSource.read();
+                                        grid = $("#benefits-grid");
+                                        grid.data('kendoGrid').dataSource.read();
+                                        $('#addBenefit').attr('disabled', false);
+                                    },
+                                    error: function(xhr, ajaxOptions, thrownError) {
+                                        alert('Failed to add employee salary.');
+                                        $('#addBenefit').attr('disabled', false);
+                                    }
+                                });
+                            });
+                        });
+                </script>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="Jobs" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="Jobs" asp-items="@(Model.Jobs)" />
+                        <span asp-validation-for="Jobs"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="BenefitTypes" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="BenefitTypes" asp-items="@(Model.BenefitTypes)" />
+                        <span asp-validation-for="BenefitTypes"></span>
+                    </div>
+                </div>
+                <div class="form-group name-input">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddBenefit.Name" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AddBenefit.Name" />
+                        <span asp-validation-for="AddBenefit.Name"></span>
+                    </div>
+                </div>
+                <div class="form-group desc-input">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddBenefit.Description" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AddBenefit.Description" />
+                        <span asp-validation-for="AddBenefit.Description"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddBenefit.Amount" />
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="AddBenefit.Amount" class="form-control text-box single-line" type="number">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                    <button type="button" id="addBenefit" class="btn btn-primary">Agregar prestacion al empleo</button>
+                </div>
+            </div>
+        </div>*@
+
+</div>

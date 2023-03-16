@@ -1,0 +1,127 @@
+﻿@model int
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "MessageBird";
+}
+<script>
+    $(document).ready(function () {
+        @if (Model > 0) {<text>
+        $('#customer-edit .nav-tabs').append('<li><a data-tab-name="tab-whatsapplogs" data-toggle="tab" href="#tab-whatsapplogs" aria-expanded="true">Logs de WhatsApp</a></li>');
+        $('#tab-whatsapplogs').appendTo('.tab-content');
+        $('#tab-whatsapplogs').attr('style', '');
+        </text>}
+        $("#messages-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("LogData", controllerName))?customerId=@Model",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: false,
+                serverFiltering: false,
+                serverSorting: false
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha de creación",
+                },
+                {
+                    field: "ToNumber",
+                    title: "Resumen del log",
+                    template: function (dataItem) {
+                        @if (Model > 0)
+                        {<text>
+                        return `El usuario
+                            <a href="/Admin/Customer/Edit/${dataItem.AdminIdThatSent}" target="_blank">${dataItem.AdminThatSent}</a>
+                            envió un mensaje de WhatsApp a este cliente al número ${dataItem.ToNumber}.`;
+                        </text>} else {<text>
+                        return `El usuario
+                            <a href="/Admin/Customer/Edit/${dataItem.AdminIdThatSent}" target="_blank">${dataItem.AdminThatSent}</a>
+                            envió un mensaje de WhatsApp al cliente <a href="/Admin/Customer/Edit/${dataItem.CustomerId}" target="_blank">${dataItem.Customer}</a>
+                            al número ${dataItem.ToNumber}.`;
+                        </text>}
+                    },
+                },
+                {
+                    field: "Template",
+                    title: "Plantilla",
+                },
+                {
+                    field: "Status",
+                    title: "Estatus",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return '<span class="grid-report-item ' + dataItem.StatusColor + '">' + dataItem.Status + '</span>';
+                    },
+                },
+                {
+                    field: "Id",
+                    title: "Ver log",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-default" href="` +
+                        window.location.origin +
+                        `/Admin/@controllerName/LogInfo?Id=#=Id#" @if (Model > 0) {<text>target="_blank"</text>}><i class="fa fa-eye"></i>Ver</a>`
+                },
+                {
+                    field: "Id",
+                    title: "Actualizar estatus",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return dataItem.IsStatusUpdatable ?
+                            '<a class="btn btn-default update-' + dataItem.Id + '" href="#a" onclick="updateLogStatus(' + dataItem.Id + ')"><i class="fa fa-eye"></i>Actualizar</a>' :
+                            '<a class="btn btn-default update-' + dataItem.Id + '" href="#a" disabled>No actualizable</a>';
+                    }
+                }
+            ]
+        });
+    });
+    function updateLogStatus(id) {
+        $('.update-' + id).addClass('disabled');
+        $.ajax({
+            type: "GET",
+            url: "/Admin/@controllerName/UpdateMessageStatus?Id=" + id,
+            success: function (data) {
+                $('#messages-grid').data('kendoGrid').dataSource.read();
+                $('.update-' + id).removeClass('disabled');
+            },
+            error: function (err) {
+                console.log(err);
+                $('#messages-grid').data('kendoGrid').dataSource.read();
+                $('.update-' + id).removeClass('disabled');
+            }
+        });
+    }
+</script>

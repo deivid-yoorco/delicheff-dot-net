@@ -1,0 +1,61 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedCustomPages");
+}
+<input type="hidden" asp-for="Id" />
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Configurar página
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <nop-tabs id="custompages-plugin">
+                <nop-tab asp-name="tab-info" asp-title="General" asp-default="true">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Info.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-product" asp-title="Productos">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Products.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-sliders" asp-title="Sliders">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Slider.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-parallax" asp-title="Parallax">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Parallax.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-top3" asp-title="Conjunto de 3">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.TopThree.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-categorydropdown" asp-title="Dropdown de categorías">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.CategoryDropdown.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-banners" asp-title="Banners">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Banners.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-carousel" asp-title="Carrusel">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Carousel.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-tags" asp-title="Tags">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Tags.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-boxes" asp-title="Cajas">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Boxes.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-collage" asp-title="Collage">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.Collage.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-popup" asp-title="PopUp">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.CustomPages/Views/CustomPages/_Edit.PopUp.cshtml", Model)
+                </nop-tab>
+            </nop-tabs>
+        </div>
+    </div>
+</form>

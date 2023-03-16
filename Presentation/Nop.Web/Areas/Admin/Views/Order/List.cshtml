@@ -1,0 +1,1347 @@
+﻿@model OrderListModel
+@inject AdminAreaSettings adminAreaSettings
+@inject IStoreService storeService
+
+@using Nop.Services.Stores
+@using Nop.Services
+
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var stores = storeService.GetAllStores();
+    var createdOn = "";
+    if (TeedCommerceStores.CurrentStore == TeedStores.CentralEnLinea
+        || TeedCommerceStores.CurrentStore == TeedStores.Cetro)
+    {
+        createdOn = "Fecha de entrega";
+    }
+    else if (TeedCommerceStores.CurrentStore == TeedStores.Cetro)
+    {
+        createdOn = "Fecha y horario seleccionado de visita";
+    }
+    else
+    {
+        createdOn = "Fecha de creación";
+    }
+
+    //page title
+    ViewBag.Title = T("Admin.Orders").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Orders");
+}
+<style>
+    .ui-dialog {
+        z-index: 9999;
+    }
+
+    .route-btns button {
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-top: 5px;
+    }
+</style>
+<form asp-controller="Order" asp-action="List" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Orders")
+        </h1>
+        <div class="pull-right">
+            <div class="btn-group pull-right" style="margin-left:5px">
+                <button type="button" class="btn btn-success">
+                    <i class="fa fa-download"></i>
+                    @T("Admin.Common.Export")
+                </button>
+                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">&nbsp;</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <button type="submit" name="exportxml-all">
+                            <i class="fa fa-file-code-o"></i>
+                            @T("Admin.Common.ExportToXml.All")
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="exportxml-selected">
+                            <i class="fa fa-file-code-o"></i>
+                            @T("Admin.Common.ExportToXml.Selected")
+                        </button>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <button type="submit" name="exportexcel-all">
+                            <i class="fa fa-file-excel-o"></i>
+                            @T("Admin.Common.ExportToExcel.All")
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="exportexcel-selected">
+                            <i class="fa fa-file-excel-o"></i>
+                            @T("Admin.Common.ExportToExcel.Selected")
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group pull-right">
+                <button type="button" class="btn bg-purple">
+                    <i class="fa fa-file-pdf-o"></i>
+                    @T("Admin.Orders.PdfInvoices")
+                </button>
+                <button type="button" class="btn bg-purple dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">&nbsp;</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <button type="submit" name="pdf-invoice-all">
+                            @T("Admin.Orders.PdfInvoices.All")
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="pdf-invoice-selected">
+                            @T("Admin.Orders.PdfInvoices.Selected")
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "export_report_ventas" })
+            @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.CentralEnLinea)
+            {
+                @await Component.InvokeAsync("AdminWidget", new { widgetZone = "export_orders_for_day_excel" })
+                <div class="pull-right">
+                    <button type="button" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                        <i class="fa fa-file-excel-o"></i>
+                        Descargar lista de entregas
+                    </button>
+                    <div id="dialog-shipping" title="Selecciona la fecha de entrega">
+                        <p>Selecciona la fecha de entrega de las órdenes que deseas descargar.</p>
+                        <div id="datepicker-shipping"></div>
+                    </div>
+                    <style>
+                        .ui-datepicker {
+                            margin: auto !important;
+                        }
+                    </style>
+                    <script>
+                        $(document).ready(function () {
+                            var dialog;
+                            dialog = $("#dialog-shipping").dialog({
+                                autoOpen: false,
+                                height: 450,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    "Descargar en PDF": function () {
+                                        var date = new Date($('#datepicker-shipping').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportShippingData?selectedDate=' + parsedDate + "&isPdf=true", '_blank');
+                                    },
+                                    "Descargar en Excel": function () {
+                                        var date = new Date($('#datepicker-shipping').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportShippingData?selectedDate=' + parsedDate + "&isPdf=false", '_blank');
+                                    },
+                                    "Descargar desglosado": function () {
+                                        var date = new Date($('#datepicker-shipping').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportShippingData?selectedDate=' + parsedDate + '&managerData=true', '_blank');
+                                    },
+                                }
+                            });
+
+                            $(".dialog-shipping").on("click", function () {
+                                $("#dialog-shipping").dialog("open");
+                            });
+
+                            $("#datepicker-shipping").datepicker();
+
+                            function formatDate(n) {
+                                return n < 10 ? '0' + n : '' + n;
+                            }
+                        });
+                    </script>
+
+                    <button type="button" class="btn bg-olive modal-trigger" data-target="modal1">
+                        <i class="fa fa-file-excel-o"></i>
+                        Descargar lista de compras
+                    </button>
+                    <div id="dialog" title="Selecciona la fecha de entrega">
+                        <p>Selecciona la fecha de entrega de los productos que deseas descargar.</p>
+                        <div id="datepicker"></div>
+                    </div>
+                    <div id="dialog-buyer" title="Selecciona el comprador">
+                        <p>Selecciona el comprador de la lista que deseas descargar.</p>
+                        <strong id="loading-buyers">Cargando compradores...</strong>
+                        <strong id="buyers-error" style="color:red; display: none">Ocurrió un problema al cargar los compradores.</strong>
+                        <select style="display: none" id="buyer-picker"></select>
+                    </div>
+                    <div id="dialog-manufacturer" title="Selecciona el fabricante">
+                        <p>Selecciona el fabricante de la lista que deseas descargar.</p>
+                        <strong id="loading-manufacturers">Cargando fabricantes...</strong>
+                        <strong id="manufacturers-error" style="color:red; display: none">Ocurrió un problema al cargar los fabricantes.</strong>
+                        <select style="display: none" id="manufacturer-picker"></select>
+                    </div>
+                    <script>
+                        var dateForClients;
+                        $(document).ready(function () {
+                            var dialog;
+                            dialog = $("#dialog").dialog({
+                                autoOpen: false,
+                                height: 600,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    "Por comprador": function () {
+                                        $("#loading-buyers").show();
+                                        $("#buyer-picker").hide();
+                                        $("#buyers-error").hide();
+                                        $.ajax({
+                                            url: '/Admin/OrderItemBuyer/GetBuyersSelectList',
+                                            success: (data) => {
+                                                $("#loading-buyers").hide();
+                                                let select = $("#buyer-picker");
+                                                select.show();
+                                                select.empty();
+                                                let options = select[0].options;
+                                                options.add(new Option("Todos los compradores", 0));
+                                                $.each(data, (index, value) => {
+                                                    options.add(new Option(value.Name, value.Id));
+                                                });
+                                            },
+                                            error: (error) => {
+                                                $("#buyers-error").show();
+                                                let select = $("#buyer-picker");
+                                                select.show();
+                                                select.empty();
+                                                let options = select[0].options;
+                                                options.add(new Option("Todos los compradores", 0));
+                                                $("#loading-buyers").hide();
+                                                console.log(error);
+                                            }
+                                        })
+                                        $("#dialog-buyer").dialog("open");
+                                    },
+                                    "Por ruta": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&byRoute=true', '_blank');
+                                    },
+                                    "Etiquetas": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&labels=true', '_blank');
+                                    },
+                                    "Etiquetas de compradores": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&buyerLabels=true', '_blank');
+                                    },
+                                    "Manojos": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&bunch=true', '_blank');
+                                    },
+                                    "Nevera": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&fridge=true', '_blank');
+                                    },
+                                    "Por fabricante": function () {
+                                        $("#loading-manufacturers").show();
+                                        $("#manufacturer-picker").hide();
+                                        $("#manufacturers-error").hide();
+                                        $.ajax({
+                                            url: '/Admin/Order/GetManufacturersSelectList',
+                                            success: (data) => {
+                                                $("#loading-manufacturers").hide();
+                                                let select = $("#manufacturer-picker");
+                                                select.show();
+                                                select.empty();
+                                                let options = select[0].options;
+                                                options.add(new Option("Todos los fabricantes", 0));
+                                                $.each(data, (index, value) => {
+                                                    options.add(new Option(value.Name, value.Id));
+                                                });
+                                            },
+                                            error: (error) => {
+                                                $("#manufacturers-error").show();
+                                                let select = $("#manufacturer-picker");
+                                                select.show();
+                                                select.empty();
+                                                let options = select[0].options;
+                                                options.add(new Option("Todos los compradores", 0));
+                                                $("#loading-manufacturers").hide();
+                                                console.log(error);
+                                            }
+                                        })
+                                        $("#dialog-manufacturer").dialog("open");
+                                    },
+                                    "Para proveedor": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&provider=true', '_blank');
+                                    },
+                                    "Para clientes": function () {
+                                        $('#loading-routes').show();
+                                        $('#routeError').hide();
+                                        $('#noOrders').hide();
+                                        $('.route-btns button').remove();
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        dateForClients = parsedDate;
+                                        $('.selected-day').text(parsedDate);
+                                        $("#dialog").dialog("close");
+                                        $("#for-clients").dialog("open");
+                                        $('div[aria-describedby="for-clients"]').find('.ui-icon-closethick').unbind('click');
+                                        $('div[aria-describedby="for-clients"]').find('.ui-icon-closethick').click(function () {
+                                            $('#dialog').dialog('open');
+                                            $('#for-clients').dialog('close');
+                                        })
+
+                                        $.ajax({
+                                            url: '/Admin/Order/GetRoutesOfTheDay?selectedDate=' + parsedDate,
+                                            type: 'GET',
+                                            success: (data) => {
+                                                $('.route-btns button').remove();
+                                                $("#dialog").dialog("close");
+                                                $("#for-clients").dialog("open");
+                                                $.each(data, function (i, e) {
+                                                    $(".route-btns").append('<button type="button" onclick="hrefRoute(' + e.Id + ')" class="btn bg-secondary dialog-shipping">' +
+                                                        e.Name +
+                                                        '</button>');
+                                                });
+                                                $("#loading-routes").hide();
+                                            },
+                                            error: (error) => {
+                                                $('.route-btns button').remove();
+                                                $("#loading-routes").hide();
+                                                if (error.responseText == "route0") {
+                                                    $('#routeError').show();
+                                                    $('#routeError a').attr('href', '/Admin/ShippingRoute/AssignRouteOrder?date=' + parsedDate);
+                                                } else if (error.responseText == "noOrders") {
+                                                    $('#noOrders').show();
+                                                }
+                                                console.log(error);
+                                            }
+                                        });
+                                    },
+                                    "Lista general": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate, '_blank');
+                                    }
+                                }
+                            });
+
+                            var pyl;
+                            pyl = $("#pyl").dialog({
+                                autoOpen: false,
+                                height: 400,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    "Descargar": function () {
+                                        var date = new Date($('#datepicker-pyl').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportPylData?selectedDate=' + parsedDate, '_blank');
+                                    }
+                                }
+                            });
+
+                            $("#datepicker-pyl").datepicker();
+
+                            $("#for-clients").dialog({
+                                autoOpen: false,
+                                height: 300,
+                                width: 450,
+                                modal: true
+                            });
+
+                            $("#dialog-buyer").dialog({
+                                autoOpen: false,
+                                height: 450,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    "Descargar": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&byBuyer=true&buyerId=' + $("#buyer-picker").val(), '_blank');
+                                    }
+                                }
+                            });
+
+                            $("#dialog-manufacturer").dialog({
+                                autoOpen: false,
+                                height: 450,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    "Descargar": function () {
+                                        var date = new Date($('#datepicker').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/ExportOrdersData?selectedDate=' + parsedDate + '&byManufacturer=true&manufacturerId=' + $("#manufacturer-picker").val(), '_blank');
+                                    }
+                                }
+                            });
+
+                            $(".modal-trigger").on("click", function () {
+                                $("#dialog").dialog("open");
+                            });
+
+                            $("#datepicker").datepicker();
+
+                            function formatDate(n) {
+                                return n < 10 ? '0' + n : '' + n;
+                            }
+                        });
+                        function hrefRoute(id) {
+                            window.open('/Admin/Order/ExportOrdersData?selectedDate=' + dateForClients + '&forClient=true&routeId=' + id, '_blank');
+                        }
+                    </script>
+
+                    <button type="button" class="btn bg-olive reportPayment" data-target="modal2">
+                        <i class="fa fa-file-excel-o"></i>
+                        Descargar reporte de pago de órdenes
+                    </button>
+                    <div id="reportPayment" title="Selecciona rango de fechas">
+                        <p>Selecciona el rango de fechas de las órdenes.</p>
+                        <div class="row col-md-12" style="text-align: center; margin: 30px">
+                            <label class="control-label col-md-12 requiredField" for="dateini">
+                                Fecha inicial
+                            </label>
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar">
+                                        </i>
+                                    </div>
+                                    <input class="form-control" id="dateini" name="dateini" placeholder="DD/MM/YYYY" type="text" style="z-index:99999 !important;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row col-md-12" style="text-align: center; margin: 30px">
+                            <label class="control-label col-md-12 requiredField" for="datefin">
+                                Fecha final
+                            </label>
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar">
+                                        </i>
+                                    </div>
+                                    <input class="form-control" id="datefin" name="datefin" placeholder="DD/MM/YYYY" type="text" style="z-index:99999 !important;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <label id="dateError" class="text-red control-label" hidden>
+                                La fecha o fechas ingresadas son invalidas
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn bg-olive pyl" data-target="pyl">
+                        <i class="fa fa-file-excel-o"></i>
+                        Descargar reporte P&L
+                    </button>
+                    <div id="pyl" title="Selecciona la fecha para crear el Excel">
+                        <p>Selecciona la fecha para crear el Excel</p>
+                        <div id="datepicker-pyl"></div>
+                    </div>
+                    <div id="for-clients" title="Selecciona una ruta">
+                        <p>Selecciona la ruta para descargar la lista de compras para clientes del día <span class="selected-day"></span></p>
+                        <div class="col-md-12">
+                            <label class="control-label for-clients" for="for-clients">
+                                Rutas:
+                            </label>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="route-btns">
+                                <strong id="loading-routes">Cargando rutas del día...</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <label id="routeError" class="text-red control-label">
+                                Para generar el documento para clientes, todas las ordenes deben estar asignadas a una ruta. Para asignar las rutas para esta fecha, da clic <a style="color:#3c8dbc !important;" href="" target="_blank"> aqui </a>
+                            </label>
+                            <label id="noOrders" class="text-red control-label">
+                                No hay ordenes en el día seleccionado
+                            </label>
+                        </div>
+                    </div>
+                    <script>
+                        $(document).ready(function () {
+                            var date_input_ini = $('input[name="dateini"]');
+                            var date_input_fin = $('input[name="datefin"]');
+                            var container = $('.bootstrap-iso form').length > 0 ? $('.bootstrap-iso form').parent() : $("#dateini");
+                            date_input_ini.datepicker({
+                                dateFormat: 'dd/mm/yy',
+                                container: container,
+                                todayHighlight: true,
+                                autoclose: true,
+                            });
+                            date_input_fin.datepicker({
+                                dateFormat: 'dd/mm/yy',
+                                container: container,
+                                todayHighlight: true,
+                                autoclose: true,
+                            });
+
+                            var paymentOrders;
+                            paymentOrders = $("#reportPayment").dialog({
+                                autoOpen: false,
+                                height: 450,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    Descargar: function () {
+                                        var dateF = (($("#dateini").val()).toString());
+                                        var dateL = (($("#datefin").val()).toString());
+                                        var doTheSearch = true;
+
+                                        if (dateF) {
+                                            if (!dateF.includes("/")) {
+                                                doTheSearch = false;
+                                            }
+                                            if ((dateF.length) < 10 || (dateF.length) > 10) {
+                                                doTheSearch = false;
+                                            }
+                                        }
+                                        if (dateL) {
+                                            if (!dateL.includes("/")) {
+                                                doTheSearch = false;
+                                            }
+                                            if ((dateL.length) < 10 || (dateL.length) > 10) {
+                                                doTheSearch = false;
+                                            }
+                                        }
+
+                                        if (dateF.length < 2 && dateL.length < 2)
+                                            doTheSearch = false;
+
+                                        if (doTheSearch) {
+                                            console.log(dateF);
+                                            console.log(dateL);
+                                            var data = additionalData();
+                                            console.log(data);
+                                            window.open('/Admin/Order/DownloadOrdersPaymentReport?dateInit=' + dateF + '&dateEnd=' + dateL);
+                                        } else {
+                                            $("#dateError").show();
+                                        }
+                                    }
+                                }
+                            });
+
+                            function additionalData() {
+                                var data = {
+                                    DateF: (($("#dateini").val()).toString()),
+                                    DateL: (($("#datefin").val()).toString())
+                                };
+                                return data;
+                            }
+
+                            $(".reportPayment").on("click", function () {
+                                $("#reportPayment").dialog("open");
+                            });
+
+                            $(".pyl").on("click", function () {
+                                $("#pyl").dialog("open");
+                            });
+
+                            $("#datepicker-init").datepicker();
+                            $("#datepicker-end").datepicker();
+
+                            function formatDate(n) {
+                                return n < 10 ? '0' + n : '' + n;
+                            }
+
+                            function resetSearch() {
+                                $("#dateini").val("");
+                                $("#datefin").val("");
+                                var dataSources = $("#element-grid").data('kendoGrid').dataSource;
+                                dataSources.page(1);
+                            }
+
+                            function selectedAutomaticEndDate() {
+                                $('datefin').val() = $("#dateini").val();
+                            }
+                        });
+                    </script>
+
+                    <button type="button" class="btn bg-olive byRouteReport" data-target="byRouteReport">
+                        <i class="fa fa fa-file-pdf-o"></i>
+                        Desglose de ventas por ruta
+                    </button>
+                    <div id="byRouteReport" title="Selecciona la fecha para crear el PDF">
+                        <p>Selecciona la fecha para crear el reporte</p>
+                        <div id="datepicker-byRouteReport"></div>
+                    </div>
+                    <script>
+                        $(document).ready(function () {
+                            $(".byRouteReport").on("click", function () {
+                                $("#byRouteReport").dialog("open");
+                            });
+
+                            var byRouteReport;
+                            byRouteReport = $("#byRouteReport").dialog({
+                                autoOpen: false,
+                                height: 400,
+                                width: 450,
+                                modal: true,
+                                buttons: {
+                                    "Descargar": function () {
+                                        var date = new Date($('#datepicker-byRouteReport').datepicker('getDate'));
+                                        var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                        window.open('/Admin/Order/SalesByRouteReportPdf?selectedDate=' + parsedDate, '_blank');
+                                    }
+                                }
+                            });
+                            $("#datepicker-byRouteReport").datepicker();
+                        });
+
+                        function formatDate(n) {
+                            return n < 10 ? '0' + n : '' + n;
+                        }
+                    </script>
+                </div>
+            }
+            else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.ZanaAlquimia)
+            {
+                <button type="button" class="btn bg-olive dialog-shipping" data-target="modal-shipping">
+                    <i class="fa fa-file-excel-o"></i>
+                    Descargar PDF
+                </button>
+                <div id="dialog-shipping" title="Selecciona la fecha de entrega">
+                    <p>Selecciona la fecha de entrega de las órdenes que deseas descargar.</p>
+                    <div id="datepicker-shipping"></div>
+                </div>
+                <style>
+                    .ui-datepicker {
+                        margin: auto !important;
+                    }
+                </style>
+                <script>
+                    $(document).ready(function () {
+                        var dialog;
+                        dialog = $("#dialog-shipping").dialog({
+                            autoOpen: false,
+                            height: 450,
+                            width: 450,
+                            modal: true,
+                            buttons: {
+                                "Producción por día": function () {
+                                    var date = new Date($('#datepicker-shipping').datepicker('getDate'));
+                                    var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                    window.open('/Admin/Order/ExportOrderDataToPdf?selectedDate=' + parsedDate, '_blank');
+                                },
+                                "Entregas del día": function () {
+                                    var date = new Date($('#datepicker-shipping').datepicker('getDate'));
+                                    var parsedDate = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+                                    window.open('/Admin/Order/ExportOrderDataToPdf?selectedDate=' + parsedDate + '&isForDelivery=true', '_blank');
+                                },
+                            }
+                        });
+
+                        $(".dialog-shipping").on("click", function () {
+                            $("#dialog-shipping").dialog("open");
+                        });
+
+                        $("#datepicker-shipping").datepicker();
+
+                        function formatDate(n) {
+                            return n < 10 ? '0' + n : '' + n;
+                        }
+                    });
+                </script>
+            }
+            else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Hamleys)
+            {
+                <button type="button" class="btn bg-olive reportProducts">
+                    <i class="fa fa-file-excel-o"></i>
+                    Descargar reporte de órdenes por producto
+                </button>
+                <script>
+                    $(document).ready(function () {
+                        $(".reportProducts").click(function () {
+                            var dateF = new Date(($("#StartDate").val()).toString());
+                            var dateL = new Date(($("#EndDate").val()).toString());
+                            var parsedDateF = formatDate(dateF.getDate()) + "/" + formatDate(dateF.getMonth() + 1) + "/" + dateF.getFullYear();
+                            var parsedDateL = formatDate(dateL.getDate()) + "/" + formatDate(dateL.getMonth() + 1) + "/" + dateL.getFullYear();
+                            var productName = $("#search-product-name").val();
+                            var billingEmail = $("#BillingEmail").val();
+                            var billingLastName = $("#BillingLastName").val();
+                            var billingCountryId = $("#BillingCountryId").val();
+                            var paymentMethodSystemName = $("#PaymentMethodSystemName").val();
+                            var orderNotes = $("#OrderNotes").val();
+
+                            var orderStatusIdsList = $("#OrderStatusIds").val();
+                            var orderStatusIds = "";
+                            jQuery.each(orderStatusIdsList, function (i, e) {
+                                orderStatusIds += e.toString() + ",";
+                            });
+
+                            var paymentStatusIdsList = $("#PaymentStatusIds").val();
+                            var paymentStatusIds = "";
+                            jQuery.each(paymentStatusIdsList, function (i, e) {
+                                paymentStatusIds += e.toString() + ",";
+                            });
+
+                            var shippingStatusIdsList = $("#ShippingStatusIds").val();
+                            var shippingStatusIds = "";
+                            jQuery.each(shippingStatusIdsList, function (i, e) {
+                                shippingStatusIds += e.toString() + ",";
+                            });
+                            var doTheSearch = true;
+
+                            if (parsedDateF) {
+                                if (!parsedDateF.includes("/")) {
+                                    doTheSearch = false;
+                                }
+                                if (parsedDateF != "NaN/NaN/NaN" && ((parsedDateF.length) < 9 || (parsedDateF.length) > 10)) {
+                                    doTheSearch = false;
+                                }
+                            }
+                            if (parsedDateL) {
+                                if (!parsedDateL.includes("/")) {
+                                    doTheSearch = false;
+                                }
+                                if (parsedDateL != "NaN/NaN/NaN" && ((parsedDateL.length) < 9 || (parsedDateL.length) > 10)) {
+                                    doTheSearch = false;
+                                }
+                            }
+
+                            // Check undefines
+                            if (parsedDateF == "NaN/NaN/NaN")
+                                parsedDateF = " ";
+                            if (parsedDateL == "NaN/NaN/NaN")
+                                parsedDateL = " ";
+                            if (typeof productName == 'undefined')
+                                productName = null;
+                            if (typeof orderStatusIds == 'undefined')
+                                orderStatusIds = "0,";
+                            if (typeof paymentStatusIds == 'undefined')
+                                paymentStatusIds = "0,";
+                            if (typeof shippingStatusIds == 'undefined')
+                                shippingStatusIds = "0,";
+                            if (typeof billingEmail == 'undefined')
+                                billingEmail = null;
+                            if (typeof billingLastName == 'undefined')
+                                billingLastName = null;
+                            if (typeof billingCountryId == 'undefined')
+                                billingCountryId = "0";
+                            if (typeof paymentMethodSystemName == 'undefined')
+                                paymentMethodSystemName = "";
+                            if (typeof orderNotes == 'undefined')
+                                orderNotes = null;
+
+                            if (doTheSearch) {
+                                window.open(('/Admin/Order/DownloadOrderProducts?startDate=' + parsedDateF +
+                                    '&endDate=' + parsedDateL +
+                                    '&productName=' + productName +
+                                    '&orderStatusIds=' + orderStatusIds +
+                                    '&paymentStatusIds=' + paymentStatusIds +
+                                    '&shippingStatusIds=' + shippingStatusIds +
+                                    '&billingEmail=' + billingEmail +
+                                    '&billingLastName=' + billingLastName +
+                                    '&billingCountryId=' + billingCountryId +
+                                    '&paymentMethodSystemName=' + paymentMethodSystemName +
+                                    '&orderNotes=' + orderNotes), '_blank');
+                            } else {
+                                $("#dataError").show();
+                            }
+                        });
+
+                        function formatDate(n) {
+                            return n < 10 ? '0' + n : '' + n;
+                        }
+                    });
+                </script>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <label id="dataError" class="text-red control-label" hidden>
+                        La información de busqueda es invalida
+                    </label>
+                </div>
+            }
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_order_list_buttons" })
+        </div>
+    </div>
+    @await Component.InvokeAsync("Widget", new { widgetZone = "order-alerts" })
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="StartDate" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="StartDate" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="EndDate" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="EndDate" />
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableWarehouses.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="WarehouseId" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="WarehouseId" asp-items="Model.AvailableWarehouses" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ProductId" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="text" id="search-product-name" autocomplete="off" class="form-control" />
+                                        <span id="search-product-friendly-name"></span>
+                                        <button type="button" id="search-product-clear" class="btn bg-gray" style="display: none; margin-top: 5px;">@T("Admin.Common.Clear")</button>
+                                        <input asp-for="ProductId" autocomplete="off" style="display:none;" />
+                                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $('#search-product-name').autocomplete({
+                                    delay: 500,
+                                    minLength: 3,
+                                    source: '@(Url.Action("ProductSearchAutoComplete"))',
+                                    select: function(event, ui) {
+                                        $('#@Html.IdFor(model => model.ProductId)').val(ui.item.productid);
+                                        $('#search-product-friendly-name').text(ui.item.label);
+
+                                        $('#search-product-clear').show();
+                                        return false;
+                                    }
+                                });
+
+                                //remove button
+                                $('#search-product-clear').click(function() {
+                                    $('#@Html.IdFor(model => model.ProductId)').val('0');
+                                    $('#search-product-friendly-name').text('');
+                                    $('#search-product-clear').hide();
+                                    return false;
+                                });
+                            });
+                                        </script>
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.IsLoggedInAsVendor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="OrderStatusIds" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="OrderStatusIds" asp-items="Model.AvailableOrderStatuses" asp-multiple="true" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="PaymentStatusIds" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="PaymentStatusIds" asp-items="Model.AvailablePaymentStatuses" asp-multiple="true" />
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.IsLoggedInAsVendor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ShippingStatusIds" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="ShippingStatusIds" asp-items="Model.AvailableShippingStatuses" asp-multiple="true" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group" @(Model.AvailableStores.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="StoreId" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="StoreId" asp-items="Model.AvailableStores" />
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableVendors.SelectionIsNotPossible() || Model.IsLoggedInAsVendor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="VendorId" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="VendorId" asp-items="Model.AvailableVendors" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="BillingEmail" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="BillingEmail" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="BillingLastName" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="BillingLastName" />
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableCountries.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="BillingCountryId" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="BillingCountryId" asp-items="Model.AvailableCountries" />
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailablePaymentMethods.SelectionIsNotPossible() || Model.IsLoggedInAsVendor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="PaymentMethodSystemName" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="PaymentMethodSystemName" asp-items="Model.AvailablePaymentMethods" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="OrderNotes" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="OrderNotes" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="GoDirectlyToCustomOrderNumber" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="input-group input-group-short">
+                                            <nop-editor asp-for="GoDirectlyToCustomOrderNumber" />
+                                            <span class="input-group-btn">
+                                                <button type="submit" id="go-to-order-by-number" name="go-to-order-by-number" class="btn btn-info btn-flat">
+                                                    @T("Admin.Common.Go")
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (TeedCommerceStores.CurrentStore == TeedStores.Masa)
+                                {
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="BranchId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="BranchId" asp-items="Model.Branches" />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7 col-md-offset-5">
+                                <button type="button" id="search-orders" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="orders-grid"></div>
+
+                        <script type="text/javascript">
+                            const sendNotification = (orderId) => {
+                                $("#notification-button-" + orderId).hide();
+                                $("#lgf-button-" + orderId).empty();
+                                $("#lgf-button-" + orderId).html(`<i class="fa fa-refresh fa-spin fa-2x fa-fw spinner" style="padding-right:0 !important; color: #3c8dbc;"></i>
+                                <span>Enviando...</span>`);
+                                $.ajax({
+                                    url: '/Admin/Logisfashion/ManualOutboundRequest?orderId=' + orderId,
+                                    mehtod: 'GET',
+                                    success: () => {
+                                        $("#lgf-button-" + orderId).empty();
+                                        $("#lgf-button-" + orderId).html("<span style='font-weight:bold;color:green'>Enviado!</span>");
+                                    },
+                                    error: (error) => {
+                                        console.log(error);
+                                        $("#lgf-button-" + orderId).empty();
+                                        $("#lgf-button-" + orderId).html("<span style='font-weight:bold;color:red'>Error!</span>");
+                                    }
+                                });
+                            };
+                            $(document).ready(function () {
+
+
+
+        $("#orders-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("OrderList", "Order"))",
+                        type: "POST",
+                        dataType: "json",
+                        data: additionalData
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                requestEnd: function (e) {
+                    if (e.type == "read") {
+                        var response = e.response;
+                        if (response) {
+                            //store extra data
+                            reportAggregates = e.response["ExtraData"];
+                        }
+                    }
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            dataBound: onDataBound,
+            columns: [
+                {
+                    field: "Id",
+                    headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                    width: 50
+                }, {
+                    field: "CustomOrderNumber",
+                    title: "@T("Admin.Orders.Fields.CustomOrderNumber")",
+                    width: 80
+                },
+                @if (!Model.IsLoggedInAsVendor)
+                {
+                    //a vendor does not have access to this functionality
+                    <text>{
+                    field: "OrderStatus",
+                    title: "@T("Admin.Orders.Fields.OrderStatus")",
+                    width: 100,
+                    template: '<span class="grid-report-item ' +
+                        '# if(OrderStatusId == 10) {# yellow #} #' +
+                        '# if(OrderStatusId == 20) {# blue #} #' +
+                        '# if(OrderStatusId == 30) {# green #} #' +
+                        '# if(OrderStatusId == 40) {# red #} #' +
+                        '">#=OrderStatus#</span>'
+                },</text>
+                }
+                {
+                    field: "PaymentStatus",
+                    title: "@T("Admin.Orders.Fields.PaymentStatus")",
+                    width: 150
+                },
+                {
+                    field: "PaymentMethod",
+                    title: "@T("Admin.Orders.Fields.PaymentMethod")",
+                    width: 150
+                },
+                @if (!Model.IsLoggedInAsVendor)
+                {
+                    //a vendor does not have access to this functionality
+                    <text>{
+                    field: "ShippingStatus",
+                    title: "@T("Admin.Orders.Fields.ShippingStatus")",
+                    width: 150
+                },</text>
+                }
+                {
+                    field: "CustomerEmail",
+                    title: "@T("Admin.Orders.Fields.Customer")",
+                    width: 250,
+                    template: '#=CustomerFullName# (#=CustomerEmail#)'
+                },
+                @if (TeedCommerceStores.CurrentStore == TeedStores.Masa) {
+                    <text>
+                    {
+                        field: "Branch",
+                        title: "@T("Admin.Orders.Fields.Branch")",
+                        width: 150,
+                    },
+                    </text>
+                }
+                {
+                    field: "StoreName",
+                    hidden: @(stores.Count > 1 ? "false" : "true"),
+                    title: "@T("Admin.Orders.Fields.Store")",
+                    width: 100
+                }, {
+                    @if(TeedCommerceStores.CurrentStore != TeedStores.Cetro)
+                    {
+                    <text>
+                    field: "CreatedOn",
+                    </text>
+                    }
+                    else
+                    {
+                    <text>
+                    field: "CreatedOnCustomString",
+                    </text>
+                    }
+                    @*title: "@T("Admin.Orders.Fields.CreatedOn")",*@
+                    title: "@createdOn",
+                    width: 150,
+                    @if(TeedCommerceStores.CurrentStore != TeedStores.Cetro)
+                    {
+                    <text>
+                    type: "date",
+                    format: "{0: dd-MM-yyyy}",
+                    </text>
+                    }
+                },
+                @if (!Model.IsLoggedInAsVendor)
+                {
+                    //a vendor does not have access to this functionality
+                    <text>{
+                    field: "OrderTotal",
+                    title: "@T("Admin.Orders.Fields.OrderTotal")",
+                    width: 100,
+                    footerTemplate: '<div><strong>@T("Admin.Orders.Report.Summary")</strong></div>' +
+                        '<div>@T("Admin.Orders.Report.Profit") <span id=\"aggregator-profit-block\"></span></div>' +
+                        '<div>@T("Admin.Orders.Report.Shipping") <span id=\"aggregator-shipping-block\"></span></div>' +
+                        '<div>@T("Admin.Orders.Report.Tax") <span id=\"aggregator-tax-block\"></span></div>' +
+                        '<div>@T("Admin.Orders.Report.Total") <span id=\"aggregator-total-block\"></span></div>'
+                },</text>
+                }
+                @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Hamleys)
+                {
+                    <text>{
+                    field: "ShippingProviderNotificationDate",
+                        title: "Enviado a Logisfashion",
+                    width: 150,
+                    template: `#if(ShippingProviderNotificationDate != null){ #
+                                        #=ShippingProviderNotificationDate#
+                                    # } else { #
+                                        <div id="lgf-button-#=Id#">
+                                            <button type="button" onclick="sendNotification(#=Id#)" id="notification-button-#=Id#" class="btn btn-danger">Enviar notificación</button>
+                                        </div>
+
+                                    # } #
+                               `
+                    },</text>
+                }
+                {
+                    field: "Id",
+                    title: "@T("Admin.Common.View")",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                }
+            ]
+        } );
+    });
+                        </script>
+
+                        <script type="text/javascript">
+    var selectedIds = [];
+    var reportAggregates = "";
+
+    $(document).ready(function () {
+        //search button
+        $('#search-orders').click(function () {
+            //search
+            var grid = $('#orders-grid').data('kendoGrid');
+            grid.dataSource.page(1); //new search. Set page size to 1
+            //grid.dataSource.read(); we already loaded the grid above using "page" function
+            //clear selected checkboxes
+            $('.checkboxGroups').attr('checked', false).change();
+            selectedIds = [];
+            return false;
+        });
+
+        $("".concat("#@Html.IdFor(model => model.BillingEmail),",
+            "#@Html.IdFor(model => model.BillingLastName),",
+            "#@Html.IdFor(model => model.OrderNotes)")).keydown(function (event) {
+            if (event.keyCode === 13) {
+                $("#search-orders").click();
+                return false;
+            }
+        });
+
+        $("#@Html.IdFor(model => model.GoDirectlyToCustomOrderNumber)").keydown(function(event) {
+            if (event.keyCode === 13) {
+                $("#go-to-order-by-number").click();
+                return false;
+            }
+        });
+
+        $('#mastercheckbox').click(function () {
+            $('.checkboxGroups').attr('checked', $(this).is(':checked')).change();
+        });
+
+        //wire up checkboxes.
+        $('#orders-grid').on('change', 'input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]', function (e) {
+            var $check = $(this);
+            if ($check.is(":checked") == true) {
+                var checked = jQuery.inArray($check.val(), selectedIds);
+                if (checked == -1) {
+                    //add id to selectedIds.
+                    selectedIds.push($check.val());
+                }
+            }
+            else {
+                var checked = jQuery.inArray($check.val(), selectedIds);
+                if (checked > -1) {
+                    //remove id from selectedIds.
+                    selectedIds = $.grep(selectedIds, function (item, index) {
+                        return item != $check.val();
+                    });
+                }
+            }
+            updateMasterCheckbox();
+        });
+    });
+
+    function additionalData() {
+        var data = {
+            StartDate: $('#@Html.IdFor(model => model.StartDate)').val(),
+            EndDate: $('#@Html.IdFor(model => model.EndDate)').val(),
+            OrderStatusIds: $('#@Html.IdFor(model => model.OrderStatusIds)').val(),
+            PaymentStatusIds: $('#@Html.IdFor(model => model.PaymentStatusIds)').val(),
+            ShippingStatusIds: $('#@Html.IdFor(model => model.ShippingStatusIds)').val(),
+            StoreId: $('#@Html.IdFor(model => model.StoreId)').val(),
+            VendorId: $('#@Html.IdFor(model => model.VendorId)').val(),
+            WarehouseId: $('#@Html.IdFor(model => model.WarehouseId)').val(),
+            BillingEmail: $('#@Html.IdFor(model => model.BillingEmail)').val(),
+            BillingLastName: $('#@Html.IdFor(model => model.BillingLastName)').val(),
+            BillingCountryId: $('#@Html.IdFor(model => model.BillingCountryId)').val(),
+            PaymentMethodSystemName: $('#@Html.IdFor(model => model.PaymentMethodSystemName)').val(),
+            ProductId: $('#@Html.IdFor(model => model.ProductId)').val(),
+            OrderNotes: $('#@Html.IdFor(model => model.OrderNotes)').val(),
+            BranchId: $('#@Html.IdFor(model => model.BranchId)').val()
+        };
+        addAntiForgeryToken(data);
+        return data;
+    }
+
+    function onDataBound(e) {
+        $('#orders-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]').each(function () {
+            var currentId = $(this).val();
+            var checked = jQuery.inArray(currentId, selectedIds);
+            //set checked based on if current checkbox's value is in selectedIds.
+            $(this).attr('checked', checked > -1);
+        });
+
+        var countCells = 0;
+        $('td[role="gridcell"]').each(function (i, e) {
+            var date = $(e).html()
+            if (date.includes('/')) {
+                if (i == 8) {
+                    $(e).html(date.substring(0, 9));
+                    countCells = 0;
+                } else if (countCells == 12) {
+                    $(e).html(date.substring(0, 9));
+                    countCells = 0;
+                }
+            }
+            countCells++;
+        });
+
+        updateMasterCheckbox();
+
+        //update order totals summary
+        if (reportAggregates != "") {
+            for (var key in reportAggregates) {
+                $('#aggregator-profit-block').text(reportAggregates['aggregatorprofit']);
+                $('#aggregator-shipping-block').text(reportAggregates['aggregatorshipping']);
+                $('#aggregator-tax-block').text(reportAggregates['aggregatortax']);
+                $('#aggregator-total-block').text(reportAggregates['aggregatortotal']);
+            }
+        }
+    }
+
+    function updateMasterCheckbox() {
+        var numChkBoxes = $('#orders-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]').length;
+        var numChkBoxesChecked = $('#orders-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]:checked').length;
+        $('#mastercheckbox').attr('checked', numChkBoxes == numChkBoxesChecked && numChkBoxes > 0);
+    }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@*export selected (XML). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities*@
+<form asp-controller="Order" asp-action="ExportXmlSelected" method="post" id="export-xml-selected-form">
+    <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#exportxml-selected').click(function (e) {
+            e.preventDefault();
+            var ids = selectedIds.join(",");
+            $('#export-xml-selected-form #selectedIds').val(ids);
+            $('#export-xml-selected-form').submit();
+            return false;
+        });
+    });
+</script>
+
+@*export selected (Excel). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities*@
+<form asp-controller="Order" asp-action="ExportExcelSelected" method="post" id="export-excel-selected-form">
+    <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#exportexcel-selected').click(function (e) {
+            e.preventDefault();
+            var ids = selectedIds.join(",");
+            $('#export-excel-selected-form #selectedIds').val(ids);
+            $('#export-excel-selected-form').submit();
+            return false;
+        });
+    });
+</script>
+
+@*Print packaging slips selected (XML). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities*@
+<form asp-controller="Order" asp-action="PdfInvoiceSelected" method="post" id="pdf-invoice-selected-form">
+    <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#pdf-invoice-selected').click(function (e) {
+            e.preventDefault();
+            var ids = selectedIds.join(",");
+            $('#pdf-invoice-selected-form #selectedIds').val(ids);
+            $('#pdf-invoice-selected-form').submit();
+            return false;
+        });
+    });
+</script>

@@ -1,0 +1,498 @@
+﻿@model Teed.Plugin.Groceries.Controllers.ShippingRouteOrderModelForMonitor
+@using Teed.Plugin.Groceries.Controllers
+@using System;
+@using Teed.Plugin.Groceries.Domain.RescheduledOrderLogs;
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@inject Nop.Services.Common.IAddressAttributeFormatter addressAttributeFormatter
+@inject Nop.Core.Domain.Payments.PaymentSettings paymentStatus
+@inject Teed.Plugin.Groceries.Services.ShippingRouteService shippingRouteService
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRouteOrder");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var orderBy = (int)ViewBag.OrderBy;
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .paid-as {
+        margin-left: 20px;
+    }
+
+    .table-y-scroll {
+        /*position: relative;
+        height: auto;
+        overflow: auto;*/
+    }
+
+    .grey {
+        background-color: lightgrey;
+    }
+
+    .pink {
+        background-color: #ffb9c5;
+    }
+
+    .purple {
+        background-color: #673ab7;
+        color: white !important;
+    }
+
+    .orange {
+        background-color: #e86f12;
+        color: white !important;
+    }
+</style>
+<form method="post">
+    <div class="content">
+        <div class="form-horizontal">
+            @if (Model.FranchiseId > 0)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 style="font-weight: bold; text-align: center">Ver monitoreo de otro día</h4>
+                        <div class="row" style="margin: 1em; text-align: center;">
+                            <div class="col-md-12">
+                                <input id="datepicker" />
+                            </div>
+                            <div class="col-md-12" style="margin-top: 15px;">
+                                <a id="go-to-date" class="btn bg-blue" href="#a">
+                                    <i class="fa fa-search"></i>
+                                    Ver
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $("#datepicker").kendoDatePicker({
+                            format: "dd-MM-yyyy",
+                            max: new Date(),
+                        });
+                        $('#datepicker').val($('#current-date').html().trim());
+                        $("#go-to-date").click(function () {
+                            window.location.href = window.location.origin + window.location.pathname + "?isForMonitor=true&franchiseId=" + @Model.FranchiseId + "&date=" + $("#datepicker").val();
+                        });
+                    }, 200);
+                </script>
+            }
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3 style="font-weight: bold; text-align: center">Monitoreo de rutas del día <span id="current-date">@Model.Date.ToString("dd-MM-yyyy")</span></h3>
+                    <div class="row" style="margin: 1em">
+                        @{
+                            var rescheduledIds = Model.RescheduledOrderLogs.Select(x => x.OrderId).ToList();
+                            var groups = Model.Orders.GroupBy(x => x.RouteId).OrderBy(x => x.Key);
+                        }
+
+                        <div style="margin: 1em">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <tr>
+                                        <th>AVANCE DE RUTA</th>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <th>@(data.RouteName)</th>
+                                        }
+                                        <th>TOTAL</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Efectivo:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.CashAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.CashAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tarjeta:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.CardAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.CardAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tarjeta app móvil:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.VisaAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.VisaAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paypal:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.PaypalAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.PaypalAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Reposición:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.ReplacementAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.ReplacementAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Benefits:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.BenefitsAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.BenefitsAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Transferencia:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.TransferAmount.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.TransferAmount).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TOTAL:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.TotalPayment.ToString("C"))</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.TotalPayment).DefaultIfEmpty().Sum().ToString("C"))</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pedidos asignados:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.AssignedPedidos)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.AssignedPedidos).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pedidos entregados:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.DeliveredPedidos)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.DeliveredPedidos).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>% de avance pedidos:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.CompletionPercentage)%</td>
+                                        }
+                                        <td>@(Math.Round(Model.TableDataList.Select(x => x.CompletionPercentage).DefaultIfEmpty().Average(), 2))%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pedidos rescatados por otras rutas:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.RescuedPedidos)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.RescuedPedidos).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pedidos rescatados de otras rutas:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.RescuedByPedidos)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.RescuedByPedidos).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pedidos reprogramados:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.RescheduledPedidos)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.RescheduledPedidos).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pedidos marcados como no entregado:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.NotDeliveredPedidos)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.NotDeliveredPedidos).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Productos asignados:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.AssignedProducts)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.AssignedProducts).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Productos entregados:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.DeliveredProducts)</td>
+                                        }
+                                        <td>@(Model.TableDataList.Select(x => x.DeliveredProducts).DefaultIfEmpty().Sum())</td>
+                                    </tr>
+                                    <tr>
+                                        <td>% de avance productos:</td>
+                                        @foreach (var data in Model.TableDataList)
+                                        {
+                                            <td>@(data.ProductPercentaje)%</td>
+                                        }
+                                        <td>@(Math.Round(Model.TableDataList.Select(x => x.ProductPercentaje).DefaultIfEmpty().Average(), 2))%</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        @if (Model.FranchiseId > 0 && !Model.Orders.Any())
+                        {
+                            <h5 style="font-weight: bold; text-align: center">No tienes rutas activas el día de hoy</h5>
+                        }
+                        @if (Model.FranchiseId > 0)
+                        {
+                            <script>
+                                $(document).ready(function () {
+                                    $('.sidebar-menu').append('<li>' +
+                                        '<a href="/Admin/ShippingRoute/AssignRouteOrder?isForMonitor=true&franchiseId=@Model.FranchiseId" class="menu-item-link">' +
+                                        '<i class="fa fa-dot-circle-o"></i>' +
+                                        '<span class="menu-item-title">Monitoreo de rutas</span>' +
+                                        '</a>' +
+                                        '</li>');
+                                });
+                            </script>
+                        }
+                        @foreach (var group in groups)
+                        {
+                            var route = Model.Routes.Where(x => x.Value == group.Key.ToString()).FirstOrDefault();
+                            var customers = Model.Customers.Where(x => route.CustomerIds.Contains(x.Value)).ToList();
+
+                            var paidOrdersOfGroup = group.Where(x => x.PaymentStatusId == 30 && !rescheduledIds.Contains(x.Id)).ToList();
+                            decimal amountInCash = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("cash") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            decimal amountInCard = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("card") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            decimal amountInVisa = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("visa") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            decimal amountInPaypal = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("paypal") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                            .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            decimal amountInReplacement = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("replacement") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            decimal amountInBenefits = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("benefits") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            decimal amountInTransfer = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("transfer") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                            <h4 style="font-weight: bold; margin-top: 40px;">
+                                @(route == null ? "Sin ruta asignada" : route.Text) (@route.AssignedVehicle) (@(group.GroupBy(x => ShippingRouteHelper.ParseOrderAddress(x.ShippingAddress.Address1)).Count()) entregas)
+                            </h4>
+                            <div class="col-md-12" style="margin-bottom: 15px;">
+                                <strong>Responsable/s de la ruta:</strong>
+                                @(string.Join(", ", customers.Select(x => x.Text)))
+                            </div>
+                            <div class="col-md-12" style="margin-bottom: 15px;">
+                                <strong>Cobrado en...</strong>
+                                <br />
+                                <strong class="paid-as">Efectivo:</strong> @(amountInCash.ToString("C"))
+                                <br />
+                                <strong class="paid-as">Tarjeta:</strong> @(amountInCard.ToString("C"))
+                                <br />
+                                <strong class="paid-as">Tarjeta app móvil:</strong> @(amountInVisa.ToString("C"))
+                                <br />
+                                <strong class="paid-as">Paypal:</strong> @(amountInPaypal.ToString("C"))
+                                <br />
+                                <strong class="paid-as">Reposición:</strong> @(amountInReplacement.ToString("C"))
+                                <br />
+                                <strong class="paid-as">Benefits:</strong> @(amountInBenefits.ToString("C"))
+                                <br />
+                                <strong class="paid-as">Transferencia:</strong> @(amountInTransfer.ToString("C"))
+                                <br />
+                                <strong class="paid-as">TOTAL:</strong> @((amountInTransfer + amountInCash + amountInCard + amountInPaypal + amountInVisa + amountInReplacement).ToString("C"))
+                            </div>
+                            <div style="margin: 1em">
+                                <div class="table-responsive" style="overflow-x: unset">
+                                    <table class="table table-hover">
+                                        <tr>
+                                            <th>Orden</th>
+                                            <th>Horario de entrega</th>
+                                            @if (Model.FranchiseId == 0)
+                                            {
+                                                <th>Nombre del cliente</th>
+                                            }
+                                            <th>Dirección</th>
+                                            <th>Método de pago</th>
+                                            <th>Estatus del pago</th>
+                                            <th>Estatus del envío</th>
+                                            <th>Hora de entrega</th>
+                                            @if (Model.FranchiseId == 0)
+                                            {
+                                                <th>Punto de entrega</th>
+                                            }
+                                        </tr>
+                                        @foreach (var order in group.OrderBy(x => x.RouteDisplayOrder))
+                                        {
+                                            var deliveryDate = order.Shipments.Where(x => x.DeliveryDateUtc.HasValue).Any() ? order.Shipments.Where(x => x.DeliveryDateUtc.HasValue).Select(x => x.DeliveryDateUtc.Value).FirstOrDefault().ToLocalTime() : DateTime.MinValue;
+                                            var selectedShippingDate = (order.SelectedShippingDate ?? DateTime.MinValue);
+                                            var shippingTime = order.SelectedShippingTime;
+                                            bool optimized = !string.IsNullOrWhiteSpace(order.ShippingAddress.Latitude) && !string.IsNullOrWhiteSpace(order.ShippingAddress.Longitude);
+                                            string style = !optimized ? "color: red" : null;
+                                            string orderStatus = order.Shipments.Any() ?
+                                                (order.OrderStatusId == 10 ? "Pendiente" :
+                                                order.OrderStatusId == 20 ? "Enviado" :
+                                                order.OrderStatusId == 30 ? "Entregado" :
+                                                order.OrderStatusId == 40 ? "Cancelado" :
+                                                order.OrderStatusId == 50 ? "No entregada" :
+                                                "")
+                                                : "Pendiente";
+                                            string deliveryStatusStyle = shippingRouteService.GetDeliveryTimeColor(deliveryDate, selectedShippingDate, shippingTime);
+                                            <tr style="@style">
+                                                <td>
+                                                    @if (Model.FranchiseId > 0)
+                                                    {
+                                                        <span>
+                                                            #@(order.Id)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a target="_blank" href="/Admin/Order/Edit/@(order.Id)">
+                                                            #@(order.Id)
+                                                        </a>
+                                                    }
+                                                    (@order.OrderItems.Count())
+                                                </td>
+                                                <td>
+                                                    @if (Model.RescheduledOrderLogs.Any())
+                                                    {
+                                                        if (Model.RescheduledOrderLogs.Where(x => x.OrderId == order.Id).Any())
+                                                        {
+                                                            var originalShippingTime = Model.RescheduledOrderLogs
+                                                                .Where(x => x.OrderId == order.Id)
+                                                                .OrderBy(x => x.NewShippingDate)
+                                                                .LastOrDefault().OriginalShippingTime;
+
+                                                            @originalShippingTime;
+                                                        }
+                                                        else
+                                                        {
+                                                            @order.SelectedShippingTime
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        @order.SelectedShippingTime
+                                                    }
+
+                                                </td>
+                                                @if (Model.FranchiseId == 0)
+                                                {
+                                                    <td><a target="_blank" href="/Admin/Customer/Edit/@(order.CustomerId)">@order.ShippingAddress?.FirstName @order.ShippingAddress?.LastName</a></td>
+                                                    <td>@order.ShippingAddress?.Address1</td>
+                                                }
+
+                                                @if (Model.FranchiseId > 0)
+                                                {
+                                                    <td>@order.ShippingAddress?.Address2 CP: @order.ShippingAddress?.ZipPostalCode</td>
+                                                }
+                                                <td>
+                                                    @{
+                                                        var paymentMethod = ParsePaymentMethodSystemName(order.PaymentMethodSystemName);
+                                                        if (string.IsNullOrEmpty(paymentMethod) &&
+                                                            decimal.Round(order.CustomerBalanceUsedAmount ?? 0, 2) == decimal.Round((order.OrderSubtotalInclTax + order.OrderShippingInclTax - order.OrderSubTotalDiscountInclTax), 2))
+                                                        {
+                                                            paymentMethod = "Saldo";
+                                                        }
+                                                    }
+                                                    @paymentMethod
+                                                </td>
+                                                <td>@(order.PaymentStatusId == 30 ? "Pagada" : "Pago pendiente")</td>
+                                                <td style="text-align: center;">
+                                                    @(orderStatus)
+                                                </td>
+                                                <td>
+                                                    @if (Model.RescheduledOrderLogs.Any() && Model.RescheduledOrderLogs.Where(x => x.OrderId == order.Id).Any())
+                                                    {
+                                                        var dateOfReschedule = Model.RescheduledOrderLogs
+                                                        .Where(x => x.OrderId == order.Id)
+                                                        .OrderBy(x => x.NewShippingDate)
+                                                        .LastOrDefault().NewShippingDate.ToString("dd-MM-yyyy");
+                                                        <a href="/Admin/ShippingRoute/AssignRouteOrder?date=@(dateOfReschedule)&isForMonitor=true" target="_blank">
+                                                            <span class="grid-report-item pink">
+                                                                Reprogramado
+                                                            </span>
+                                                        </a>
+                                                    }
+                                                    else if (order.RescuedByRouteId.HasValue && order.RescuedByRouteId.Value > 0)
+                                                    {
+                                                        <span class="grid-report-item purple">
+                                                            Rescatado
+                                                        </span>
+                                                    }
+                                                    else if (order.OrderStatusId == 50)
+                                                    {
+                                                        <span class="grid-report-item red">
+                                                            No entregado
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="grid-report-item @(deliveryStatusStyle)">
+                                                            @(deliveryDate == DateTime.MinValue ? "Pendiente" : deliveryDate.ToString("hh:mmtt"))
+                                                        </span>
+                                                    }
+                                                </td>
+                                                @if (Model.FranchiseId == 0)
+                                                {
+                                                    <td>
+                                                        <a target="_blank" href="http://www.google.com/maps/place/@(order.ShippingAddress.Latitude),@(order.ShippingAddress.Longitude)">
+                                                            @(order.ShippingAddress.Latitude)/@(order.ShippingAddress.Longitude) <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                                                        </a>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@functions {
+    public string ParsePaymentMethodSystemName(string paymentMethodSystemName)
+    {
+        if (paymentMethodSystemName.ToLower().Contains("paypal"))
+        {
+            return "Paypal";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("cash"))
+        {
+            return "Efectivo";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("card"))
+        {
+            return "Tarjeta contra entrega";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("replacement"))
+        {
+            return "Reposición";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("transfer"))
+        {
+            return "Transferencia";
+        }
+        else
+        {
+            return paymentMethodSystemName;
+        }
+    }
+}

@@ -1,0 +1,38 @@
+﻿@model CustomerAddressEditModel
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Account").Text);
+    Html.AppendPageCssClassParts("html-account-page");
+    //page class
+    Html.AppendPageCssClassParts("html-address-edit-page");
+}
+@section left
+{
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.Addresses })
+}
+<script src="~/Themes/TeedMaterialV2/Content/js/V2-checkout.js" type="text/javascript"></script>
+<script src="~/Themes/TeedMaterialV2/Content/js/custom.js" type="text/javascript"></script>
+<input type="hidden" id="postal-codes" value="@Model.ValidPostalCodes" />
+<form asp-route="CustomerAddressAdd" method="post" class="section">
+    <div class="page account-page address-edit-page">
+        <div class="">
+            <h1 class="category-page-title">@T("Account.MyAccount") - @T("Account.CustomerAddresses.AddNew")</h1>
+        </div>
+        <div class="page-body">
+            <div asp-validation-summary="ModelOnly" class="message-error"></div>
+            @{
+                var dataDictAddress = new ViewDataDictionary(ViewData);
+                dataDictAddress.TemplateInfo.HtmlFieldPrefix = "Address";
+                @await Html.PartialAsync("_CreateOrUpdateAddress", Model.Address, dataDictAddress)
+            }
+            <div style="color:red;text-align:center;margin-bottom:1em;display:none" id="general-address-error">
+                <span>Existen datos incorrectos o incompletos, por favor verifica la información y llena todos los campos para poder continuar.</span>
+            </div>
+            <div class="button center-align">
+                <input type="button" id="save-address-btn" class="btn save-address-button" value="@T("Common.Save")" onclick="saveNewAddress();" />
+            </div>
+        </div>
+    </div>
+</form>

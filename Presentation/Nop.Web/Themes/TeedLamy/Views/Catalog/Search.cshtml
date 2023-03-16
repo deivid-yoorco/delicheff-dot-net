@@ -1,0 +1,236 @@
+﻿@model Nop.Web.Models.Catalog.SearchModel
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Search").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-search-page");
+}
+<script type="text/javascript" asp-location="Footer">
+    $(document).ready(function () {
+        $("#@Html.IdFor(model => model.adv)").click(toggleAdvancedSearch);
+        toggleAdvancedSearch();
+    });
+
+    function toggleAdvancedSearch() {
+        if ($('#@Html.IdFor(model => model.adv)').is(':checked')) {
+            $('#advanced-search-block').show();
+        }
+        else {
+            $('#advanced-search-block').hide();
+        }
+    }
+</script>
+<div class="page search-page">
+    <div class="page-body">
+        <div class="search-input">
+            <form asp-route="ProductSearch" method="get">
+                <div class="row">
+                    <div class="input-field col s8">
+                        <input asp-for="q" type="text" />
+                        <label asp-for="q">@T("Search.SearchTerm")</label>
+                    </div>
+                    <div class="input-field col s4">
+                        <button type="submit" class="btn">
+                            @T("Search.Button")
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        @await Component.InvokeAsync("Widget", new { widgetZone = "productsearch_page_before_results" })
+        <div class="search-results">
+            @if (!string.IsNullOrEmpty(Model.Warning))
+            {
+                <div class="warning">
+                    @Model.Warning
+                </div>
+            }
+            @if (Model.NoResults)
+            {
+                <div class="no-result">
+                    @T("Search.NoResultsText")
+                </div>
+            }
+            @if (Model.Products.Count > 0)
+            {
+                <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "product-list" : "product-grid")">
+                    <div class="row">
+                        @foreach (var product in Model.Products)
+                        {
+                            <div class="col s12 m12">
+                                @await Html.PartialAsync("_ProductLine", product)
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            @{
+                var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber").BooleanParameterName("adv").BooleanParameterName("isc").BooleanParameterName("sid").RenderEmptyParameters(true);
+            }
+            @if (!pager.IsEmpty())
+            {
+                <div class="pager">
+                    @pager
+                </div>
+            }
+        </div>
+        @await Component.InvokeAsync("HomepageBestSellers")
+        @await Component.InvokeAsync("Widget", new { widgetZone = "productsearch_page_after_results" })
+    </div>
+</div>
+
+<script>
+                        Array.prototype.where = function (filter) {
+
+                            var collection = this;
+
+                            switch (typeof filter) {
+
+                                case 'function':
+                                    return $.grep(collection, filter);
+
+                                case 'object':
+                                    for (var property in filter) {
+                                        if (!filter.hasOwnProperty(property))
+                                            continue; // ignore inherited properties
+
+                                        collection = $.grep(collection, function (item) {
+                                            return item[property] === filter[property];
+                                        });
+                                    }
+                                    return collection.slice(0); // copy the array
+                                // (in case of empty object filter)
+
+                                default:
+                                    throw new TypeError('func must be either a' +
+                                        'function or an object of properties and values to filter by');
+                            }
+                        };
+
+                        Array.prototype.firstOrDefault = function (func) {
+                            return this.where(func)[0] || null;
+                        };
+
+                        function checkIfFirstIsSpecial($productColors) {
+                            setTimeout(function () {
+                                if (typeof $productColors != 'undeifned') {
+                                    var $selectedColor =
+                                        $productColors.find('li .selected-color')
+                                            .parent().first();
+                                    var classes = $productColors.attr('class').split(/\s+/);
+                                    var id = classes[0].substring(classes[0].lastIndexOf('-') + 1, classes[0].length);
+                                    if ($selectedColor.data('special'))
+                                        $('.special-edition-' + id).show();
+                                    else {
+                                        $('.special-edition-' + id).hide();
+                                        if ($selectedColor.data('new'))
+                                            $('.new-edition-' + id).show();
+                                        else
+                                            $('.new-edition-' + id).hide();
+                                    }
+                                }
+                            }, 500);
+                        }
+                        function priceChange(element) {
+                            //// Pricing
+                            var parent = $(element).parent();
+                            var productId = parent.data('product-id');
+                            var attribute = parent.data('attribute');
+                            var originalPrice = 0.00;
+                            var attributePrice = 0.00;
+
+                            $.ajax({
+                                cache: false,
+                                url: '@Url.Action("ProductDetails_AttributePrice", "ShoppingCart")?productId=' + productId +
+                                    '&attributeData=' + attribute,
+                                type: 'GET',
+                                success: function (data) {
+                                    if (data.includes('$'))
+                                        data = data.replace('$', '').replace(/,/g, '');
+                                    var ajaxPrice = formatCurrency(parseFloat(data));
+                                    var attributePrice = parseFloat($(element).attr('data-price'));
+                                    if($('#price-original-' + productId).data('originalprice') == 0)
+                                        originalPrice = formatCurrency(parseFloat($(element).data('price')).toFixed(2));
+                                    else
+                                        originalPrice = formatCurrency(parseFloat($(element).data('price') + attributePrice).toFixed(2));
+                                    if (ajaxPrice != originalPrice && originalPrice != "MXN 0.00" &&
+                                        attributePriceBelowOriginal(data, attributePrice)) {
+                                        if ($('#price-left-' + productId + ' .price-text-big').length > 0) {
+                                            $('#price-left-' + productId + ' .price-text-big').text(ajaxPrice);
+                                            hidingCheckPrices(productId);
+                                            $('#price-left-' + productId + ' .price-text-big').text(ajaxPrice);
+                                            $('#price-original-' + productId).show();
+                                            $('#price-left-' + productId + ' .price-orignal-text').show();
+                                            $('.product-texts-' + productId).addClass('price-several-texts');
+                                            $('#price-original-' + productId + ' .price-original-big').text(originalPrice);
+                                        }
+                                        else {
+                                            $('#price-left-' + productId + ' .text-red').text(ajaxPrice);
+                                            hidingCheckPrices(productId);
+                                            $('#price-original-' + productId).show();
+                                            $('#price-left-' + productId + ' .price-orignal-text').show();
+                                            $('.product-texts-' + productId).addClass('price-several-texts');
+                                            $('#price-original-' + productId + ' .price-original-big').text(originalPrice);
+                                        }
+                                    } else {
+                                        $('#price-left-' + productId + ' .old-price').show();
+                                        $('#price-original-' + productId).hide();
+                                        $('#price-left-' + productId + ' .price-orignal-text').hide();
+                                        $('.product-texts-' + productId).removeClass('price-several-texts');
+                                        if ($('#price-left-' + productId + ' .price-text-big').length > 0)
+                                            $('#price-left-' + productId + ' .price-text-big').text(ajaxPrice);
+                                        else
+                                            $('#price-left-' + productId + ' .text-red').text(ajaxPrice);
+                                        if ($('#price-left-' + productId + ' .old-price-text').is(":visible"))
+                                            $('#price-left-' + productId + ' .price-orignal-text').show();
+                                    }
+                                },
+                                error: function (e) {
+                                    $('#price-original-' + productId).hide();
+                                    $('#price-left-' + productId + ' .price-orignal-text').hide();
+                                    $('.product-texts-' + productId).removeClass('price-several-texts');
+                                    console.log('Error getting price of attributes ' + attribute + ' from product ' + productId + ':');
+                                    console.log(e);
+                                    console.log('----- applying normal price');
+                                    var productId = $(element).parentsUntil('.center-content-card').last().attr('class').match(/product-colors-\d+/)[0].split('-')[2];
+                                    hidingCheckPrices(productId);
+                                    if (typeof $("#price-left-" + productId).attr('data-originalprice') != 'undefined' && $("#price-left-" + productId).attr('data-originalprice') != '')
+                                        originalPrice = parseFloat($("#price-left-" + productId).attr('data-originalprice'));
+                                    if(typeof $(element).attr('data-price') != 'undefined' && $(element).attr('data-price') != '')
+                                        attributePrice = parseFloat($(element).attr('data-price'));
+
+                                    if (attributePrice > 0) {
+                                        if ($('#price-left-' + productId + ' .price-text-big').length > 0)
+                                            $('#price-left-' + productId + ' .price-text-big').text(formatCurrency(originalPrice + attributePrice));
+                                        else
+                                            $('#price-left-' + productId + ' .text-red').text(formatCurrency(originalPrice + attributePrice));
+                                    }
+                                }
+                            });
+                        }
+                        function formatCurrency(total) {
+                            var neg = false;
+                            if(total < 0) {
+                                neg = true;
+                                total = Math.abs(total);
+                            }
+                            return "MXN " + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
+                        }
+                        function hidingCheckPrices(productId) {
+                            if ($('#price-left-' + productId + ' .old-price').is(":visible")) {
+                                $('#price-left-' + productId + ' .old-price').hide();
+                                $('#price-left-' + productId + ' .old-price-text').hide();
+                                if ($('#price-left-' + productId + ' .old-price').next().is('br'))
+                                    $('#price-left-' + productId + ' .old-price').next().hide();
+                            }
+                        }
+                        function attributePriceBelowOriginal(newPrice, oldPrice) {
+                            var newNum = parseFloat(newPrice).toFixed(2);
+                            if (newNum > oldPrice)
+                                return false;
+                            else
+                                return true;
+                        }
+</script>

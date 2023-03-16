@@ -1,0 +1,110 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var imageText = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es: 1200x1200 píxeles.";
+
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Primera imagen en conjunto de 3
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Picture3Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Picture3Id" />
+                <span asp-validation-for="Top3Picture3Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Text3" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Text3" />
+                <span asp-validation-for="Top3Text3"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Link3" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Link3" />
+                <span asp-validation-for="Top3Link3"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Segunda imagen en conjunto de 3
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Picture4Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Picture4Id" />
+                <span asp-validation-for="Top3Picture4Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Text4" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Text4" />
+                <span asp-validation-for="Top3Text4"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Link4" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Link4" />
+                <span asp-validation-for="Top3Link4"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Tercera imagen en conjunto de 3
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Picture5Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Picture5Id" />
+                <span asp-validation-for="Top3Picture5Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Text5" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Text5" />
+                <span asp-validation-for="Top3Text5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Top3Link5" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Top3Link5" />
+                <span asp-validation-for="Top3Link5"></span>
+            </div>
+        </div>
+    </div>
+</div>

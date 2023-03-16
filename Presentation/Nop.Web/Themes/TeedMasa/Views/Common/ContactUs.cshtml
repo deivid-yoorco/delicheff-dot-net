@@ -1,0 +1,120 @@
+﻿@model ContactUsModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.ContactUs").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-contact-page");
+}
+<style>
+    .contact-form textarea {
+        float: left;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        width: 462px;
+        height: 201px;
+        overflow: auto;
+        border-top: 1px #ffffff;
+        border-left: 1px #ffffff;
+        border-right: 1px;
+        background-color: transparent;
+       
+        border-bottom: 1px solid #9e9e9e;
+        border-radius: 0;
+        outline: 0;
+        font-size: 16px;
+        margin: 0 0 8px 0;
+        padding: 0;
+        box-shadow: none;
+        box-sizing: content-box;
+        transition: box-shadow .3s,border .3s;
+    }
+    form input:focus, form textarea:focus {
+        outline: none;
+        background: none;
+        border-top: 1px #ffffff;
+        border-left: 1px #ffffff;
+        border-right: 1px;
+        border-bottom: 2px solid #000000;
+        
+    }
+</style>
+<div class="page contact-page section">
+    <div class="page-title">
+        <h1>@T("PageTitle.ContactUs")</h1>
+    </div>
+
+ 
+    <div class="page-body">
+        @await Component.InvokeAsync("TopicBlock", new { systemName = "ContactUs" })
+        @await Component.InvokeAsync("Widget", new { widgetZone = "contactus_top" })
+        @if (Model.SuccessfullySent)
+        {
+            <div class="result">
+                @Model.Result
+            </div>
+        }
+        else
+        {
+            <div class="contact-form">
+                <form asp-route="ContactUs" method="post">
+
+                    <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                    <div class="fieldset">
+                        <div class="row">
+                            <div class="form-fields">
+
+                                <div class="col l6 m6 s12" >
+                                    <div class="input-field">
+                                        <input asp-for="FullName" placeholder="@T("ContactUs.FullName.Hint")" class="fullname" />
+                                        <label>*@Html.DisplayNameFor(a => a.FullName)</label>
+                                        <span class="helper-text red-text" asp-validation-for="FullName"></span>
+                                    </div>
+                                    <div class="input-field">
+                                        <input asp-for="Email" placeholder="@T("ContactUs.Email.Hint")" class="email" />
+                                        <label>*@Html.DisplayNameFor(a => a.Email)</label>
+                                        <span class="helper-text red-text" asp-validation-for="Email"></span>
+                                    </div>
+                                    @if (Model.SubjectEnabled)
+                                    {
+                                        <div class="input-field">
+                                            <input asp-for="Subject" placeholder="@T("ContactUs.Subject.Hint")" class="subject" />
+                                            <label>*@Html.DisplayNameFor(a => a.Subject)</label>
+                                            <span class="helper-text red-text" asp-validation-for="Subject"></span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="col l6 m6 s12">
+                                    <div class="input-field">
+                                        <label>*@Html.DisplayNameFor(a => a.Enquiry)</label>
+                                        <span class="helper-text red-text" asp-validation-for="Enquiry"></span>
+
+                                        <textarea asp-for="Enquiry" placeholder="@T("ContactUs.Enquiry.Hint")" class="enquiry">
+                                </textarea>
+
+                                    </div>
+                                    @if (Model.DisplayCaptcha)
+                                    {
+                                        <div class="captcha-box">
+                                            <nop-captcha />
+                                        </div>
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <button type="submit" name="send-email" class="waves-effect waves-light btn">
+                            @T("ContactUs.Button")
+                        </button>
+                    </div>
+                </form>
+                </div>
+                }
+                @await Component.InvokeAsync("Widget", new { widgetZone = "contactus_bottom" })
+            </div>
+        </div>
+<div class="section"></div>

@@ -1,0 +1,295 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.BillingModel
+<style>
+    .loader {
+        border: 10px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 10px solid #3498db;
+        width: 30px;
+        height: 30px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+        margin: auto;
+        margin-bottom: 6em;
+    }
+    /* Safari */
+    @@-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input id="bill-id" asp-for="Id" hidden />
+                        @if (Model.Id > 0)
+                        {
+                            <div>
+                                Cualquier ajuste realizado a la factura será calculado utilizando las tarifas tomadas al momento de su creación. Para que una factura se regenere con las tarifas actuales, solo es necesario borrarla y el sistema la creará de nuevo automáticamente (máximo 12 semanas de antiguedad).
+                            </div>
+                        }
+                        <script type="text/javascript">
+                            @if (Model.Id > 0)
+                            {
+                                <text>
+                                    setTimeout(function () {
+                                        $('#startDate').text('@Model.InitDate.ToString("dd-MM-yyyy")');
+                                        $('#endDate').text('@Model.EndDate.ToString("dd-MM-yyyy")');
+                                        $('#InitDate').val('@Model.InitDate.ToString("dd-MM-yyyy")');
+                                        $('#EndDate').val('@Model.EndDate.ToString("dd-MM-yyyy")');
+                                    }, 100);
+                                </text>
+                            }
+                            $.datepicker.regional['es'] = {
+                                monthNames: [
+                                    'Enero',
+                                    'Febrero',
+                                    'Marzo',
+                                    'Abril',
+                                    'Mayo',
+                                    'Junio',
+                                    'Julio',
+                                    'Agosto',
+                                    'Septiembre',
+                                    'Octubre',
+                                    'Noviembre',
+                                    'Diciembre'
+                                ],
+                                monthNamesShort: [
+                                    'Ene',
+                                    'Feb',
+                                    'Mar',
+                                    'Abr',
+                                    'May',
+                                    'Jun',
+                                    'Jul',
+                                    'Ago',
+                                    'Sep',
+                                    'Oct',
+                                    'Nov',
+                                    'Dic'
+                                ],
+                                dayNames: [
+                                    'Domingo',
+                                    'Lunes',
+                                    'Martes',
+                                    'Miércoles',
+                                    'Jueves',
+                                    'Viernes',
+                                    'SábadModel'
+                                ],
+                                dayNamesShort: [
+                                    'Dom',
+                                    'Lun',
+                                    'Mar',
+                                    'Mie',
+                                    'Jue',
+                                    'Vie',
+                                    'Sáb'
+                                ],
+                                dayNamesMin: ['D', 'L', 'M', 'Mi', 'J', 'V', 'S'],
+                                cancel: "Cancelar"
+                            };
+                            $.datepicker.setDefaults($.datepicker.regional['es']);
+
+                            $(function () {
+
+                                var startDate;
+                                var endDate;
+
+                                var selectCurrentWeek = function () {
+                                    window.setTimeout(function () {
+                                        $('.week-picker').find('.ui-datepicker-current-day a').addClass('ui-state-active')
+                                    }, 1);
+                                }
+
+                                $('.week-picker').datepicker({
+                                    firstDay: 1, // Start with Monday
+                                    showOtherMonths: true,
+                                    selectOtherMonths: true,
+                                    dateFormat: "dd-mm-yyyy",
+                                    onSelect: function (dateText, inst) {
+                                        var date = $(this).datepicker('getDate');
+
+                                        startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + 1);
+                                        endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + 7);
+
+                                        var dateFormat = inst.settings.dateFormat || $.datepicker._defaults.dateFormat;
+
+                                        $('#startDate').text(formatDate(startDate));
+                                        $('#endDate').text(formatDate(endDate));
+                                        $('#InitDate').val(formatDate(startDate));
+                                        $('#EndDate').val(formatDate(endDate));
+
+                                        selectCurrentWeek();
+                                        GetBilled();
+                                    },
+                                    beforeShowDay: function (date) {
+                                        var cssClass = '';
+                                        if (date >= startDate && date <= endDate)
+                                            cssClass = 'ui-datepicker-current-day';
+                                        return [true, cssClass];
+                                    },
+                                    onChangeMonthYear: function (year, month, inst) {
+                                        selectCurrentWeek();
+                                    }
+                                });
+
+                                $('.week-picker .ui-datepicker-calendar tr').live('mousemove', function () { $(this).find('td a').addClass('ui-state-hover'); });
+                                $('.week-picker .ui-datepicker-calendar tr').live('mouseleave', function () { $(this).find('td a').removeClass('ui-state-hover'); });
+
+                                $('#FranchiseId').on('change', function () {
+                                    GetBilled();
+                                });
+                                $('#AmountAjustment').on('keyup', function () {
+                                    GetBilled();
+                                });
+                                $('#Billed').attr('disabled', 'disabled');
+                            });
+
+                            function formatDate(date) {
+                                let year = date.getFullYear();
+                                let month = date.getMonth() + 1;
+                                let day = date.getDate();
+
+                                let parsedMonth = month < 10 ? "0" + month : month;
+                                let parsedDay = day < 10 ? "0" + day : day;
+
+                                return parsedDay + "-" + parsedMonth + "-" + year;
+
+                            }
+
+                            function GetBilled() {
+                                $('.loader').show();
+                                var postData = {
+                                    initDate: $('#InitDate').val(),
+                                    endDate: $("#EndDate").val(),
+                                    franchiseId: $('#FranchiseId').val(),
+                                    amountAjustment: $('#AmountAjustment').val(),
+                                    billId: $("#bill-id").val()
+                                };
+
+                                console.log(postData);
+
+                                if (typeof postData.initDate != 'undefined' ||
+                                    postData.initDate != '' ||
+                                    typeof postData.endDate != 'undefined' ||
+                                    postData.endDate != '') {
+                                        addAntiForgeryToken(postData);
+                                        var formData = new FormData();
+                                        $.each(postData, function (name, value) {
+                                            formData.append(name, value);
+                                        });
+                                        $.ajax({
+                                            contentType: false,
+                                            processData: false,
+                                            type: "POST",
+                                            url: "@(Url.Action("GetBilled", "Billing"))",
+                                            data: formData,
+                                            success: function (data) {
+                                                $('#Billed').val(data);
+                                                $('.loader').hide();
+                                            },
+                                            error: function (e) {
+                                                console.log(e);
+                                                $('.loader').hide();
+                                            }
+                                        });
+                                }
+                            }
+                        </script>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Franquicia</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="FranchiseId" asp-items="@Model.Franchises" />
+                                <span asp-validation-for="FranchiseId"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Semana de la factura</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="week-picker"></div>
+                                <label>Semana :</label> <span id="startDate"></span> - <span id="endDate"></span>
+                                <br /><br />
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="display: none;">
+                            <div class="col-md-9">
+                                <nop-editor asp-for="InitDate" />
+                                <span asp-validation-for="InitDate"></span>
+                                <nop-editor asp-for="EndDate" />
+                                <span asp-validation-for="EndDate"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Comentario</label>
+                            </div>
+                            <div class="col-md-9">
+                                @Html.TextAreaFor(m => m.Comment, 4, 20, new { @class = "form-control" })
+                                <span asp-validation-for="Comment"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Monto ajustable</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="AmountAjustment" />
+                                <span asp-validation-for="AmountAjustment"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Facturado</label>
+                                <i title="Total de órdenes +
+                                   Bonos [Si aplican] –
+                                   Incidencias + Monto ajustable"
+                                   class="fa fa-question-circle ico-help handmade">
+                                </i>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Billed" disabled />
+                                <span asp-validation-for="Billed"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-1 col-md-8">
+                                <div class="loader" style="display: none;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

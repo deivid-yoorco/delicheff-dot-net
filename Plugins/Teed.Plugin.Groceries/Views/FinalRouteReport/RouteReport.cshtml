@@ -1,0 +1,96 @@
+﻿@model Teed.Plugin.Groceries.Controllers.FinalRouteModel
+@using Teed.Plugin.Groceries.Controllers
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.FinalRouteReport");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "FinalRouteReport";
+    var groupedOrders = Model.Orders.GroupBy(x => x.RouteId).OrderBy(x => x.Key);
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Liquidación de entregas para @(Model.ShippingDate.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-MX")))
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div style="margin: 1em">
+                    @foreach (var group in groupedOrders)
+                    {
+                        var route = Model.Routes.Where(x => x.Value == group.Key.ToString()).FirstOrDefault();
+                        var customers = Model.Customers.Where(x => route.CustomerIds.Contains(x.Value)).ToList();
+
+                        var paidOrdersOfGroup = group.Where(x => x.PaymentStatusId == 30).ToList();
+                        decimal amountInCash = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("cash") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                            .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                        decimal amountInCard = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("card") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                            .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                        decimal amountInVisa = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("visa") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                            .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                        decimal amountInPaypal = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("paypal") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                                        .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                        decimal amountInReplacement = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("replacement") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                            .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+                        decimal amountInBenefits = paidOrdersOfGroup.Where(x => x.PaymentMethodSystemName.ToLower().Contains("benefits") && (!x.RescuedByRouteId.HasValue || x.RescuedByRouteId.Value == 0))
+                            .Select(x => x.OrderTotal).DefaultIfEmpty().Sum();
+
+                        <h4 style="font-weight: bold; margin-top: 40px;">
+                            @(route == null ? "Sin ruta asignada" : route.Text) (@route.AssignedVehicle) (@(group.GroupBy(x => ShippingRouteHelper.ParseOrderAddress(x.ShippingAddress.Address1)).Count()) entregas)
+                        </h4>
+                        <div class="col-md-12" style="margin-bottom: 15px;">
+                            <strong>@(route.Franchise)</strong><br/>
+                            <strong>Responsable/s de la ruta:</strong>
+                            @(string.Join(", ", customers.Select(x => x.Text)))
+                        </div>
+                        <div class="col-md-12" style="margin-bottom: 15px;">
+                            <strong>Cobrado en...</strong>
+                            <br />
+                            <strong class="paid-as">Efectivo:</strong> @(amountInCash.ToString("C"))
+                            <br />
+                            <strong class="paid-as">Tarjeta:</strong> @(amountInCard.ToString("C"))
+                            <br />
+                            <strong class="paid-as">Tarjeta app móvil:</strong> @(amountInVisa.ToString("C"))
+                            <br />
+                            <strong class="paid-as">Paypal:</strong> @(amountInPaypal.ToString("C"))
+                            <br />
+                            <strong class="paid-as">Reposición:</strong> @(amountInReplacement.ToString("C"))
+                            <br />
+                            <strong class="paid-as">Benefits:</strong> @(amountInBenefits.ToString("C"))
+                            <br />
+                            <strong class="paid-as">TOTAL:</strong> @((amountInCash + amountInCard + amountInPaypal + amountInVisa + amountInReplacement).ToString("C"))
+                        </div>
+                        <div class="table-responsive" style="overflow-x: unset">
+                            <table class="table table-hover">
+                                <tr>
+                                    <th>Hora de entrega</th>
+                                    <th>Pedido</th>
+                                    <th>Método de pago</th>
+                                    <th>Importe</th>
+                                    <th>Importe a liquidar</th>
+                                    <th>Liquidación</th>
+                                    <th>Comprobante</th>
+                                </tr>
+                                @*@foreach (var pedido in pedidos)
+                    {
+                        <tr>
+                            <td>@(pedido.Select(x => x.SelectedShippingTime).FirstOrDefault())</td>
+                            <td>@(string.Join(", ", pedido.Select(x => "#" + x.Id.ToString())))</td>
+                            <td>@(string.Join(", ", pedido.Select(x => x.PaymentMethodSystemName)))</td>
+                            <td>@(string.Join(", ", pedido.Select(x => x.OrderTotal.ToString("C"))))</td>
+                            <td>@(pedido.Select(x => x.OrderTotal).DefaultIfEmpty().Sum())</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    }*@
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

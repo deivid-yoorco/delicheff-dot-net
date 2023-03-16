@@ -1,0 +1,671 @@
+﻿@{
+    var gridPageSize = 4;
+}
+
+<style>
+    .scroll-bar-new::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        background-color: #F5F5F5;
+    }
+
+    .scroll-bar-new::-webkit-scrollbar {
+        width: 5px;
+        background-color: #F5F5F5;
+    }
+
+    .scroll-bar-new::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.1);
+        background-color: #CCCCCC;
+    }
+</style>
+<div style="padding-top:0; padding-bottom:0">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="box box-info" style="height:100%;overflow:auto;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Cambios de precios
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div id="change-price">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Productos con existencias sin publicar
+                    </div>
+                </div>
+                <div class="content scroll-bar-new" id="products-stock" style="overflow:auto;height:21.5em;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Productos publicados sin existencias
+                    </div>
+                </div>
+                <div class="content scroll-bar-new" id="products-withoutstock" style="overflow:auto;height:21.5em;">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Cambios en existencias
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div id="change-stock">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="box box-info" style="height:25em;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Productos publicados con menor margen de ganancia
+                    </div>
+                </div>
+                <div class="content scroll-bar-new" id="products-margin" style="overflow:auto;height:21.5em;">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Productos publicados con menos de 2 productos relacionados
+                    </div>
+                </div>
+                <div class="content scroll-bar-new" id="products-related" style="overflow:auto;height:20.5em;">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Productos publicados con menos de 2 productos cruzados
+                    </div>
+                </div>
+                <div class="content scroll-bar-new" id="products-cross" style="overflow:auto;height:20.5em;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Lista de pedidos pagados no enviados
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div id="paid-notsent">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="box box-info" style="height:100%;">
+                <div class="box-header with-border clearfix">
+                    <div class="box-title">
+                        <i class="fa ion-stats-bars"></i>
+                        Lista de pedidos enviados
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div id="orders-sent">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    productsUnpublished();
+    productsPublished();
+    productsMargin();
+    productsRelated();
+    productsCross();
+
+        $("#change-price").kendoGrid({
+        dataSource: {
+            type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("PriceChanges", "Dash"))",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    }
+                },
+            schema: {
+                data: "Data",
+                total: "Total",
+                errors: "Errors"
+            },
+            error: function (e) {
+                display_kendoui_grid_error(e);
+                // Cancel the changes
+                this.cancelChanges();
+            },
+            pageSize: @(gridPageSize),
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true
+        },
+        pageable: {
+            refresh: true,
+            numeric: true,
+            previousNext: true,
+            info: true,
+            @await Html.PartialAsync("_GridPagerMessages")
+        },
+        editable: {
+            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+            mode: "inline"
+        },
+        scrollable: false,
+        columns: [{
+            field: "CreatedOnUtc",
+            title: "Fecha del cambio",
+            width: 150
+        }, {
+            field: "SKU",
+            title: "SKU"
+        }, {
+            field: "Product",
+            title: "Producto"
+        }, {
+            field: "OldPrice",
+            title: "Precio anterior",
+            width: 50
+        }, {
+            field: "NewPrice",
+            title: "Precio nuevo",
+            width: 50
+        }, {
+            field: "User",
+            title: "Usuario"
+        }, {
+            field: "Id",
+            title: "Editar producto",
+            width: 50,
+            headerAttributes: { style: "text-align:center" },
+            attributes: { style: "text-align:center" },
+            template: "<a class='btn btn-xs btn-default' href='/Admin/Product/Edit/#=ProductId#'><i class='fa fa-eye'></i>Editar</a>"
+        }]
+    });
+
+    $("#change-stock").kendoGrid({
+        dataSource: {
+            type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("StockChanges", "Dash"))",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    }
+                },
+            schema: {
+                data: "Data",
+                total: "Total",
+                errors: "Errors"
+            },
+            error: function (e) {
+                display_kendoui_grid_error(e);
+                // Cancel the changes
+                this.cancelChanges();
+            },
+            pageSize: @(gridPageSize),
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true
+        },
+        pageable: {
+            refresh: true,
+            numeric: true,
+            previousNext: true,
+            info: true,
+            @await Html.PartialAsync("_GridPagerMessages")
+        },
+        editable: {
+            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+            mode: "inline"
+        },
+        scrollable: false,
+        columns: [{
+            field: "CreatedOnUtc",
+            title: "Fecha del cambio",
+            width: 150
+        }, {
+            field: "SKU",
+            title: "SKU"
+        }, {
+            field: "Product",
+            title: "Producto"
+        }, {
+            field: "OldStock",
+            title: "Stock anterior",
+            width: 50
+        }, {
+            field: "NewStock",
+            title: "Stock nuevo",
+            width: 50
+        }, {
+            field: "User",
+            title: "Usuario"
+        }, {
+            field: "ChangeType",
+            title: "Tipo de cambio"
+        }, {
+            field: "Id",
+            title: "Editar producto",
+            width: 50,
+            headerAttributes: { style: "text-align:center" },
+            attributes: { style: "text-align:center" },
+            template: "<a class='btn btn-xs btn-default' href='/Admin/Product/Edit/#=ProductId#'><i class='fa fa-eye'></i>Editar</a>"
+        }]
+    });
+
+    function productsUnpublished() {
+        $("#products-stock").empty();
+        $("#products-stock").append("<i class='fa fa-spinner fa-pulse fa-fw spinner' style='padding-right:0!important;margin:1em auto;display:block;font-size:2em'></i>");
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/ProductsWithStockUnpublished',
+            type: 'GET',
+            success: function (result) {
+                $("#products-stock").empty();
+                var html = "";
+                $.each(result, function (index, value) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-3'>";
+                    html += "<img src='" + value.Image + "' style='width:80px;'>";
+                    html += "</div>";
+                    html += "<div class='col-md-5'>";
+                    html += "<a href='Admin/Product/Edit/" + value.Id + "'>" + value.Name + "</a></br >";
+                    html += "<p>Existencias: <strong>" + value.StockQuantity + "</strong></p></br >";
+                    html += "</div>";
+                    html += "<div class='col-md-4'>";
+                    html += "<a style='margin:3px' href='Admin/Product/Edit/" + value.Id + "' class='btn btn-sm bg-blue'>Editar producto</a>";
+                    html += "<button style='margin:3px' type='button' class='btn btn-sm bg-red' onclick='publish(" + value.Id + ")'>Publicar</button>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "<hr>";
+                });
+
+                if (result.length == 0) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-12' style='text-align:center;font-weight: bold'>";
+                    html += "No se encontraron productos que cumplan con esta condición.";
+                    html += "</div>";
+                    html += "</div>";
+                }
+
+                $("#products-stock").append(html);
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    function productsPublished() {
+        $("#products-withoutstock").empty();
+        $("#products-withoutstock").append("<i class='fa fa-spinner fa-pulse fa-fw spinner' style='padding-right:0!important;margin:1em auto;display:block;font-size:2em'></i>");
+
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/ProductsPublishedWithoutStock',
+            type: 'GET',
+            success: function (result) {
+                $("#products-withoutstock").empty();
+
+                var html = "";
+                $.each(result, function (index, value) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-3'>";
+                    html += "<img src='" + value.Image + "' style='width:80px;'>";
+                    html += "</div>";
+                    html += "<div class='col-md-5'>";
+                    html += "<a href='Admin/Product/Edit/" + value.Id + "'>" + value.Name + "</a></br >";
+                    html += "<p>Existencias: <strong>" + value.StockQuantity + "</strong></p></br >";
+                    html += "</div>";
+                    html += "<div class='col-md-4'>";
+                    html += "<a style='margin:3px' href='Admin/Product/Edit/" + value.Id + "' class='btn btn-sm bg-blue'>Editar producto</a>";
+                    html += "<button style='margin:3px' type='button' class='btn btn-sm bg-red' onclick='unpublish(" + value.Id + ")'>Despublicar</button>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "<hr>";
+
+                })
+
+                if (result.length == 0) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-12' style='text-align:center;font-weight: bold'>";
+                    html += "No se encontraron productos que cumplan con esta condición.";
+                    html += "</div>";
+                    html += "</div>";
+                }
+
+                $("#products-withoutstock").append(html);
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    function publish(Id) {
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/ProductPublish/' + Id,
+            type: 'GET',
+            success: function (result) {
+                productsUnpublished();
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    function unpublish(Id) {
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/ProductUnpublish/' + Id,
+            type: 'GET',
+            success: function (result) {
+                productsPublished();
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    function productsMargin() {
+        $("#products-margin").empty();
+        $("#products-margin").append("<i class='fa fa-spinner fa-pulse fa-fw spinner' style='padding-right:0!important;margin:1em auto;display:block;font-size:2em'></i>");
+
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/ProductsLessMargin',
+            type: 'GET',
+            success: function (result) {
+                $("#products-margin").empty();
+
+                var html = "";
+                $.each(result, function (index, value) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-3'>";
+                    html += "<img src='" + value.Image + "' style='width:80px;'>";
+                    html += "</div>";
+                    html += "<div class='col-md-5'>";
+                    html += "<a href='Admin/Product/Edit/" + value.Id + "'>" + value.Name + "</a></br >";
+                    if (value.Cost > 0) {
+                        html += "<p>Porcentaje: <strong>" + (((value.Price - value.Cost) / value.Cost) * 100).toFixed(2) + "%</strong></p></br >";
+                    }
+                    else {
+                        html += "<p>Porcentaje: <strong>100%</strong></p></br >";
+                    }
+                    html += "</div>";
+                    html += "<div class='col-md-4'>";
+                    html += "<a style='margin:3px' href='Admin/Product/Edit/" + value.Id + "' class='btn btn-sm bg-blue'>Editar producto</a>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "<hr>";
+                });
+
+                if (result.length == 0) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-12' style='text-align:center;font-weight: bold'>";
+                    html += "No se encontraron productos que cumplan con esta condición.";
+                    html += "</div>";
+                    html += "</div>";
+                }
+
+                $("#products-margin").append(html);
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    function productsRelated() {
+        $("#products-related").empty();
+        $("#products-related").append("<i class='fa fa-spinner fa-pulse fa-fw spinner' style='padding-right:0!important;margin:1em auto;display:block;font-size:2em'></i>");
+
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/RelatedProducts',
+            type: 'GET',
+            success: function (result) {
+                $("#products-related").empty();
+
+                var html = "";
+                $.each(result, function (index, value) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-3'>";
+                    html += "<img src='" + value.Image + "' style='width:80px;'>";
+                    html += "</div>";
+                    html += "<div class='col-md-5'>";
+                    html += "<a href='Admin/Product/Edit/" + value.Id + "'>" + value.Name + "</a></br >";
+                    html += "</div>";
+                    html += "<div class='col-md-4'>";
+                    html += "<a style='margin:3px' href='Admin/Product/Edit/" + value.Id + "' class='btn btn-sm bg-blue'>Editar producto</a>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "<hr>";
+                })
+
+                if (result.length == 0) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-12' style='text-align:center;font-weight: bold'>";
+                    html += "No se encontraron productos que cumplan con esta condición.";
+                    html += "</div>";
+                    html += "</div>";
+                }
+
+                $("#products-related").append(html);
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    function productsCross() {
+        $("#products-cross").empty();
+        $("#products-cross").append("<i class='fa fa-spinner fa-pulse fa-fw spinner' style='padding-right:0!important;margin:1em auto;display:block;font-size:2em'></i>");
+
+        $.ajax({
+            cache: false,
+            url: 'Admin/Dash/CrosssellProducts',
+            type: 'GET',
+            success: function (result) {
+                $("#products-cross").empty();
+
+                var html = "";
+                $.each(result, function (index, value) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-3'>";
+                    html += "<img src='" + value.Image + "' style='width:80px;'>";
+                    html += "</div>";
+                    html += "<div class='col-md-5'>";
+                    html += "<a href='Admin/Product/Edit/" + value.Id + "'>" + value.Name + "</a></br >";
+                    html += "</div>";
+                    html += "<div class='col-md-4'>";
+                    html += "<a style='margin:3px' href='Admin/Product/Edit/" + value.Id + "' class='btn btn-sm bg-blue'>Editar producto</a>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "<hr>";
+                });
+
+                if (result.length == 0) {
+                    html += "<div class='row' style='width:100%;'>";
+                    html += "<div class='col-md-12' style='text-align:center;font-weight: bold'>";
+                    html += "No se encontraron productos que cumplan con esta condición.";
+                    html += "</div>";
+                    html += "</div>";
+                }
+
+                $("#products-cross").append(html);
+            },
+            error: function () {
+                alert('Error de conexión');
+            }
+        });
+    }
+
+    $("#paid-notsent").kendoGrid({
+        dataSource: {
+            type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("OrdersPaidNotSent", "Dash"))",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    }
+                },
+            schema: {
+                data: "Data",
+                total: "Total",
+                errors: "Errors"
+            },
+            error: function (e) {
+                display_kendoui_grid_error(e);
+                // Cancel the changes
+                this.cancelChanges();
+            },
+            pageSize: @(gridPageSize),
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true
+        },
+        pageable: {
+            refresh: true,
+            numeric: true,
+            previousNext: true,
+            info: true,
+            @await Html.PartialAsync("_GridPagerMessages")
+        },
+        editable: {
+            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+            mode: "inline"
+        },
+        scrollable: false,
+        columns: [{
+            field: "Customer",
+            title: "Cliente"
+        }, {
+            field: "Email",
+            title: "Correo"
+        }, {
+            field: "PaidDate",
+            title: "Fecha de pago",
+            width: 150
+        }, {
+            field: "StatusPaid",
+            title: "Estado del pago"
+        }, {
+            field: "StatusSent",
+            title: "Estado del envío"
+        }, {
+            field: "Id",
+            title: "Ver",
+            headerAttributes: { style: "text-align:center" },
+            attributes: { style: "text-align:center" },
+            template: "<a class='btn btn-xs btn-default' href='/Admin/Order/Edit/#=Id#'><i class='fa fa-eye'></i>Ver</a>"
+        }]
+    });
+
+    $("#orders-sent").kendoGrid({
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: "@Html.Raw(Url.Action("OrdersSent", "Dash"))",
+                    type: "POST",
+                    dataType: "json",
+                    data: addAntiForgeryToken
+                }
+            },
+            schema: {
+                data: "Data",
+                total: "Total",
+                errors: "Errors"
+            },
+            error: function (e) {
+                display_kendoui_grid_error(e);
+                // Cancel the changes
+                this.cancelChanges();
+            },
+            pageSize: @(gridPageSize),
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true
+        },
+        pageable: {
+            refresh: true,
+            numeric: true,
+            previousNext: true,
+            info: true,
+            @await Html.PartialAsync("_GridPagerMessages")
+        },
+        editable: {
+            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+            mode: "inline"
+        },
+        scrollable: false,
+        columns: [{
+            field: "Customer",
+            title: "Cliente"
+        }, {
+            field: "Email",
+            title: "Correo"
+        }, {
+            field: "PaidDate",
+            title: "Fecha de pago",
+            width: 150
+        }, {
+            field: "StatusSent",
+            title: "Estado del envío"
+        }, {
+            field: "Id",
+            title: "Ver",
+            headerAttributes: { style: "text-align:center" },
+            attributes: { style: "text-align:center" },
+            template: "<a class='btn btn-xs btn-default' href='/Admin/Order/Edit/#=Id#'><i class='fa fa-eye'></i>Ver</a>"
+        }]
+    });
+</script>

@@ -1,0 +1,46 @@
+﻿@model Teed.Plugin.Payroll.Models.JobCatalog.JobCatalogModel
+
+@if (Model.EmployeesWithoutJobAssigned.Any())
+{
+    <div class="content">
+        <div class="form-horizontal">
+            <nop-tabs id="unassigned">
+                <nop-tab asp-name="tab-chart" asp-title="Empleados sin puesto" asp-default="true">
+                    <div class="raw clearfix">
+                        <div class="nav-tabs-custom" style="border: 0px !important;">
+                            <div class="col-md-12">
+                                <h4 style="text-align: center; color: red; font-weight: bold;">Empleados sin puesto asignado:</h4>
+                            </div>
+                            <div class="col-md-12">
+                                <table class="table" style="width:100%">
+                                    @foreach (var item in Model.EmployeesWithoutJobAssigned)
+                                    {
+                                        <tr>
+                                            <td style="border: 0px !important;">
+                                                <a target="_blank" href="/Admin/PayrollEmployee/Edit?Id=@item.Value">@item.Text</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </nop-tab>
+            </nop-tabs>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#unassigned .nav-tabs.nav').css('display', 'none');
+        });
+    </script>
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="product-edit">
+            <nop-tab asp-name="tab-chart" asp-title="Organigrama" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/JobCatalog/_MainView.Chart.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-table" asp-title="Puestos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/JobCatalog/_MainView.Table.cshtml", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>

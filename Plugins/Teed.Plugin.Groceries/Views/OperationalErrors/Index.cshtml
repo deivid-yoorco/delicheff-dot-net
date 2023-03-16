@@ -1,0 +1,138 @@
+﻿@model Teed.Plugin.Groceries.Models.OperationalErrors.IndexViewModel;
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OperationalErrors");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<style>
+    .ok {
+        /*text-align: center;
+            font-weight: bold;
+            #dff0d8
+        */
+        padding: 1em;
+        margin: 1em 0;
+        border-color: blue;
+        background-color: white;
+    }
+
+    .order-alert-danger {
+        margin-top: auto;
+        background-color: white;
+        border-radius: 5px;
+        border: solid 2px #3c8dbc;
+    }
+
+    .complete-list {
+        margin-top: auto;
+        font-size: 12px;
+        text-align: left;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #dff0d8;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Advertencias del negocio
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group" style="margin:15px;margin-bottom: 0px">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="accordion" id="accordionExample">
+                        <div class="card order-alert-danger text-left ok">
+                            <div class="card-header panel-heading" id="headingOne">
+                                <h1 class="mb-0" style="margin-top: 10px; font-style: normal">
+                                    <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                        <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Errores en compras (<span id="buyer-error-count">...</span>)</i>
+                                    </button>
+                                </h1>
+                            </div>
+                            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    <div id="buyer-errors-grid"></div>
+                                    <script>
+                                            $(document).ready(function () {
+                                                $("#buyer-errors-grid").kendoGrid({
+                                                    dataSource: {
+                                                        type: "json",
+                                                        transport: {
+                                                            read: {
+                                                                url: "@Html.Raw(Url.Action("GetOperationalErrorsData", "Warnings"))",
+                                                                type: "POST",
+                                                                dataType: "json",
+                                                                data: null
+                                                            }
+                                                        },
+                                                        schema: {
+                                                            data: "Data",
+                                                            total: "Total",
+                                                            errors: "Errors"
+                                                        },
+                                                        error: function(e) {
+                                                            display_kendoui_grid_error(e);
+                                                            // Cancel the changes
+                                                            this.cancelChanges();
+                                                        },
+                                                        pageSize: @(defaultGridPageSize),
+                                                        serverPaging: false,
+                                                        serverFiltering: false,
+                                                        serverSorting: false
+                                                    },
+                                                    dataBound: function(e) {
+                                                        $("#buyer-error-count").html(this.dataSource.total());
+                                                    },
+                                                    pageable: {
+                                                        refresh: false,
+                                                        pageSizes: [@(gridPageSizes)],
+                                                        @await Html.PartialAsync("_GridPagerMessages")
+                                                    },
+                                                    editable: {
+                                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                                        mode: "inline"
+                                                    },
+                                                    scrollable: false,
+                                                    columns: [
+                                                        {
+                                                            field: "DateTime",
+                                                            title: "Fecha y hora",
+                                                        },
+                                                        {
+                                                            field: "ErrorMadeByCustomer",
+                                                            title: "Usuario que cometió el error",
+                                                        },
+                                                        {
+                                                            field: "ErrorDescription",
+                                                            title: "Descripción del error",
+                                                        },
+                                                    ]
+                                                });
+                                            });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleIcon(e) {
+        $(e.target)
+            .prev('.panel-heading')
+            .find(".more-less")
+            .toggleClass('glyphicon-plus glyphicon-minus');
+    }
+    $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+    $('.panel-group').on('shown.bs.collapse', toggleIcon);
+</script>

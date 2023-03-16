@@ -1,0 +1,244 @@
+﻿@model Teed.Plugin.Payroll.Models.Assistance.DateOfEmployeeMain
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Teed.Plugin.Payroll.Domain.Assistances
+@using Nop.Services.Helpers
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Payroll.Assistance");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Assistance";
+}
+<style>
+    .light-blue {
+        background: #6495ED;
+        color: white !important;
+    }
+
+    .king-blue {
+        background: #0000CD;
+        color: white !important;
+    }
+
+    .purple {
+        background: #A000A0;
+        color: white !important;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Asistencias de @Model.FullName (Nombre en el Reloj Checador: @Model.NameInChecker)
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="List">regresar a la bitácora</a>
+        </small>
+    </h1>
+    <div class="pull-right" style="margin-left: 15px">
+        <a onclick="location.reload()" href="#" class="btn bg-blue">
+            <i class="fa fa-refresh"></i>
+            Recargar asistencias
+        </a>
+    </div>
+    <div class="pull-right">
+        <a href="/Admin/Assistance/DownloadAssistances?id=@Model.Id" class="btn bg-blue">
+            Descargar asistencias
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h4 style="font-weight: bold; margin-bottom: 20px;">
+                    Atención: Se toman en cuenta 15 minutos de tolerancia (Ejemplo: si la hora de entrada es a las 9:00 AM y se llegó a las 9:11 AM es a tiempo, si es después de las 9:14:59 AM se llegó con retardo).
+                </h4>
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="assistance-select-dummy" style="display: none;">
+    <select>
+        @foreach (var type in Enum.GetValues(typeof(AssistanceType)).Cast<AssistanceType>().Where(x => x != AssistanceType.AbsenceByDelays))
+        {
+            <option value="@((int)type)">@type.GetDisplayName()</option>
+        }
+    </select>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("DatesOfEmployeeData", controllerName))?customerId=" + @Model.Id,
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    },
+                    update: {
+                        url: "@Html.Raw(Url.Action("AssistanceOverride", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    },
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors",
+                    model: {
+                        id: "Id",
+                        fields: {
+                            EmployeeId: { editable: false, type: "int" },
+                            Date: { editable: false, type: "date" },
+                            DateString: { editable: false, type: "string" },
+                            TimesRegistred: { editable: false, type: "string" },
+                            CheckIn: { editable: false, type: "string" },
+                            Assistance: { editable: true, type: "int" },
+                            Comment: { editable: true, type: "string" },
+                            OriginalAssistance: { editable: false, type: "int" },
+                        }
+                    }
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: false,
+                serverFiltering: false,
+                serverSorting: false
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            detailInit: detailInit,
+            scrollable: false,
+            columns: [
+                {
+                    field: "Id",
+                    template: "<span data-id='#=Id#'></span>",
+                    hidden: true
+                },
+                {
+                    field: "OverrideLogs",
+                    template: "<span data-id='#=OverrideLogs#'></span>",
+                    hidden: true
+                },
+                {
+                    field: "EmployeeId",
+                    template: "<span data-id='#=EmployeeId#'></span>",
+                    hidden: true
+                },
+                {
+                    field: "Date",
+                    template: "<span data-date='#=Date#'></span>",
+                    hidden: true
+                },
+                {
+                    field: "OriginalAssistance",
+                    template: "<span data-date='#=OriginalAssistance#'></span>",
+                    hidden: true
+                },
+                {
+                    field: "DateString",
+                    title: "Fecha",
+                },
+                {
+                    field: "TimesRegistred",
+                    title: "Tiempos registrados",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return '<span>' + dataItem.TimesRegistred +
+                        '</span>';
+                    }
+                },
+                {
+                    field: "CheckIn",
+                    title: "Hora de entrada y salida",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return '<span>De ' +
+                            dataItem.CheckIn + ' a ' + dataItem.CheckOut
+                            '</span>';
+                    }
+                },
+                {
+                    field: "Assistance",
+                    title: "Asistencia",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return '<span class="grid-report-item ' +
+                            (dataItem.Assistance == 1 ? 'green' : dataItem.Assistance == 2 ? 'yellow' : dataItem.Assistance == 3 ? 'red' :
+                                dataItem.Assistance == 5 ? 'light-blue' : dataItem.Assistance == 6 ? 'king-blue' :
+                                dataItem.Assistance == 7 ? 'purple' : 'grey') + '">' +
+                            (dataItem.Assistance == 1 ? 'A tiempo' : dataItem.Assistance == 2 ? 'Retardo' : dataItem.Assistance == 3 ? 'Falta' :
+                                dataItem.Assistance == 5 ? 'Incapacidad pagada' : dataItem.Assistance == 6 ? 'Incapacidad subsidiada por IMSS' :
+                                dataItem.Assistance == 7 ? 'Vacación': '...') +
+                            (dataItem.Overriden ? ' * ' : '') + '</span>';
+                    },
+                    editor: assistanceEditor,
+                },
+                {
+                    field: "OverrideComment",
+                    template: function (dataItem) {
+                        return "";
+                    },
+                    hidden: true,
+                    editor: emptyEditor,
+                },
+                {
+                    attributes: { style: "text-align:center" },
+                    command: [
+                        {
+                            name: "edit",
+                            text: {
+                                edit: "Editar",
+                                update: "Actualizar",
+                                cancel: "Cancelar"
+                            }
+                        },
+                    ],
+                    width: 100
+                }
+            ]
+        });
+    });
+
+    function emptyEditor(container, options) {
+        setTimeout(function () {
+            var comment = options.model.OverrideComment;
+            if (comment != null && typeof comment != 'undefined' &&
+                comment != "Esta asistencia no tiene comentarios." &&
+                $('[data-bind="value:Comment"]').val() == '') {
+                var filteredComment = comment.replace(/<br>/g, '\n');
+                $('[data-bind="value:Comment"]').val(filteredComment);
+            }
+        }, 200);
+    }
+
+    function assistanceEditor(container, options) {
+        $('<select data-bind="value:' + options.field + '">' + $('#assistance-select-dummy select').html() + '</select>' +
+            '<div style="margin-top:10px;"><span>Comentarios:</span><textarea class="form-control text-box single-line" data-bind="value:Comment" type="text"></textarea></div>')
+            .appendTo(container);
+    }
+
+    //details grid
+    function detailInit(e) {
+        console.log(e);
+        $("<div/>").appendTo(e.detailCell).append('<div style="border-bottom: #cdcdcd 1px solid;"><span>Comentarios: ' +
+            e.data.OverrideComment + '</span></div> <span>' + e.data.OverrideLogs + '</span>');
+    }
+</script>

@@ -1,0 +1,48 @@
+﻿@model Teed.Plugin.RecentProducts.Models.RecentProductsModel
+@{
+    Layout = "_NoContainer";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.NewProducts").Text);
+    //page class
+}
+<div class="row container">
+    <div class="section">
+        <div>
+            @Html.Raw(Model.configModel.Body)
+        </div>
+        @if (Model.CategoryProducsGroups.Count > 0)
+        {
+            <div class="row">
+                @foreach (var category in Model.CategoryProducsGroups)
+                {
+                    <div class="col s12" style="margin-bottom: 2em">
+                        <h3>@category.CategoryName</h3>
+                    </div>
+                    @foreach (var productOfCategory in category.ListProducts)
+                    {
+                        <div class="col s6 m6 l3" style="margin-bottom: 2em">
+                            @await Html.PartialAsync("_ProductBox", productOfCategory)
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-result">
+                @T("Search.NoResultsText")
+            </div>
+            <div class="no-result" style="margin-bottom: 1em; color: red; margin-left: 10px;font-weight: bold">
+                <span>¡Lo sentimos! No encontramos lo que estabas buscando.</span>
+            </div>
+        }
+
+        @if (Model.pager != "")
+        {
+            <div class="pager">
+                @Html.Raw(Model.pager)
+            </div>
+        }
+    </div>
+</div>

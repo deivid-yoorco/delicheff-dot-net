@@ -1,0 +1,19 @@
+﻿@model ShoppingCartModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.ShoppingCart").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-shopping-cart-page");
+}
+
+<div class="page shopping-cart-page section">
+    <h1 class="category-page-title">Combinar carrito</h1>
+    <h6 class="red-text" style="font-weight: bold">
+        Ya tenías agregados los siguientes productos en el carrito de tu cuenta ¿Deseas conservar estos productos y sus cantidades? Si decides conservarlos, estos productos se agregarán a tu nuevo carrito, por favor revisa tu nuevo carrito y las cantidades antes de terminar tu orden.
+    </h6>
+    <div class="page-body">
+        @await Component.InvokeAsync("ProductsMerge", new { overriddenModel = Model })
+    </div>
+</div>

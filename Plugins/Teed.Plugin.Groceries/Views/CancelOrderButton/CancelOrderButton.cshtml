@@ -1,0 +1,18 @@
+﻿@model Teed.Plugin.Groceries.Models.CancelOrderButtonModel.CancelOrderButtonModel
+
+@if (Model.CancelButtonEnable && Model.StatusOrder != 40)
+{
+        <button type="submit" data-target="modalCancel" class="btn bg-red right modal-trigger">Cancelar Orden</button>
+        <div id="modalCancel" class="modal">
+            <div class="modal-content">
+                <h4 style="color:red;">Cancelar Orden</h4>
+                <div class="label-wrapper">
+                    <p>¿Confirmas que deseas cancelar tu orden #@(Model.OrderId)?</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#!" class="modal-close waves-effect btn">Cancelar</a>
+                    <a href="/Order/CancelOrder/@(Model.OrderId)" class="waves-effect btn" id="cancelarOrden">Aceptar</a>
+                </div>
+            </div>
+        </div>
+}

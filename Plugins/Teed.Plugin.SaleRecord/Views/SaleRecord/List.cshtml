@@ -1,0 +1,115 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("SaleRecords.SaleRecords");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "SaleRecord";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Lista de ventas
+    </h1>
+    <div class="pull-right">
+        <a class="btn btn-success" asp-action="ImportaExcelSaleDay">
+            <i class="fa fa-download"></i>
+            @T("Admin.Common.Export")
+        </a>
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "SaleDateString",
+                    title: "Día de la visita",
+                },
+                {
+                    field: "Time",
+                    title: "Horario de visita",
+                },
+                {
+                    field: "Quantity",
+                    title: "Cantidad de boletos",
+                },
+                {
+                    field: "Total",
+                    title: "Total",
+                },
+                {
+                    field: "CustomerFullName",
+                    title: "Nombre del cliente",
+                },
+                {
+                    field: "CustomerEmail",
+                    title: "Correo electrónico",
+                },
+                {
+                    field: "CustomerPhoneNumber",
+                    title: "Número telefónico",
+                },
+                {
+                    field: "PaymentMethod",
+                    title: "Método de pago",
+                },
+                {
+                    field: "Id",
+                    title: "Editar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>Editar</a>'
+                }
+            ]
+        });
+    });
+</script>

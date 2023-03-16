@@ -1,0 +1,88 @@
+﻿@model Teed.Plugin.Medical.Models.Appointment.AppointmentDetailsModel
+@using Nop.Services.Common;
+@using Nop.Core.Domain.Customers;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Appointments");
+}
+
+<form asp-controller="Plugin" asp-action="List" method="post" id="plugins-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Información de la cita
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de citas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn bg-blue">
+                <i class="fa fa-pencil"></i>
+                @T("Admin.Common.Edit")
+            </a>
+            @if (Model.Status != Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.Cancelled)
+            {
+                <a asp-action="UpdateStatus" asp-route-id="@Model.Id" asp-route-status="@Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.Cancelled" class="btn bg-red">
+                    <i class="fa fa-ban"></i>
+                    Cancelar cita
+                </a>
+            }
+            @if (Model.Status == Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.NotConfirmed)
+            {
+                <a asp-action="UpdateStatus" asp-route-id="@Model.Id" asp-route-status="@Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.Confirmed" class="btn bg-green">
+                    <i class="fa fa-check"></i>
+                    Confirmada
+                </a>
+            }
+            @*@if (Model.Status != Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.Cancelled && Model.Status != Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.Arrived)
+            {
+                <a asp-action="UpdateStatus" asp-route-id="@Model.Id" asp-route-status="@Teed.Plugin.Medical.Domain.Appointment.AppointmentStatus.Arrived" class="btn bg-purple">
+                    <i class="fa fa-user"></i>
+                    El paciente llegó
+                </a>
+            }*@
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-9 col-md-offset-3">
+                                @if (string.IsNullOrWhiteSpace(Model.Patient.Email))
+                                {
+                                    <p><strong>Nombre del paciente:</strong> @Model.Patient.FirstName @Model.Patient.LastName <a asp-controller="Patient" asp-action="Details" asp-route-id="@Model.Patient.Id">(Ir a expediente)</a></p>
+                                }
+                                else
+                                {
+                                    <p><strong>Nombre del paciente:</strong> @Model.Patient.FirstName @Model.Patient.LastName (@Model.Patient.Email) <a asp-controller="Patient" asp-action="Details" asp-route-id="@Model.Patient.Id">(Ir a expediente)</a></p>
+                                }
+                                <p><strong>Doctor:</strong> @Model.Doctor</p>
+                                <p><strong>Sucursal:</strong> @Model.Branch.Name</p>
+                                <p><strong>Fecha de Cita:</strong> @Model.AppointmentDate</p>
+                                <p><strong>Tipo de visita:</strong> @Html.DisplayFor(x => x.VisitType)</p>
+                                <p><strong>Estado:</strong> @Html.DisplayFor(x => x.Status)</p>
+
+                                @if (!string.IsNullOrWhiteSpace(Model.Comments))
+                                {
+                                    <p><strong>Comentarios:</strong> @Model.Comments</p>
+                                }
+
+                                @*<h3>Procedimientos:</h3>
+                                @foreach (var element in Model.Products)
+                                {
+                                    <div style="margin:3%">
+                                        <p>@element.Name</p>
+                                    </div>
+                                }*@
+
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

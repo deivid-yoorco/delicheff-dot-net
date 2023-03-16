@@ -1,0 +1,361 @@
+﻿@model Teed.Plugin.Groceries.Components.OrderAlertsModel
+<style>
+    .order-alert-danger {
+        background-color: #fff6f6;
+        border-radius: 5px;
+        border: solid 1px #ff8383;
+    }
+</style>
+<div class="form-horizontal">
+    <div class="panel-group" style="margin:15px;margin-bottom: 0px">
+        <div class="panel panel-default panel-search">
+            <div class="panel-body">
+                <div class="accordion" id="accordionExample">
+                    @if (Model.OrdersSameCustomer.Count > 0)
+                    {
+                        <div class="card order-alert-danger">
+                            <div class="card-header" id="headingOne">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        Clientes con varias órdenes para mañana (@(Model.OrdersSameCustomer.Count))
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.OrdersSameCustomer)
+                                    {
+                                        <div>
+                                            @(item.FirstOrDefault()?.Customer?.Email)
+                                            <ul>
+                                                @foreach (var order in item)
+                                                {
+                                                    <li><a href="/admin/order/edit/@order.Id">#@order.CustomOrderNumber</a></li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.PedidosDuplicatedProduct.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingTwo">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Órdenes complementarias con al menos un producto repetido para hoy o mañana (@(Model.PedidosDuplicatedProduct.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.PedidosDuplicatedProduct)
+                                    {
+                                        <div>
+                                            @(item.FirstOrDefault()?.Customer?.Email)
+                                            <ul>
+                                                @foreach (var order in item)
+                                                {
+                                                    <li><a href="/admin/order/edit/@order?.Id">#@order?.CustomOrderNumber</a> (@order?.SelectedShippingDate.Value.ToString("dd-MM-yyyy"))</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.NotPayedPaypal.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingThree">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        Órdenes con tipo de pago Paypal, que estén pendientes de hoy, mañana y pasado mañana (@(Model.NotPayedPaypal.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.NotPayedPaypal)
+                                    {
+                                        <div>
+                                            <ul>
+                                                <li><a href="/admin/order/edit/@item.Id">#@item?.CustomOrderNumber</a></li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.OrdersWithDuplicatedProducts.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingFour">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                        Órdenes de hoy y mañana con productos duplicados (@(Model.OrdersWithDuplicatedProducts.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.OrdersWithDuplicatedProducts)
+                                    {
+                                        <div>
+                                            <ul>
+                                                <li><a href="/admin/order/edit/@item.Id">#@item?.CustomOrderNumber</a> (@item.SelectedShippingDate.Value.ToString("dd-MM-yyyy"))</li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.OrdersWithNoNumber.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingFive">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                        Órdenes sin productos para mañana (@(Model.OrdersWithNoNumber.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.OrdersWithNoNumber)
+                                    {
+                                        <div>
+                                            <ul>
+                                                <li><a href="/admin/order/edit/@item.Id">Sin número</a></li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.OrderSameClientDifferentDirection.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingSix">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                        Clientes con varias órdenes con diferente dirección de entrega para hoy y mañana (@(Model.OrderSameClientDifferentDirection.Count))
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.OrderSameClientDifferentDirection)
+                                    {
+                                        <div>
+                                            @(item.FirstOrDefault()?.Customer?.Email)
+                                            <ul>
+                                                @foreach (var order in item)
+                                                {
+                                                    <li><a href="/admin/order/edit/@order.Id">#@order.CustomOrderNumber</a> (@order.SelectedShippingDate.Value.ToString("dd-MM-yyyy"))</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.OrdersBigAmount.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingSeven">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                        Órdenes de más de 5,000 pesos de hoy y mañana (@(Model.OrdersBigAmount.Count))
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    <ul>
+                                        @foreach (var order in Model.OrdersBigAmount.OrderBy(x => x.SelectedShippingDate))
+                                        {
+                                            <li><a href="/admin/order/edit/@order.Id">#@order.CustomOrderNumber (@order.OrderTotal.ToString("C"))(@order.SelectedShippingDate.Value.ToString("dd-MM-yyyy"))</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.OrdersCardNotPayed.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingEight">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                                        Órdenes pago con tarjeta y pago pendiente de hoy y mañana (@(Model.OrdersCardNotPayed.Count))
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    <ul>
+                                        @foreach (var order in Model.OrdersCardNotPayed)
+                                        {
+                                            <li><a href="/admin/order/edit/@order.Id">#@order.CustomOrderNumber</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.OrdersWithoutPaymentMethod.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingTen">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTen" aria-expanded="false" aria-controls="collapseTen">
+                                        Órdenes sin método de pago para hoy y mañana (@(Model.OrdersWithoutPaymentMethod.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseTen" class="collapse" aria-labelledby="headingTen" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.OrdersWithoutPaymentMethod)
+                                    {
+                                        <div>
+                                            <ul>
+                                                <li><a href="/admin/order/edit/@item.Id">#@item.Id</a></li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.PayedAndCancelled.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingEleven">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseEleven" aria-expanded="false" aria-controls="collapseEleven">
+                                        Órdenes canceladas pero pagadas para mañana y pasado mañana (@(Model.PayedAndCancelled.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseEleven" class="collapse" aria-labelledby="headingEleven" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.PayedAndCancelled)
+                                    {
+                                        <div>
+                                            <ul>
+                                                <li><a href="/admin/order/edit/@item.Id">#@item?.CustomOrderNumber</a></li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.CustomerEmailsWithOrdersLastTwoDays.Count > 0)
+                    {
+                        <div class="card order-alert-danger" style="margin-top: 15px">
+                            <div class="card-header" id="headingTwelve">
+                                <h2 class="mb-0" style="margin-top: 10px">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTwelve" aria-expanded="false" aria-controls="collapseTwelve">
+                                        Clientes con orden para mañana que hicieron una compra en los últimos dos días (@(Model.CustomerEmailsWithOrdersLastTwoDays.Count))
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseTwelve" class="collapse" aria-labelledby="headingTwelve" data-parent="#accordionExample">
+                                <div class="card-body" style="margin: 30px;margin-top:0px">
+                                    @foreach (var item in Model.CustomerEmailsWithOrdersLastTwoDays)
+                                    {
+                                        <div>
+                                            <ul>
+                                                <li><a href="/Admin/Customer/Edit/@item.Id">@(item.Email)</a></li>
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div id="load-suspicious-orders-container" class="card order-alert-danger" style="margin-top: 15px">
+                        <div class="card-header">
+                            <h2 class="mb-0" style="margin-top: 10px">
+                                <button id="load-suspicious-orders" class="btn btn-link btn-block text-left" type="button" onclick="loadSuspiciousOrders()">
+                                    Cargar órdenes sospechosas de hoy y mañana <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="btn btn-link btn-block text-left" id="loading-suspicious-orders" style="display: none">Cargando...</button>
+                                <button type="button" class="btn btn-link btn-block text-left" id="error-suspicious-orders" style="display: none; color: red">No fue posible cargar las órdenes sospechosas. Por favor, inténtalo de nuevo más tarde.</button>
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="card order-alert-danger" id="suspicious-list-container" style="margin-top: 15px; display: none">
+                        <div class="card-header" id="headingNine">
+                            <h2 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseNine" aria-expanded="false" aria-controls="collapseNine">
+                                    Órdenes sospechosas de hoy y mañana (<span id="suspicious-count"></span>)
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseNine" class="collapse" aria-labelledby="headingNine" data-parent="#accordionExample">
+                            <div class="card-body" style="margin: 30px;margin-top:0px" id="suspicious-list">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const loadSuspiciousOrders = () => {
+        $("#loading-suspicious-orders").show();
+        $("#load-suspicious-orders").hide();
+        $.ajax({
+            url: '/Admin/Order/GetSuspiciousOrders',
+            method: 'GET',
+            success: function (result) {
+                $("#suspicious-count").html(result.length);
+                let html = "";
+                $.each(result, (i, e) => {
+                    html += `<div><a href="/admin/order/edit/${e.OrderId}" target="_blank">#${e.OrderCustomOrderNumber} (${e.SelectedShippingDate})</a><ul>`;
+                    $.each(e.SuspiciousElements, (j, item) => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += "</ul></div>";
+                });
+                $("#load-suspicious-orders-container").hide();
+                $("#suspicious-list").html(html);
+                $("#suspicious-list-container").show();
+            },
+            error: function (error) {
+                console.log('ERROR LOADING SUSPICIOUS ORDERS', error);
+                $("#loading-suspicious-orders").hide();
+                $("#error-suspicious-orders").show();
+            }
+        });
+    };
+</script>

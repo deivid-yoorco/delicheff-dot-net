@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Teed Plugins",
+  "FriendlyName": "Teed Manager",
+  "SystemName": "Teed.Plugin.Manager",
+  "Version": "1.2",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Manager.dll",
+  "Description": "Teed Manager"
+}

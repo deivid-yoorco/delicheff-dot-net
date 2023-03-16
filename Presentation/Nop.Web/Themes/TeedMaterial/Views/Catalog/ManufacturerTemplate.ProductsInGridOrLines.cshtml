@@ -1,0 +1,132 @@
+﻿@model ManufacturerModel
+@using Nop.Core.Domain.Seo
+@inject SeoSettings seoSettings
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(!string.IsNullOrEmpty(Model.MetaTitle) ? Model.MetaTitle : Model.Name);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-manufacturer-page");
+
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var manufacturerUrl = Url.RouteUrl("Manufacturer", new { SeName = Model.SeName }, this.Url.ActionContext.HttpContext.Request.Scheme);
+        Html.AddCanonicalUrlParts(manufacturerUrl, seoSettings.QueryStringInCanonicalUrlsEnabled);
+    }
+}
+<div class="page manufacturer-page">
+    <style>
+        .title-manufacturer-page {
+            margin-top: 0.5em;
+            padding: 0.3em;
+            text-align: center;
+            color: white;
+            padding-bottom: 0.4em;
+        }
+    </style>
+
+    @if (Model.DisplayTitle)
+    {
+        <h1 class="category-page-title teed-primary title-manufacturer-page">@Model.Name</h1>
+    }
+    else
+    {
+        <div style="margin-top:3em"></div>
+    }
+
+    <div class="page-body">
+        @await Component.InvokeAsync("Widget", new { widgetZone = "manufacturerdetails_top", additionalData = Model.Id })
+        <div class="col s12 m12" style="margin-bottom: 2%;">
+            @if (Model.DisplayPicture)
+            {
+                @if (!Model.DisplayDescription)
+                {
+                    <style>
+                        .manufacturer-picture {
+                            max-width: 50%;
+                            margin: auto;
+                            display: block;
+                        }
+                    </style>
+                }
+                else
+                {
+                    <style>
+                        .manufacturer-picture {
+                            max-width: 100%;
+                            margin: auto;
+                            display: block;
+                        }
+                    </style>
+                }
+                <div class="col s12 @(Model.DisplayDescription ? "m6" : "m12")">
+                    <img class="img-responsive manufacturer-picture" src="@Model.PictureModel.FullSizeImageUrl" />
+                </div>
+            }
+            @*description*@
+            @if (!string.IsNullOrWhiteSpace(Model.Description) && Model.DisplayDescription)
+            {
+                <div class="manufacturer-description col s12 @(Model.DisplayPicture ? "m6" : "m12")">
+                    @Html.Raw(Model.Description)
+                </div>
+            }
+        </div>
+        @await Component.InvokeAsync("Widget", new { widgetZone = "manufacturerdetails_before_featured_products", additionalData = Model.Id })
+        @*featured products*@
+        @if (Model.FeaturedProducts.Count > 0)
+        {
+            <div class="product-grid featured-product-grid">
+                <div class="title">
+                    <strong>@T("Products.FeaturedProducts")</strong>
+                </div>
+                <div class="row">
+                    @foreach (var product in Model.FeaturedProducts)
+                    {
+                        <div class="col s6 m4">
+                            @await Html.PartialAsync("_ProductBox", product)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "manufacturerdetails_after_featured_products", additionalData = Model.Id })
+        @*@if (Model.Products.Count > 0)
+                {
+                    @await Html.PartialAsync("_CatalogSelectors", Model.PagingFilteringContext)
+                }@
+            @await Component.InvokeAsync("Widget", new { widgetZone = "manufacturerdetails_before_filters", additionalData = Model.Id })
+            @*filtering*@
+        @if (Model.PagingFilteringContext.PriceRangeFilter.Enabled)
+        {
+            @await Html.PartialAsync("_FilterPriceBox", Model.PagingFilteringContext.PriceRangeFilter)
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "manufacturerdetails_before_product_list", additionalData = Model.Id })
+        @if (Model.Products.Count > 0)
+        {
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "product-list" : "product-grid")">
+                <div class="row">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="btn-manufacturer col s6 m4" style="margin-bottom: 2em">
+                            @await Html.PartialAsync("_ProductBox", product)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "manufacturerdetails_bottom", additionalData = Model.Id })
+    </div>
+</div>

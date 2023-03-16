@@ -1,0 +1,220 @@
+﻿//GLOBAL VARIABLES:
+
+$stars_color: #FC6;
+
+
+nav ul a,
+nav .brand-logo {
+    color: #444;
+}
+
+.brand-logo img {
+    height: 40px;
+    vertical-align: middle;
+}
+
+nav.black ul a {
+    color: #fff;
+}
+
+.breadcrumb {
+    color: color('grey', 'base') !important;
+}
+
+.breadcrumb::before {
+    color: color('grey', 'base') !important;
+}
+
+.button-collapse {
+    color: #26a69a;
+}
+
+.parallax-container {
+    min-height: 380px;
+    line-height: 0;
+    height: auto;
+    color: rgba(255,255,255,.9);
+}
+
+.parallax-container .section {
+    width: 100%;
+}
+
+.parallax-container .parallax img {
+    max-width: 100%;
+}
+
+@media only screen and (max-width : 992px) {
+    .parallax-container .section {
+        position: absolute;
+        top: 40%;
+    }
+
+    #index-banner .section {
+        top: 10%;
+    }
+}
+
+@media only screen and (max-width : 600px) {
+    #index-banner .section {
+        top: 0;
+    }
+}
+
+.icon-block {
+    padding: 0 15px;
+}
+
+.icon-block .material-icons {
+    font-size: inherit;
+}
+
+strong {
+    font-weight: bold !important;
+}
+
+.pointer {
+    cursor: pointer !important;
+}
+
+
+.container{
+    width: 90% !important;
+}
+
+.homepage-parallax {
+    min-height: 250px;
+    max-height: 250px;
+}
+
+@media all and (min-width: 481px){
+    .container {
+        width: 92.5% !important;
+    }
+}
+
+@media all and (min-width: 769px) {
+    .container {
+        width: 94% !important;
+    }
+}
+
+@media all and (min-width: 1001px) {
+    .container {
+        width: 980px !important;
+        margin: auto !important;
+    }
+}
+
+@media all and (min-width: 1367px) {
+    .container {
+        width: 1200px !important;
+    }
+}
+
+//eCommerce nav bar
+$top-navbar-height: 30px;
+
+.top-small-navbar {
+    height: $top-navbar-height;
+}
+
+.top-small-navbar nav {
+    height: $top-navbar-height;
+    line-height: $top-navbar-height;
+}
+
+.top-small-navbar nav i {
+    height: 30px;
+    line-height: 30px;
+    font-size: 20px;
+}
+
+//Notifications
+
+.notification-box {
+    z-index: 9999;
+    width: 100%;
+}
+
+//Footer
+
+footer.page-footer {
+    margin: 0;
+    margin-top: 25px;
+}
+
+
+
+.btn-social {
+    width: 35px;
+    height: 35px;
+    text-align: center;
+}
+
+.social {
+    margin-bottom: 20px;
+}
+
+.facebook {
+    background-color: #3b5998 !important;
+}
+
+.twitter {
+    background-color: #0084b4 !important;
+}
+
+.youtube {
+    background-color: #ff0000 !important;
+}
+
+.rss {
+    background-color: #d95b29 !important;
+}
+
+.googleplus {
+    background-color: #d34836 !important;
+}
+
+.newsletter-subscribe {
+    .options{
+        margin-top: 10px;
+    }
+}
+
+.newsletter-result {
+    color: $error-color;
+}
+
+.newsletter-subscribe-text:focus {
+    border-bottom-color: #fff !important;
+}
+
+.newsletter-subscribe-text:focus+label{
+    color: #fff !important;
+}
+
+.unsubscribe {
+    margin-left: 40px;
+}
+
+.cobertura {
+    background-color: $primary-color;
+    border-radius: 15px;
+    margin-top: 2px;
+}
+
+.cobertura a {
+    color: white;
+    height: 25px;
+    line-height: 24px;
+    font-weight: bold;
+}
+
+.cobertura a:hover {
+    background-color: transparent;
+}
+
+.like-button {
+    border-right: $primary-color 1px solid;
+}

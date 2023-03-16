@@ -1,0 +1,24 @@
+﻿@model Teed.Plugin.Payroll.Models.JobCatalog.JobCatalogModel
+
+@{
+    Layout = "_AdminLayout";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Payroll.JobCatalog");
+}
+
+<link rel="stylesheet" href="~/Plugins/Teed.Plugin.Payroll/src/css/jquery.orgchart.css" />
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/4.1.1/es6-promise.auto.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/Plugins/Teed.Plugin.Payroll/src/js/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+<script src="~/Plugins/Teed.Plugin.Payroll/src/js/jquery.orgchart.js"></script>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Catálogo de puestos
+        </h1>
+    </div>
+    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/JobCatalog/_MainView.cshtml", Model)
+</form>

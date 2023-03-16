@@ -1,0 +1,504 @@
+﻿@using Nop.Core.Domain
+@using StackExchange.Profiling
+@using Nop.Core.Domain.Common
+@using Nop.Core.Domain.Seo
+@using Nop.Services.Events
+@using Nop.Services.Security
+@using Nop.Web.Framework.Events
+@using Nop.Services
+@inject CommonSettings commonSettings
+@inject IEventPublisher eventPublisher
+@inject IPermissionService permissionService
+@inject SeoSettings seoSettings
+@inject StoreInformationSettings storeInformationSettings
+@{
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/Themes/TeedCetro/Content/js/site.min.js");
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/Themes/TeedCetro/Content/js/public.js");
+
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedCetro/Content/css/site.min.css");
+    @if (TeedCommerceStores.CurrentStore == TeedStores.Lithographic)
+    {
+        Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedCetro/Content/css/custom-lithographic.css");
+    }
+    else if (TeedCommerceStores.CurrentStore == TeedStores.Cetro)
+    {
+        Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedCetro/Content/css/custom.cetro.css");
+    }
+
+    if (commonSettings.RenderXuaCompatible)
+    {
+        Html.AppendHeadCustomParts($"<meta http-equiv=\"X-UA-Compatible\" content=\"{commonSettings.XuaCompatibleValue}\"/>");
+    }
+    //custom tag(s);
+    if (!string.IsNullOrEmpty(seoSettings.CustomHeadTags))
+    {
+        Html.AppendHeadCustomParts(seoSettings.CustomHeadTags);
+    }
+    var displayMiniProfiler = storeInformationSettings.DisplayMiniProfilerInPublicStore
+        && (!storeInformationSettings.DisplayMiniProfilerForAdminOnly || permissionService.Authorize(StandardPermissionProvider.AccessAdminPanel));
+    //event
+    eventPublisher.Publish(new PageRenderingEvent(this.Html));
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/js/gridify.js");
+}
+<!DOCTYPE html>
+<html @(this.ShouldUseRtlTheme() ? Html.Raw(" dir=\"rtl\"") : null) @Html.NopPageCssClasses()>
+<head>
+    <title>@Html.NopTitle()</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <meta name="description" content="@(Html.NopMetaDescription())" />
+    <meta name="keywords" content="@(Html.NopMetaKeywords())" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    @*<meta property="og:image" content="https://www.ink-studio.com.mx/images/ink-og-image.jpg" />*@
+    @*<meta property="og:image" content="https://www.montecito38.com/images/montecito-og-image.jpg" />*@
+
+    <script>
+        dataLayer = []; //Google tag manager variable
+    </script>
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-T9BJ7MJ');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.InkStudio)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-MDDJNZ2');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.ElPomito)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-KJH8XF5');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Atomica)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-M96FDFD');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Lithographic)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-T2SDQK7');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == TeedStores.Pelletier)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-T4TTNX7');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == TeedStores.Chabelo)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start':
+                        new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0],
+                    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-NMD4XMF');</script>
+        <!-- End Google Tag Manager -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Cetro)
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({
+                    'gtm.start': new Date().getTime(), event: 'gtm.js'
+                }); var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+                j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-MVSFC98');
+        </script>
+
+        <!-- End Google Tag Manager -->
+    }
+    @Html.NopHeadCustom()
+    @*This is used so that themes can inject content into the header*@
+    @await Html.PartialAsync("Head")
+    @await Component.InvokeAsync("Widget", new { widgetZone = "head_html_tag" })
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+
+    <script src="~/js/jquery.min.js"></script>
+
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Cetro)
+    {
+        <!-- Facebook Pixel Code -->
+        <script>
+            !function (f, b, e, v, n, t, s) {
+                if (f.fbq) return; n = f.fbq = function () {
+                    n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                };
+                if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                n.queue = []; t = b.createElement(e); t.async = !0;
+                t.src = v; s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '192413275842330');
+            fbq('track', 'PageView');
+        </script>
+        <noscript>
+            <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=192413275842330&ev=PageView&noscript=1" />
+        </noscript>
+
+        <!-- End Facebook Pixel Code -->
+    }
+
+    @Html.NopCssFiles(this.Url, ResourceLocation.Head)
+    @Html.NopScripts(this.Url, ResourceLocation.Head)
+    @Html.NopCanonicalUrls()
+    @await Component.InvokeAsync("NewsRssHeaderLink")
+    @await Component.InvokeAsync("BlogRssHeaderLink")
+    @*Favicon - upload favicon.ico file to the root directory*@
+    @await Component.InvokeAsync("Favicon")
+    @if (displayMiniProfiler)
+    {
+        <mini-profiler />
+    }
+    @Html.NopInlineScripts(this.Url, ResourceLocation.Head)
+</head>
+<body>
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T9BJ7MJ"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.InkStudio)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MDDJNZ2"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+
+        <!-- Load Facebook SDK for JavaScript / Messenger Chat -->
+        <style>
+            .fb_dialog_mobile {
+                margin-bottom: 40px;
+            }
+
+            .fb-customerchat iframe {
+                margin-bottom: 40px;
+            }
+        </style>
+        <div id="fb-root"></div>
+        <script>
+            window.fbAsyncInit = function () {
+                FB.init({
+                    xfbml: true,
+                    version: 'v5.0'
+                });
+            };
+
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = 'https://connect.facebook.net/es_LA/sdk/xfbml.customerchat.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));</script>
+
+        <!-- Your customer chat code -->
+        <div class="fb-customerchat"
+             attribution=install_email
+             page_id="1372216896225102"
+             theme_color="#0084ff"
+             logged_in_greeting="&#xa1;Hola! &#xbf;Puedo ayudarte con algo?"
+             logged_out_greeting="&#xa1;Hola! &#xbf;Puedo ayudarte con algo?">
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.ElPomito)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KJH8XF5"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Atomica)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M96FDFD"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+
+        <!-- Load Facebook SDK for JavaScript -->
+        <style>
+            .fb_dialog_mobile {
+                margin-bottom: 40px;
+            }
+
+            .fb-customerchat iframe {
+                margin-bottom: 40px;
+            }
+        </style>
+        <div id="fb-root"></div>
+        <script>
+            window.fbAsyncInit = function () {
+                FB.init({
+                    xfbml: true,
+                    version: 'v8.0'
+                });
+            };
+
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = 'https://connect.facebook.net/es_LA/sdk/xfbml.customerchat.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));</script>
+
+        <!-- Your Chat Plugin code -->
+        <div class="fb-customerchat"
+             attribution=install_email
+             page_id="804974203169617"
+             logged_in_greeting="&#xa1;Hola! &#xbf;C&#xf3;mo podemos ayudarte?"
+             logged_out_greeting="&#xa1;Hola! &#xbf;C&#xf3;mo podemos ayudarte?">
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Lithographic)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T2SDQK7"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Pelletier)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T4TTNX7"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Chabelo)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T4TTNX7"
+                    height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Cetro)
+    {
+        <!-- Google Tag Manager (noscript) -->
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MVSFC98" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        </noscript> 
+        <!-- End Google Tag Manager (noscript) -->
+    }
+    @RenderBody()
+    @Html.NopCssFiles(this.Url, ResourceLocation.Footer)
+    @Html.NopScripts(this.Url, ResourceLocation.Footer)
+    @Html.NopInlineScripts(this.Url, ResourceLocation.Footer)
+
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Aldora)
+    {
+        @*<div class="call-us-container">
+                <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+                <a href="https://api.whatsapp.com/send?phone=5215540729627" class="phone teed-primary">(55) 4072 9627</a>
+            </div>*@
+
+        <script type="text/javascript">
+            window._mfq = window._mfq || [];
+            (function () {
+                var mf = document.createElement("script");
+                mf.type = "text/javascript"; mf.async = true;
+                mf.src = "//cdn.mouseflow.com/projects/b63e94d8-ffe8-4978-a7ce-1946be0f6ede.js";
+                document.getElementsByTagName("head")[0].appendChild(mf);
+            })();
+        </script>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Indigo)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215510713342" class="teed-primary phone">(55) 1071 3342</a>
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215564857510" class="teed-primary phone">(55) 6485 7510</a>
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.UvasYMoras)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215564857920" class="teed-primary phone">(55) 6485 7920</a>
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.CentralEnLinea)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215540729627" class="phone teed-primary">(55) 4072 9627</a>
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.UvasYMorasExpress)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215561583699" class="phone teed-primary">(55) 6158 3699</a>
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.ElPomito)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5217222501900" class="phone teed-primary">(72) 2250 1900</a>
+        </div>
+    }
+    else if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Lithographic)
+    {
+        <div class="call-us-container">
+            <span class="phone-icon teed-primary"><i class="fab fa-whatsapp" style="margin-left:0.5em;"></i></span>
+            <a href="https://api.whatsapp.com/send?phone=5215624044790" class="phone teed-primary">(56) 2404 4790</a>
+        </div>
+    }
+</body>
+</html>
+
+<style>
+    .call-us-container {
+        position: fixed;
+        bottom: 0;
+        color: white;
+        z-index: 999;
+        margin-left: 1em;
+    }
+
+        .call-us-container .phone-icon {
+            border-top-left-radius: 5px;
+            padding: 5px;
+            display: table;
+            position: absolute;
+            padding-left: 0.15em;
+        }
+
+        .call-us-container .phone {
+            border-top-right-radius: 5px;
+            padding: 5px;
+            margin-left: 1.5em;
+            display: table;
+            padding-right: 10px;
+            color: white !important;
+        }
+
+    @@media screen and (max-width: 600px) {
+        /*.zopim {
+            z-index: 996 !important;
+        }*/
+        .call-us-container {
+            z-index: 996 !important;
+        }
+    }
+
+    @@media screen and (max-width: 500px) {
+        .call-us-container {
+            position: fixed;
+            bottom: 0;
+            color: white;
+            z-index: 999;
+            margin-left: 5px;
+            margin-bottom: 15px;
+        }
+
+            .call-us-container .phone-icon {
+                border-top-left-radius: 5px;
+                padding: 5px;
+                display: table;
+                position: absolute;
+                border-bottom-left-radius: 5px;
+                padding-left: 0.2em;
+            }
+
+                .call-us-container .phone-icon .material-icons {
+                    font-size: 21px !important;
+                }
+
+            .call-us-container .phone {
+                border-top-right-radius: 5px;
+                padding: 5px;
+                margin-left: 1em;
+                display: table;
+                padding-right: 10px;
+                border-bottom-right-radius: 5px;
+                padding-left: 12px;
+            }
+    }
+</style>

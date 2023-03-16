@@ -1,0 +1,132 @@
+﻿@model Teed.Plugin.Groceries.Models.UrbanPromoter.UrbanPromoterCouponModel
+
+@{
+    Layout = "_AdminLayout";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Groceries.UrbanPromoters");
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar cupón al promotor
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a href="/Admin/UrbanPromoter/View?id=@Model.UrbanPromoterId">regresar al promotor</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            @*<button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>*@
+        </div>
+    </div>
+
+    <input type="hidden" value="@Model.UrbanPromoterId" id="UrbanPromoterId" name="UrbanPromoterId"/>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="raw clearfix">
+                <div class="col-md-12">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Cupón</label>
+                                            <div title="Cupón ligado al promotor."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="hidden" id="DiscountId" name="DiscountId" />
+                                        <input id="coupons" name="coupons" style="width: 100%;" />
+                                        <span asp-validation-for="DiscountId"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Comisión del cupón</label>
+                                            <div title="Comisión del cupón."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="Fee" />
+                                        <span asp-validation-for="Fee"></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    var filtering;
+    $(document).ready(function () {
+        filtering = $("#coupons").kendoComboBox({
+            placeholder: "Buscar cupón por nombre o código...",
+            dataTextField: "name",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            select: function (e) {
+                $("#DiscountId").val(filtering.data("kendoComboBox").dataItem(e.item.index()).id);
+            }
+        });
+        $('[name="coupons_input"]').on('keyup', function (e) {
+            if (e.which <= 90 && e.which >= 48) {
+                setTimeout(function () {
+                    if (GetCurrentText().length > 2) {
+                        Getcoupons(GetCurrentText());
+                    }
+                }, 200);
+            }
+        });
+        @if (Model.Id > 0)
+        {
+        <text>
+        Getcoupons('', @Model.Id);
+        </text>
+        }
+    });
+    function GetCurrentText() {
+        return $('[name="coupons_input"]').val();
+    }
+    function Getcoupons(text = '', id = 0) {
+        $.ajax({
+            cache: false,
+            type: "GET",
+            url: "/Admin/UrbanPromoter/GetCouponsFiltering?text=" + text + '&byId=' + id,
+            success: function (data) {
+                filtering.data("kendoComboBox").setDataSource($.isArray(data) ? data : [data]);
+                if (id > 0) {
+                    filtering.data("kendoComboBox").value(data.name);
+                }
+                else if (!$('.k-animation-container').is(":visible"))
+                    $('.k-select').click();
+            },
+            error: function (e) {
+                alert('Failed to retrieve coupons.');
+                console.log(e)
+            },
+        });
+
+    }
+    </script>
+
+</form>

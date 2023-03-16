@@ -1,0 +1,177 @@
+﻿@model Teed.Plugin.Medical.Models.Visit.VisitModel
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            @if (Model != null)
+            {
+                <div id="products-grid"></div>
+                <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#products-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("GetVisitProductsList", "Visit", new {id = Model.Id}))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors",
+                                        model: {
+                                            id: "Id",
+                                            fields: {
+                                                ItemName: { editable: false, type: "string" }
+                                            }
+                                        }
+                                    },
+                                    requestEnd: function(e) {
+                                        if (e.type == "update") {
+                                            this.read();
+                                        }
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    numeric: false,
+                                    previousNext: false,
+                                    info: false,
+                                    @*@await Html.PartialAsync("_GridPagerMessages")*@
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "ItemName",
+                                        title: "Nombre del producto",
+                                        width: 150
+                                    }
+                                ]
+                            });
+                        });
+                </script>
+
+                if (Model.ProductsCount <= 0)
+                {
+                    <div id="empty-message" class="panel panel-default">
+                        <div class="panel-body">
+                            No se han agregado productos o tratamientos a esta consulta.
+                        </div>
+                    </div>
+                }
+                <br />
+                <script>
+                    $(document).ready(function () {
+                        $('#addProductSpec').click(function () {
+                                var productId = $('#productId').val();
+
+                                if (!productId) {
+                                    document.getElementById("selectProduct").style.display = "block";
+                                }
+                                else {
+                                    var postData = {
+                                        productId: productId,
+                                        visitId: @Model.Id
+                                    };
+                                    addAntiForgeryToken(postData);
+
+                                    $.ajax({
+                                        cache: false,
+                                        type: "POST",
+                                        url: "@(Url.Action("AddProductToVisit", "Visit"))",
+                                        data: postData,
+                                        success: function (data) {
+                                            var grid = $("#products-grid").data('kendoGrid');
+                                            grid.dataSource.read();
+                                            $('#addProductSpec').attr('disabled', false);
+                                            $('#empty-message').hide();
+                                        },
+                                        error: function (xhr, ajaxOptions, thrownError) {
+                                            alert('Ocurrió un error al agregar el producto.');
+                                            $('#addProductSpec').attr('disabled', false);
+                                        }
+                                    });
+                                }
+                        });
+                    });
+                </script>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Agregar producto o tratamiento
+                    </div>
+                    <div class="panel-body">
+                        <div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Tratamiento</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="ProductId" type="hidden" id="productId" />
+                                    <input id="products" style="width: 100%;" />
+                                    <script>
+                                            $(document).ready(function () {
+                                                $("#products").kendoComboBox({
+                                                    placeholder: "Selecciona el producto...",
+                                                    dataTextField: "Name",
+                                                    dataValueField: "Id",
+                                                    filter: "contains",
+                                                    autoBind: true,
+                                                    minLength: 1,
+                                                    dataSource: {
+                                                        type: "json",
+                                                        transport: {
+                                                            read: {
+                                                                url: "@Html.Raw(Url.Action("ProductListData", "Visit"))",
+                                                                type: "POST",
+                                                                data: addAntiForgeryToken
+                                                            }
+                                                        }
+                                                    },
+                                                    select: onSelect
+                                                });
+                                                function onSelect(e) {
+                                                    document.getElementById("selectProduct").style.display = "none";
+                                                    $("#productId").val(this.dataItem(e.item.index()).Id);
+                                                }
+                                            });
+                                    </script>
+                                    <span id="selectProduct" style="display:none" class="text-danger">Debes seleccionar un producto</span>
+                                    <span asp-validation-for="ProductId"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-9 col-md-offset-3">
+                                    <button type="button" id="addProductSpec" class="btn btn-primary">Agregar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        Debes guardar la consulta antes de poder agregar medicamentos o tratamientos.
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

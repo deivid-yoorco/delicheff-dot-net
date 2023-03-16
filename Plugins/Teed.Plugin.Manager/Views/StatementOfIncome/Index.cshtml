@@ -1,0 +1,256 @@
+﻿@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.StatementOfIncome");
+    int baseYear = 2018;
+}
+<script src="~/Plugins/Teed.Plugin.Manager/Content/js/izi-modal/iziModal.min.js"></script>
+<link href="~/Plugins/Teed.Plugin.Manager/Content/js/izi-modal/iziModal.min.css" rel="stylesheet">
+<style>
+    .child-category {
+        display: block;
+        margin-left: 1em !important;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        P&L - Estado de resultados
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default panel-search">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>Fecha</label>
+                    </div>
+                    <div class="col-md-9" style="display:inline-flex">
+                        <select class="form-control" data-style="select-with-transition" style="width:140px" id="monthSelect">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                if (DateTime.Now.Month == i)
+                                {
+                                    <option selected value="@i">@(new DateTime(2018, i, 1).ToString("MMMM", System.Globalization.CultureInfo.GetCultureInfo("es-MX")).ToUpper())</option>
+                                }
+                                else
+                                {
+                                    <option value="@i">@(new DateTime(2018, i, 1).ToString("MMMM", System.Globalization.CultureInfo.GetCultureInfo("es-MX")).ToUpper())</option>
+                                }
+                            }
+                        </select>
+                        <select class="form-control" data-style="select-with-transition" id="yearSelect" style="width:100px; margin-left: 10px">
+                            @for (int i = baseYear; i <= DateTime.Now.Year; i++)
+                            {
+                                if (DateTime.Now.Year == i)
+                                {
+                                    <option selected value="@i">@i</option>
+                                }
+                                else
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div style="text-align:center" id="loading">
+                    <i class="fa fa-circle-o-notch fa-pulse fa-3x fa-fw fa-circle-o-notch" style="padding:0!important"></i>
+                    <span style="display:block;margin-top:10px">Cargando...</span>
+                </div>
+                <div class="col-md-4" id="data0"></div>
+                <div class="col-md-4" id="data1"></div>
+                <div class="col-md-4" id="data2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="expenses-details-modal"></div>
+<div id="shopping-expenses-details-modal"></div>
+<script>
+    let modalData = null;
+
+    $("#expenses-details-modal").iziModal({
+        fullscreen: true,
+        title: 'Detalles de gastos',
+        iconClass: 'fa fa-cog',
+        width: 1200,
+        overlayClose: true,
+        iframe: false,
+        onOpening: function (modal) {
+            modal.startLoading();
+            let modalHtmlContent = "<table class='table'><tr><th>Fecha</th><th>Concepto</th><th>Forma de pago</th><th>Tipo de comprobante</th><th>Monto</th><th>IVA</th><th>Total</th><th>Archivos</th></tr>";
+            if (modalData.length <= 0) {
+                modalHtmlContent += "</table>";
+                modalHtmlContent += "<div style='text-align:center;font-weight:bold;color:red;margin-bottom:1em'><h3>No hay datos para mostrar</h3></div>";
+            }
+            else {
+                $.each(modalData, function (index, data) {
+                    modalHtmlContent += "<tr><td>" + data.Date + "</td>";
+                    modalHtmlContent += "<td>" + data.Concept + "</td>";
+                    modalHtmlContent += "<td>" + data.PaymentType + "</td>";
+                    modalHtmlContent += "<td>" + data.VoucherType + "</td>";
+                    modalHtmlContent += "<td>" + data.Amount + "</td>";
+                    modalHtmlContent += "<td>" + data.Tax + "</td>";
+                    modalHtmlContent += "<td>" + data.Total + "</td>";
+                    modalHtmlContent += "<td><ul>";
+                    $.each(data.Files, function (indx, file) {
+                        modalHtmlContent += "<li><a href='" + file.FileUrl + "' target='_blank'>" + file.FileName + "</a></li>";
+                    });
+                    modalHtmlContent += "</td></ul></tr>";
+                });
+                modalHtmlContent += "</table>";
+            }
+
+            $("#expenses-details-modal .iziModal-content").html(modalHtmlContent);
+            modal.stopLoading();
+        }
+    });
+
+    let expand = (element, index) => {
+        $(element).html("<i class='fa fa-minus-circle' aria-hidden='true'></i>");
+        $(element).attr("onclick", "hideElement(this," + index + ")");
+        let parentId = $(element).closest("div").data("categoryid");
+        $("#expenses-table-" + index).find(".child-category[data-parent='" + parentId + "']").show();
+    };
+
+    let hideElement = (element, index) => {
+        $(element).html("<i class='fa fa-plus-circle' aria-hidden='true'></i>");
+        $(element).attr("onclick", "expand(this," + index + ")");
+        let parentId = $(element).closest("div").data("categoryid");
+        let newParentId = $(".child-category[data-parent='" + parentId + "']").data("categoryid");
+        $(".child-category[data-parent='" + parentId + "']").hide();
+        while (newParentId) {
+            $("#expenses-table-" + index).find(".child-category[data-parent='" + newParentId + "']").hide();
+            newParentId = $("#expenses-table-" + index).find(".child-category[data-parent='" + newParentId + "']").data("categoryid");
+        }
+    }
+
+    let viewData = (data,) => {
+        modalData = data;
+        $('#expenses-details-modal').iziModal('open');
+    }
+    
+    $(document).ready(function () {
+
+        var formatter = new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+        });
+
+        $("#monthSelect").on('change', function () {
+            $("#loading").show();
+            loadData();
+        });
+
+        $("#yearSelect").on('change', function () {
+            $("#loading").show();
+            loadData();
+        });
+
+        let loadData = () => {
+            $.ajax({
+                url: '/Admin/StatementOfIncome/GetData?month=' + $("#monthSelect").val() + "&year=" + $("#yearSelect").val(),
+                type: 'GET',
+                success: function (dataResult) {
+                    $("#loading").hide();
+
+                    $.each(dataResult, function (index, data) {
+                        let totalPerc = 100;
+                        $("#data" + index).html("<h3 style='font-weight:bold'>" + data.Date + "</h3>");
+
+                        let incomeTable = "<div class='col-md-12' style='padding:0'>";
+                        incomeTable += "<span style='padding:0' class='col-md-6' style='font-weight:bold'>Ingresos</span>";
+                        incomeTable += "<span style='padding:0' class='col-md-6 total-income'>" + formatter.format(data.Incomes) + "</span>";
+                        incomeTable += "</div>";
+                        incomeTable += "<div class='col-md-12' style='padding:5px 0'><hr style='margin:2px'></div>";
+                        $("#data" + index).append(incomeTable);
+
+                        var elementCount = 0;
+                        var newList = data.ExpensesByCategory;
+                        $("#data" + index).append("<div class='table' id='expenses-table-" + index + "'></div>");
+                        while (newList.length > 0) {
+                            var elements = data.ExpensesByCategory.filter(function (item) { return item.ParentCategoryId == elementCount; });
+                            if (elementCount == 0) {
+                                let currentTotal = 0;
+                                for (var i = 0; i < elements.length; i++) {
+                                    let expensesTableData = "";
+                                    expensesTableData += "<div class='parent-category category col-md-12' style='padding:0;margin:5px 0' data-parent='" + elements[i].ParentCategoryId + "' data-categoryid='" + elements[i].CategoryId + "'>";
+                                    expensesTableData += "<span class='col-md-5' style='padding:0'>" + elements[i].CategoryName + "</span>";
+                                    expensesTableData += "<span class='col-md-3' style='padding:0;text-align:center'>" + formatter.format(Math.round(elements[i].CategoryExpenseAmount * 100) / 100) + "</span>";
+                                    expensesTableData += "<span class='col-md-3' style='padding:0;text-align:center'>" + Math.round(elements[i].ExpensePercentage * 100) / 100 + "%</span>";
+                                    if (elements[i].IsLastChild && !elements[i].IsShoppingExpense) {
+                                        expensesTableData += "<a onclick='viewData(" + JSON.stringify(elements[i].Expenses) + ")' class='col-md-1 trigger' style='padding:0;text-align:center'><i class='fa fa-question-circle' aria-hidden='true'></i></a>";
+                                    }
+                                    else if (!elements[i].IsShoppingExpense) {
+                                        expensesTableData += "<a class='col-md-1' style='padding:0' onclick='expand(this, " + index + ")'><i class='fa fa-plus-circle' aria-hidden='true'></i></a>";
+                                    }
+
+                                    expensesTableData += "</div>";
+                                    if (i == 0) {
+                                        currentTotal = (parseFloat($("#data" + index).find(".total-income").html().replace("$", "").replace(",", "")) - elements[i].CategoryExpenseAmount);
+                                    }
+                                    else {
+                                        currentTotal = (currentTotal - elements[i].CategoryExpenseAmount);
+                                    }
+
+                                    totalPerc = totalPerc - elements[i].ExpensePercentage;
+
+                                    expensesTableData += "<div class='col-md-12' style='padding:5px 0'><hr style='margin:2px'></div>";
+                                    expensesTableData += "<div class='col-md-12' style='padding:0'>";
+                                    expensesTableData += "<span style='padding:0; font-weight:bold' class='col-md-5'>" + elements[i].CategoryTitle + ":</span>";
+                                    expensesTableData += "<span style='padding:0; font-weight:bold;text-align:center' class='col-md-3'>" + formatter.format(currentTotal) + "</span>";
+                                    expensesTableData += "<span style='padding:0; font-weight:bold;text-align:center' class='col-md-3'>" + Math.round(totalPerc * 100) / 100 + "%</span>";
+                                    expensesTableData += "<span style='padding:0; font-weight:bold' class='col-md-1'></span>";
+                                    expensesTableData += "<div class='col-md-12' style='padding:5px 0'><hr style='margin:2px'></div>";
+                                    $("#expenses-table-" + index).append(expensesTableData);
+                                }
+                            }
+                            else {
+                                for (var i = 0; i < elements.length; i++) {
+                                    // TODO: REFACTOR THE 'CHILDREN' THING...
+                                    var parentElementId = $("#expenses-table-" + index + ">.category").filter(function (index) { return $(this).data("categoryid") == elementCount });
+                                    if (parentElementId.length == 0) {
+                                        var parentElementId = $("#expenses-table-" + index + ">.category").children().filter(function (index) { return $(this).data("categoryid") == elementCount });
+                                    }
+                                    if (parentElementId.length == 0) {
+                                        var parentElementId = $("#expenses-table-" + index + ">.category").children().children().filter(function (index) { return $(this).data("categoryid") == elementCount });
+                                    }
+                                    if (parentElementId.length == 0) {
+                                        var parentElementId = $("#expenses-table-" + index + ">.category").children().children().children().filter(function (index) { return $(this).data("categoryid") == elementCount });
+                                    }
+                                    if (parentElementId.length == 0) {
+                                        var parentElementId = $("#expenses-table-" + index + ">.category").children().children().children().children().filter(function (index) { return $(this).data("categoryid") == elementCount });
+                                    }
+                                    if (parentElementId.length == 0) {
+                                        var parentElementId = $("#expenses-table-" + index + ">.category").children().children().children().children().children().filter(function (index) { return $(this).data("categoryid") == elementCount });
+                                    }
+                                    let childElement = "<div style='padding:0;display:none;margin:5px 0;' class='child-category category col-md-12' data-parent='" + elementCount + "' data-categoryid='" + elements[i].CategoryId + "'>";
+                                    childElement += "<span class='col-md-5' style='padding:0'>" + elements[i].CategoryName + "</span>";
+                                    childElement += "<span class='col-md-3' style='padding:0;text-align:center'>" + formatter.format(Math.round(elements[i].CategoryExpenseAmount * 100) / 100) + "</span>";
+                                    childElement += "<span class='col-md-3' style='padding:0;text-align:center'>" + Math.round(elements[i].ExpensePercentage * 100) / 100 + "%</span>";
+                                    if (elements[i].IsLastChild && !elements[i].IsShoppingExpense) {
+                                        childElement += "<a onclick='viewData(" + JSON.stringify(elements[i].Expenses) + ")' class='col-md-1 trigger' style='padding:0;text-align:center'><i class='fa fa-question-circle' aria-hidden='true'></i></a>";
+                                    }
+                                    else if (!elements[i].IsShoppingExpense) {
+                                        childElement += "<a class='col-md-1' style='padding:0;text-align:center' onclick='expand(this," + index + ")'><i class='fa fa-plus-circle' aria-hidden='true'></i></a>";
+                                    }
+
+                                    childElement += "</div>";
+                                    $(parentElementId).closest("div").append(childElement);
+                                }
+                            }
+                            newList = newList.filter(function (item) { return elements.map(x => x.CategoryId).indexOf(item.CategoryId) == -1 });
+                            elementCount++;
+                        }
+                    });
+                }
+            });
+        }
+
+        loadData();
+    });
+</script>

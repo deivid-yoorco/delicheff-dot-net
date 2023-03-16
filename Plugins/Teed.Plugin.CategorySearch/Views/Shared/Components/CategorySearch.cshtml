@@ -1,0 +1,28 @@
+﻿@model List<Teed.Plugin.CategorySearch.Models.CategorySearchModel>
+
+@if (Model.Count > 0)
+{
+    <style>
+        .category-search-result {
+            height: fit-content !important;
+        }
+    </style>
+    <div class="search-results">
+        <div class="product-grid">
+            <div class="row">
+                @foreach (var category in Model)
+                {
+                    <div class="col s6 m3">
+                        <div class="card category-search-result" style="border-radius:10px">
+                            <div class="card-image" >
+                                <a href="/categorias/@category.SeName" title="Mostrar productos en categoría @category.Name">
+                                    <img style="border-radius: 10px" class="responsive-img" src="@category.PictureUrl" width="250" height="125" alt="Ver productos en categoría @category.Name">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,153 @@
+﻿@model Teed.Plugin.Groceries.Components.CustomerDataModel
+@inject Teed.Plugin.Groceries.Services.ShippingRouteService shippingRouteService
+<style>
+    .grey {
+        background-color: lightgrey;
+    }
+
+    .pink {
+        background-color: #ffb9c5;
+    }
+
+    .purple {
+        background-color: #673ab7;
+        color: white !important;
+    }
+
+    .orange {
+        background-color: #e86f12;
+        color: white !important;
+    }
+</style>
+<div class="form-horizontal">
+    <div class="panel-group" style="margin:15px;margin-bottom: 25px">
+        <div class="panel panel-default panel-search">
+            <div class="panel-body">
+                @if (Model.CompletedPedidosCount > 0)
+                {
+                    <strong>
+                        Número de pedidos (completados):
+                    </strong>
+                    <span>@Model.CompletedPedidosCount</span><br />
+                    <strong>
+                        Monto total (completados):
+                    </strong>
+                    <span>@Model.TotalAmount.ToString("C")</span><br />
+                    <strong>
+                        Ticket promedio:
+                    </strong>
+                    <span>@Model.AverageTicket.ToString("C")</span><br />
+                    <strong>
+                        Promedio de productos por pedido:
+                    </strong>
+                    <span>@Math.Round(Model.AverageProductCount, 2)</span><br />
+                    <strong>
+                        Fecha de entrega de primera compra:
+                    </strong>
+                    <span>@Model.FirstPurchaseDate.ToString("dd-MM-yyyy")</span><br />
+                    <strong>
+                        Fecha de entrega de última compra:
+                    </strong>
+                    <span>@Model.LastPurchaseDate.ToString("dd-MM-yyyy")</span><br />
+                    <strong>
+                        Recurrencia mensual:
+                    </strong>
+                    <span>@Math.Round(Model.MonthlyRecurrence, 2)</span><br />
+                    <strong>
+                        Pedidos entregados a tiempo:
+                    </strong>
+                    <span>@Model.DeliveredInTimeData</span><br />
+                    @*<div class="table-responsive text-nowrap">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Número de pedidos (completados)
+                                        </th>
+                                        <th>
+                                            Monto total (de todos los pedidos)
+                                        </th>
+                                        <th>
+                                            Ticket promedio
+                                        </th>
+                                        <th>
+                                            Promedio de productos por pedido
+                                        </th>
+                                        <th>
+                                            Fecha de primera compra
+                                        </th>
+                                        <th>
+                                            Fecha de entrega de última compra
+                                        </th>
+                                        <th>
+                                            Recurrencia mensual
+                                        </th>
+                                        <th>
+                                            Pedidos entregados a tiempo
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tr>
+                                    <td>
+                                        @Model.CompletedPedidosCount
+                                    </td>
+                                    <td>
+                                        @Model.TotalAmount.ToString("C")
+                                    </td>
+                                    <td>
+                                        @Model.AverageTicket.ToString("C")
+                                    </td>
+                                    <td>
+                                        @Math.Round(Model.AverageProductCount, 2)
+                                    </td>
+                                    <td>
+                                        @Model.FirstPurchaseDate.ToString("dd-MM-yyyy")
+                                    </td>
+                                    <td>
+                                        @Model.LastPurchaseDate.ToString("dd-MM-yyyy")
+                                    </td>
+                                    <td>
+                                        @Math.Round(Model.MonthlyRecurrence, 2)
+                                    </td>
+                                    <td>
+                                        @Model.DeliveredInTimeData
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>*@
+                }
+                else
+                {
+                    <strong>El cliente no tiene pedidos completados.</strong>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function grid_dataBound(e) {
+        /* The result can be observed in the DevTools(F12) console of the browser. */
+        loadTimes();
+    };
+
+    loadTimes();
+    function loadTimes() {
+        setTimeout(function () {
+            var grid = $("#order-grid").data("kendoGrid");
+            grid.bind("dataBound", grid_dataBound);
+
+            let elements = $("span.delivery-time");
+            $.each(elements, (index, element) => {
+                let id = $(element).attr('id');
+                $.ajax({
+                    url: '/Admin/ShippingRoute/GetDeliveryStatusColor?orderId=' + id,
+                    method: 'GET',
+                    success: function (result) {
+                        $(element).html(result.deliveryTime);
+                        $('.delivery-date-' + id).html(result.deliveryDate);
+                    }
+                })
+            });
+        }, 2000);
+    }
+</script>

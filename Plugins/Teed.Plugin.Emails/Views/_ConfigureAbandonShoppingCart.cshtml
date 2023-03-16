@@ -1,0 +1,35 @@
+﻿@model Teed.Plugin.Emails.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Configuración general
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label style="text-align:right" for="AbandonShoppingCartEmailIsActive">¿Está activo?</label>
+                    <div title="Selecciona si deseas que el envío de correos por carrito abandonado esté activo." class="ico-help"><i class="fa fa-question-circle"></i></div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="AbandonShoppingCartEmailIsActive" />
+                <span asp-validation-for="AbandonShoppingCartEmailIsActive"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="control-label" for="HoursToSendAbandonShoppingCartEmail">¿A las cuantas horas se debe enviar el correo?</label>
+                    <div title="Indica cuántas horas debe pasar el usuario con el carrito abandonado para enviarle el correo. Debe ser mayor a 0 para funcionar." class="ico-help">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <input type="number" asp-for="HoursToSendAbandonShoppingCartEmail" class="form-control text-box single-line" />
+                <span asp-validation-for="HoursToSendAbandonShoppingCartEmail"></span>
+            </div>
+        </div>
+    </div>
+</div>

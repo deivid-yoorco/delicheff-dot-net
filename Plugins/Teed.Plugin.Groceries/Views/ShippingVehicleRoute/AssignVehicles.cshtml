@@ -1,0 +1,193 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingVehicle.AssignVehicleModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingVehicleRoute");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+</style>
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar vehículos a las rutas para la fecha de entrega @(Model.Date.ToString("dd-MM-yyyy"))
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="VehicleRouteList">regresar a la lista de fechas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong style="display: none;color: red" id="submit-error"></strong>
+                            @if (Model.Routes.Count > 0)
+                            {
+                                @foreach (var route in Model.Routes)
+                                {
+                                    <h3>@(route.Route.RouteName)</h3>
+                                    <div class="route">
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <div class="input-group" style="width:100%">
+                                                    <select data-selectorRouteId="@(route.Route.Id)" class="ui-choose">
+                                                        @foreach (var vehicle in Model.Vehicles)
+                                                        {
+                                                            if (route.SelectedVehicleId.ToString() == vehicle.Value)
+                                                            {
+                                                                <option selected value="@(vehicle.Value)">@(vehicle.Text)</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@(vehicle.Value)">@(vehicle.Text)</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (Model.RoutesWithoutOrders.Count > 0)
+                                {
+                                    <h2>Rutas sin pedidos asignados:</h2>
+                                    @foreach (var route in Model.RoutesWithoutOrders)
+                                    {
+                                        <h3>@(route.Route.RouteName)</h3>
+                                        <div class="route">
+                                            <div class="form-group">
+                                                <div class="col-md-12">
+                                                    <div class="input-group" style="width:100%">
+                                                        <select data-selectorRouteId="@(route.Route.Id)" class="ui-choose-without-vehicle">
+                                                            @foreach (var vehicle in Model.Vehicles)
+                                                            {
+                                                                if (route.SelectedVehicleId.ToString() == vehicle.Value)
+                                                                {
+                                                                    <option selected value="@(vehicle.Value)">@(vehicle.Text)</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@(vehicle.Value)">@(vehicle.Text)</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <h4>Todas las órdenes de esta fecha deben estar asignadas a una ruta para poder asignar los vehículos. Si quieres asignar las rutas para esta fecha, da click <a href="/Admin/ShippingRoute/AssignRouteOrder?date=@(Model.Date.ToString("dd-MM-yyyy"))">aquí</a></h4>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    let buildUiChoose = () => {
+        $('ul.ui-choose').remove();
+        $('.ui-choose').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: false,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+
+        $('ul.ui-choose-without-vehicle').remove();
+        $('.ui-choose-without-vehicle').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: false,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    };
+
+    buildUiChoose();
+
+    const onSubmit = () => {
+        $("#submit-error").hide();
+        $("#loading-container").show();
+        $("#submit-button").hide();
+
+        let result = [];
+        let routes = $(".route").find('select');
+        $.each(routes, (index, element) => {
+            let routeId = $(element).data('selectorrouteid');
+            let selectedVehicleId = $(element).val();
+            result.push({ routeId, selectedVehicleId: selectedVehicleId });
+        });
+
+        let body = {
+            date: '@Model.Date',
+            data: result
+        };
+
+        $.ajax({
+            url: '/Admin/ShippingVehicle/AssignVehicles',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#submit-error").show();
+                $("#submit-error").html(error.responseText);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

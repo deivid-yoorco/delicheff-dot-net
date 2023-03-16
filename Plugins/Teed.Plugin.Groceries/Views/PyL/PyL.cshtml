@@ -1,0 +1,253 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.P&L");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Order";
+}
+
+<style>
+    .bootstrap-iso .formden_header h2, .bootstrap-iso .formden_header p, .bootstrap-iso form {
+        font-family: Arial, Helvetica, sans-serif;
+        color: black
+    }
+
+        .bootstrap-iso form button, .bootstrap-iso form button:hover {
+            color: white !important;
+        }
+
+    .asteriskField {
+        color: red;
+    }
+</style>
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        P&L Diario
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal panel-group">
+        <div class="panel panel-default panel-search">
+            <div class="panel-body">
+                <div class="bootstrap-iso">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <form class="form-horizontal" method="post">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-2 requiredField" for="dateini">
+                                            Fecha inicial
+                                        </label>
+                                        <div class="col-sm-3">
+                                            <div class="input-group">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar">
+                                                    </i>
+                                                </div>
+                                                <input class="form-control" id="dateini" name="dateini" placeholder="DD-MM-YYYY" type="text" />
+                                            </div>
+                                        </div>
+                                        <label class="control-label col-sm-3 requiredField" for="datefin">
+                                            Fecha final
+                                        </label>
+                                        <div class="col-sm-3">
+                                            <div class="input-group">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar">
+                                                    </i>
+                                                </div>
+                                                <input class="form-control" id="datefin" name="datefin" placeholder="DD-MM-YYYY" type="text" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="margin-top: 1em;">
+                                        <div class="col-sm-12" style="text-align-last: center;">
+                                            <button class="btn btn-primary dateSubmit" name="submit" type="button" onclick="submitDate()">
+                                                <i class="fa fa-search" aria-hidden="true"></i> Buscar por fecha
+                                            </button>
+                                            <button class="btn btn-primary dateSubmit" name="submit" type="button" onclick="resetSearch()">
+                                                <i class="fa fa-times" aria-hidden="true"></i> Resetear busqueda
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <label id="dateError" class="text-red control-label" hidden>
+                                    La fecha o fechas ingresadas son invalidas
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var date_input_ini = $('input[name="dateini"]');
+        var date_input_fin = $('input[name="datefin"]');
+        var container = $('.bootstrap-iso form').length > 0 ? $('.bootstrap-iso form').parent() : "body";
+        date_input_ini.datepicker({
+            dateFormat: 'dd/mm/yy',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        });
+        date_input_fin.datepicker({
+            dateFormat: 'dd/mm/yy',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        });
+        doKendo();
+    });
+
+    function doKendo() {
+        $(".dateSubmit").attr("disabled", true);
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("PylListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: additionalData
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "Sales",
+                    title: "Ventas",
+                },
+                {
+                    field: "Expenses",
+                    title: "Gastos",
+                },
+                {
+                    field: "Profit",
+                    title: "Ganancia",
+                },
+                {
+                    field: "Porcentage",
+                    title: "Porcentaje",
+                },
+                {
+                    field: "Date",
+                    title: "Ordenes",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="ViewOrders?date=#=Date#"><i class="fa fa-eye"></i>Ver Ordenes</a>'
+                }
+            ],
+            dataBound: function (e) {
+                var count = 1;
+                if ($("tbody[role='rowgroup'] tr").find("td").length > 0) {
+                    $("tbody[role='rowgroup'] tr").find("td").each(function (i, elm) {
+                        if (count > 3)
+                            count = 1;
+                        if (count == 3) {
+                            if (($(elm).html().toString()) == "$0.00") {
+                                $(elm).parent().css("color", "darkgrey");
+                                $(elm).parent().children().last().remove();
+                                $(elm).parent().append("<td style='text-align-last: center; padding: 1em;'>Aun sin reporte</td>");
+                            }
+                        }
+                        count++;
+                    });
+                }
+                $(".dateSubmit").removeAttr("disabled");
+            }
+        });
+    }
+
+    function additionalData() {
+        var data = {
+            DateF: (($("#dateini").val()).toString()),
+            DateL: (($("#datefin").val()).toString())
+        };
+        return data;
+    }
+
+    function submitDate() {
+        $(".dateSubmit").attr("disabled", true);
+        $("#dateError").hide();
+        var dateF = (($("#dateini").val()).toString());
+        var dateL = (($("#datefin").val()).toString());
+        var doTheSearch = true;
+
+        if (dateF) {
+            if (!dateF.includes("/")) {
+                doTheSearch = false;
+            }
+            if ((dateF.length) < 10 || (dateF.length) > 10) {
+                doTheSearch = false;
+            }
+        }
+        if (dateL) {
+            if (!dateL.includes("/")) {
+                doTheSearch = false;
+            }
+            if ((dateL.length) < 10 || (dateL.length) > 10) {
+                doTheSearch = false;
+            }
+        }
+
+        if (dateF.length < 2 && dateL.length < 2)
+            doTheSearch = false;
+
+        if (doTheSearch) {
+            var dataSources = $("#element-grid").data('kendoGrid').dataSource;
+            dataSources.page(1);
+        } else {
+            $("#dateError").show();
+            $(".dateSubmit").removeAttr("disabled");
+        }
+    }
+
+    function resetSearch() {
+        $("#dateini").val("");
+        $("#datefin").val("");
+        var dataSources = $("#element-grid").data('kendoGrid').dataSource;
+        dataSources.page(1);
+    }
+</script>

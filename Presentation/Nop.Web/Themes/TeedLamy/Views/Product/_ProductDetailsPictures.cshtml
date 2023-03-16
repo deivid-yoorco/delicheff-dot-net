@@ -1,0 +1,353 @@
+﻿@model ProductDetailsModel
+@{
+    Html.AddScriptParts(ResourceLocation.Footer, "~/lib/magnific-popup/jquery.magnific-popup.min.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "/Themes/TeedMaterial/Content/lib/easeljs/easeljs-0.6.0.min.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "/Themes/TeedLamy/Content/lib/elevatezoom/jquery.elevatezoom.js");
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/slick/slick.min.js");
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/js/gridify.js");
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/slick/slick.css");
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/slick/slick-theme.css");
+    Html.AddCssFileParts("~/lib/magnific-popup/magnific-popup.css");
+    int is360 = Model.PictureModels.Where(x => x.Is360 == true).Count();
+}
+<div class="row img-container">
+    <div class="col s12" style="margin-top: 25px;">
+        @if (Model.DefaultPictureZoomEnabled)
+        {
+            <a class="responsive-img" href="@Model.DefaultPictureModel.FullSizeImageUrl" title="@Model.DefaultPictureModel.Title" id="main-product-img-lightbox-anchor-@Model.Id">
+                <img class="responsive-img" alt="@Model.DefaultPictureModel.AlternateText" src="@Model.DefaultPictureModel.FullSizeImageUrl" title="@Model.DefaultPictureModel.Title" itemprop="image" id="main-product-img-@Model.Id" data-zoom-image="@Model.DefaultPictureModel.FullSizeImageUrl" />
+            </a>
+            <script type="text/javascript" asp-location="Footer">
+                    $(document).ready(function () {
+                        $('#main-product-img-lightbox-anchor-@Model.Id').magnificPopup(
+                            {
+                                type: 'image',
+                                removalDelay: 300,
+                                gallery: {
+                                    enabled: true,
+                                    tPrev: '@T("Media.MagnificPopup.Previous")',
+                                    tNext: '@T("Media.MagnificPopup.Next")',
+                                    tCounter: '@T("Media.MagnificPopup.Counter")'
+                                },
+                                tClose: '@T("Media.MagnificPopup.Close")',
+                                tLoading: '@T("Media.MagnificPopup.Loading")'
+                            });
+                    });
+            </script>
+        }
+        else
+        {
+            @if (is360 == 0)
+            {
+                int count = 0;
+                <img class="responsive-img" alt="@Model.DefaultPictureModel.AlternateText" src="@Model.DefaultPictureModel.FullSizeImageUrl" title="@Model.DefaultPictureModel.Title" itemprop="image" id="main-product-img-@Model.Id" data-zoom-image="@Model.DefaultPictureModel.FullSizeImageUrl" />
+                <div class="details-pictures-slick" style="display: none;">
+                    @foreach (var picture in Model.PictureModels)
+                    {
+                        <div class="details-single-image">
+                            <img class="responsive-img " alt="@picture.AlternateText" src="@picture.FullSizeImageUrl" title="@picture.Title" itemprop="image" id="main-product-img-@Model.Id-@count" data-zoom-image="@picture.FullSizeImageUrl" />
+                        </div>
+                        count++;
+                    }
+                </div>
+            }
+            else
+            {
+                <style>
+                    @@media only screen and (max-width: 768px) {
+                        canvas {
+                            width: 95%;
+                        }
+                    }
+
+                    @@media only screen and (max-width: 600px) {
+                        canvas {
+                            width: 100%;
+                        }
+                    }
+                </style>
+                <div class="container text-center">
+                    <canvas id="360viewer" width="458" height="458"></canvas>
+                </div>
+            }
+        }
+    </div>
+    @if (Model.PictureModels.Count > 1)
+    {
+        int cId = 0;
+        <div class="thumb-items col s12">
+            @foreach (var picture in Model.PictureModels)
+            {
+                if (!picture.Is360)
+                {
+                    <div class="thumb-item cId thumb-item-pic" id="@cId"
+                         style="border: 5px solid; border-color: white; background-image: url(@picture.ThumbImageUrl)">
+                        <div class="arrow down" style="display: none;"></div>
+                    </div>
+                    cId++;
+                }
+                else
+                {
+                    <!--Images 360-->
+                    <img class="responsive-img imgProduct" src="@picture.ImageUrl" hidden />
+                }
+            }
+        </div>
+        <script>
+
+            function initProductSlick() {
+                if ($('.details-pictures-slick').prev().is('img'))
+                    $('.details-pictures-slick').prev().hide();
+                $('.details-pictures-slick').show();
+                $('.details-pictures-slick').slick({
+                    mobileFirst: true,
+                    dots: false,
+                    infinite: true,
+                    arrows: true,
+                    variableWidth: false,
+                    draggable: false
+                });
+                $('.arrow.down').first().show();
+                $('.thumb-item').click(function () {
+                    $('.details-pictures-slick').slick('slickGoTo', $(this).attr('id'));
+                    $('.arrow.down').hide();
+                    $(this).find('.arrow.down').show();
+                });
+                $('.slick-arrow').click(function () {
+                    var current = $('.details-pictures-slick').slick('slickCurrentSlide');
+                    $(".thumb-item:eq(" + current + ")").click();
+                });
+            }
+        </script>
+    }
+
+    <script type="text/javascript" asp-location="Footer">
+            var zoomObject = null;
+            function initElevateZoom() {
+                var doVar = false;
+                if(doVar) {
+                    var isMobile = {
+                        Android: function () {
+                            return navigator.userAgent.match(/Android/i);
+                        },
+                        BlackBerry: function () {
+                            return navigator.userAgent.match(/BlackBerry/i);
+                        },
+                        iOS: function () {
+                            return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+                        },
+                        Opera: function () {
+                            return navigator.userAgent.match(/Opera Mini/i);
+                        },
+                        Windows: function () {
+                            return navigator.userAgent.match(/IEMobile/i);
+                        },
+                        any: function () {
+                            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+                        }
+                    };
+                    if (!isMobile.any()) {
+
+                        zoomObject = $('#main-product-img-@Model.Id').elevateZoom({
+                            zoomType: "inner",
+                            cursor: "crosshair",
+                            easing: true
+                        });
+                        console.log("zoom initiated");
+                        //Interval loop
+                        var notApplied = true;
+                        var refreshIntervalId = window.setInterval(function () {
+                            if ($('.zoomWindowContainer').length > 0) {
+                                if (notApplied) {
+                                    $('.zoomWindowContainer').unbind('mouseover');
+                                    $('.zoomWindowContainer').unbind('mouseout');
+                                    console.log($('.zoomWindowContainer').length);
+                                    $('.zoomWindowContainer').mouseover(function () {
+                                        $('.product-imgs .row .col.s12 img').css('opacity', '0');
+                                    });
+                                    $('.zoomWindowContainer').mouseout(function () {
+                                        $('.product-imgs .row .col.s12 img').css('opacity', '1');
+                                    });
+                                    notApplied = false;
+                                } else {
+                                    // Stop interval
+                                    clearInterval(refreshIntervalId);
+                                }
+                            }
+                        }, 200);
+                    }
+                    //else {
+                    //    $('#360viewer').css("width", "100%");
+                    //}
+                }
+            }
+
+            $(document).ready(function () {
+                $('.thumb-item img').on('click', function () {
+                    $('#main-product-img-@Model.Id').attr('src', $(this).attr('data-defaultsize'));
+                    $('#main-product-img-@Model.Id').attr('title', $(this).attr('title'));
+                    $('#main-product-img-@Model.Id').attr('alt', $(this).attr('alt'));
+                    $('#main-product-img-@Model.Id').data('zoom-image', $(this).data('zoom-image'));
+                    $('.zoomContainer').remove();
+                    $('#main-product-img-@Model.Id').removeData('elevateZoom');
+
+                    $('#main-product-img-lightbox-anchor-@Model.Id').attr('href', $(this).attr('data-fullsize'));
+                    $('#main-product-img-lightbox-anchor-@Model.Id').attr('title', $(this).attr('title'));
+                    if ($('.attribute-section .color-squares').length > 0) {
+                        initElevateZoom();
+                    }
+                });
+            });
+    </script>
+</div>
+@{
+    int cont = 0;
+    foreach (var picture in Model.PictureModels)
+    {
+        <script type="text/javascript" asp-location="Footer">
+            $(document).ready(function () {
+                $('#@cont').on('click', function () {
+                    $('.cId').removeClass('z-depth-1');
+                    $('#@cont').addClass('z-depth-1');
+                });
+            });
+        </script>
+        cont++;
+    }
+}
+<script type="text/javascript" asp-location="Footer">
+    $(document).ready(function () {
+        if ($('.attribute-section .color-squares').length > 0) {
+            initElevateZoom();
+        }
+
+        var stage;
+
+        function init() {
+            var canvas = document.getElementById("360viewer");
+            if (!canvas || !canvas.getContext) return;
+
+            stage = new createjs.Stage(canvas);
+            stage.enableMouseOver(true);
+            stage.mouseMoveOutside = true;
+            createjs.Touch.enable(stage);
+            var imgList = [];
+            var imgsProduct = document.getElementsByClassName("imgProduct")
+            for (var i = 0; i < imgsProduct.length; i++) {
+                var src = imgsProduct[i].src;
+                imgList.push(src)
+            }
+
+            var images = [],
+                loaded = 0,
+                currentFrame = 0,
+                totalFrames = imgList.length;
+            var rotate360Interval, start_x;
+
+            var bg = new createjs.Shape();
+            stage.addChild(bg);
+
+            var bmp = new createjs.Bitmap();
+            stage.addChild(bmp);
+
+            function load360Image() {
+                var img = new Image();
+                img.src = imgList[loaded];
+                stage.canvas.width = img.naturalWidth;
+                stage.canvas.height = img.naturalHeight;
+                img.onload = img360Loaded;
+                images[loaded] = img;
+            }
+
+            function img360Loaded(event) {
+                loaded++;
+                bg.graphics.clear()
+                bg.graphics.beginFill("#fff").drawRect(0, 0, stage.canvas.width * loaded / totalFrames, stage.canvas.height);
+                bg.graphics.endFill();
+
+                if (loaded == totalFrames) start360();
+                else load360Image();
+            }
+
+            function start360() {
+                document.body.style.cursor = 'none';
+                update360(0);
+
+                // first rotation
+                rotate360Interval = setInterval(function () {
+                    if (currentFrame === totalFrames - 1) {
+                        clearInterval(rotate360Interval);
+                        addNavigation();
+                    }
+                    update360(1);
+                }, 25);
+            }
+
+            function iconLoaded(event) {
+                var iconBmp = new createjs.Bitmap();
+                iconBmp.image = event.target;
+                iconBmp.x = 20;
+                iconBmp.y = canvas.height - iconBmp.image.height - 20;
+                stage.addChild(iconBmp);
+            }
+
+            function update360(dir) {
+                currentFrame += dir;
+                if (currentFrame < 0) currentFrame = totalFrames - 1;
+                else if (currentFrame > totalFrames - 1) currentFrame = 0;
+                bmp.image = images[currentFrame];
+            }
+
+            //-------------------------------
+            function addNavigation() {
+                stage.onMouseOver = mouseOver;
+                stage.onMouseDown = mousePressed;
+                document.body.style.cursor = 'auto';
+            }
+
+            function mouseOver(event) {
+                document.body.style.cursor = 'pointer';
+            }
+
+            function mousePressed(event) {
+                start_x = event.rawX;
+                stage.onMouseMove = mouseMoved;
+                stage.onMouseUp = mouseUp;
+
+                document.body.style.cursor = 'w-resize';
+            }
+
+            function mouseMoved(event) {
+                var dx = event.rawX - start_x;
+                var abs_dx = Math.abs(dx);
+
+                if (abs_dx > 5) {
+                    update360(dx / abs_dx);
+                    start_x = event.rawX;
+                }
+            }
+
+            function mouseUp(event) {
+                stage.onMouseMove = null;
+                stage.onMouseUp = null;
+                document.body.style.cursor = 'pointer';
+            }
+
+            function handleTick() {
+                stage.update();
+            }
+
+            document.body.style.cursor = 'progress';
+            load360Image();
+
+            // TICKER
+            createjs.Ticker.addEventListener("tick", handleTick);
+            //createjs.Ticker.setFPS(24);
+            createjs.Ticker.getMeasuredFPS(24);
+            createjs.Ticker.useRAF = true;
+        }
+
+        // Init
+        window.addEventListener('load', init, false);
+    });
+</script>

@@ -1,0 +1,132 @@
+﻿@model GrowthHackingModel
+
+@{
+    //page title
+    ViewBag.Title = "Ajustes de Growth Hacking";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Growth Hacking settings");
+}
+
+<form asp-controller="Setting" asp-action="GrowthHacking" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @ViewBag.Title
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Ajustes
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label style="text-align:right" for="IsActive">¿Está activo?</label>
+                                    <div title="Selecciona si deseas que el sistema de Growth Hacking esté activo" class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="IsActive" />
+                                <span asp-validation-for="IsActive"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="RewardAmount">Monto de recompensa por orden completada</label>
+                                    <div title="Indica el monto del regalo que se le dará al usuario por cada amigo que complete una compra en la tienda." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="number" asp-for="RewardAmount" class="form-control text-box single-line" />
+                                <span asp-validation-for="RewardAmount"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="UserCodeCouponAmount">Descuento ofrecido por código de amigo</label>
+                                    <div title="Indica el monto del descuento que se dará a un usuario que utilice el código de un amigo." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="number" asp-for="UserCodeCouponAmount" class="form-control text-box single-line" />
+                                <span asp-validation-for="UserCodeCouponAmount"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="UserCodeCouponOrderMinimumAmount">Monto mínimo para utilizar código de amigo</label>
+                                    <div title="Indica el monto mínimo de orden requerido para utilizar el código de amigo. Dejar en 0 si no hay monto mínimo." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="number" asp-for="UserCodeCouponOrderMinimumAmount" class="form-control text-box single-line" />
+                                <span asp-validation-for="UserCodeCouponOrderMinimumAmount"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="RewardOrderMinimumAmount">Monto mínimo para utilizar cupón de recompensa</label>
+                                    <div title="Indica el monto mínimo de orden requerido para utilizar el cupón de recompensa. Dejar en 0 si no hay monto mínimo." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="number" asp-for="RewardOrderMinimumAmount" class="form-control text-box single-line" />
+                                <span asp-validation-for="RewardOrderMinimumAmount"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="RewardValidDays">Validez del cupón de recompensa (días)</label>
+                                    <div title="Indica la cantidad de días en que será válido el cupón de recompensa. Dejar en 0 si no hay fecha límite." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="number" asp-for="RewardValidDays" class="form-control text-box single-line" />
+                                <span asp-validation-for="RewardValidDays"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="MinimumAmountToCreateFriendCode">Monto mínimo de orden para crear código de amigo</label>
+                                    <div title="Indica el monto mínimo de la orden completada requerido para habilitar el código de amigo. Dejar en 0 si no se requiere monto mínimo para generar código de amigo." class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="number" asp-for="MinimumAmountToCreateFriendCode" class="form-control text-box single-line" />
+                                <span asp-validation-for="MinimumAmountToCreateFriendCode"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

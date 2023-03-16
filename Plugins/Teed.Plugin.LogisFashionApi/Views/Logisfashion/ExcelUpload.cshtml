@@ -1,0 +1,166 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@model Teed.Plugin.Logisfashion.Models.ExcelUploadModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    Html.SetActiveMenuItemSystemName("TeedLogisfashionExcelUpload");
+
+    string error = (string)ViewData["Error"];
+    bool success = (bool)ViewData["Success"];
+}
+
+<style>
+    .fileUpload {
+        position: relative;
+        overflow: hidden;
+        margin: 10px;
+    }
+
+        .fileUpload input.upload {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+</style>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2>Enviar aviso de inventario</h2>
+                    <p>Enviar notificación a Logisfashion de próxima llegada de inventario. Puedes descargar la plantilla haciendo click <a href="~/Plugins/Teed.Plugin.Logisfashion/Content/files/template.xlsx" target="_blank">aquí</a>. Se deben enviar por separado las notificaciones que son assortment y las que no son assortment.</p>
+                    <div>
+                        <form id="uploader" asp-action="ExcelUpload" method="post" enctype="multipart/form-data">
+                            <input id="uploadFile" placeholder="Choose File" disabled="disabled" style="padding-right: 2em;" />
+                            <div class="fileUpload btn" style="background-color: #e6e6e6;">
+                                <span>Selecciona tu archivo</span>
+                                <input id="uploadBtn" type="file" class="upload" asp-for="ExcelFile"
+                                       accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="label-wrapper" style="float: left; margin: 0 1em 1em 0;">
+                                        <label class="control-label">Número de orden</label>
+                                        <div title="Número de albaran para identificar ingreso" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <input class="form-control" asp-for="OrderNumber" />
+                                        <span asp-validation-for="OrderNumber"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="label-wrapper" style="float: left; margin: 0 1em 1em 0;">
+                                        <label class="control-label">¿Es assortment?</label>
+                                        <div title="Indica si la información corresponde a productos de assorment" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <nop-editor asp-for="IsAssortment" />
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" name="save" class="btn btn-primary">
+                                <i class="fa fa-upload"></i>
+                                Enviar
+                            </button>
+                        </form>
+                        <div style="display:inline-block; display: none" id="loading">
+                            <i class="fa fa-refresh fa-spin fa-2x fa-fw spinner" style="padding-right:0 !important; color: #3c8dbc;"></i>
+                            <span>Enviando...</span>
+                        </div>
+                        <div>
+                            @if (success)
+                            {
+                                <span id="success" style="color:green;">Se enviaron correctamente los productos.</span>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(error))
+                            {
+                                <span id="error" style="color:red;">Ocurrió un problema al enviar los productos. Error: @error</span>
+                            }
+                        </div>
+                    </div>
+                    <h2 style="margin-top:1em;">Envíos exitosos:</h2>
+                    <div id="element-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        document.getElementById("uploadBtn").onchange = function () {
+            document.getElementById("uploadFile").value = this.value;
+        };
+
+            $("#element-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "/Admin/Logisfashion/ListInboundRequest",
+                            type: "POST",
+                            dataType: "json",
+                            data: null
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors"
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                pageable: {
+                    refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "Date",
+                        title: "Fecha",
+                    },
+                    {
+                        field: "PONumber",
+                        title: "Albarán",
+                    },
+                    {
+                        field: "Request",
+                        title: "Productos",
+                    },
+                    {
+                        field: "Status",
+                        title: "Estado",
+                    }
+                ]
+            });
+        });
+</script>

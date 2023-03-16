@@ -1,0 +1,162 @@
+﻿@model Teed.Plugin.Suppliers.Models.SupplierModel
+
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Nombre</label>
+            <div title="Nombre del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Name" />
+            <span asp-validation-for="Name"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Dirección</label>
+            <div title="Dirección del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Address" />
+            <span asp-validation-for="Address"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Código postal</label>
+            <div title="Código postal del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="PostalCode" />
+            <span asp-validation-for="PostalCode"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Ciudad</label>
+            <div title="Ciudad del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="City" />
+            <span asp-validation-for="City"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Estado</label>
+            <div title="Estado donde está ubicado el proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <select class="form-control" asp-for="StateProvinceId" asp-items="@Model.States"></select>
+            <span asp-validation-for="StateProvinceId"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Teléfono 1</label>
+            <div title="Teléfono 1 del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Phone1" />
+            <span asp-validation-for="Phone1"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Teléfono 2</label>
+            <div title="Teléfono 2 del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Phone2" />
+            <span asp-validation-for="Phone2"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Correo electrónico</label>
+            <div title="Correo electrónico del proveedor" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Email" />
+            <span asp-validation-for="Phone2"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Persona de contacto</label>
+            <div title="Nombre de la persona de contacto" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Contact" />
+            <span asp-validation-for="Contact"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Comentarios</label>
+            <div title="Comentarios adicionales (opcional)" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <textarea class="form-control" asp-for="Comment"></textarea>
+            <span asp-validation-for="Comment"></span>
+        </div>
+    </div>
+</div>

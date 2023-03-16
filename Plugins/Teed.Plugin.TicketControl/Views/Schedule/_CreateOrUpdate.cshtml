@@ -1,0 +1,14 @@
+﻿@model Teed.Plugin.TicketControl.Models.Schedule.CreateOrEditModel
+
+<input type="hidden" value="@Model.Id" />
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="product-edit">
+            <nop-tab asp-name="tab-info" asp-title="Información principal" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.TicketControl/Views/Schedule/_CreateOrUpdate.Info.cshtml", Model)</nop-tab>
+            @if (Model.Id > 0)
+            {
+                <nop-tab asp-name="tab-log" asp-title="Bitácora">@await Html.PartialAsync("~/Plugins/Teed.Plugin.TicketControl/Views/Schedule/_CreateOrUpdate.Log.cshtml", Model)</nop-tab>
+            }
+        </nop-tabs>
+    </div>
+</div>

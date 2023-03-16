@@ -1,0 +1,200 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@inject Nop.Core.IWorkContext workContext
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.PartnerLiabilities");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Pasivos con socios
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Agregar
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default panel-search">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>Usuario</label>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <input id="users" />
+                            <input type="hidden" id="selected-user" />
+                        </div>
+                        <em>Selecciona para filtrar los movimientos por usuario.</em>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <label>Fecha</label>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <input class="form-control" id="datepicker" />
+                            <input type="hidden" id="filterDate" />
+                        </div>
+                        <em>Selecciona la fecha para filtrar. <a style="display:none" id="removeDateFilter" href="#">Quitar este filtro</a></em>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker();
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+            $("#element-grid-today").hide();
+            $("#today-appointmets-data").hide();
+            $("#removeDateFilter").show();
+            loadElements();
+        });
+
+        $("#removeDateFilter").click(function () {
+            $("#datepicker").val("");
+            $("#filterDate").val("");
+            $('selector').datepicker('setDate', null);
+            $("#element-grid-today").show();
+            $("#today-appointmets-data").show();
+            $("#removeDateFilter").hide();
+            loadElements();
+            return false;
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        $("#users").kendoComboBox({
+            placeholder: "Selecciona al usuario...",
+            dataTextField: "User",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/PartnerLiabilities/UserListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#users").data("kendoComboBox").value()) {
+                    $("#users").data("kendoComboBox").value($("#selected-user").val());
+                }
+            },
+            select: function (e) {
+                $("#selected-user").val(this.dataItem(e.item.index()).Id);
+                $("#element-grid").data("kendoGrid").destroy();
+                loadElements();
+            }
+        });
+
+        loadElements();
+        function loadElements() {
+            let selectedUser = $("#selected-user").val();
+            let selectedDate = $("#filterDate").val();
+            $("#element-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "/Admin/PartnerLiabilities/ListData?selectedDate=" + selectedDate + "&selectedUserId=" + selectedUser,
+                            type: "POST",
+                            dataType: "json",
+                            data: null
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors"
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                },
+                pageable: {
+                    refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "DateString",
+                        title: "Fecha",
+                    },
+                    {
+                        field: "PartnerName",
+                        title: "Usuario"
+                    },
+                    {
+                        field: "AmountFormatted",
+                        title: "Monto",
+                    },
+                    {
+                        field: "Balance",
+                        title: "Saldo",
+                    },
+                    {
+                        field: "Id",
+                        title: "Editar",
+                        width: 50,
+                        headerAttributes: { style: "text-align:center" },
+                        attributes: { style: "text-align:center" },
+                        template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>Editar</a>'
+                    }
+                ]
+            });
+        }
+    });
+</script>

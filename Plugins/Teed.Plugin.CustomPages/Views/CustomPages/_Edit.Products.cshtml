@@ -1,0 +1,45 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var availableProducts = (List<SelectListItem>)ViewData["AllProducts"];
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título de la sección</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ProductSectionTitle" />
+                <span asp-validation-for="ProductSectionTitle"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Productos</label>
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="SelectedProductIds" asp-items="availableProducts" asp-multiple="true" />
+                <script type="text/javascript">
+                $(document).ready(function() {
+                    var productIdsInput = $('#@Html.IdFor(model => model.SelectedProductIds)').data("kendoMultiSelect");
+                        productIdsInput.setOptions({
+                        autoClose: false,
+                        filter: "contains"
+                    });
+                    @if (availableProducts.Count == 0)
+                    {
+                        <text>
+                        productIdsInput.setOptions({
+                            enable: false,
+                            placeholder: 'No hay productos disponibles.'
+                        });
+                        productIdsInput._placeholder();
+                        productIdsInput._enable();
+                        </text>
+                    }
+                });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

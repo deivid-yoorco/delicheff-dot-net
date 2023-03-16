@@ -1,0 +1,47 @@
+﻿@model Teed.Plugin.Emails.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Configuración general
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label style="text-align:right" for="ReorderEmailIsActive">¿Está activo?</label>
+                    <div title="Selecciona si deseas que el envío automático de correo de recompra esté activo." class="ico-help"><i class="fa fa-question-circle"></i></div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReorderEmailIsActive" />
+                <span asp-validation-for="ReorderEmailIsActive"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label style="text-align:right" for="ReorderOnlyCompletedOrders">¿Considerar únicamente órdenes completadas?</label>
+                    <div title="Selecciona si deseas que únicamente sean consideradas las órdenes completadas (pagadas y entregadas) para enviar los correos de recompra. Si está desmarcada esta opción serán consideradas todas las órdenes menos las canceladas." class="ico-help"><i class="fa fa-question-circle"></i></div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReorderOnlyCompletedOrders" />
+                <span asp-validation-for="ReorderOnlyCompletedOrders"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="control-label" for="DaysToSendReorderEmail">¿A los cuántos días se debe enviar el correo?</label>
+                    <div title="Indica luego de cuántos dias de la última compra del usuario se debe enviar el correo. Debe ser mayor a 0 para funcionar." class="ico-help">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <input type="number" asp-for="DaysToSendReorderEmail" class="form-control text-box single-line" />
+                <span asp-validation-for="DaysToSendReorderEmail"></span>
+            </div>
+        </div>
+    </div>
+</div>

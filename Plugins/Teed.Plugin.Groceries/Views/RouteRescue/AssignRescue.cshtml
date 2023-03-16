@@ -1,0 +1,228 @@
+﻿@model Teed.Plugin.Groceries.Models.RouteRescue.AssignRouteModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.RouteRescue");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "RouteRescue";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Asignar rescate de rutas
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="List">regresar a la lista de fechas</a>
+        </small>
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Guardando...</span>
+        </div>
+        <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.Save")
+        </button>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @foreach (var item in Model.GroupedOrders)
+                {
+                    <h4 style="font-weight: bold; margin-top: 40px;">
+                        @{
+                            var vehicleRoute = Model.VehicleRoutes.Where(x => x.RouteId == item.Key).FirstOrDefault();
+                        }
+                        @(vehicleRoute == null ? "Sin camioneta asignada" : $"{vehicleRoute.Route.RouteName} ({Teed.Plugin.Groceries.Utils.VehicleUtils.GetVehicleName(vehicleRoute.Vehicle)})")
+                    </h4>
+                    var pedidos = Teed.Plugin.Groceries.Utils.OrderUtils.GetPedidosGroupByList(item.Select(x => x).OrderBy(x => x.RouteDisplayOrder).ToList());
+                    <div style="margin: 1em">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Horario de entrega</th>
+                                    <th>Nombre del cliente</th>
+                                    <th>Dirección</th>
+                                    <th>Método de pago</th>
+                                    <th>Estatus del envío</th>
+                                    <th>Ruta de rescate</th>
+                                </tr>
+                                @foreach (var pedido in pedidos)
+                                {
+                                    <tr>
+                                        <td>@(string.Join(", ", pedido.Select(x => "#" + x.CustomOrderNumber)))</td>
+                                        <td>@(string.Join(", ", pedido.GroupBy(x => x.SelectedShippingTime).Select(x => x.Key)))</td>
+                                        <td>@(pedido.Select(x => x.ShippingAddress.FirstName + " " + x.ShippingAddress.LastName).FirstOrDefault())</td>
+                                        <td>@(pedido.Select(x => x.ShippingAddress.Address1).FirstOrDefault())</td>
+                                        <td>@(ParsePaymentMethodSystemName(pedido.Select(x => x.PaymentMethodSystemName).FirstOrDefault()))</td>
+                                        <td>Pendiente</td>
+                                        <td>
+                                            <select class="assign-rescue-table" data-orderids="@string.Join(",", pedido.Select(x => x.Id))">
+                                                <option value="0">Selecciona ruta de rescate...</option>
+                                                @foreach (var vr in Model.VehicleRoutes.Where(x => x.RouteId != item.Key).OrderBy(x => x.Route.RouteName))
+                                                {
+                                                    if (pedido.FirstOrDefault().RescuedByRouteId.HasValue && vr.RouteId == pedido.FirstOrDefault().RescuedByRouteId.Value)
+                                                    {
+                                                        <option selected value="@vr.RouteId">@(vr.Route.RouteName) (@(Teed.Plugin.Groceries.Utils.VehicleUtils.GetVehicleName(vr.Vehicle)))</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@vr.RouteId">@(vr.Route.RouteName) (@(Teed.Plugin.Groceries.Utils.VehicleUtils.GetVehicleName(vr.Vehicle)))</option>
+                                                    }
+                                                }
+                                                <option value="-1">Sin ruta de rescate</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                }
+                <div style="text-align: center">
+                    <h3 style="font-weight: bold;">Pedidos rescatados</h3>
+                </div>
+                @if (Model.GroupedRescuedOrders.Count > 0)
+                {
+                    @foreach (var item in Model.GroupedRescuedOrders)
+                    {
+                        <h4 style="font-weight: bold; margin-top: 40px;">
+                            @{
+                                var vehicleRoute = Model.VehicleRoutes.Where(x => x.RouteId == item.Key).FirstOrDefault();
+                            }
+                            @(vehicleRoute == null ? "Pedidos rescatados sin camioneta asignada" : $"Pedidos rescatados por {vehicleRoute.Route.RouteName} ({Teed.Plugin.Groceries.Utils.VehicleUtils.GetVehicleName(vehicleRoute.Vehicle)})")
+                        </h4>
+                        var pedidos = Teed.Plugin.Groceries.Utils.OrderUtils.GetPedidosGroupByList(item.Select(x => x).OrderBy(x => x.RescueRouteDisplayOrder).ToList());
+                        <div style="margin: 1em">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Horario de entrega</th>
+                                        <th>Nombre del cliente</th>
+                                        <th>Dirección</th>
+                                        <th>Método de pago</th>
+                                        <th>Estatus del envío</th>
+                                        <th>Orden para mostrar</th>
+                                    </tr>
+                                    @foreach (var pedido in pedidos)
+                                    {
+                                        <tr>
+                                            <td>@(string.Join(", ", pedido.Select(x => "#" + x.CustomOrderNumber)))</td>
+                                            <td>@(string.Join(", ", pedido.Select(x => x.SelectedShippingTime)))</td>
+                                            <td>@(pedido.Select(x => x.ShippingAddress.FirstName + " " + x.ShippingAddress.LastName).FirstOrDefault())</td>
+                                            <td>@(pedido.Select(x => x.ShippingAddress.Address1).FirstOrDefault())</td>
+                                            <td>@(ParsePaymentMethodSystemName(pedido.Select(x => x.PaymentMethodSystemName).FirstOrDefault()))</td>
+                                            <td>Pendiente</td>
+                                            <td>
+                                                <select  style="width: 50px" class="rescue-display-order" data-orderids="@string.Join(",", pedido.Select(x => x.Id))">
+                                                    <option disabled value="0">Selecciona el órden para mostrar...</option>
+                                                    @for (int i = 0; i <= 50; i++)
+                                                    {
+                                                        @if (pedido.FirstOrDefault().RescueRouteDisplayOrder == i)
+                                                        {
+                                                            <option selected value="@i">@i</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@i">@i</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@functions {
+    public string ParsePaymentMethodSystemName(string paymentMethodSystemName)
+    {
+        if (paymentMethodSystemName.ToLower().Contains("paypal"))
+        {
+            return "Paypal";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("cash"))
+        {
+            return "Efectivo";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("card"))
+        {
+            return "Tarjeta contra entrega";
+        }
+        else if (paymentMethodSystemName.ToLower().Contains("replacement"))
+        {
+            return "Reposición";
+        }
+        else
+        {
+            return paymentMethodSystemName;
+        }
+    }
+}
+<script>
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+
+        let result = [];
+        let orders = $(".assign-rescue-table");
+        $.each(orders, (index, element) => {
+            let orderIds = $(element).data("orderids");
+            let selectedValue = $(element).val();
+            if (selectedValue !== 0) {
+                result.push({ orderIds, selectedValue });
+            }
+        });
+
+        let displayOrderResult = [];
+        let rescuedOrders = $(".rescue-display-order");
+        $.each(rescuedOrders, (index, element) => {
+            let orderIds = $(element).data("orderids");
+            let selectedValue = $(element).val();
+            if (selectedValue !== 0) {
+                displayOrderResult.push({ orderIds, selectedValue });
+            }
+        });
+
+        let body = {
+            date: '@(Model.SelectedDate)',
+            data: result,
+            displayOrderData: displayOrderResult
+        };
+
+        $.ajax({
+            url: '/Admin/RouteRescue/AssignRescueRoutes',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

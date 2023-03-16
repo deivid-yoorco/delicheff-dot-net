@@ -1,0 +1,115 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.InfoModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<style>
+    .download-button {
+        border: solid 1px;
+    }
+</style>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h3 style="text-align: center;margin-top: 0px !important;">Comisiones</h3>
+        <div id="bills-grid"></div>
+
+        <script type="text/javascript">
+            function getUrlBills() {
+                    return "@Html.Raw(Url.Action("ResumeBills", "Franchise"))?franchiseId=@Model.FranchiseId";
+                }
+                $(document).ready(function() {
+                    $("#bills-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: getUrlBills(),
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: addAntiForgeryToken
+                                }
+                            },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors",
+                                model: {
+                                    id: "Id",
+                                }
+                            },
+                            error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            pageSize: @(defaultGridPageSize),
+                            serverPaging: false,
+                            serverFiltering: false,
+                            serverSorting: false
+                        },
+                        pageable: {
+                            refresh: false,
+                            pageSizes: [@(gridPageSizes)],
+                            @await Html.PartialAsync("_GridPagerMessages")
+                        },
+                        scrollable: false,
+                        columns: [
+                            {
+                                field: "WeekName",
+                                title: "Semana",
+                                width: 150,
+                            },
+                            {
+                                field: "Vehicle",
+                                title: "Camioneta",
+                                width: 150,
+                            },
+                            {
+                                field: "Billed",
+                                title: "Comisión",
+                                width: 150,
+                            },
+                            //{
+                            //    field: "PdfId",
+                            //    title: "Factura PDF/XML",
+                            //    width: 150,
+                            //    template: function (dataItem) {
+                            //        var final = "<span>Archivos Pdf:<br />";
+
+                            //        $.each(dataItem.PdfIds, function (i, e) {
+                            //            final += '<a class="btn btn-default download-button" href="#" onclick="downloadFile(true, ' + e + ')">Descargar PDF (Id: ' + e + ')</a><br />';
+                            //        });
+                            //        final += '<span><input onchange="uploadFile(this, ' + dataItem.Id + ', true)" type="file" id="' + dataItem.Id + '" class="pdf"></span><br />Archivos XML: <br />';
+                            //        $.each(dataItem.XmlIds, function (i, e) {
+                            //            final += '<a class="btn btn-default download-button" href="#" onclick="downloadFile(false, ' + e + ')">Descargar XML (Id: ' + e + ')</a>';
+                            //        });
+                            //        final += '<span><input onchange="uploadFile(this, ' + dataItem.Id + ', false)" type="file" id="' + dataItem.Id + '" class="xml"></span>';
+
+                            //        final += "</span><br />";
+                            //        return final;
+                            //    }
+                            //},
+                            //{
+                            //    field: "OtherFileIds",
+                            //    title: "Comprobante de pago",
+                            //    width: 150,
+                            //    template: function (dataItem) {
+                            //        if (dataItem.OtherFileIds.length > 0) {
+                            //            var final = "<span'>";
+                            //            $.each(dataItem.OtherFileIds, function () {
+                            //                final += '<a class="btn btn-default" href="#" onclick="downloadFile(null, ' + dataItem.XmlId + ')">Descargar comprobante</a><br /><br />';
+                            //            });
+                            //            final += "</span>";
+                            //            return final;
+                            //        } else {
+                            //            return "<span>Sin archivos</span>";
+                            //        }
+                            //    }
+                            //}
+                        ],
+                    });
+                });
+        </script>
+    </div>
+</div>

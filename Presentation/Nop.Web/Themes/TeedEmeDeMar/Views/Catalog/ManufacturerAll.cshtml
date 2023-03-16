@@ -1,0 +1,57 @@
+﻿@model IList<ManufacturerModel>
+@using Nop.Core
+@using Nop.Services.Configuration
+@using Nop.Web.Models.HomePageImages
+@{
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+
+    Layout = "_ColumnsTwo";
+
+    //title
+    if (!string.IsNullOrEmpty(imagesSettings.TitleManufacturer))
+    {
+        Html.AddTitleParts(imagesSettings.TitleManufacturer);
+    }
+    else
+    {
+        Html.AddTitleParts(T("PageTitle.Manufacturers").Text);
+    }
+    //page class
+    Html.AppendPageCssClassParts("html-manufacturer-list-page");
+}
+<div class="page manufacturer-list-page" style="margin-top: 1%;">
+    @if (!string.IsNullOrEmpty(imagesSettings.TitleManufacturer))
+    {
+        <h1 class="category-page-title">@imagesSettings.TitleManufacturer</h1>
+    }
+    else
+    {
+        <h1 class="category-page-title">@T("Manufacturers.List")</h1>
+    }
+    <div class="page-body">
+        <div class="manufacturer-grid">
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <div class="col s6 m4">
+                        <div class="card">
+                            <div class="card-image">
+                                <a href="@Url.RouteUrl("Manufacturer", new { SeName = item.SeName })" title="@item.Name">
+                                    <img alt="@item.PictureModel.AlternateText" src="@item.PictureModel.ImageUrl" title="@item.Name">
+                                </a>
+                            </div>
+                            <div class="card-action">
+                                <a href="@Url.RouteUrl("Manufacturer", new { SeName = item.SeName })" title="@item.Name">
+                                    @item.Name
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

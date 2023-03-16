@@ -1,0 +1,77 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var controllerName = "Patient";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="file-grid"></div>
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $("#file-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("PatientFiles", controllerName, new { id = Model.Id }))",
+                                            type: "POST",
+                                            dataType: "json"
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors"
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    pageSize: @(defaultGridPageSize),
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "UploadedDate",
+                                        title: "Fecha",
+                                        width: 200
+                                    },
+                                    {
+                                        field: "FileType",
+                                        title: "Tipo",
+                                        width: 100
+                                    },
+                                    {
+                                        field: "Description",
+                                        title: "Descripción",
+                                        with: 500
+                                    },
+                                    {
+                                        field: "Url",
+                                        title: " ",
+                                        template: "<a class='k-button' href='#=Url#' target='_blank'>Descargar</a>",
+                                        width: 100
+                                    }
+                                ]
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

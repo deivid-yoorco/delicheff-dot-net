@@ -1,0 +1,41 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderType.OrderTypeModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderType");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar tipo de pedido
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de tipos de pedidos</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        @(await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/OrderType/_CreateOrUpdate.cshtml", Model))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

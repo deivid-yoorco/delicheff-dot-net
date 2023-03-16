@@ -1,0 +1,120 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Logisfashion";
+Html.SetActiveMenuItemSystemName("TeedLogisfashionUpdate");
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2>Enviar productos a Logisfashion</h2>
+                    <p>Se realiza un barrido sobre todos los productos y enviarán aquellos pendientes por actualizar el sistema de Logisfashion. El proceso puede tardar unos minutos.</p>
+                    <div>
+                        <button id="button" type="button" class="btn bg-blue">Actualizar ahora</button>
+                        <div style="display:inline-block; display: none" id="loading">
+                            <i class="fa fa-refresh fa-spin fa-2x fa-fw spinner" style="padding-right:0 !important; color: #3c8dbc;"></i>
+                            <span>Actualizando...</span>
+                        </div>
+                        <div>
+                            @*<span id="success" style="color:green;display:none">Se enviaron <span id="qty" style="font-weight:bold"></span> productos.</span>*@
+                            <span id="success" style="color:green;display:none">Se enviaron correctamente los productos.</span>
+                            <span id="error" style="color:red;display:none">Ocurrió un problema al enviar los productos. <span id="error-msg"></span></span>
+                        </div>
+                    </div>
+                    <h2 style="margin-top:1em;">Historial de envío correcto de productos:</h2>
+                    <div id="element-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListSentProducts", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                    width: 50,
+                },
+                {
+                    field: "ProductName",
+                    title: "Producto",
+                    width: 50,
+                },
+                {
+                    field: "Sku",
+                    title: "Sku",
+                    width: 50,
+                }
+            ]
+        });
+
+        $("#button").on("click", function () {
+            $(this).hide();
+            $("#loading").show();
+            $.ajax({
+                url: '/Admin/Logisfashion/UpdateLogisfashionProducts',
+                method: 'GET',
+                success: function (data) {
+                    $("#loading").hide();
+                    if (data.skuWithErrors.length > 0) {
+                        let errorMessage = "Ocurrió un problema al intentar actualizar los siguientes SKUs: " + data.skuWithErrors.join(", ");
+                        $("#error").show();
+                        $("#error-msg").html(errorMessage);
+                    }
+                    else {
+                        $("#success").show();
+                        $("#qty").html(data.updatedCount);
+                    }
+                },
+                error: function (e) {
+                    $("#loading").hide();
+                    $("#error").show();
+                    $("#error-msg").html(e.responseText);
+                }
+            });
+        });
+    });
+</script>

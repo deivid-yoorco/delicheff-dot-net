@@ -1,0 +1,74 @@
+﻿<style>
+    img {
+        max-width: 100% !important;
+    }
+</style>
+<script>
+    var str = $(".post-body").html();
+    var postVariable = str.substring(
+        str.lastIndexOf("[["),
+        str.lastIndexOf("]]") + 2
+    );
+    let spinner = `
+       <div id="ingredients-container">
+            <div class="preloader-wrapper small active" id="loading-value">
+                <div class="spinner-layer spinner-green-only">
+                  <div class="circle-clipper left">
+                    <div class="circle"></div>
+                  </div><div class="gap-patch">
+                    <div class="circle"></div>
+                  </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                  </div>
+                </div>
+              </div>
+        </div>
+    `;
+    $(".post-body").html($(".post-body").html().replace(postVariable, spinner));
+    let parsedVariable = postVariable.replace('[[', '').replace(']]', '');
+    console.log(parsedVariable);
+    $.ajax({
+        url: '/Admin/ShoppingCartUrl/GetVariableData',
+        method: 'POST',
+        data: { variable: parsedVariable },
+        success: (result) => {
+            console.log(result);
+            let str = '<form action="#" id="">';
+            $.each(result.Products, (index, value) => {
+                str += `
+                    <p>
+                        <label>
+                            <input data-productid="${value.Id}" checked="checked" type="checkbox" value="true" /><span style="color:black">${value.Text}</span>
+                        </label>
+                    </p>
+                `;
+            });
+            str += '</form>';
+            str += `
+                    <div class="col s12">
+                        <button type="button" onclick="handleAddToCart('${result.ShoppingCartUrlCode}')" class="btn-large waves-effect waves-light" style="margin-bottom: 2em; margin-up: 1em">
+                            Agregar al carrito
+                        </button>
+                    </div>
+            `;
+            $("#ingredients-container").html(str);
+        },
+        error: (error) => {
+            console.log(error);
+        }
+    });
+
+    const handleAddToCart = (code) => {
+        let checkboxes = $("#ingredients-container").find('input[type=checkbox]:checked');
+        let productIds = '';
+        $.each(checkboxes, (index, value) => {
+            productIds += $(value).data("productid") + ','
+        });
+        var win = window.open('/sc/' + code + '?productIds=' + productIds, '_blank');
+        if (win) {
+            win.focus();
+        } else {
+            alert('Debes permitir que abramos popups.');
+        }
+    };
+</script>

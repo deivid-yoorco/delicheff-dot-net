@@ -1,0 +1,42 @@
+﻿@model Teed.Plugin.Medical.Models.Doctors.DoctorsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Settings");
+    var isAdmin = (bool)ViewData["IsAdmin"];
+}
+
+<form asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Detalles de usuario
+            @if (isAdmin)
+            {
+                <small>
+                    <i class="fa fa-arrow-circle-left"></i>
+                    <a asp-action="List">regresar a la lista de doctores</a>
+                </small>
+            }
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <nop-tabs id="recipe">
+                            <nop-tab asp-name="tab-info" asp-title="Detalles" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Doctor/_Update.Info.cshtml", Model)</nop-tab>
+                            <nop-tab asp-name="tab-schedule" asp-title="Horario">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Doctor/_Update.Schedule.cshtml", Model)</nop-tab>
+                            <nop-tab asp-name="tab-blockDates" asp-title="Bloquear fechas">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Doctor/_UpdateLockDates.cshtml", Model)</nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Benefits",
+  "SystemName": "Payments.Benefits",
+  "Version": "1.40",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.Benefits.dll",
+  "Description": "This payment module allows you to enable \"Benefits\" option in your store"
+}

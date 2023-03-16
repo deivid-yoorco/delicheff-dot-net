@@ -1,0 +1,256 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var imageNote = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es 640x960 píxeles.";
+    var colorText = "El valor del texto debe ser escrito en código hexadecimal. Por ej: #C1C7C9";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Texto del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Texto</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselText" />
+                <span asp-validation-for="CarouselText"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color del texto</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselTextColor" />
+                <span asp-validation-for="CarouselTextColor"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen de flecha
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Imagen de flecha</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselArrowId" />
+                <span asp-validation-for="CarouselArrowId"></span>
+                <em>Ingresa selecciona la imagen que será utilizada como flecha para cambiar de imagen en el Slider. Solo es necesaria la flecha que apunta a la derecha.</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 1 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture7Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture7Id" />
+                <span asp-validation-for="CarouselPicture7Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink7" />
+                <span asp-validation-for="CarouselLink7"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 2 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture8Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture8Id" />
+                <span asp-validation-for="CarouselPicture8Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink8" />
+                <span asp-validation-for="CarouselLink8"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 3 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture9Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture9Id" />
+                <span asp-validation-for="CarouselPicture9Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink9" />
+                <span asp-validation-for="CarouselLink9"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 4 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture10Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture10Id" />
+                <span asp-validation-for="CarouselPicture10Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink10" />
+                <span asp-validation-for="CarouselLink10"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 5 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture11Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture11Id" />
+                <span asp-validation-for="CarouselPicture11Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink11" />
+                <span asp-validation-for="CarouselLink11"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 6 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture12Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture12Id" />
+                <span asp-validation-for="CarouselPicture12Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink12" />
+                <span asp-validation-for="CarouselLink12"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 7 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture13Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture13Id" />
+                <span asp-validation-for="CarouselPicture13Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink13" />
+                <span asp-validation-for="CarouselLink13"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 8 del carrusel
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CarouselPicture14Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselPicture14Id" />
+                <span asp-validation-for="CarouselPicture14Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CarouselLink14" />
+                <span asp-validation-for="CarouselLink14"></span>
+            </div>
+        </div>
+    </div>
+</div>

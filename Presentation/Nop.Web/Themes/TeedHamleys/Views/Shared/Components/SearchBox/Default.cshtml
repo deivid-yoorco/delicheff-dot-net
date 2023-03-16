@@ -1,0 +1,37 @@
+﻿@model SearchBoxModel
+@using System.Text.Encodings.Web
+
+
+<div id="" class="modal bottom-sheet">
+    <div class="modal-content">
+        <form asp-route="ProductSearch" method="get" id="small-search-box-form">
+            <div class="row">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">search</i>
+                    <input id="small-searchterms" type="text" class="search-box-text" name="q" autofocus="autofocus" />
+                    <label for="small-searchterms">Buscar productos en @Nop.Services.TeedCommerceStores.CurrentStore.ToString() @*@T("Search.SearchBox.Tooltip")*@</label>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.SearchTermMinimumLength > 0)
+{
+    <script type="text/javascript" asp-location="Footer">
+        $("#small-search-box-form").submit(function(event) {
+            if ($("#small-searchterms").val() == "") {
+                Materialize.toast('@Html.Raw(JavaScriptEncoder.Default.Encode(T("Search.EnterSearchTerms").Text))', 6000);
+                $("#small-searchterms").focus();
+                event.preventDefault();
+            }
+        });
+    </script>
+}
+
+@if (Model.AutoCompleteEnabled)
+{
+
+
+}
+ 

@@ -1,0 +1,132 @@
+﻿@model Teed.Plugin.Groceries.Models.UrbanPromoter.UrbanPromoterPublicViewModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts("Promotor Urbano");
+}
+<style>
+    .bold {
+        font-weight: bold;
+    }
+</style>
+<div class="page section">
+    <div class="row">
+        <div class="col s12">
+            <h4 class="bold">Portal de Promotores Urbanos</h4>
+            <span>¡Hola, <span class="teed-primary-text">@Model.CustomerName</span>! Aquí podrás ver tus ganancias y los cupones que han canjeado tus clientes.</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <h4 class="bold">Tus Cupones:</h4>
+            @if (Model.DiscountsWithPromoter.Any())
+            {
+                <ul style="list-style: none !important;">
+                    @foreach (var coupon in Model.DiscountsWithPromoter)
+                    {
+                        <text>
+                            <li class="bold" style="list-style: none !important;">
+                                @coupon
+                            </li>
+                        </text>
+                    }
+                </ul>
+            }
+            else
+            {
+                <span>Aún no tienes cupones registrados, favor de intentar más tarde.</span>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <span>Tus ganancias: <span class="teed-primary-text">@Model.FeesTotal.ToString("C")</span></span>
+        </div>
+        <div class="col s12">
+            <span>Saldo cobrado: <span class="teed-primary-text">@Model.PaymentsTotal.ToString("C")</span></span>
+        </div>
+        <div class="col s12">
+            <span>Saldo pendiente de cobrar: <span class="teed-primary-text">@Model.PendingTotal.ToString("C")</span></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <span class="teed-primary-text bold">Cupones canjeados por tus clientes</span>
+        </div>
+        @if (Model.OrdersWithPromoter.Any())
+        {
+            <div class="col s12 m6">
+                <table>
+                    <tr>
+                        <th style="font-weight: bold;">Fecha</th>
+                        <th style="font-weight: bold;">Cliente</th>
+                        <th style="font-weight: bold;">Estatus</th>
+                        <th style="font-weight: bold;">Comisión</th>
+                    </tr>
+                    @foreach (var order in Model.OrdersWithPromoter)
+                    {
+                        <tr>
+                            <td>@order.Date.ToString("dd/MM/yyyy")</td>
+                            <td>@order.Client</td>
+                            <td>@order.Status</td>
+                            <td>@order.Comission.ToString("C")</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="col s12">
+                <span>Aún no hay ordenes con tus cupones.</span>
+            </div>
+        }
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <h4 class="bold">Tu información bancaria</h4>
+        </div>
+        @if (Model.CashPayment)
+        {
+            <div class="col s12">
+                <span>El pago se realizará en efectivo.</span>
+            </div>
+        }
+        else
+        {
+            <div class="col s12">
+                @if (!string.IsNullOrEmpty(Model.AccountOwnerName))
+                {
+                    <span>
+                        Nombre del titular de la cuenta: @Model.AccountOwnerName
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.AccountBankName))
+                {
+                    <span>
+                        Banco: @Model.AccountBankName
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.AccountCLABE))
+                {
+                    <span>
+                        CLABE interbancaria: @Model.AccountCLABE
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.AccountNumber))
+                {
+                    <span>
+                        Número de cuenta: @Model.AccountNumber
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.AccountAddress))
+                {
+                    <span>
+                        Direccíon del titular de la cuenta: @Model.AccountAddress
+                    </span>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,22 @@
+﻿@model CategoryNavigationModel.CategoryLineModel
+@{
+    var isCurrentCategory = Model.Category.Id == Model.CurrentCategoryId;
+    var isSubcategory = Model.Category.SubCategories.Select(x => x.Id).Contains(Model.CurrentCategoryId);
+}
+@if (isCurrentCategory || isSubcategory)
+{
+    <div class="section row category-sidebar-element">
+        @foreach (var item in Model.Category.SubCategories)
+        {
+            <div class="col l12 s6 m6">
+                <div class="card"  style="border-radius:10px">
+                    <div class="card-image">
+                        <a href="@Url.RouteUrl("Category", new { SeName = item.SeName })" title="@item.PictureModel.Title">
+                            <img class="responsive-img" width="250" height="125" alt="@item.PictureModel.AlternateText" src="@item.PictureModel.ImageUrl" title="@item.PictureModel.Title"  style="border-radius:10px">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

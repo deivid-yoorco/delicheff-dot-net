@@ -1,0 +1,79 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderReport.EditOrderReportModel
+
+<div class="form-horizontal">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Costo de pedido</th>
+                            <th>Costo por kg/pz</th>
+                            <th>Bodega</th>
+                            <th>Comentarios</th>
+                        </tr>
+                        @foreach (var orderItem in Model.OrderItemsReport)
+                        {
+                            <tr class="product" id="@orderItem.OrderItem?.Id">
+                                @if (orderItem.OrderItem != null && orderItem.OrderItem.EquivalenceCoefficient > 0 && orderItem.OrderItem.BuyingBySecondary)
+                                {
+                                    var type = "gr";
+                                    var value = (orderItem.OrderItem?.Quantity * 1000) / orderItem?.OrderItem.EquivalenceCoefficient;
+                                    if (value >= 1000)
+                                    {
+                                        value = value / 1000;
+                                        type = "kg";
+                                    }
+                                    <td>@orderItem.OrderItem?.Product.Name (@(value?.ToString("0.##")) @type)</td>
+                                }
+                                else if (orderItem.OrderItem != null && orderItem.OrderItem?.WeightInterval > 0)
+                                {
+                                    var type = "gr";
+                                    var value = orderItem.OrderItem?.Quantity * orderItem.OrderItem?.WeightInterval;
+                                    if (value >= 1000)
+                                    {
+                                        value = value / 1000;
+                                        type = "kg";
+                                    }
+                                    <td>@orderItem.OrderItem?.Product.Name (@(value?.ToString("0.##")) @type)</td>
+                                }
+                                else if (orderItem.OrderItem != null)
+                                {
+                                    <td>@orderItem.OrderItem?.Product.Name (@orderItem.OrderItem?.Quantity pz)</td>
+                                }
+                                else
+                                {
+                                    <td style="color:red;font-weight:bold">PRODUCTO ELIMINADO</td>
+                                }
+                                <td><input type="number" id="cost-@(orderItem.OrderItem?.Id)" class="form-control" required name="cost-@(orderItem.OrderItem?.Id)" value="@orderItem.RequestedQtyCost" /></td>
+                                <td><input type="number" id="unit-cost-@(orderItem.OrderItem?.Id)" class="form-control" required name="unit-cost-@(orderItem.OrderItem?.Id)" value="@orderItem.UnitCost" /></td>
+                                <td><input id="store-@(orderItem.OrderItem?.Id)" class="form-control" required name="store-@(orderItem.OrderItem?.Id)" value="@orderItem.Store" /></td>
+                                <td><input id="comment-@(orderItem.OrderItem?.Id)" class="form-control" value="@orderItem.Comment" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (Model.OrderReportFiles.Count > 0)
+                {
+                    <div class="form-group">
+                        <h4 style="font-weight:bold" class="col-md-12">Archivos cargados</h4>
+                        <ul>
+                            @foreach (var file in Model.OrderReportFiles)
+                            {
+                                <li><a href="@file.FileUrl" target="_blank">@file.Name</a></li>
+                            }
+                        </ul>
+                    </div>
+                }
+                <div class="form-group">
+                    <h4 style="font-weight:bold" class="col-md-12">Cargar archivos</h4>
+                    <div class="col-md-12">
+                        <div class="fileinput-preview fileinput-book-cover fileinput-exists thumbnail img-raised" id="img-preview" style="display:none"></div>
+                        <input name="files" id="files" type="file" aria-label="files" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,116 @@
+﻿@using Nop.Core
+@model ShareAndWinModel
+@{
+        Layout = "_ColumnsTwo";
+
+        //title
+        Html.AddTitleParts("¡Gana súper gratis!");
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-customer-info-page");
+}
+
+@section left
+    {
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.GrowthHacking })
+}
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        justify-content: center;
+    }
+    .modal .modal-footer {
+        text-align: center;
+    }
+    #edit-code-modal {
+        height: 50%
+    }
+    @@media (max-width: 600px) {
+        #edit-code-modal {
+            height: 100%
+        }
+    }
+</style>
+<div class="page account-page customer-info-page section">
+    <div class="">
+        <h1 class="category-page-title">¡Gana súper gratis!</h1>
+    </div>
+    <div class="page-body card-panel" style="text-align: center">
+        <strong>¡Invita a tus amigos a comprar en Central en línea y gana descuentos!</strong>
+        <p>Tu amigo recibe @(Model.CouponValue) MXN para su primera compra*. Una vez completada la orden de tu invitado ¡te regalamos @(Model.RewardAmount) MXN para gastar en productos de Central en línea!</p>
+        @if (!string.IsNullOrWhiteSpace(Model.CustomerCode) && !Model.CouponDesactivated)
+        {
+
+            <strong>TU CÓDIGO ES:</strong>
+            <strong>@Model.CustomerCode</strong><a class="waves-effect waves-teal btn-flat modal-trigger" href="#edit-code-modal"><i class="tiny material-icons">edit</i></a>
+            string valor = Model.UserCodeCouponOrderMinimumAmount > 0 ? $" {Model.UserCodeCouponOrderMinimumAmount:C} MXN" : "";
+            <div class="right-align" style="margin-top: 15px">
+                <strong style="text-align:right; font-size:12px; font-style: italic">*Para aplicar el descuento, la primera compra de tu invitado debe ser de mínimo @valor</strong>
+            </div>
+
+            <div id="edit-code-modal" class="modal">
+                <div class="modal-content">
+                    <h4>¡Personaliza tu código!</h4>
+                    <p>Puedes cambiar tu código personal para que sea más fácil de compartir. Los códigos personales deben tener entre 5 y 12 caracteres alfanuméricos.</p>
+                    <input maxlength="12" style="text-align: center; text-transform: uppercase" type="text" id="code-modal-value" value="@Model.CustomerCode" />
+                </div>
+                <div class="modal-footer">
+                    <span style="color:red;font-weight:bold;display:none" id="error-message"></span>
+                    <span style="color:green;font-weight:bold;display:none" id="success-message">¡Tu código fue cambiado correctamente!</span>
+                    <button type="button" class="waves-effect waves-green btn" id="change-button" onclick="updateCode()">Cambiar código</button>
+
+                    <div style="display:none" class="loading-container" id="loading-container">
+                        <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                            <div class="spinner-layer spinner-green-only">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div><div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div><div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <span style="margin-left: 10px">Actualizando código...</span>
+                    </div>
+
+                </div>
+            </div>
+            <script>
+                const updateCode = () => {
+                    $("#change-button").hide();
+                    $("#loading-container").show();
+                    $("#error-message").hide();
+                    $.ajax({
+                        url: '/Customer/UpdateCode?newCode=' + $("#code-modal-value").val(),
+                        method: 'POST',
+                        success: () => {
+                            $("#loading-container").hide();
+                            $("#success-message").show();
+                            location.reload();
+                        },
+                        error: (error) => {
+                            console.log(error);
+                            $("#loading-container").hide();
+                            $("#error-message").show();
+                            $("#error-message").html(error.responseText + "<br/>");
+                            $("#change-button").show();
+                        }
+                    })
+                    console.log($("#code-modal").val());
+                }
+            </script>
+        }
+        else if (Model.CouponDesactivated)
+        {
+            <p><span style="color:red;font-weight: bold">Tu código de amigo fue desactivado. Si piensas que se trata de un error por favor contáctanos.</span><br /></p>
+        }
+        else
+        {
+            string condition = Model.MinimumAmountToCreateFriendCode > 0 ? $"de por lo menos {Model.MinimumAmountToCreateFriendCode:C} MXN" : "";
+            <p><span style="color:red;font-weight: bold">¡Todavía no tienes código!</span><br /> Para generar tu código tienes que tener una compra @condition completada con nosotros.</p>
+        }
+    </div>
+</div>

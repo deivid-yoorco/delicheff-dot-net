@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "_Root.Head";
+}
+@await Component.InvokeAsync("Widget", new { widgetZone = "body_start_html_tag_after" })
+
+@await Html.PartialAsync("_Notifications")
+
+@await Html.PartialAsync("_JavaScriptDisabledWarning")
+
+@await Component.InvokeAsync("AdminHeaderLinks")
+
+@await Html.PartialAsync("_Header")
+
+<script type="text/javascript" asp-location="Footer">
+    AjaxCart.init(false, '.header-links .cart-qty', '.header-links .wishlist-qty', '#flyout-cart');
+</script>
+
+@if(Url.RouteUrl(ViewContext.RouteData.Values) != "/onepagecheckout")
+{
+    @await Component.InvokeAsync("TopMenu")
+}
+
+@await Component.InvokeAsync("Widget", new { widgetZone = "content_before" })
+
+@if (IsSectionDefined("Breadcrumb"))
+{
+    @RenderSection("Breadcrumb")
+}
+
+@RenderBody()
+
+@await Component.InvokeAsync("Widget", new { widgetZone = "content_after" })
+
+@await Component.InvokeAsync("Footer")
+
+
+@await Component.InvokeAsync("EuCookieLaw")
+@await Component.InvokeAsync("Widget", new { widgetZone = "body_end_html_tag_before" })

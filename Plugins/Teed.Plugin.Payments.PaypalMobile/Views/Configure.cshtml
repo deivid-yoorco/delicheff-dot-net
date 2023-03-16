@@ -1,0 +1,74 @@
+﻿@model Teed.Plugin.Payments.PaypalMobile.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Para obtener el Tokenization Key se debe ingresar al panel de control de Braintree. 
+                El de sandbox se obtiene <a target="_blank" href="https://sandbox.braintreegateway.com/">aquí</a>, luego se selecciona el icono del engrane ubicado en la esquina superior derecha, 
+                luego en API. Luego se debe configurar Paypal, para ello estando en API se selecciona la opción "Processing", en ese punto se configura Paypal. 
+                En el dashboard de Paypal se debe crear una nueva APP y obtener el ClientId y el Secret. En producción el procedimiento es el mismo.<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="UseSandbox" />
+                        <span asp-validation-for="UseSandbox"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="TokenizationKeySandbox_OverrideForStore" asp-input="TokenizationKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Tokenization Key Sandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="TokenizationKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="TokenizationKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="TokenizationKeyProduction_OverrideForStore" asp-input="TokenizationKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Tokenization Key Production</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="TokenizationKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="TokenizationKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AdditionalFee_OverrideForStore" asp-input="AdditionalFee" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Aplicar comisión</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFee" />
+                        <span asp-validation-for="AdditionalFee"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AdditionalFeePercentage_OverrideForStore" asp-input="AdditionalFeePercentage" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>¿La comisión es porcentaje?</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFeePercentage" />
+                        <span asp-validation-for="AdditionalFeePercentage"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

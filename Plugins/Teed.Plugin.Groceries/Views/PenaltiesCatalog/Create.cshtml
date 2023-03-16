@@ -1,0 +1,41 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.PenaltyCatalogModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.PenaltiesCatalog");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nueva penalización o cargo fijo
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="PenaltiesList">regresar a la lista de penalizaciones</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-penalty" asp-title="Penalización" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/PenaltiesCatalog/_CreateOrUpdate.cshtml", Model)
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+</script>

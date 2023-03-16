@@ -1,0 +1,94 @@
+﻿@model ProductDetailsModel
+@{
+
+    Html.AddScriptParts(ResourceLocation.Footer, "~/fancy/js/jquery-ui.min.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "~/fancy/js/fabric.min.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "~/fancy/js/FancyProductDesigner-all.js");
+    Html.AddCssFileParts("~/fancy/css/main.css");
+    Html.AddCssFileParts("~/fancy/css/FancyProductDesigner-all.min.css");
+}
+<style>
+    #main-container {
+        margin: 0 !important;
+    }
+</style>
+<div class="row">
+    <div class="col s12">
+        <div id="main-container">
+            @*<h3 id="clothing">Clothing Designer</h3>*@
+            <div id="clothing-designer" class="fpd-container fpd-shadow-2 fpd-topbar fpd-tabs fpd-tabs-side fpd-top-actions-centered fpd-bottom-actions-centered fpd-views-inside-left">
+                @{
+                    var preview = Model.PictureModels.GroupBy(x => x.Title).FirstOrDefault();
+
+                    <div class="fpd-product" title="Shirt Front" data-thumbnail="@preview.FirstOrDefault().FullSizeImageUrl">
+                        <img src="@preview.FirstOrDefault().FullSizeImageUrl" title="Base" data-parameters='{"boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "left": 325, "top": 329, "replace": "replaceBase", "price": @Model.ProductPrice.PriceValue}' />
+                        <span title="Any Text" data-parameters='{"boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "left": 326, "top": 232, "zChangeable": true, "removable": true, "draggable": true, "rotatable": true, "resizable": true, "price": 15, "curvable":true,"curveSpacing":10,"curveRadius":80,"curveReverse":false, "colors": "#000000,#ffffff,#ff5a5f"}'>Default Text</span>
+
+                        @for (var i = 1; i < preview.ToArray().Length; i++)
+                        {
+                            <div class="fpd-product" title="Shirt Back" data-thumbnail="@preview.ToArray()[i].FullSizeImageUrl">
+                                <img src="@preview.ToArray()[i].FullSizeImageUrl" title="Base" data-parameters='{"boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "left": 317, "top": 329, "colorLinkGroup": "Base"}' />
+                            </div>
+                        }
+                    </div>
+                }
+                <div class="fpd-design">
+                    <div class="fpd-category" title="Swirls" data-thumbnail="fancy/images/designs/swirl.png">
+                        <img src="~/fancy/images/designs/swirl.png" title="Swirl" data-parameters='{"zChangeable": true, "left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "price": 10, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/swirl2.png" title="Swirl 2" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "price": 5, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/swirl3.png" title="Swirl 3" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/heart_blur.png" title="Heart Blur" data-parameters='{"left": 215, "top": 200, "colors": "#bf0200", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "price": 5, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/converse.png" title="Converse" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/crown.png" title="Crown" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/men_women.png" title="Men hits Women" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                    </div>
+                    <div class="fpd-category" title="Retro" data-thumbnail="fancy/images/designs/retro_3.png">
+                        <img src="~/fancy/images/designs/retro_1.png" title="Retro One" data-parameters='{"left": 210, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/retro_2.png" title="Retro Two" data-parameters='{"left": 193, "top": 180, "colors": "#ffffff", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.46, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/retro_3.png" title="Retro Three" data-parameters='{"left": 240, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 8, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/heart_circle.png" title="Heart Circle" data-parameters='{"left": 240, "top": 200, "colors": "#007D41", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.4, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/swirl.png" title="Swirl" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "price": 10, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/swirl2.png" title="Swirl 2" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "price": 5, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/designs/swirl3.png" title="Swirl 3" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping"}' />
+                    </div>
+                    <div class="fpd-category" title="Logos" data-thumbnail="fancy/images/logos/Angry_Bag.png">
+                        <img src="~/fancy/images/logos/android.png" title="Logos One" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/logos/brand.png" title="Logos Two" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/logos/drupal.png" title="Logos Three" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping","autoCenter": true}' />
+                        <img src="~/fancy/images/logos/github.png" title="Logos Four" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping","autoCenter": true}' />
+                        <img src="~/fancy/images/logos/linux.png" title="Logos Five" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping","autoCenter": true}' />
+                        <img src="~/fancy/images/logos/marvel.png" title="Logos Six" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping","autoCenter": true}' />
+                        <img src="~/fancy/images/logos/robot.png" title="Logos Seven" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/logos/Angry_Bag.png" title="Logos Eight" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                        <img src="~/fancy/images/logos/Bubbles.png" title="Logos Nine" data-parameters='{"left": 215, "top": 200, "colors": "#000000", "removable": true, "draggable": true, "rotatable": true, "resizable": true, "scale": 0.25, "price": 7, "boundingBox": {"x":@preview.FirstOrDefault().BoundingX,"y":@preview.FirstOrDefault().BoundingY,"width":@preview.FirstOrDefault().BoundingWidth,"height":@preview.FirstOrDefault().BoundingHeight}, "boundingBoxMode": "clipping", "autoCenter": true}' />
+                    </div>
+                </div>
+            </div>
+            @*<br />
+
+        <div class="fpd-clearfix" style="margin-top: 30px;">
+            <div class="api-buttons fpd-container fpd-left">
+                <a href="#" id="print-button" class="fpd-btn">Print</a>
+                <a href="#" id="image-button" class="fpd-btn">Create Image</a>
+                <a href="#" id="checkout-button" class="fpd-btn">Checkout</a>
+                <a href="#" id="recreation-button" class="fpd-btn">Recreate product</a>
+            </div>
+            <div class="fpd-right">
+                <span class="price badge badge-inverse"><span id="thsirt-price"></span> $</span>
+            </div>
+        </div>
+
+            <p class="fpd-container">
+                Only working on a webserver:<br />
+                <span class="fpd-btn" id="save-image-php">Save image with php</span>
+                <span class="fpd-btn" id="send-image-mail-php">Send image to mail</span>
+            </p>*@
+            @*<div class="fpd-clearfix" style="margin-top: 30px;">
+                <div class="fpd-right">
+                    <span class="price badge badge-inverse"><span id="thsirt-price"></span> $</span>
+                </div>
+            </div>*@
+            <input type="text" id="input-product-fancy" name="input-product-fancy" hidden />
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+﻿@model Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.MarketingExpenseModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MarketingExpenses.MarketingExpenseType");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nuevo gasto publicitario
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de gastos publicitarios</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-expenseType" asp-title="Gasto publicitario" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.MarketingDashboard/Views/MarketingExpense/_CreateOrUpdate.cshtml", Model)
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>

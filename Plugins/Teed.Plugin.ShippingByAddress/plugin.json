@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Teed Plugins",
+  "FriendlyName": "Teed Shipping By Address",
+  "SystemName": "Teed.Plugin.ShippingByAddress",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.ShippingByAddress.dll",
+  "Description": "Teed ShippingByAddress"
+}

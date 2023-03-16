@@ -1,0 +1,183 @@
+﻿@model Teed.Plugin.Payroll.Models.JobCatalog.JobCatalogData
+
+    <div style="padding-left: 265px;margin-top: 10px;">
+        <label class="control-label" for="WorkSchedule">Horario de trabajo</label>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Monday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Monday" />
+            <span asp-validation-for="Works_Monday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="MondayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="MondayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="MondayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="MondayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Tuesday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Tuesday" />
+            <span asp-validation-for="Works_Tuesday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="TuesdayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="TuesdayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="TuesdayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="TuesdayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Wednesday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Wednesday" />
+            <span asp-validation-for="Works_Wednesday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="WednesdayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="WednesdayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="WednesdayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="WednesdayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Thursday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Thursday" />
+            <span asp-validation-for="Works_Thursday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="ThursdayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="ThursdayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="ThursdayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="ThursdayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Friday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Friday" />
+            <span asp-validation-for="Works_Friday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="FridayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="FridayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="FridayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="FridayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Saturday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Saturday" />
+            <span asp-validation-for="Works_Saturday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="SaturdayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="SaturdayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="SaturdayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="SaturdayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <nop-label asp-for="Works_Sunday" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Works_Sunday" />
+            <span asp-validation-for="Works_Sunday"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label style="display: none;">T</label>
+        </div>
+        <div class="col-md-9" style="display: flex;">
+            <nop-select asp-for="SundayInHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="SundayInMinutes" asp-items="Model.MinutesSelect" />
+            <nop-select asp-for="SundayOutHour" asp-items="Model.HoursSelect" />
+            <nop-select asp-for="SundayOutMinutes" asp-items="Model.MinutesSelect" />
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('[id*="InHour"]').attr('disabled', 'disabled');
+            $('[id*="OutHour"]').attr('disabled', 'disabled');
+            $('[id*="InMinutes"]').attr('disabled', 'disabled');
+            $('[id*="OutMinutes"]').attr('disabled', 'disabled');
+            $.each($('input[id*="Works_"]:checked'), function () {
+                var dayId = '#' + $(this).attr('id').split('Works_')[1];
+                $(dayId + 'InHour').removeAttr('disabled');
+                $(dayId + 'OutHour').removeAttr('disabled');
+                $(dayId + 'InMinutes').removeAttr('disabled');
+                $(dayId + 'OutMinutes').removeAttr('disabled');
+            });
+            $('input[id*="Works_"]').click(function () {
+                var checked = $(this).prop('checked');
+                var dayId = '#' + $(this).attr('id').split('Works_')[1];
+                if (checked) {
+                    $(dayId + 'InHour').removeAttr('disabled');
+                    $(dayId + 'OutHour').removeAttr('disabled');
+                    $(dayId + 'InMinutes').removeAttr('disabled');
+                    $(dayId + 'OutMinutes').removeAttr('disabled');
+                }
+                else {
+                    $(dayId + 'InHour').attr('disabled', 'disabled');
+                    $(dayId + 'OutHour').attr('disabled', 'disabled');
+                    $(dayId + 'InMinutes').attr('disabled', 'disabled');
+                    $(dayId + 'OutMinutes').attr('disabled', 'disabled');
+                }
+            });
+        });
+    </script>

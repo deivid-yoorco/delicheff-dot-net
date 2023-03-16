@@ -1,0 +1,424 @@
+﻿
+.checkout-page .section {
+    margin: 0 0 30px;
+}
+
+.checkout-page .section.order-summary {
+    margin: 100px 0 30px;
+}
+
+.checkout-page .cart-options {
+    min-height: 60px;
+    overflow: hidden;
+}
+
+.checkout-page .cart-footer {
+    border-top: none;
+}
+
+.checkout-page .total-info {
+    margin: 0;
+    border-bottom: none;
+    padding: 5px 20px 10px;
+}
+
+.checkout-page .address-item {
+    width: 350px;
+    max-width: 100%;
+    margin: 0 auto 40px;
+}
+
+.checkout-page .address-item ul {
+    margin: 0 0 15px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    color: #444;
+}
+
+.checkout-page .address-item li {
+    padding: 5px 0;
+}
+
+.checkout-page .address-item li.name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.enter-address .message-error {
+    margin: 20px 0;
+}
+
+.enter-address .edit-address {
+    
+}
+
+.checkout-page .ship-to-same-address {
+    padding: 30px 0;
+    text-align: center;
+}
+
+.checkout-page .ship-to-same-address .selector {
+    margin: 0 0 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.checkout-page .pickup-in-store {
+    text-align: center;
+}
+
+.checkout-page .pickup-in-store .selector {
+    margin: 0 0 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.select-pickup-point {
+    text-align: center;
+}
+
+.checkout-page .pickup-points-map {
+    min-width: 400px;
+    min-height: 350px;
+    vertical-align: middle;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.shipping-method .method-list,
+.payment-method .method-list {
+    margin: 0 auto 30px;
+    overflow: hidden;
+    text-align: center;
+    font-size: 0;
+}
+
+.shipping-method .method-list li,
+.payment-method .method-list li {
+    margin: 20px 0;
+    font-size: 14px; /*reset zeroing*/
+}
+
+.shipping-method .method-list li label,
+.payment-method .method-list li label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+}
+
+.shipping-method .method-description {
+    margin: 5px 0 0;
+}
+
+.payment-method .use-reward-points {
+    margin: 0 0 30px;
+    text-align: center;
+    color: #444;
+}
+
+.payment-method .payment-logo {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.payment-method .payment-logo label {
+    display: block;
+    font-size: 0 !important;
+}
+
+.payment-method .payment-details {
+    min-width: 180px;
+    display: inline-block;
+    margin: 0 0 0 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.payment-info .info {
+    padding: 30px 15px;
+    color: #444;
+}
+
+.payment-info .info tr {
+    display: block;
+    margin: 0 0 15px;
+    font-size: 0;
+}
+
+.payment-info .info td {
+    display: inline-block;
+    width: 100% !important;
+    max-width: 400px !important;
+    font-size: 14px; /*reset zeroing*/
+}
+
+.payment-info .info td:only-child {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.payment-info .info td input[type="text"] {
+    width: 100% !important;
+}
+
+.payment-info .info td input[name="CardCode"] {
+    width: 65px !important;
+}
+
+.payment-info .info td select {
+    min-width: 70px;
+}
+
+.payment-info .info td:first-child {
+    margin: 0 0 10px;
+}
+
+.payment-info .info p {
+    text-align: center;
+}
+
+.confirm-order .buttons {
+    padding: 10px 0;
+}
+
+.confirm-order .button-1 {
+    font-size: 16px;
+}
+
+.order-review-data > div,
+.order-details-area > div,
+.shipment-details-area > div {
+    width: 350px;
+    max-width: 100%;
+    margin: 0 auto 40px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    color: #444;
+}
+
+.order-review-data li,
+.order-details-area li,
+.shipment-details-area li {
+    padding: 3px 0;
+}
+
+.order-review-data .title,
+.order-details-area .title,
+.shipment-details-area .title {
+    margin: 0 0 5px;
+    padding: 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.order-review-data .title strong,
+.order-details-area .title strong,
+.shipment-details-area .title strong {
+    font-weight: 700;
+}
+
+.order-review-data .payment-method-info,
+.order-review-data .shipping-method-info,
+.order-details-area .payment-method-info,
+.order-details-area .shipping-method-info {
+    margin-top: 20px;
+}
+
+.order-completed .details {
+    margin: 0 0 30px;
+    padding: 30px 15px;
+    text-align: center;
+    color: #444;
+}
+
+.order-completed .details div {
+    margin: 5px 0;
+}
+
+.order-completed .details strong {
+    font-weight: normal;
+    text-transform: uppercase;
+}
+
+/*.order-completed .details a {
+    color: #a07936;
+}*/
+
+.order-completed .details a:hover {
+    text-decoration: underline;
+}
+
+.opc .step-title {
+    margin: 0 0 1px;
+    overflow: hidden;
+    background-color: #f6f6f6;
+}
+
+.opc .step-title h3, .opc .step-title h2{
+    margin: 0;
+}
+
+.opc .allow .step-title {
+    /*background-color: #a07936;*/
+    cursor: pointer;
+    box-shadow: 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12), 0 2px 4px -1px rgba(0,0,0,.3);
+}
+
+.opc .step-title .number,
+.opc .step-title .title {
+    float: left;
+    min-height: 40px;
+    padding: 10px 15px;
+    line-height: 20px;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.opc .allow .step-title .number,
+.opc .allow .step-title .title {
+    color: #fff;
+    cursor: pointer;
+}
+
+.opc .step-title .number {
+    width: 42px;
+    border-right: 1px solid #fff;
+    text-align: center;
+}
+
+.opc .allow .step-title .number {
+    background-color: #5b5b5f;
+}
+
+.opc .step {
+    margin: 10px 0;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+.opc .section {
+    margin: 0 0 30px;
+}
+
+.opc .section > label {
+    display: block;
+    margin: 0 0 10px;
+}
+
+.opc input[type="text"],
+.opc select {
+    max-width: 100%;
+}
+
+.opc .buttons {
+    margin-bottom: 0;
+}
+
+.opc .back-link {
+    margin: 0 0 10px;
+}
+
+.opc .back-link small {
+    display: none;
+}
+
+.opc .back-link a {
+    display: inline-block;
+    margin: 0 0 0 -15px;
+    background: url('../images/back-button.png') left center no-repeat;
+    padding: 0 0 0 18px;
+    color: #444;
+}
+
+.opc .back-link a:hover {
+    color: #bb0032;
+}
+
+.opc .buttons .please-wait {
+    display: block;
+    margin: 10px 0 0;
+    background: none;
+}
+
+.opc .section.ship-to-same-address {
+    margin: 0 0 30px;
+    padding: 0;
+}
+
+.opc .section.pickup-in-store {
+    margin: 0 0 30px;
+    padding: 0;
+}
+
+.opc .payment-info .info tr {
+    text-align: left;
+}
+
+.opc .section.order-summary {
+    margin: 0;
+}
+
+.checkout-page .selected-checkout-attributes {
+    float: right;
+    text-align: right;
+}
+
+.checkout-page .cart-footer .totals {
+    max-width: 350px;
+    margin: 0;
+}
+
+.checkout-page .address-grid {
+    overflow: hidden;
+}
+
+.checkout-page .address-item {
+    float: left;
+    width: 48%;
+    margin: 0 1% 40px;
+}
+
+.shipping-method .method-list li,
+.payment-method .method-list li {
+    display: inline-block;
+    width: 25%;
+    margin: 20px 2%;
+    vertical-align: top;
+}
+
+.shipping-method .method-name {
+    background-color: #f6f6f6;
+    padding: 10px;
+}
+
+.payment-method .payment-logo {
+    display: block;
+    background-color: #f6f6f6;
+    padding: 10px;
+}
+
+.payment-method .payment-details {
+    display: block;
+    width: auto;
+    min-width: 0;
+    margin: 10px 0 0;
+    text-align: center;
+}
+
+.payment-info .info {
+    padding: 30px 75px;
+}
+
+.order-review-data,
+.order-details-area,
+.shipment-details-area {
+    overflow: hidden;
+}
+
+.order-review-data > div,
+.order-details-area > div,
+.shipment-details-area > div {
+    float: left;
+    width: 48%;
+    margin: 0 1% 40px;
+}

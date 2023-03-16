@@ -1,0 +1,34 @@
+﻿@model Teed.Plugin.Suppliers.Models.SupplierModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedSuppliers");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar proveedor
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="Index">regresar a la lista de proveedores</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.AddNew")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @(await Html.PartialAsync("~/Plugins/Teed.Plugin.Supplier/Views/Supplier/_CreateOrUpdate.cshtml"))
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

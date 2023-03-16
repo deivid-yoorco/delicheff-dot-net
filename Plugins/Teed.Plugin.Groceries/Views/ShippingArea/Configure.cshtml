@@ -1,0 +1,48 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingArea.ConfigureModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingArea");
+    //resources for product tags input
+    Html.AppendCssFileParts("~/lib/tagEditor/jquery.tag-editor.css");
+    Html.AppendScriptParts("~/lib/tagEditor/jquery.tag-editor.min.js");
+    Html.AppendScriptParts("~/lib/tagEditor/jquery.caret.min.js");
+}
+
+<form asp-controller="ShippingArea" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Zonas de entrega
+        </h1>
+        <div class="pull-right">
+            <button type="submit" id="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p>Ingresa los códigos postales dónde se pueden realizar las entregas.</p><br />
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Códigos postales</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="PostalCodes" class="form-control" id="postal-codes" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        $('#postal-codes').tagEditor();
+    });
+</script>

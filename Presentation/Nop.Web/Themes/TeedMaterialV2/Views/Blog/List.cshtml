@@ -1,0 +1,95 @@
+﻿@model BlogPostListModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Blog").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-blog-page");
+}
+@*@section left {
+        @await Component.InvokeAsync("Widget", new { widgetZone = "left_side_column_blog_before" })
+        @await Component.InvokeAsync("BlogMonths")
+        @await Component.InvokeAsync("Widget", new { widgetZone = "left_side_column_after_blog_archive" })
+        @await Component.InvokeAsync("BlogTags")
+        @await Component.InvokeAsync("Widget", new { widgetZone = "left_side_column_blog_after" })
+    }*@
+<style>
+    .element-title {
+        margin: 0 0 15px 0px;
+        font-size: 2rem;
+        color: black;
+        font-weight: bold;
+    }
+</style>
+<div class="page blog-page">
+    <div class="page-title">
+        <a href="@Url.RouteUrl("BlogRSS", new { languageId = Model.WorkingLanguageId })" class="link-rss" title="@T("Blog.RSS.Hint")">@T("Blog.RSS")</a>
+        <h1>
+            @if (string.IsNullOrEmpty(Model.PagingFilteringContext.Tag))
+            {
+                if (Model.PagingFilteringContext.GetParsedMonth().HasValue)
+                {
+                    @string.Format(T("Blog.FilteredByMonth").Text, Model.PagingFilteringContext.GetParsedMonth().Value.Year, Model.PagingFilteringContext.GetParsedMonth().Value.ToString("MMMM"))
+                }
+                else
+                {
+                    @T("Blog")
+                }
+            }
+            else
+            {
+                @string.Format(T("Blog.TaggedWith").Text, Model.PagingFilteringContext.Tag)
+            }
+        </h1>
+    </div>
+    <div class="page-body">
+        @await Component.InvokeAsync("Widget", new { widgetZone = "bloglist_page_before_posts" })
+        <div class="blog-posts">
+            <div class="row">
+                @foreach (var item in Model.BlogPosts)
+                {
+                    <div class="col m3">
+                        @await Component.InvokeAsync("Widget", new { widgetZone = "bloglist_page_before_post", additionalData = item.Id })
+                        <div class="card">
+                            <a href="@Url.RouteUrl("BlogPost", new {SeName = item.SeName})">
+                                <div class="card-image waves-effect waves-block waves-light">
+                                    <img class="activator" src="@item.BodyOverview">
+                                </div>
+                                <div class="card-content">
+                                    <a class="post-title" href="@Url.RouteUrl("BlogPost", new {SeName = item.SeName})"><h2 class="element-title">@item.Title</h2></a>
+                                    <p style="position: absolute;bottom: 20px;"><a href="@Url.RouteUrl("BlogPost", new {SeName = item.SeName})" class="read-more">@T("Blog.MoreInfo")</a></p>
+                                </div>
+                            </a>
+                        </div>
+                        @await Component.InvokeAsync("Widget", new { widgetZone = "bloglist_page_after_post", additionalData = item.Id })
+                    </div>
+                }
+            </div>
+        </div>
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "bloglist_page_after_posts" })
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var maxHeight = 0;
+        var maxWidth = 0;
+
+        $(".blog-posts .card").each(function () {
+            if ($(this).height() > maxHeight) { maxHeight = $(this).height(); }
+            if ($(this).width() > maxWidth) { maxWidth = $(this).width(); }
+        });
+
+        $(".blog-posts .card").height(maxHeight + 20);
+        $(".blog-posts .card").width(maxWidth);
+    });
+</script>

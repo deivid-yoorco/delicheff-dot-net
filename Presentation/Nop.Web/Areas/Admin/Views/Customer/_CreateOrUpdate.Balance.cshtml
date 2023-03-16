@@ -1,0 +1,265 @@
+﻿@model CustomerModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@inject Nop.Services.Security.IPermissionService permissionService
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="row" style="text-align: center">
+            <h3>Saldo a favor actual: <text id="currentBalance">---</text></h3>
+        </div>
+        <div class="panel-body">
+            <div id="balance-grid"></div>
+        </div>
+    </div>
+    @if (permissionService.Authorize(Nop.Services.Security.StandardPermissionProvider.BalanceManager))
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Agregar saldo
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Monto</label>
+                            <div title="El monto que se agregará al cliente. Debe ser un valor positivo."
+                                 class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input class="form-control text-box single-line valid" id="Amount" name="Amount" type="number">
+                        <span class="field-validation-valid" data-valmsg-for="Amount" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Orden asociada</label>
+                            <div title="La orden asociada por la que se da el monto."
+                                 class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <select class="form-control text-box single-line valid" id="OrderId" name="OrderId">
+                        </select>
+                        <span class="field-validation-valid" data-valmsg-for="OrderId" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <div class="label-wrapper">
+                            <label class="control-label">Comentario</label>
+                            <div title="Comentario para el saldo agregado."
+                                 class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input class="form-control text-box single-line valid" id="Comment" name="Comment" type="text">
+                        <span class="field-validation-valid" data-valmsg-for="Comment" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-3 col-md-9 balance-error" style="color: red;display: none;margin-bottom: 10px;">
+                    Todos los campos son requeridos para agregar saldo.
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                    <button type="button" id="addBalance" class="btn btn-primary">Agregar saldo al cliente</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script>
+        $(document).ready(function () {
+            @if (permissionService.Authorize(Nop.Services.Security.StandardPermissionProvider.BalanceManager))
+            {
+                <text>
+                    $('#addBalance').click(function () {
+                    var customerId = @Model.Id;
+                    var comment = $("#Comment").val();
+                    var amount = $("#Amount").val();
+                    var orderId = $("#OrderId").val();
+                    if (comment.trim() != '' &&
+                        comment != null &&
+                        typeof comment != 'undefined' &&
+                        amount > 0 &&
+                        typeof amount != 'undefined'
+                        @if (!Model.CurrentAdminIsBalanceManager)
+                        {
+                        <text>
+                        && orderId > 0 && typeof orderId != 'undefined'
+                        </text>
+                        }
+                        ) {
+                        var postData = {
+                            amount: amount,
+                            comment: comment,
+                            orderId: orderId == 0 ? null : orderId,
+                            customerId: customerId,
+                        };
+                        addAntiForgeryToken(postData);
+                        var formData = new FormData();
+                        $.each(postData, function (name, value) {
+                            formData.append(name, value);
+                        });
+                        $.ajax({
+                            contentType: false,
+                            processData: false,
+                            type: "POST",
+                            url: "@(Url.Action("AddBalance", "Customer"))",
+                            data: formData,
+                            success: function (data) {
+                                var grid = $("#balance-grid");
+                                grid.data('kendoGrid').dataSource.read();
+                                $('#addBalance').attr('disabled', false);
+                                $('.balance-error').hide();
+                                getCurrentBalance();
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                alert('Failed to add comment.');
+                                $('#addBalance').attr('disabled', false);
+                                $('.balance-error').hide();
+                            }
+                        });
+                    }
+                    else
+                        $('.balance-error').show();
+                });
+
+                $.ajax({
+                    type: "GET",
+                    url: "@(Url.Action("GetCustomerOrdersSelect", "Customer"))?customerId=@Model.Id",
+                    data: addAntiForgeryToken,
+                    success: function (data) {
+                        $('#OrderId option').remove();
+                        $('#OrderId').append('<option value="0" selected>Sin orden seleccionada</option>');
+                        $.each(data, function (i, e) {
+                            $('#OrderId').append(new Option('#' + e, e));
+                        })
+                    },
+                    error: function (e) {
+                        console.log(e);
+                    }
+                });
+                </text>
+            }
+
+            $("#balance-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                    transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("CustomerBalance", "Customer"))?customerId=@Model.Id",
+                            type: "POST",
+                            dataType: "json",
+                            data: addAntiForgeryToken
+                        },
+                        destroy: {
+                        url: "@Html.Raw(Url.Action("DeleteBalance", "Customer"))",
+                            type: "POST",
+                            dataType: "json",
+                            data: addAntiForgeryToken
+                        }
+                    },
+                    schema: {
+                    data: "Data",
+                        total: "Total",
+                        errors: "Errors",
+                        model: {
+                        id: "Id"
+                        }
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: false,
+                    serverFiltering: false,
+                    serverSorting: false
+                },
+                pageable: {
+                refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                dataBound: function (e) {
+                    getCurrentBalance();
+                },
+                columns: [
+                    {
+                field: "Id",
+                        template: "<span data-id='#=Id#'></span>",
+                        hidden: true
+                    },
+                    {
+                field: "CreatedOn",
+                        title: "Fecha",
+                    },
+                    {
+                field: "Amount",
+                        title: "Monto",
+                    },
+                    {
+                    field: "Order",
+                    title: "Orden",
+                    },
+                    {
+                field: "Comment",
+                        title: "Comentario",
+                    },
+                    {
+                field: "GivenByCustomer",
+                        title: "Otorgado por",
+                    },
+                    @if (permissionService.Authorize(Nop.Services.Security.StandardPermissionProvider.BalanceManager))
+                    {
+                        <text>
+                    {
+                command: [
+                            {
+                    name: "destroy",
+                                text: "Eliminar"
+                            }
+                        ],
+                        width: 100
+                    }
+                    </text>
+                        }
+                ]
+            });
+        });
+
+    function getCurrentBalance() {
+        $.ajax({
+            type: "GET",
+            url: "@(Url.Action("GetCurrentCustomerBalance", "Customer"))?customerId=@Model.Id",
+            data: addAntiForgeryToken,
+            success: function (data) {
+                if (data != '' && typeof data != 'undefined')
+                    $('#currentBalance').html(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(thrownError);
+            }
+        });
+    }
+</script>

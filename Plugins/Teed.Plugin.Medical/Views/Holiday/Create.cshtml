@@ -1,0 +1,121 @@
+﻿@model Teed.Plugin.Medical.Models.Holiday.HolidayModel
+@using Teed.Plugin.Medical.Domain;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedBranches.Holidays");
+    var availableBranches = (List<SelectListItem>)ViewData["Branches"];
+    var currentYear = DateTime.Now.Year;
+}
+
+<form asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar feriado
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de feriados</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Fecha del feriado</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="HolidayDate" id="datepicker" style="width: 100%;" />
+                                <script>
+                                    $(document).ready(function () {
+                                        $("#datepicker").kendoDatePicker({
+                                            min: new Date(@currentYear, 0, 1),
+                                            max: new Date(@currentYear, 11, 31),
+                                            footer: "#: kendo.toString(data, 'm') #",
+                                            start: "year",
+                                            depth: "month",
+                                            format: "dd MMMM",
+                                            dateInput: true,
+                                            open: function (e) {
+                                                var dp = e.sender;
+                                                var calendar = dp.dateView.calendar;
+                                                if (calendar.view().name === "year") {
+                                                    calendar.element.find(".k-header").css("display", "none");
+                                                };
+                                                calendar.bind("navigate", function (e) {
+                                                    var cal = e.sender;
+                                                    var view = cal.view();
+
+                                                    if (view.name === "year") {
+                                                        cal.element.find(".k-header").css("display", "none");
+                                                    } else {
+                                                        var navFast = $(".k-nav-fast");
+                                                        var dsa = cal.element.find(".k-header").css("display", "block");
+                                                        navFast[0].innerText = navFast[0].innerText.slice(0, -5);
+                                                    }
+                                                });
+                                            },
+                                            close: function (e) {
+                                                var calendar = e.sender.dateView.calendar;
+                                                calendar.unbind("navigate");
+                                                calendar.element.find(".k-header").css("display", "block");
+                                            }
+                                        });
+                                    });
+                                </script>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Nombre del Feriado</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="Name" maxlength="256" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Sucursales a las que aplica</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="SelectedBranchesIds" asp-items="availableBranches" asp-multiple="true" />
+                                <script type="text/javascript">
+                                    $(document).ready(function() {
+                                        var productIdsInput = $('#@Html.IdFor(model => model.SelectedBranchesIds)').data("kendoMultiSelect");
+                                        productIdsInput.setOptions({
+                                            autoClose: false,
+                                            filter: "contains"
+                                        });
+                                        @if (availableBranches.Count == 0)
+                                        {
+                                            <text>
+                                                productIdsInput.setOptions({
+                                                    enable: false,
+                                                    placeholder: 'No hay sucursales disponibles.'
+                                                });
+                                                productIdsInput._placeholder();
+                                                productIdsInput._enable();
+                                            </text>
+                                        }
+                                    });
+                                </script>
+                                <span asp-validation-for="SelectedBranchesIds" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

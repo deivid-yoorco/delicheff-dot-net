@@ -1,0 +1,321 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.BadgeModel
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Nombre</label>
+                                <div title="El nombre para identificar la insignia, se muestra a los usuarios."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Name" />
+                            <span asp-validation-for="Name"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Descripción</label>
+                                <div title="La descripción para la insignia, se muestra a los usuarios."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Description" />
+                            <span asp-validation-for="Description"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Imagen bronce</label>
+                                <div title="La imagen de la insignia en nivel bronce."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="BronzeImageId" />
+                            <span asp-validation-for="BronzeImageId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Monto bronce</label>
+                                <div title="El monto necesario en pesos para conseguir el nivel bronce."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="BronzeAmount" />
+                            <span asp-validation-for="BronzeAmount"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Imagen plata</label>
+                                <div title="La imagen de la insignia en nivel plata."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="SilverImageId" />
+                            <span asp-validation-for="SilverImageId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Monto plata</label>
+                                <div title="El monto necesario en pesos para conseguir el nivel plata."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="SilverAmount" />
+                            <span asp-validation-for="SilverAmount"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Imagen oro</label>
+                                <div title="La imagen de la insignia en nivel oro."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="GoldImageId" />
+                            <span asp-validation-for="GoldImageId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Monto oro</label>
+                                <div title="El monto necesario en pesos para conseguir el nivel oro."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="GoldAmount" />
+                            <span asp-validation-for="GoldAmount"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Tipo de elemento para obtener la recompensa</label>
+                                <div title="El tipo de elemento que está conectado con la insignia, dependiendo de la selección en esta sección se mostraran los distintos listados de elementos para la selección."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="ElementTypeId" asp-items="Model.ElementType" />
+                        </div>
+                    </div>
+                    <script>
+                        $(document).ready(function () {
+                            $('#ElementTypeId').change(function () {
+                                var value = $(this).val();
+                                if (value == 1) {
+                                    $('.subcategories').show();
+                                    $('.tags').hide();
+                                    $('.products').hide();
+                                } else if (value == 2) {
+                                    $('.subcategories').hide();
+                                    $('.tags').show();
+                                    $('.products').hide();
+                                } else if (value == 3) {
+                                    $('.subcategories').hide();
+                                    $('.tags').hide();
+                                    $('.products').show();
+                                }
+                            });
+                            $('#ElementTypeId').change();
+                        });
+                    </script>
+
+                    <div class="form-group subcategories">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Subcategorías</label>
+                                <div title="Subcategorías para conectar con la insignia."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="SelectedSubcategoryIds" asp-items="Model.AvailableSubcategories" asp-multiple="true" />
+                            <script type="text/javascript">
+                                $(document).ready(function() {
+                                    var categoryIdsInput = $('#@Html.IdFor(model => model.SelectedSubcategoryIds)').data("kendoMultiSelect");
+                                    categoryIdsInput.setOptions({
+                                        autoClose: false,
+                                        filter: "contains"
+                                    });
+
+                                    @if (Model.AvailableSubcategories.Count == 0)
+                            {
+                                <text>
+                                    categoryIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: 'No hay subcategorías disponibles'
+                                    });
+                                    categoryIdsInput._placeholder();
+                                    categoryIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+
+                    <div class="form-group tags">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Tags</label>
+                                <div title="Tags para conectar con la insignia."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="SelectedTagIds" asp-items="Model.AvailableTags" asp-multiple="true" />
+                            <script type="text/javascript">
+                                $(document).ready(function() {
+                                    var categoryIdsInput = $('#@Html.IdFor(model => model.SelectedTagIds)').data("kendoMultiSelect");
+                                    categoryIdsInput.setOptions({
+                                        autoClose: false,
+                                        filter: "contains"
+                                    });
+
+                                    @if (Model.AvailableTags.Count == 0)
+                                    {
+                                <text>
+                                    categoryIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: 'No hay tags disponibles'
+                                    });
+                                    categoryIdsInput._placeholder();
+                                    categoryIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+
+                    <div class="form-group products">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Productos</label>
+                                <div title="Productos para conectar con la insignia."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="SelectedProductIds" asp-items="Model.AvailableProducts" asp-multiple="true" />
+                            <script type="text/javascript">
+                                $(document).ready(function() {
+                                    var categoryIdsInput = $('#@Html.IdFor(model => model.SelectedProductIds)').data("kendoMultiSelect");
+                                    categoryIdsInput.setOptions({
+                                        autoClose: false,
+                                        filter: "contains"
+                                    });
+
+                                    @if (Model.AvailableProducts.Count == 0)
+                                    {
+                                <text>
+                                    categoryIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: 'No hay productos disponibles'
+                                    });
+                                    categoryIdsInput._placeholder();
+                                    categoryIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <script>
+                        $(document).ready(function () {
+                        @if(Model.SelectedSubcategoryIds.Any() && Model.ElementTypeId == 1)
+                        {
+                            <text>
+                            var currentSelect = $('#@Html.IdFor(model => model.SelectedSubcategoryIds)').data("kendoMultiSelect");
+                            @foreach (var item in Model.SelectedSubcategoryIds)
+                            {
+                            <text>
+                            currentSelect.value("@item");
+                            </text>
+                            }
+                            currentSelect.trigger("change");
+                            </text>
+                        }
+                        else if (Model.SelectedTagIds.Any() && Model.ElementTypeId == 2)
+                        {
+                            <text>
+                            var currentSelect = $('#@Html.IdFor(model => model.SelectedTagIds)').data("kendoMultiSelect");
+                            @foreach (var item in Model.SelectedTagIds)
+                            {
+                            <text>
+                            currentSelect.value("@item");
+                            </text>
+                            }
+                            currentSelect.trigger("change");
+                            </text>
+                        }
+                        else if (Model.SelectedProductIds.Any() && Model.ElementTypeId == 3)
+                        {
+                            <text>
+                            var currentSelect = $('#@Html.IdFor(model => model.SelectedProductIds)').data("kendoMultiSelect");
+                            @foreach (var item in Model.SelectedProductIds)
+                            {
+                            <text>
+                            currentSelect.value("@item");
+                            </text>
+                            }
+                            currentSelect.trigger("change");
+                            </text>
+                        }
+                        });
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

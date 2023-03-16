@@ -1,0 +1,22 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.RewardModel
+@{
+    //page title
+    ViewBag.Title = "Editar configuración de Rewards";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Rewards.Configuration");
+}
+
+<form asp-controller="Rewards" asp-action="Configuration" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Configuración general de Gamification
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    @await Html.PartialAsync("_Configuration.Tabs", Model)
+</form>

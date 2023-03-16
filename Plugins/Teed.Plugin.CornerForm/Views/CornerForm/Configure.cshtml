@@ -1,0 +1,92 @@
+﻿@model Teed.Plugin.CornerForm.Models.ConfigurationModel
+@inject Nop.Core.IWebHelper webHelper
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedCornerForm.Configure");
+}
+
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Configurar formulario
+        </h1>
+        <div class="pull-right">
+            <button type="submit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Texto minimizado</label>
+                                <div title="Ingresa el texto de la pestaña del formulario" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="MinimizedText" />
+                                <span asp-validation-for="MinimizedText"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Pregunta</label>
+                                <div title="La pregunta que será mostrada a los usuarios en el formulario" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="Question" />
+                                <span asp-validation-for="Question"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Color del botón</label>
+                                <div title="Ingresa el color del botón en hexadecimal" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="ButtonColor" />
+                                <span asp-validation-for="ButtonColor"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Color del texto del botón</label>
+                                <div title="Ingresa el color del texto del botón en hexadecimal" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" asp-for="ButtonTextColor" />
+                                <span asp-validation-for="ButtonTextColor"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

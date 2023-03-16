@@ -1,0 +1,238 @@
+﻿@model Teed.Plugin.Groceries.Controllers.BuyerPaymentModel
+@using Nop.Services.Helpers;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.BuyerPayment");
+}
+
+<form asp-controller="BuyerPayment" asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" id="BuyerPaymentId" name="BuyerPaymentId" value="@Model.BuyerPaymentId">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar solicitud de pago
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="BuyerPaymentDashboard">regresar a la lista de pagos</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <nop-tabs id="buyer-request">
+                <nop-tab asp-name="tab-request" asp-title="Editar solicitud" asp-default="true">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Fecha de entrega:</label>
+                                            <div title="Fecha seleccionada por el cliente" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9" style="margin-top: 5px;">
+                                        @(Model.Date.ToString("dd-MM-yyyy"))
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Fecha y hora de solicitud de pago:</label>
+                                            <div title="Fecha y hora en la que el comprador realizó la solicitud de pago" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9" style="margin-top: 5px;">
+                                        @(Model.CreationDate.ToString("dd-MM-yyyy HH:mm"))
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Fabricante:</label>
+                                            <div title="Bodega a la que se debe realizar el pago" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9" style="margin-top: 5px;">
+                                        @(Model.ManufacturerName)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Cuenta bancaria:</label>
+                                            <div title="Muestra la cuenta bancaria del fabricante" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9" style="margin-top: 5px;">
+                                        @if (Model.ManufacturerBankAccount == null)
+                                        {
+                                            <span style="color: red">No se ha cargado la cuenta bancaria.</span>
+                                        }
+                                        else
+                                        {
+                                            <span><strong>Titular de cuenta bancaria:</strong> @(Model.ManufacturerBankAccount.AccountOwner)</span><br />
+                                            <span><strong>Banco:</strong> @(Model.ManufacturerBankAccount.BankName)</span><br />
+                                            <span><strong>Cuenta bancaria:</strong> @(Model.ManufacturerBankAccount.AccountNumber)</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Comprador solicitante:</label>
+                                            <div title="Comprador que realizó la solicitud de pago" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9" style="margin-top: 5px;">
+                                        @(Model.BuyerName)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Monto solicitado:</label>
+                                            <div title="Monto solicitado por el comprador" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9" style="margin-top: 5px;">
+                                        @(Model.RequestedAmount.ToString("C"))
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Recibos:</label>
+                                            <div title="Los tickets cargados por el comprador desde su app" class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            @foreach (var item in Model.TicketBuyerFileIds)
+                                            {
+                                                <div class="col-md-3" style="height: 200px; overflow: hidden;">
+                                                    <a href="/Admin/BuyerPayment/GetPicture?id=@(item)" target="_blank">
+                                                        <img style="max-width: 100%; margin-top: 15px" src="/Admin/BuyerPayment/GetPicture?id=@(item)" />
+                                                    </a>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Estatus de pago</label>
+                                            <div title="El estatus de este pago."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="PaymentStatusId" asp-items="Model.PaymentStatuses" />
+                                        <span asp-validation-for="PaymentStatusId"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Comprobante de pago (PDF)</label>
+                                            <div title="El comprobante de pago en formato PDF."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input accept="application/pdf" class="form-control text-box single-line" type="file" id="PaymentFile" name="PaymentFile">
+                                    </div>
+                                    @if (Model.PaymentFileId > 0)
+                                    {
+                                        <div class="col-md-9 col-md-offset-3" style="margin-top: 5px; margin-bottom: 10px;">
+                                            <a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = Model.PaymentFileId })">
+                                                Descargar comprobante de pago
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Factura (PDF)</label>
+                                            <div title="La factura en formato PDF."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input accept="application/pdf" class="form-control text-box single-line" type="file" id="InvoiceFilePdf" name="InvoiceFilePdf">
+                                    </div>
+                                    @if (Model.InvoiceFilePdfId > 0)
+                                    {
+                                        <div class="col-md-9 col-md-offset-3" style="margin-top: 5px; margin-bottom: 10px;">
+                                            <a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = Model.InvoiceFilePdfId })">
+                                                Descargar PDF de la factura
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label class="control-label">Factura (XML)</label>
+                                            <div title="La factura en formato XML."
+                                                 class="ico-help">
+                                                <i class="fa fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input accept="application/xhtml+xml, text/xml, application/xml" class="form-control text-box single-line" type="file" id="InvoiceFileXml" name="InvoiceFileXml">
+                                    </div>
+                                    @if (Model.InvoiceFileXmlId > 0)
+                                    {
+                                        <div class="col-md-9 col-md-offset-3" style="margin-top: 5px; margin-bottom: 10px;">
+                                            <a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = Model.InvoiceFileXmlId })">
+                                                Descargar XML de la factura
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nop-tab>
+                <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                    <div class="panel-body">
+                        @Html.Raw(Model.Log.Replace("\n", "<br />"))
+                    </div>
+                </nop-tab>
+            </nop-tabs>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,125 @@
+﻿@model MiniShoppingCartModel
+@{
+    bool IsMoto = false;
+}
+<div id="flyout-cart" class="flyout-cart hide-on-small-only">
+    <div class="mini-shopping-cart">
+        <style>
+            .items:hover{
+                overflow:auto;
+            }
+            .flyout-cart{
+                height:100%;
+                max-height:26.5em;
+            }
+            .items {
+                height: 22em;
+                max-height: 100%;
+                overflow-y: auto;
+                position: absolute;
+                display:block;
+            }
+            .totals {
+                position: relative;
+                padding-top: 19em;
+            }
+            .items:focus, .item:focus, .first:focus{
+                overflow-y:auto;
+            }           
+        </style>
+        <div class="count">
+            @if (Model.TotalProducts == 0)
+            {
+                @T("ShoppingCart.Mini.NoItems")
+            }
+            else
+            {
+                @Html.Raw(string.Format(T("ShoppingCart.Mini.ItemsText").Text, $"<a href=\"{Url.RouteUrl("ShoppingCart")}\">{string.Format(T("ShoppingCart.Mini.Items").Text, Model.TotalProducts)}</a>"))
+            }
+        </div>
+        @if (Model.TotalProducts > 0)
+        {
+            <div class="items">
+                @for (var i = 0; i < Model.Items.Count; i++)
+                {
+                    var item = Model.Items[i];
+                    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                    {
+                        if (!IsMoto)
+                        {
+                            if (item.Category.Equals("Motos"))
+                            {
+                                IsMoto = true;
+                            }
+                        }
+                    }
+                    <div class="item @(i == 0 ? "first" : null)">
+                        @if (Model.ShowProductImages)
+                        {
+                            <div class="picture">
+                                <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" title="@item.Picture.Title">
+                                    <img alt="@item.Picture.AlternateText" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                </a>
+                            </div>
+                        }
+                        <div class="product">
+                            <div class="name">
+                                <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="teed-primary-text">@item.ProductName</a>
+                            </div>
+                            @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                            {
+                                <div class="attributes">
+                                    @Html.Raw(item.AttributeInfo)
+                                </div>
+                            }
+                            <div class="price">@T("ShoppingCart.Mini.UnitPrice"): <span>@item.UnitPrice</span></div>
+                            <div class="quantity">@T("ShoppingCart.Mini.Quantity"): <span>@item.Quantity</span></div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="totals">@T("ShoppingCart.Totals.SubTotal"): <strong>@Model.SubTotal</strong></div>
+            <div class="buttons">
+                @if (Model.DisplayShoppingCartButton)
+                {
+                    <input type="button" value="@T("ShoppingCart.Mini.ViewCart")" class="waves-effect waves-light btn" onclick="setLocation('@(Url.RouteUrl("ShoppingCart"))')" />
+
+                }
+                @if (!Model.DisplayCheckoutButton)
+                {
+                    var checkoutUrl = "";
+                    //if (Model.AnonymousCheckoutAllowed && Model.CurrentCustomerIsGuest)
+                    //{
+                    //    checkoutUrl = Url.RouteUrl("LoginCheckoutAsGuest", new { returnUrl = Url.RouteUrl("ShoppingCart") });
+                    //}
+                    //else
+                    //{
+                    checkoutUrl = Url.RouteUrl("Checkout");
+                    //}
+
+                    @if (IsMoto)
+                    {
+                        <a class="waves-effect waves-light btn modal-trigger" href="#modal-motos-minicart">Pagar</a>
+                    }
+                    else
+                    {
+                        <input type="button" value="Pagar" class="waves-effect waves-light btn" onclick="setLocation('@checkoutUrl')" />
+                    }
+                }
+            </div>
+        }
+        @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+        {
+            <!-- Modal Structure -->
+            <div id="modal-motos-minicart" class="modal">
+                <div class="modal-content">
+                    <h4>Importante</h4>
+                    <p style="font-size:16px">Para el envío de las motos debes comunicarte con nosotros a través de nuestra <a href="https://www.kromtekstore.com/contactus" target="_blank">sección de contacto</a> o llamando al teléfono:  <strong>01-800-570-6835</strong>  </p>
+                </div>
+                <div class="modal-footer" style="margin-left:-7px;">
+                    <a href="#!" class="modal-close waves-effect waves-green btn">Cerrar</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,29 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Project key de Smartlook:</strong><br />
+
+        Debes ingresar a tu cuenta de smartkey y en el dashboard o en la configuración del proyecto podrás obtener el Project Key.
+    </div>
+    <br />
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Project Key</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SmartlookProjectKey" />
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>¿Está activo?</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SmartlookIsActive" />
+            </div>
+        </div>
+    </div>
+</div>

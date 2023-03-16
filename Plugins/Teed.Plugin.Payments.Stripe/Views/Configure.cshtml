@@ -1,0 +1,91 @@
+﻿@model Teed.Plugin.Payments.Stripe.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="PaymentStripe" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="UseSandbox" />
+                        <span asp-validation-for="UseSandbox"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="PublishableKeySandbox_OverrideForStore" asp-input="PublishableKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>PublishableKeySandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="PublishableKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="PublishableKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SecretKeySandbox_OverrideForStore" asp-input="SecretKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>SecretKeySandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SecretKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SecretKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="PublishableKeyProduction_OverrideForStore" asp-input="PublishableKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>PublishableKeyProduction</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="PublishableKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="PublishableKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SecretKeyProduction_OverrideForStore" asp-input="SecretKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>SecretKeyProduction</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SecretKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SecretKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AdditionalFee_OverrideForStore" asp-input="AdditionalFee" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Aplicar comisión</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFee" />
+                        <span asp-validation-for="AdditionalFee"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AdditionalFeePercentage_OverrideForStore" asp-input="AdditionalFeePercentage" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>¿La comisión es porcentaje?</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFeePercentage" />
+                        <span asp-validation-for="AdditionalFeePercentage"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

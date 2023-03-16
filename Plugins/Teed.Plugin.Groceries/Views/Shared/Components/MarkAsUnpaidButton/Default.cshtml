@@ -1,0 +1,27 @@
+﻿@model Nop.Web.Areas.Admin.Models.Orders.OrderModel;
+@if (Model.PaymentStatus == "Pagado")
+{
+    <button type="button" name="" id="markasunpaid" class="btn bg-red" style="margin-right: 3px;" data-toggle="modal" data-target="#markasunpaid-action-confirmation">
+        Marcar como no pagada
+    </button>
+    <div id="markasunpaid-action-confirmation" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="markasunpaid-action-confirmation-title" style="display: none; padding-right: 17px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title" id="markasunpaid-action-confirmation-title">¿Seguro?</h4>
+                </div>
+                <div class="modal-body">
+                    ¿Confirmas que deseas marcar esta orden como NO pagada?
+                </div>
+                <div class="modal-footer">
+                    <a  href="/Admin/Order/MarkOrderAsNotPaid?id=@Model.Id" id="markasunpaid-action-confirmation-submit-button" class="btn btn-primary pull-right" name="markasunpaid">
+                        Si
+                    </a>
+                    <span class="btn btn-default pull-right margin-r-5" data-dismiss="modal">No</span>
+                </div>
+            </div>
+        </div>
+        <script>$(document).ready(function () { $('#markasunpaid').attr("data-toggle", "modal").attr("data-target", "#markasunpaid-action-confirmation"); $('#markasunpaid-action-confirmation-submit-button').attr("name", $("#markasunpaid").attr("name")); $("#markasunpaid").attr("name", ""); if ($("#markasunpaid").attr("type") == "submit") $("#markasunpaid").attr("type", "button"); });</script>
+    </div>
+}

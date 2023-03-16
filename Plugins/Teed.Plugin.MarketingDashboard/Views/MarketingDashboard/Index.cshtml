@@ -1,0 +1,754 @@
+﻿@model Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.MarketingDashboardDataModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MarketingExpenses.MarketingDashboard");
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Indicadores MKT
+        <small>
+            <i class="fa fa-clock-o"></i>
+            <span>Última actualización: @(Model.ControlDate != DateTime.MinValue ? Model.ControlDate.ToString("dd-MM-yyyy hh:mm:ss tt") : "---")</span>
+        </small>
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Actualizando, favor de esperar...</span>
+        </div>
+        <button type="button" id="submit-button" class="btn bg-blue" onclick="refreshData()">
+            <i class="fa fa-refresh"></i>
+            Actualizar datos
+        </button>
+        <a asp-action="ExportDataExcel" class="btn bg-blue">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar datos
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        @*<div class="panel panel-default">
+            <div class="panel-body" style="text-align: center;">
+                <select id="generation-date">
+                    @foreach (var item in Model.GenerationDates)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+                <button onclick="refreshData(true)" class="btn bg-blue">
+                    Generar datos de fecha
+                </button>
+            </div>
+        </div>*@
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th colspan="2">
+                                    Indicadores semanales de MKT
+                                </th>
+                                @foreach (var data in Model.Data)
+                                {
+                                    <th>@(data.InitDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                            <tr>
+                                <th>
+                                    ID
+                                </th>
+                                <th>
+                                    Indicador semanal
+                                </th>
+                                @foreach (var data in Model.Data)
+                                {
+                                    <th>@(data.EndDate.ToString("dd-MM-yyyy"))</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td>
+                                MK0001
+                            </td>
+                            <td>
+                                Costo por nuevo registro
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.NewRegisterCost.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0002
+                            </td>
+                            <td>
+                                CAC (Costo por adquisición de cliente)
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.AdquisitionCost.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0003
+                            </td>
+                            <td>
+                                Tasa de registros a compras
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.BuyinRegister * 100, 2))%</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0004
+                            </td>
+                            <td>
+                                Promedio de pedidos diarios
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.DailyPedidosAverage, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0005
+                            </td>
+                            <td>
+                                Promedio de venta diaria
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.DailySalesAverage.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0006A
+                            </td>
+                            <td>
+                                Ticket promedio
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.AverageTicket.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0006B
+                            </td>
+                            <td>
+                                Ticket promedio clientes nuevos
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.AverageTicketNewCustomers.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0006C
+                            </td>
+                            <td>
+                                Ticket promedio clientes recurrentes
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.AverageTicketOldCustomers.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0007
+                            </td>
+                            <td>
+                                Recurrencia mensual
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008A
+                            </td>
+                            <td>
+                                Recurrencia 120/1
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence120days, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008B
+                            </td>
+                            <td>
+                                Recurrencia 120/2-3
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence120days2or3, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008C
+                            </td>
+                            <td>
+                                Recurrencia 120/4-5
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence120days4or5, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008D
+                            </td>
+                            <td>
+                                Recurrencia 120/6-7
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence120days6or7, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008E
+                            </td>
+                            <td>
+                                Recurrencia 120/8-9
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence120days8or9, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008F
+                            </td>
+                            <td>
+                                Recurrencia 120/10+
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.Recurrence120daysMoreThan10, 2))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0009
+                            </td>
+                            <td>
+                                Tasa de retención estabilizada
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@data.RetentionRate120Days</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0010
+                            </td>
+                            <td>
+                                Costumer Annual Value
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomerAnnualValue.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0011
+                            </td>
+                            <td>
+                                Costumer Annual Contribution
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0012
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (mensual) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContributionRetention, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013A
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (120/1) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution120Retention, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013B
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (120/2-3) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution120Retention2or3, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013C
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (120/4-5) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution120Retention4or5, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013D
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (120/6-7) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution120Retention6or7, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013E
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (120/8-9) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution120Retention8or9, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013F
+                            </td>
+                            <td>
+                                Costumer Annual Contribution (120/10+) * Tasa de Retención
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomerAnnualContribution120RetentionMoreThan10, 2).ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0014
+                            </td>
+                            <td>
+                                [Costumer Annual Contribution (mensual) * Tasa de Retención] / CAC
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(Math.Round(data.CustomFormula2, 2))</td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+                <div class="table-responsive text-nowrap" style="margin-top: 50px">
+                    <table class="table table-hover">
+                        <tr>
+                            <th colspan="2">
+                                Variables para indicadores semanales de MKT
+                            </th>
+                            @foreach (var data in Model.Data)
+                            {
+                                <th>@(data.InitDate.ToString("dd-MM-yyyy"))</th>
+                            }
+                        </tr>
+                        <tr>
+                            <th>
+                                ID
+                            </th>
+                            <th>
+                                Variable
+                            </th>
+                            @foreach (var data in Model.Data)
+                            {
+                                <th>@(data.EndDate.ToString("dd-MM-yyyy"))</th>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0001
+                            </td>
+                            <td>
+                                Gasto publicitario del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.MarketingExpenses.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0002
+                            </td>
+                            <td>
+                                Nuevos registros en el período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.NewRegisteredUsersCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0003
+                            </td>
+                            <td>
+                                Nuevas cuentas activas (al menos han hecho un pedido en la vida) del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.NewActiveCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0004
+                            </td>
+                            <td>
+                                Total de pedidos del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.PedidosCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0005
+                            </td>
+                            <td>
+                                Total de ventas del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.SalesTotal.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0006
+                            </td>
+                            <td>
+                                Número de días trabajados en el período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.WorkingDays)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0007
+                            </td>
+                            <td>
+                                Total de pedidos de los últimos 30 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.TotalPedidos30Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0008
+                            </td>
+                            <td>
+                                Número de clientes que hayan hecho al menos un pedido en los últimos 60 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomerCount60Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0009
+                            </td>
+                            <td>
+                                Número de clientes que hayan hecho al menos un pedido en los últimos 30 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomerCount30Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0010
+                            </td>
+                            <td>
+                                Número de clientes que hayan hecho su primer pedido en los últimos 30 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.FirstOrderCount30Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0011
+                            </td>
+                            <td>
+                                Número de clientes que hayan hecho al menos un pedido en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomerCount120Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0012
+                            </td>
+                            <td>
+                                Número de clientes que hayan hecho al menos un pedido en los últimos 90 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomerCount90Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0013
+                            </td>
+                            <td>
+                                Número de clientes que hayan hecho su primer pedido en los últimos 90 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.FirstOrderCount90Days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0014
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron al menos 1 pedido en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCountAtLeastOneOrder120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0015
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron únicamente 1 pedido en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCountOnlyOnePedido120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0016
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron 2 ó 3 pedidos en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCount2or3Pedidos120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0017
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron 4 ó 5 pedidos en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCount4or5Pedidos120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0018
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron 6 ó 7 pedidos en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCount6or7Pedidos120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0019
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron 8 ó 9 pedidos en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCount8or9Pedidos120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0020
+                            </td>
+                            <td>
+                                Número de clientes que hicieron su primer pedido hace más de 120 días y que hicieron 10 ó más pedidos en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersCountMoreThan10Pedidos120DaysAndMore)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0021
+                            </td>
+                            <td>
+                                Número de clientes que hicieron al menos un pedido entre 150 y 121 días atrás a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersWithOneOrderBetween150and121days)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0022
+                            </td>
+                            <td>
+                                Número de clientes que hicieron al menos un pedido entre 150 y 121 días atrás y que hicieron al menos un pedido en los últimos 120 días a partir de la fecha final del período
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.CustomersWithOneOrderBetween150and121daysAnd120daysPedido)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0023
+                            </td>
+                            <td>
+                                Ventas generadas por pedidos dentro del período que fueron el primer pedido del cliente
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.SalesFirstOrders.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0024
+                            </td>
+                            <td>
+                                Número de pedidos dentro del período que fueron el primer pedido del cliente
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.FirstPedidosCount)</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0025
+                            </td>
+                            <td>
+                                Ventas generadas por pedidos dentro del período que fueron hechas por clientes con más de un pedido
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.SalesNotFirstOrders.ToString("C"))</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td>
+                                MK0026
+                            </td>
+                            <td>
+                                Número de pedidos dentro del período que fueron hechos por clientes con más de un pedido
+                            </td>
+                            @foreach (var data in Model.Data)
+                            {
+                                <td>@(data.NotFirstOrdersCount)</td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const refreshData = (withDate = false) => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        $.ajax({
+            url: '/Admin/MarketingDashboard/GenerateDashboardData?specificDate=' +
+                (withDate ? $('#generation-date').val() : ""),
+            type: 'GET',
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

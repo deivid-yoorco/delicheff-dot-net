@@ -1,0 +1,264 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.ChallengeModel
+<style>
+    .challenges .panel-default {
+        margin-bottom: 25px;
+    }
+</style>
+<div class="content challenges">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Crea una cuenta en Super Papelera
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="CreateAccountActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="CreateAccountActive" />
+                            <span asp-validation-for="CreateAccountActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="CreateAccountAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="CreateAccountAmount" />
+                            <span asp-validation-for="CreateAccountAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Vincula tu cuenta en Facebook
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FacebookLinkActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FacebookLinkActive" />
+                            <span asp-validation-for="FacebookLinkActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FacebookLinkAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FacebookLinkAmount" />
+                            <span asp-validation-for="FacebookLinkAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*<div class="panel panel-default">
+                <div class="panel-heading">
+                    Síguenos en Facebook
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FacebookFollowActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FacebookFollowActive" />
+                            <span asp-validation-for="FacebookFollowActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FacebookFollowAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FacebookFollowAmount" />
+                            <span asp-validation-for="FacebookFollowAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Síguenos en Instagram
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="InstagramFollowActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="InstagramFollowActive" />
+                            <span asp-validation-for="InstagramFollowActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="InstagramFollowAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="InstagramFollowAmount" />
+                            <span asp-validation-for="InstagramFollowAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Compra 4 semanas seguidas con mínimo de consumo de XXXX pesos
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FourWeeksMinimumBoughtActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FourWeeksMinimumBoughtActive" />
+                            <span asp-validation-for="FourWeeksMinimumBoughtActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FourWeeksMinimumBoughtRequired" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FourWeeksMinimumBoughtRequired" />
+                            <span asp-validation-for="FourWeeksMinimumBoughtRequired"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FourWeeksMinimumBoughtAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FourWeeksMinimumBoughtAmount" />
+                            <span asp-validation-for="FourWeeksMinimumBoughtAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Compra 8 semanas seguidas con mínimo de consumo de XXXX pesos
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EightWeeksMinimumBoughtActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="EightWeeksMinimumBoughtActive" />
+                            <span asp-validation-for="EightWeeksMinimumBoughtActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EightWeeksMinimumBoughtRequired" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="EightWeeksMinimumBoughtRequired" />
+                            <span asp-validation-for="EightWeeksMinimumBoughtRequired"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EightWeeksMinimumBoughtAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="EightWeeksMinimumBoughtAmount" />
+                            <span asp-validation-for="EightWeeksMinimumBoughtAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Compra 12 semanas seguidas con mínimo de consumo de XXXX pesos
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="TwelveWeeksMinimumBoughtActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="TwelveWeeksMinimumBoughtActive" />
+                            <span asp-validation-for="TwelveWeeksMinimumBoughtActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="TwelveWeeksMinimumBoughtRequired" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="TwelveWeeksMinimumBoughtRequired" />
+                            <span asp-validation-for="TwelveWeeksMinimumBoughtRequired"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="TwelveWeeksMinimumBoughtAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="TwelveWeeksMinimumBoughtAmount" />
+                            <span asp-validation-for="TwelveWeeksMinimumBoughtAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Descarga la app e inicia sesión desde la app
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AppLoginActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AppLoginActive" />
+                            <span asp-validation-for="AppLoginActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AppLoginAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AppLoginAmount" />
+                            <span asp-validation-for="AppLoginAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Completa tu perfil
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ProfileFinishActive" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ProfileFinishActive" />
+                            <span asp-validation-for="ProfileFinishActive"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ProfileFinishAmount" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ProfileFinishAmount" />
+                            <span asp-validation-for="ProfileFinishAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

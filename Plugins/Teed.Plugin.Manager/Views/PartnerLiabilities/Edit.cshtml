@@ -1,0 +1,206 @@
+﻿@model Teed.Plugin.Manager.Models.PartnerLiabilities.EditViewModel
+@inject Nop.Core.IWorkContext workContext
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.PartnerLiabilities");
+}
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar pasivo con socios
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List" asp-controller="PartnerLiabilities">regresar a la lista de pasivos con socios</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div>
+                            <input asp-for="SelectedDate" type="hidden" id="filterDate" />
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Fecha</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group" style="width:100%">
+                                        <input class="form-control" id="datepicker" value="@Model.SelectedDate" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Categoría</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="CategoryId" type="hidden" id="categoryId" />
+                                    <input id="categories" style="width: 100% !important;" value="@Model.CategoryId" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Usuario</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group" style="width:100%">
+                                        <input id="users" />
+                                        <input type="hidden" id="selected-user" asp-for="PartnerId" />
+                                    </div>
+                                    <div id="current-balance" style="display:none">
+                                        <em>Balance actual: <span id="current-balance-amount"></span></em>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Monto</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Amount" asp-postfix="MXN" />
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Comments">Comentarios</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Comments" class="form-control"></textarea>
+                                    <span asp-validation-for="Comments" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+    $(document).ready(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker();
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        $("#users").kendoComboBox({
+            placeholder: "Selecciona al usuario...",
+            dataTextField: "User",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/PartnerLiabilities/UserListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#users").data("kendoComboBox").value()) {
+                    $("#users").data("kendoComboBox").value($("#selected-user").val());
+                }
+            },
+            select: function (e) {
+                $("#selected-user").val(this.dataItem(e.item.index()).Id);
+                getUserBalance();
+            }
+        });
+
+        function getUserBalance() {
+            let userId = $("#selected-user").val();
+            $("#current-balance").hide();
+
+            $.ajax({
+                url: '/Admin/PartnerLiabilities/GetUserBalance?id=' + userId,
+                method: 'GET',
+                success: function (data) {
+                    $("#current-balance").show();
+                    $("#current-balance-amount").html(data.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }));
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        }
+
+        $("#categories").kendoComboBox({
+        placeholder: "Selecciona la categoría...",
+        dataTextField: "Category",
+        dataValueField: "Id",
+        filter: "contains",
+        autoBind: true,
+        minLength: 1,
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: "@Html.Raw(Url.Action("CategoryListData", "Expenses"))",
+                    type: "POST",
+                    data: addAntiForgeryToken
+                }
+            }
+        },
+        dataBound: function (e) {
+            var combobox = $("#categories").data('kendoComboBox');
+            if (combobox.dataSource.data().length == 1) {
+                var id = combobox.dataSource.data()[0].Id;
+                combobox.value(id);
+                $("#categoryId").val(id);
+            }
+            if (!$("#categoryId").val()) {
+                $("#categories").data("kendoComboBox").value($("#categoryId").val());
+            }
+        },
+        select: function (e) {
+            $("#categoryId").val(this.dataItem(e.item.index()).Id);
+        },
+        change: function (e) {
+            if (this.selectedIndex == -1) {
+                $("#categories").data("kendoComboBox").value("");
+            }
+        }
+        });
+    });
+</script>

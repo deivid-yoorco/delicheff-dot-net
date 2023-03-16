@@ -1,0 +1,83 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var controllerName = "Patient";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var notesCount = (int)ViewData["notesCount"];
+    var filesCount = (int)ViewData["filesCount"];
+}
+
+<form asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Información del paciente
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de pacientes</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <a asp-controller="Appointment" asp-action="Create" asp-route-id="@Model.Id" class="btn bg-yellow">
+                <i class="fa fa-file-text"></i>
+                Agendar Cita
+            </a>
+            <a asp-controller="Appointment" asp-action="ManualCreate" asp-route-id="@Model.Id" class="btn bg-green">
+                <i class="fa fa-file-text"></i>
+                Agendar Cita Manual
+            </a>
+            <a asp-controller="Visit" asp-action="Create" asp-route-id="@Model.Id" class="btn bg-olive">
+                <i class="fa fa-file-text"></i>
+                Agregar Consulta
+            </a>
+            @*<a asp-controller="Prescription" asp-action="Create" asp-route-id="@Model.Id" class="btn bg-purple">
+                    <i class="fa fa-file-text"></i>
+                    Agregar Receta
+                </a>*@
+            <a asp-controller="Note" asp-action="Create" asp-route-id="@Model.Id" class="btn bg-red">
+                <i class="fa fa-file-text"></i>
+                Agregar Nota
+            </a>
+            <a asp-controller="Files" asp-action="Create" asp-route-pid="@Model.Id" class="btn bg-blue">
+                <i class="fa fa-file-text"></i>
+                Agregar Archivo
+            </a>
+            @if (!Model.ActiveUpdate)
+            {
+                <a asp-controller="Patient" asp-action="ActivePatient" asp-route-id="@Model.Id" class="btn bg-red">
+                    <i class="fa fa-file-text"></i>
+                    Solicitar completar información
+                </a>
+
+            }
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn bg-blue">
+                <i class="fa fa-pencil"></i>
+                @T("Admin.Common.Edit")
+            </a>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.PatientBanner.cshtml", Model)
+                        <nop-tabs id="recipe" style="margin-top:1.5%;">
+                            <nop-tab asp-name="tab-info" asp-title="Información" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.PatientDetails.cshtml", Model)</nop-tab>
+                            @*<nop-tab asp-name="tab-prescription" asp-title="Recetas">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.PatientPrescriptions.cshtml", Model)</nop-tab>*@
+                            @*<nop-tab asp-name="tab-visits" asp-title="Consultas">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.PatientVisits.cshtml", Model)</nop-tab>*@
+                            <nop-tab asp-name="tab-appointments" asp-title="Historial de Citas">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.PatientAppointments.cshtml", Model)</nop-tab>
+
+                            <!--<nop-tab asp-name="tab-past-appointments" asp-title="Citas Pasadas">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.PatientPastAppointments.cshtml", Model)</nop-tab>-->
+                            <nop-tab asp-name="tab-notes" asp-title="Notas (@(notesCount))">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.Notes.cshtml", Model)</nop-tab>
+                            <nop-tab asp-name="tab-files" asp-title="Archivos (@filesCount)">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Patient/_Details.Files.cshtml", Model)</nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,15 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@model int
+
+@if (Model > 0)
+{
+    <div class="tab-pane" id="tab-whatsapplogs" style="display: none">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="messages-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

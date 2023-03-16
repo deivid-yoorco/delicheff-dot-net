@@ -1,0 +1,10 @@
+﻿@model Teed.Plugin.Api.Models.TaggableBoxModel
+
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @Html.Raw(Model.Log.Replace("\n", "<br />"))
+        </div>
+    </div>
+</div>

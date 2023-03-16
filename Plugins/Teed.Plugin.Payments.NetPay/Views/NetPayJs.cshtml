@@ -1,0 +1,11 @@
+﻿@model bool
+@if(Model)
+{
+    <!--Pruebas-->
+    <script type="text/javascript" src="https://docs.netpay.mx/cdn/js/dev/netpay.154.js"></script>
+}
+else
+{
+    <!--Produccion-->
+    <script type="text/javascript" src="https://docs.netpay.mx/cdn/v1.3/netpay.min.js"></script>
+}

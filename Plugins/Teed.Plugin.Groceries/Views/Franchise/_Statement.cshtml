@@ -1,0 +1,96 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.InfoModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h3 style="text-align: center;margin-top: 0px !important;margin-bottom: 30px">
+            Estado de cuenta
+            <div class="pull-right">
+                <a asp-action="ExportStatement" asp-route-franchiseId="@Model.FranchiseId" class="btn bg-blue">
+                    <i class="fa fa-file-excel-o"></i>
+                    Exportar
+                </a>
+            </div>
+        </h3>
+        <div id="balance-grid"></div>
+        <script>
+            $(document).ready(function () {
+                $("#balance-grid").kendoGrid({
+                    dataSource: {
+                        type: "json",
+                        transport: {
+                            read: {
+                                url: "@Html.Raw(Url.Action("StatementData", "Franchise", new { franchiseId = Model.FranchiseId }))",
+                                type: "POST",
+                                dataType: "json",
+                                data: null
+                            }
+                        },
+                        schema: {
+                            data: "Data",
+                            total: "Total",
+                            errors: "Errors"
+                        },
+                        error: function(e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        pageSize: @(defaultGridPageSize),
+                        serverPaging: false,
+                        serverFiltering: false,
+                        serverSorting: false
+                    },
+                    pageable: {
+                        refresh: false,
+                        pageSizes: [@(gridPageSizes)],
+                        @await Html.PartialAsync("_GridPagerMessages")
+                    },
+                    editable: {
+                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                        mode: "inline"
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "Date",
+                            title: "Fecha",
+                        },
+                        {
+                            field: "Description",
+                            title: "Comisiones / abonos a cuenta",
+                        },
+                        {
+                            field: "Amount",
+                            title: "Importe",
+                            template: function (dataItem) {
+                                return (!dataItem.IsAdding ? "-" : "") + kendo.htmlEncode(dataItem.Amount);
+                            }
+                        },
+                        {
+                            field: "Tax",
+                            title: "IVA",
+                            template: function (dataItem) {
+                                return (!dataItem.IsAdding ? "-" : "") + kendo.htmlEncode(dataItem.Tax);
+                            }
+                        },
+                        {
+                            field: "Total",
+                            title: "Total",
+                            template: function (dataItem) {
+                                return (!dataItem.IsAdding ? "-" : "") + kendo.htmlEncode(dataItem.Total);
+                            }
+                        },
+                        //{
+                        //    field: "Balance",
+                        //    title: "Saldo",
+                        //},
+                    ]
+                });
+            });
+        </script>
+    </div>
+</div>

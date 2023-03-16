@@ -1,0 +1,236 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.CorcelProduct");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Corcel";
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="content-header clearfix">
+            <h1 class="pull-left">
+                Productos CORCEL
+            </h1>
+        </div>
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <div id="corcelProducts-grid"></div>
+
+                    <script type="text/javascript">
+                    $(document).ready(function() {
+                        $("#corcelProducts-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("CorcelProductList", controllerName))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    create: {
+                                        url: "@Html.Raw(Url.Action("CorcelProductAdd", controllerName))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("CorcelProductUpdate", controllerName))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    destroy: {
+                                        url: "@Html.Raw(Url.Action("CorcelProductDelete", controllerName))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            Id: { editable: false, type: "number" },
+                                            ProductId: { editable: true, type: "number" },
+                                            ProductName: { editable: false, type: "string" },
+                                            Quantity: { editable: true, type: "number" },
+                                            AddedOnDate: { editable: false, type: "string" },
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "create" || e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            toolbar: [{ name: "create", text: "@T("Admin.Common.AddNewRecord")" }],
+                            editable: {
+                                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "Id",
+                                    template: "<span data-id='#=Id#'></span>",
+                                    hidden: true
+                                },
+                                {
+                                    field: "ProductId",
+                                    title: "Nombre del producto",
+                                    template: "<span data-productid='#=ProductId#'>#=ProductName#</span>",
+                                    editor: productEditor,
+                                    width: 300
+                                }, {
+                                    field: "Quantity",
+                                    title: "Cantidad equivalente a comparar en reglas",
+                                    template: "<span data-quantity='#=Quantity#'>#=Quantity#</span>",
+                                    editor: quantityEditor,
+                                    width: 300
+
+                                }, {
+                                    command: [
+                                        {
+                                            name: "edit",
+                                            text: {
+                                                edit: "@T("Admin.Common.Edit")",
+                                                update: "@T("Admin.Common.Update")",
+                                                cancel: "@T("Admin.Common.Cancel")"
+                                            }
+                                        }, {
+                                            name: "destroy",
+                                            text: "@T("Admin.Common.Delete")"
+                                        }
+                                    ],
+                                    width: 200
+                                }
+                            ]
+                        });
+                    });
+
+                function quantityEditor(container, options) {
+                    $('<input data-bind="value:' + options.field + '"/>')
+                        .appendTo(container)
+                        .kendoNumericTextBox({
+                            decimals: 0,
+                            format: "n",
+                            min: 1
+                        });
+                }
+
+                var productIdsInput;
+                var $limitedInput;
+                function productEditor(container, options) {
+                    $('<input id="product-id" style="display: none!important" data-bind="value:' + options.field + '"/><select id="product-select"></select>')
+                        .appendTo(container);
+
+                    $('#product-select').kendoMultiSelect({
+                        dataTextField: "name",
+                        dataValueField: "id",
+                        autoClose: false,
+                        filter: "contains",
+                        delay: 1000,
+                        minLength: 3,
+                        maxSelectedItems: 1,
+                        change: function (e) {
+                            var value = this.value();
+                            if (value.length > 0)
+                                $('#product-id').val(value[0]);
+                            else
+                                $('#product-id').val('');
+                            $('#product-id').change();
+                        }
+                    });
+                    productIdsInput = $('#product-select').data("kendoMultiSelect");
+
+                    $limitedInput = $('[aria-owns="product-select_taglist product-select_listbox"]');
+                    $limitedInput.on('keyup', function (e) {
+                        if (e.which <= 90 && e.which >= 48 &&
+                            GetCurrentText($limitedInput).length > 2 &&
+                            !e.ctrlKey && !e.altKey) {
+                            setTimeout(function () {
+                                GetProducts(GetCurrentText($limitedInput));
+                            }, 200);
+                        }
+                    });
+                    setTimeout(function () {
+                        if ($('#product-id').val() > 0) {
+                            GetProducts('', $('#product-id').val());
+                            productIdsInput.enable(false);
+                        } else
+                            productIdsInput.enable(true);
+                    }, 200);
+                }
+
+                        function GetCurrentText($element) {
+                            return $element.val();
+                        }
+                        function GetProducts(text = '', id = '') {
+                            productIdsInput.close();
+                            var namesList = [];
+                            if (text != '' && text.includes(',')) {
+                                namesList = text.split(',');
+                                text = '';
+                            }
+                            var data = {
+                                Text: text,
+                                ByIds: [id],
+                                Texts: namesList
+                            }
+                            addAntiForgeryToken(data);
+                            $.ajax({
+                                cache: false,
+                                type: "POST",
+                                url: "/Admin/Corcel/GetProductsFiltering",
+                                data: data,
+                                success: function (data) {
+                                    if (typeof data.setAll != 'undefined') {
+                                        if (data.setAll == true) {
+                                            productIdsInput.setDataSource(data.customers);
+                                            var values = data.customers.map(x => x.id);
+                                            productIdsInput.value(values);
+                                        }
+                                    }
+                                    else if (data.length > 0) {
+                                        productIdsInput.setDataSource(data);
+                                        if (id !== '')
+                                            productIdsInput.value([id]);
+                                        else
+                                            productIdsInput.open();
+                                    }
+                                },
+                                error: function (e) {
+                                    alert('Failed to retrieve products.');
+                                    console.log(e);
+                                },
+                            });
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

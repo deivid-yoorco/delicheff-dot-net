@@ -1,0 +1,185 @@
+﻿
+input.qty-input {
+    text-align: center !important;
+}
+
+.shopping-cart-action-buttons button {
+    margin-top: 5px !important;
+}
+
+.shopping-cart-action-buttons {
+    padding: 0 !important;
+}
+
+/*#topcartlink {
+    display: inline-block;
+    width: auto;
+    margin: 0;
+    padding: 0 18px;
+}*/
+
+.flyout-cart {
+    position: fixed;
+    top: 3%;
+    right: 25%;
+    z-index: 1003;
+    width: 300px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.25);
+    background-color: #fff;
+}
+
+/*@media(max-width: 600px) {
+    .flyout-cart {
+        top: 3%;
+        right: 2%;
+    }
+}*/
+
+@media(min-width: 1300px) {
+    .flyout-cart {
+        right: 25%;
+    }
+}
+
+@media(min-width: 1500px) {
+    .flyout-cart {
+        right: 25%;
+    }
+}
+
+@media(min-width: 1600px) {
+    .flyout-cart {
+        right: 25%;
+    }
+}
+
+@media(min-width: 1700px) {
+    .flyout-cart {
+        right: 25%;
+    }
+}
+
+/*#topcartlink {
+    display: block;
+    width: 70%;
+    max-width: 400px;
+    margin: 10px auto 0;
+    background-color: #f6f6f6;
+    padding: 0 20px;
+}
+
+#topcartlink a {
+    /*background: url('../images/shopping-bag.png') left center no-repeat;
+    padding: 0 0 0 20px;
+}*/
+
+.flyout-cart {
+    display: none;
+}
+
+.flyout-cart.active {
+    display: block;
+}
+
+.mini-shopping-cart {
+    padding: 12px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.mini-shopping-cart .count {
+    padding: 5px 0 15px;
+    color: #444;
+}
+
+.mini-shopping-cart .count a {
+    margin: 0 2px;
+    font-weight: bold;
+    color: #444;
+}
+
+.mini-shopping-cart .items {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    margin: 0 0 20px;
+}
+
+.mini-shopping-cart .item {
+    overflow: hidden;
+    padding: 10px 0;
+}
+
+.mini-shopping-cart .picture {
+    float: left;
+    width: 70px;
+    text-align: center;
+}
+
+.mini-shopping-cart .picture a {
+    display: block;
+    position: relative;
+    overflow: hidden;
+}
+
+.mini-shopping-cart .picture a:before {
+    content: "";
+    display: block;
+    padding-top: 100%;
+}
+
+.mini-shopping-cart .picture img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    max-width: 100%;
+}
+
+.mini-shopping-cart .picture + .product {
+    margin: 0 0 0 80px;
+}
+
+.mini-shopping-cart .name {
+    margin: 0 0 10px;
+    font-size: 14px;
+}
+
+.mini-shopping-cart .name a {
+    color: #a07936;
+}
+/*.mini-shopping-cart .name a:hover {
+    color: #248ece;
+}*/
+.mini-shopping-cart .attributes {
+    margin: 5px 0;
+    color: #444;
+}
+
+.mini-shopping-cart .totals {
+    margin: 0 0 12px;
+    font-size: 14px;
+}
+
+.mini-shopping-cart .totals strong {
+    font-size: 16px;
+    color: #444;
+}
+
+.mini-shopping-cart .buttons {
+    margin: 0 0 5px;
+}
+
+.mini-shopping-cart input[type="button"] {
+    /*display: inline-block;
+    border: none;
+    background-color: #a07936;
+    padding: 10px 20px;
+    font-size: 12px;*/
+    color: #fff;
+    /*text-transform: uppercase;*/
+}
+/*.mini-shopping-cart input[type="button"]:hover {
+    background-color: #a07936;
+}*/

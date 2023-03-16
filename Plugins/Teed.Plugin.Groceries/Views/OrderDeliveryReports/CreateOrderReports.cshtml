@@ -1,0 +1,271 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderDeliveryReports.CreateOrderReportsViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var deliveryDate = Model.DeliveryDate.ToString("dd-MM-yyyy");
+    var countProducts = 0;
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Crear reportes de las ordenes de la fecha: @deliveryDate
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="DeliveryDateList">Regresar a la lista de fechas de entregas</a>
+            </small>
+        </h1>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @if (ViewBag.mensaje != null)
+                        {
+                            <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                @ViewBag.mensaje
+                            </h2>
+                        }
+                        <div>
+                            @foreach (var order in Model.GroupsDistinc)
+                            {
+                                <h2>Producto: @order.GroupProductName</h2>
+                                <div class="table-responsive">
+                                    <table class="table-responsive" style="width:100%">
+                                        <tr>
+                                            <td hidden style="background-color:khaki">Producto</td>
+                                            <td style="background-color:khaki">Precio (kg/pz)</td>
+                                            <td style="background-color:khaki">Pedido</td>
+                                            <td style="background-color:khaki">Orden</td>
+                                            <td style="background-color:khaki">Especificaciones</td>
+                                            <td style="background-color:khaki">Cantidad</td>
+                                            <td style="background-color:khaki">Costo pedido</td>
+                                            <td style="background-color:khaki">Bodega</td>
+                                            <td style="background-color:khaki">Comentarios</td>
+                                        </tr>
+                                        @foreach (var item in order.Products)
+                                        {
+                                            <tr>
+                                                <td hidden><input hidden id="orderItemId-@countProducts" value="@item.OrderItemId" /> </td>
+                                                <td hidden><input hidden id="orderItemName-@countProducts" value="@item.OrderItemName" /> </td>
+
+                                                <td style="text-align:right">$@item.ItemCostKgPz                <input hidden id="itemCostKgPz-@countProducts" value="@item.ItemCostKgPz" /></td>
+                                                <td style="text-align:right">$@item.OrderItemCost               <input hidden id="orderItemCost-@countProducts" value="@item.OrderItemCost" /> </td>
+                                                <td style="text-align:center">#@item.OrderId                    <input hidden id="orderId-@countProducts" value="@item.OrderId" /></td>
+                                                <td>- @item.OrderItemSpecifications                             <input hidden id="orderItemSpecifications-@countProducts" value="@item.OrderItemSpecifications" /></td>
+                                                <td style="text-align:right">@item.OrderItemQuantitySpecific    <input hidden id="orderItemQuantity-@countProducts" value="@item.OrderItemQuantity" /></td>
+                                                <td style="text-align:right">                                   <input id="orderItemRequestedQtyPrice-@countProducts" placeholder="Ingresa el costo del pedido..." type="number" min="0" /></td>
+                                                <td style="text-align:center">                                  <input id="orderItemStore-@countProducts" placeholder="Ingresa el codigo de la bodega..." /> </td>
+                                                <td>                                                            <textarea id="orderItemComment-@countProducts" placeholder="Registra los comentarios correspondientes..."></textarea> </td>
+                                                <span style="color:red" id="valueRegisterCeroOrEmpty-@countProducts"></span>
+                                            </tr>
+                                            countProducts++;
+                                        }
+                                    </table>
+                                </div>
+
+                                <hr />
+                            }
+                        </div>
+                        <input id="JsonData" asp-for="JsonData" type="hidden" />
+                        <input id="ExpenseJsonData" asp-for="ExpenseJsonData" type="hidden" />
+                        <input hidden asp-for="DeliveryDate" />
+                        @*<div>
+                                <button type="button" class="btn btn-success" onclick="createOrderReportJson()">crea json order</button>
+                            </div>*@
+                        <div>
+                            <h2>Gastos adicionales</h2>
+                            <div id="tablesExpenseContainer" class="table-responsive">
+                                @*tablesContainer*@
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-success" onclick="addNewExpense()">Agregar gasto</button>
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <button type="submit" asp-action="CreateOrderReports" onclick="return createOrderReportJson()" class="btn bg-blue">
+                                Crear reporte de ordenes del dia
+                            </button>
+                            @*<div>
+                                    <button type="button" class="btn btn-success" onclick="createExpenseJson(this)">crea json</button>
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+    function createExpenseJson() {
+        var expenseData = [];
+        if (countClick != 0) {
+
+            for (var i = 0; i < countClick; i++) {
+                var expenseAmount = 0
+                if (document.getElementById('amountExpense' + i).value != "") {
+                    expenseAmount = document.getElementById('amountExpense' + i).value;
+                }
+                var expenseDescription = document.getElementById('descriptionExpense' + i).value;
+                var Data = {
+                    ExpenseAmount: expenseAmount,
+                    ExpenseDescription : expenseDescription
+
+                }
+                expenseData.push(Data);
+            }
+            var expenseDataTypeJson = JSON.stringify(expenseData);
+            console.log(expenseDataTypeJson);
+            DataExpenseJson(expenseDataTypeJson);
+        }
+    }
+
+    function DataExpenseJson(dataJsonExpense) {
+        var jsonExpense = dataJsonExpense;
+        document.getElementById('ExpenseJsonData').value = jsonExpense;
+
+    }
+
+    function createOrderReportJson() {
+        var orderReportData = [];
+
+        for (var i = 0; i < @countProducts; i++) {
+            var orderIdData = document.getElementById('orderId-' + i).value;
+            var orderItemIdData = document.getElementById('orderItemId-' + i).value;
+            var orderItemCostData = document.getElementById('orderItemCost-' + i).value;
+            var orderItemStoreData = document.getElementById('orderItemStore-' + i).value;
+
+            var orderItemRequestedQtyPriceData = 0;
+            if (document.getElementById('orderItemRequestedQtyPrice-' + i).value != "") {
+                orderItemRequestedQtyPriceData = document.getElementById('orderItemRequestedQtyPrice-' + i).value;
+                if (orderItemRequestedQtyPriceData == 0) {
+                    document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "No puedes registrar 0's en la orden " + document.getElementById('orderId-' + i).value + ". ";
+                    alert('[Alerta] Registraste algun cero en el producto: ' + document.getElementById('orderItemName-' + i).value + '.');
+                    return false;
+                } else {
+                    document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "";
+                }
+            }
+            else {
+                document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "Todos los campos deben ser llenados en la orden " + document.getElementById('orderId-' + i).value + ". ";
+                alert('[Alerta] Dejaste campos vacios en el producto: ' + document.getElementById('orderItemName-' + i).value + '.');
+                return false;
+            }
+            var orderItemCommentData = document.getElementById('orderItemComment-' + i).value;
+
+            var Data = {
+                OrderId: orderIdData,
+                OrderItemId: orderItemIdData,
+                OrderItemCost: orderItemCostData,
+                ShoppingStoreId: orderItemStoreData,
+                RequestedQtyCost: orderItemRequestedQtyPriceData,
+                OrderItemComments: orderItemCommentData,
+            }
+            orderReportData.push(Data);
+        }
+
+            var orderReportTypeJson = JSON.stringify(orderReportData);
+            console.log(orderReportTypeJson);
+            createExpenseJson();
+            DataJson(orderReportTypeJson);
+    };
+
+    function DataJson(Json) {
+        var jsonData = Json;
+        document.getElementById('JsonData').value = jsonData;
+    }
+
+    var countClick = 0;
+    function countClickAdd() {
+        countClick += 1;
+        console.log(countClick);
+    }
+    function countClickRest() {
+        countClick -= 1;
+        console.log(countClick);
+    }
+
+    function addNewExpense() {
+        createNewExpense(countClick);
+        countClickAdd();
+    }
+
+    function createNewExpense(currentClickExpense) {
+        var currentExpense = currentClickExpense;
+        $('#tablesExpenseContainer').append(
+            '<table id="tableExpense' + currentExpense + '" class="tableExpense" style = "width:100%" >'
+                + '<tr>'
+                    + '<td class="tdExpense" style="width:30%; text-align:right;">Monto Gastado: $ <input id="amountExpense' + currentExpense + '" class="amountExpense" type="number" min="0" style="width:65%; text-align:center" placeholder="Ingresa la cantidad del gasto..." /> </td>'
+                        + '<td class="tdExpense" style="text-align:right; width:8%">Descripción: </td>'
+                        + '<td class="tdExpense" style="width:30%"><textarea id="descriptionExpense' + currentExpense + '" class="descriptionExpense" style="width:100%" placeholder="Registra el concepto del gasto..."></textarea></td>'
+                    + '<td class="tdExpense" style="width:12%"><button id="deleteExpense' + currentExpense + '" class="deleteExpense btn btn-danger"  type="button" onclick="deleteTableAndReorderIds(this)">Borrar gasto</button></td>'
+                +'</tr>'
+            +'</table >'
+        );
+    }
+
+    function deleteTableAndReorderIds(element) {
+
+        var idButton = element.id;
+        var numberTableId = idButton.substring(idButton.length - 1, idButton.length)
+        console.log(idButton);
+        console.log(numberTableId);
+
+
+        $('#tableExpense' + numberTableId).remove();
+        countClickRest();
+
+        var tableExpense = document.getElementsByClassName('tableExpense');
+        $.each(tableExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'tableExpense' + index);
+        });
+
+        var amountExpense = document.getElementsByClassName('amountExpense');
+        $.each(amountExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'amountExpense' + index);
+        });
+
+        var descriptionExpense = document.getElementsByClassName('descriptionExpense');
+        $.each(descriptionExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'descriptionExpense' + index);
+        });
+
+        var deleteExpense = document.getElementsByClassName('deleteExpense');
+        $.each(deleteExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'deleteExpense' + index);
+        });
+
+    }
+
+
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    .tableExpense {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tdExpense, .thExpense {
+        border: 1px solid #ffffff;
+        text-align: center;
+        padding: 8px;
+    }
+</style>

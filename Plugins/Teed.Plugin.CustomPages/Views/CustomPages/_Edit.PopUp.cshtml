@@ -1,0 +1,52 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var imageNote = "Se recomienda que la imagen cargada sea de 1920x550 píxeles.";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Activar notificación
+    </div>
+    <div class="panel-body">
+        <div class="col-md-3 text-right">
+            <label>Activado</label>
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="PopUpEnable" />
+            <span asp-validation-for="PopUpEnable"></span>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen para escritorio
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="PopUpPicture39Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="PopUpPicture39Id" />
+                <span asp-validation-for="PopUpPicture39Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen para móviles
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="PopUpPicture39ResponsiveId" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="PopUpPicture39ResponsiveId" />
+                <span asp-validation-for="PopUpPicture39ResponsiveId"></span>
+                <em>Se recomienda que la imagen cargada sea de 640 x 960 píxeles.</em>
+            </div>
+        </div>
+    </div>
+</div>

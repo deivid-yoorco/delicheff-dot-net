@@ -1,0 +1,112 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.IncidentsListModel 
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Incidents");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Incidents";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Lista de incidencias del vehículo
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="IncidentVehiclesList" asp-route-date="@Model.Date">regresar a lista de rutas</a>
+        </small>
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" asp-route-date="@Model.Date" asp-route-franchiseId="@Model.FranchiseId" asp-route-vehicleId="@Model.VehicleId" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Agregar incidencia
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("IncidentsListData", controllerName, new { date = Model.Date, franchiseId = Model.FranchiseId, vehicleId = Model.VehicleId }))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "Franchise",
+                    title: "Franquicia",
+                },
+                {
+                    field: "Vehicle",
+                    title: "Camioneta",
+                },
+                {
+                    field: "Comments",
+                    title: "Comentarios",
+                },
+                {
+                    field: "IncidentCode",
+                    title: "Código",
+                },
+                {
+                    field: "Amount",
+                    title: "Monto",
+                },
+                {
+                    field: "Authorized",
+                    title: "Estado",
+                },
+                {
+                    field: "Id",
+                    title: "Editar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>Editar</a>'
+                }
+            ]
+        });
+    });
+</script>

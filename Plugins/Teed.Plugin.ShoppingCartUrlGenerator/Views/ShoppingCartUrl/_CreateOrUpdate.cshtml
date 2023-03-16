@@ -1,0 +1,292 @@
+﻿@model Teed.Plugin.ShoppingCartUrlGenerator.Models.ShoppingCartUrlModel
+<style>
+    .form-container {
+        border-bottom: solid 1px #ccc;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+</style>
+<div class="form-group">
+    <div class="col-md-3"></div>
+    <div class="col-md-9">
+        <strong style="color:red" id="error-message"></strong>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Código de Url</label>
+            <div title="Código que se utilizará para crear la URL. Debe ser único y no debe contener espacios. No se consideran mayúsculas ni minúsculas. Se recomienda no utilizar caracteres especiales. El formato final será /sc/{codigo}" class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="input-group" style="width:100%">
+            <input class="form-control" asp-for="Code" />
+            <span asp-validation-for="Code"></span>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">Cuerpo del mensaje</label>
+            <div title="Ingresa el contenido que se mostrará al usuario al ingresar en la URL, el contenido estará ubicado sobre la lista de productos." class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <nop-editor asp-for="Body" asp-template="RichEditor" />
+        <span asp-validation-for="Body"></span>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <label class="control-label">¿Está activa?</label>
+            <div title="Selecciona si deseas que la URL esté activa." class="ico-help">
+                <i class="fa fa-question-circle"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <nop-editor asp-for="IsActive" />
+        <span asp-validation-for="IsActive"></span>
+    </div>
+</div>
+<hr />
+<h4>Productos</h4>
+<div id="product-forms">
+    @if (Model?.SelectedProductsData.Count > 0)
+    {
+        int count = 0;
+        @foreach (var item in Model.SelectedProductsData)
+        {
+            count++;
+            <div class="form-container" data-edit="true" data-index="@count">
+                <div class="form-group">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-9">
+                        <span><strong>Producto:</strong> @item.ProductName</span><br />
+                        <span><strong>Cantidad:</strong> @item.ProductGroceryQuantity</span><br />
+                        @if (!string.IsNullOrWhiteSpace(item.ProductProperty))
+                        {
+                            <span><strong>Propiedad:</strong> @item.ProductProperty</span><br />
+                        }
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-9">
+                        <a style="color:red" href="javascript:deleteForm(@count, @(item.ProductId))"><i class="fa fa-trash" aria-hidden="true"></i> Eliminar este producto</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<div class="form-group" style="margin-top: 10px;">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-9">
+        <a href="javascript:createForm()">+ Agregar otro producto</a>
+    </div>
+</div>
+<script>
+    let index = @(Model?.SelectedProductsData.Count) + 1;
+    function onQtyChange(el, index) {
+        let qty = $(el).val();
+        let equivalence = $("#equivalence-selector-" + index).val();
+        let interval = $("#interval-selector-" + index).val();
+
+        console.log(qty);
+        console.log(equivalence);
+        console.log(interval);
+    }
+
+    function updateQuantitySelect(unit, index) {
+        let select = $("#quantity-selector-" + index);
+        select.empty();
+        let options = select[0].options;
+
+        let equivalence = $("#equivalence-selector-" + index).val();
+        let interval = $("#interval-selector-" + index).val();
+
+        for (var i = 1; i < 100; i++) {
+            let type = unit == 1 ? " gr" : "";
+
+            let weightValue = i;
+            if (interval > 0 && unit == 1) {
+                weightValue = (i * interval).toFixed(2);
+            }
+            else if (equivalence > 0 && unit == 1) {
+                weightValue = ((i * 1000) / equivalence).toFixed(2);
+            }
+
+            if (weightValue >= 1000) {
+                weightValue = (weightValue / 1000).toFixed(2);
+                type = " kg";
+            }
+
+            let optionWeight = new Option(weightValue + type, i);
+            options.add(optionWeight);
+        }
+    }
+
+    function showPropertiesSelector(properties, index) {
+        let select = $("#properties-selector-" + index);
+        select.show();
+        select.empty();
+        let options = select[0].options;
+        for (var i = 0; i < properties.length; i++) {
+            options.add(new Option(properties[i], properties[i]));
+        }
+    }
+
+    function createForm() {
+        let formString = `
+            <div class="form-container" data-index="` + index + `">
+                <div class="form-group" id="product-container-selector-` + index + `">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Producto</label>
+                            <div title="Busca por nombre o SKU y selecciona un producto (solo se muestran productos publicados)" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input id="product-selector-` + index + `" style="width: 100%;" />
+                        <input type="hidden" id="equivalence-selector-` + index + `" />
+                        <input type="hidden" id="interval-selector-` + index + `" />
+                        <script>
+                            $("#product-selector-` + index + `").kendoComboBox({
+                                placeholder: "Busca un producto por nombre o SKU...",
+                                dataTextField: "Product",
+                                dataValueField: "Id",
+                                filter: "contains",
+                                autoBind: false,
+                                minLength: 3,
+                                dataSource: {
+                                    type: "json",
+                                    serverFiltering: true,
+                                    transport: {
+                                        read: {
+                                            url: "/Admin/ShoppingCartUrl/ProductListData"
+                                        }
+                                    },
+                                },
+                                change: (e) => onChange(e, ` + index + `),
+                                value: []
+                            });
+                        \<\/script\>
+                    </div>
+                </div>
+                <div class="form-group" id="unit-container-selector-` + index + `" style="display:none">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Unidad</label>
+                            <div title="Selecciona la unidad de medida." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:25%">
+                            <select class="form-control" id="unit-selector-` + index + `" onchange="updateQuantitySelect($(this).val(), ` + index + `)">
+                                <option value="0">Pieza</option>
+                                <option value="1">Peso</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" id="quantity-container-selector-` + index + `">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Cantidad</label>
+                            <div title="Cantidad del producto para agregar al carrito. Debes seleccionar un producto para activar esta casilla." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:25%">
+                            <select class="form-control" id="quantity-selector-` + index + `" onchange="onQtyChange(this, ` + index + `)" disabled></select>
+                            <span id="equivalence-calc-` + index + `"></span>
+                            <span id="interval-calc-` + index + `"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" id="property-container-selector-` + index + `" style="display:none">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Propiedades del producto</label>
+                            <div title="Selecciona las propiedades del producto" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:25%">
+                            <select style="text-transform: uppercase" class="form-control" id="properties-selector-` + index + `"></select>
+                        </div>
+                    </div>
+                </div>
+        `;
+        if (index > 1) {
+            formString += `
+                <div class="form-group" style="margin-top: 10px;">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-9">
+                        <a style="color:red" href="javascript:deleteForm(` + index + `)"><i class="fa fa-trash" aria-hidden="true"></i> Eliminar este producto</a>
+                    </div>
+                </div>
+            `
+        }
+        formString += "</div>";
+        $("#product-forms").append(formString);
+        index++;
+    }
+
+    function onChange(e, index) {
+        var productId = $("#product-selector-" + index).data('kendoComboBox').dataItem()?.Id;
+        if (!productId) return;
+
+        $("#unit-container-selector-" + index).hide();
+        $("#property-selector-" + index).hide();
+
+        $.ajax({
+            url: '/Admin/ShoppingCartUrl/GetProductData/' + productId,
+            type: 'GET',
+            success: (data) => {
+                $("#quantity-selector-" + index).attr('disabled', false);
+                $("#equivalence-selector-" + index).val(data.EquivalenceCoefficient);
+                $("#interval-selector-" + index).val(data.WeightInterval);
+
+                console.log(data);
+
+                if (data.EquivalenceCoefficient > 0) {
+                    $("#unit-container-selector-" + index).show();
+                    updateQuantitySelect(0, index);
+                }
+                else if (data.WeightInterval > 0) {
+                    updateQuantitySelect(1, index);
+                }
+                else {
+                    updateQuantitySelect(0, index);
+                }
+
+                if (data.PropertiesOptions) {
+                    $("#property-container-selector-" + index).show();
+                    showPropertiesSelector(data.PropertiesOptions.split(','), index);
+                }
+            },
+            error: (error) => {
+                console.log('ERROR GETTING PRODUCT DATA: ', error);
+            }
+        })
+    };
+</script>

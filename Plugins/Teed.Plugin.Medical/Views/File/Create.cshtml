@@ -1,0 +1,67 @@
+﻿@model Teed.Plugin.Medical.Models.File.FileModel
+@{
+    Layout = "_AdminLayout";
+    var selectedUser = (Teed.Plugin.Medical.Domain.Patient)ViewData["Patient"];
+}
+<script src="~/Plugins/Teed.Plugin.Medical/js/jasny/js/jasny-bootstrap.min.js"></script>
+<link href="~/Plugins/Teed.Plugin.Medical/js/jasny/css/jasny-bootstrap.min.css" rel="stylesheet">
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="PatientId" value="@selectedUser.Id" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar archivo al expediente de @selectedUser.FirstName @selectedUser.LastName
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-controller="Patient" asp-action="Details" asp-route-id="@selectedUser.Id">regresar al expediente del paciente</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                Guardar y agregar más archivos
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Archivo</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                    <div style="max-width: 11em" class="fileinput-preview fileinput-book-cover fileinput-exists thumbnail img-raised"></div>
+                                    <div>
+                                        <span class="btn btn-raised btn-round btn-default btn-file">
+                                            <span class="fileinput-new">Selecciona un archivo</span>
+                                            <span class="fileinput-exists">Cambiar</span>
+                                            <input type="file" asp-for="File" />
+                                        </span>
+                                        <a href="javascript:void(0)" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Quitar</a>
+                                        <br />
+                                        <span asp-validation-for="File" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Descripción</label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea asp-for="Description" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

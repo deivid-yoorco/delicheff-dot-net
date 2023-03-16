@@ -1,0 +1,50 @@
+﻿@model Teed.Plugin.Medical.Models.Appointment.AppointmentEditModel
+@using Teed.Plugin.Medical.Domain.Appointment
+@using Nop.Services
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Appointments");
+    var now = DateTime.Now;
+    var patients = (IEnumerable<Teed.Plugin.Medical.Domain.Patient>)ViewData["Patients"];
+    var availableProducts = (List<SelectListItem>)ViewData["Treatments"];
+    var availableUsers = (List<SelectListItem>)ViewData["DoctorsAndNurses"];
+}
+
+<form asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @if (Model.IsManualAppointment)
+            {
+                <span>Editar cita manual</span>
+            }
+            else
+            {
+                <span>Editar cita</span>
+            }
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de citas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <nop-tabs id="recipe">
+                            <nop-tab asp-name="tab-info" asp-title="Detalles" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Appointment/_Edit.Info.cshtml", Model)</nop-tab>
+                            <nop-tab asp-name="tab-schedule" asp-title="Bitácora">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Appointment/_Edit.Log.cshtml", Model)</nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

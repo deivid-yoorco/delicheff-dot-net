@@ -1,0 +1,349 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Medical</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Teed.Plugin.Medical</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+  <!-- This target execute after "Build" target -->
+  <Target Name="NopTarget" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugins path -->
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\Build\ClearPluginAssemblies.proj" Properties="PluginPath=$(MSBuildProjectDirectory)\$(OutDir)" Targets="NopClear" />
+  </Target>
+  <ItemGroup>
+    <None Remove="js\appointment-edit.js" />
+    <None Remove="js\appointment.js" />
+    <None Remove="js\jasny\css\jasny-bootstrap.min.css" />
+    <None Remove="js\jasny\js\jasny-bootstrap.min.js" />
+    <None Remove="js\manual-appointment-edit.js" />
+    <None Remove="js\manual-appointment.js" />
+    <None Remove="js\schedule-doctor.js" />
+    <None Remove="js\ui-choose\icon-selected.png" />
+    <None Remove="js\ui-choose\ui-choose.css" />
+    <None Remove="js\ui-choose\ui-choose.js" />
+    <None Remove="plugin.json" />
+    <None Remove="Views\Appointment\Create.cshtml" />
+    <None Remove="Views\Appointment\Details.cshtml" />
+    <None Remove="Views\Appointment\Edit.cshtml" />
+    <None Remove="Views\Appointment\List.cshtml" />
+    <None Remove="Views\Appointment\ListDoctorRole.cshtml" />
+    <None Remove="Views\Appointment\ManualCreate.cshtml" />
+    <None Remove="Views\Appointment\_Edit.Info.cshtml" />
+    <None Remove="Views\Appointment\_Edit.Log.cshtml" />
+    <None Remove="Views\Branch\Create.cshtml" />
+    <None Remove="Views\Branch\Details.cshtml" />
+    <None Remove="Views\Branch\Edit.cshtml" />
+    <None Remove="Views\Branch\List.cshtml" />
+    <None Remove="Views\Branch\_Create.Info.cshtml" />
+    <None Remove="Views\Branch\_Create.Schedule.cshtml" />
+    <None Remove="Views\Branch\_Update.Info.cshtml" />
+    <None Remove="Views\Branch\_Update.Schedule.cshtml" />
+    <None Remove="Views\Doctor\Details.cshtml" />
+    <None Remove="Views\Doctor\List.cshtml" />
+    <None Remove="Views\Doctor\_Update.Info.cshtml" />
+    <None Remove="Views\Doctor\_Update.Schedule-NEWSCHEDULE.cshtml" />
+    <None Remove="Views\Doctor\_Update.Schedule.cshtml" />
+    <None Remove="Views\Doctor\_UpdateLockDates.cshtml" />
+    <None Remove="Views\File\Create.cshtml" />
+    <None Remove="Views\Holiday\Create.cshtml" />
+    <None Remove="Views\Holiday\Details.cshtml" />
+    <None Remove="Views\Holiday\Edit.cshtml" />
+    <None Remove="Views\Holiday\List.cshtml" />
+    <None Remove="Views\Note\Create.cshtml" />
+    <None Remove="Views\Note\Details.cshtml" />
+    <None Remove="Views\Note\Edit.cshtml" />
+    <None Remove="Views\Note\List.cshtml" />
+    <None Remove="Views\Note\_Create.Info.cshtml" />
+    <None Remove="Views\Note\_Update.Info.cshtml" />
+    <None Remove="Views\Office\Create.cshtml" />
+    <None Remove="Views\Office\Edit.cshtml" />
+    <None Remove="Views\Office\List.cshtml" />
+    <None Remove="Views\Patient\_Details.Files.cshtml" />
+    <None Remove="Views\UpdatePatient\DoneUpdate.cshtml" />
+    <None Remove="Views\UpdatePatient\FalseUpdate.cshtml" />
+    <None Remove="Views\UpdatePatient\Update.cshtml" />
+    <None Remove="Views\Patient\Create.cshtml" />
+    <None Remove="Views\Patient\Details.cshtml" />
+    <None Remove="Views\Patient\Edit.cshtml" />
+    <None Remove="Views\Patient\List.cshtml" />
+    <None Remove="Views\Patient\VerifyAndCreate.cshtml" />
+    <None Remove="Views\Patient\_Details.Notes.cshtml" />
+    <None Remove="Views\Patient\_Details.PatientAppointments.cshtml" />
+    <None Remove="Views\Patient\_Details.PatientBanner.cshtml" />
+    <None Remove="Views\Patient\_Details.PatientDetails.cshtml" />
+    <None Remove="Views\Patient\_Details.PatientPastAppointments.cshtml" />
+    <None Remove="Views\Patient\_Details.PatientPrescriptions.cshtml" />
+    <None Remove="Views\Patient\_Details.PatientVisits.cshtml" />
+    <None Remove="Views\Prescription\Create.cshtml" />
+    <None Remove="Views\Prescription\Details.cshtml" />
+    <None Remove="Views\Prescription\Edit.cshtml" />
+    <None Remove="Views\Prescription\List.cshtml" />
+    <None Remove="Views\Prescription\_Create.Info.cshtml" />
+    <None Remove="Views\Prescription\_Create.Products.cshtml" />
+    <None Remove="Views\Prescription\_Update.Info.cshtml" />
+    <None Remove="Views\Prescription\_Update.Products.cshtml" />
+    <None Remove="Views\Visit\Create.cshtml" />
+    <None Remove="Views\Visit\Edit.cshtml" />
+    <None Remove="Views\Visit\_Create.Pending.cshtml" />
+    <None Remove="Views\Visit\_Create.Visit.cshtml" />
+    <None Remove="Views\Visit\_PrescriptionProducts.cshtml" />
+    <None Remove="Views\Visit\_Update.Products.cshtml" />
+    <None Remove="Views\Visit\_Update.Visit.cshtml" />
+    <None Remove="Views\_ViewImports.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="js\appointment-edit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\appointment.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\jasny\css\jasny-bootstrap.min.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\jasny\js\jasny-bootstrap.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\manual-appointment-edit.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\manual-appointment.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\schedule-doctor.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\ui-choose\icon-selected.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\ui-choose\ui-choose.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="js\ui-choose\ui-choose.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\_Edit.Log.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\_Edit.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\ListDoctorRole.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\ManualCreate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Appointment\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\_Create.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\_Create.Schedule.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\_Update.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Branch\_Update.Schedule.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Doctor\_UpdateLockDates.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Doctor\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Doctor\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Doctor\_Update.Schedule.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Doctor\_Update.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Doctor\_Update.Schedule-NEWSCHEDULE.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\File\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Holiday\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Holiday\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Holiday\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Holiday\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Note\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Note\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Note\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Note\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Note\_Create.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Note\_Update.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Office\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Office\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Office\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.Files.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UpdatePatient\DoneUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UpdatePatient\FalseUpdate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\UpdatePatient\Update.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.PatientBanner.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.Notes.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.PatientPastAppointments.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.PatientAppointments.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.PatientVisits.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.PatientPrescriptions.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\_Details.PatientDetails.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\VerifyAndCreate.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Patient\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\Details.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\_Create.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\_Create.Products.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\_Update.Products.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\_Update.Info.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Prescription\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\Edit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\Create.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\_PrescriptionProducts.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\_Update.Visit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\_Create.Visit.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\_Create.Pending.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Visit\_Update.Products.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\_ViewImports.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="itext7" Version="7.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
+    <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
+    <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

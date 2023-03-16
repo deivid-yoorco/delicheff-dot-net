@@ -1,0 +1,333 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.InfoModel
+@{
+    //Html.SetActiveMenuItemSystemName("Groceries.Franchises");
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h3 style="text-align: center;margin-top: 0px !important;">Detalle por semana</h3>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <div class="label-wrapper">
+                    <label class="control-label">Camionetas registradas</label>
+                    <div title="Selecciona la comioneta que quieras visualizar." class="ico-help">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <select id="vehicle-details" class="form-control">
+                    @foreach (var item in Model.VehiclesSelect)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <div class="label-wrapper">
+                    <label class="control-label">Semana</label>
+                    <div title="Selecciona la semana que quieras visualizar." class="ico-help">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="week-picker"></div>
+                <label>Semana seleccionada:</label> <span id="startDate">@Model.InitDate.ToString("dd-MM-yyyy")</span> - <span id="endDate">@Model.EndDate.ToString("dd-MM-yyyy")</span>
+            </div>
+        </div>
+        <div id="details-grid"></div>
+        <br />
+        <br />
+        <div id="days-grid"></div>
+
+        <script type="text/javascript">
+            var startDate;
+            var endDate;
+
+            var selectCurrentWeek = function () {
+                window.setTimeout(function () {
+                    $('.week-picker').find('.ui-datepicker-current-day a').addClass('ui-state-active')
+                }, 1);
+            }
+
+            $.datepicker.regional['es'] = {
+                monthNames: [
+                    'Enero',
+                    'Febrero',
+                    'Marzo',
+                    'Abril',
+                    'Mayo',
+                    'Junio',
+                    'Julio',
+                    'Agosto',
+                    'Septiembre',
+                    'Octubre',
+                    'Noviembre',
+                    'Diciembre'
+                ],
+                monthNamesShort: [
+                    'Ene',
+                    'Feb',
+                    'Mar',
+                    'Abr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Ago',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dic'
+                ],
+                dayNames: [
+                    'Domingo',
+                    'Lunes',
+                    'Martes',
+                    'Miércoles',
+                    'Jueves',
+                    'Viernes',
+                    'SábadModel'
+                ],
+                dayNamesShort: [
+                    'Dom',
+                    'Lun',
+                    'Mar',
+                    'Mie',
+                    'Jue',
+                    'Vie',
+                    'Sáb'
+                ],
+                dayNamesMin: ['D', 'L', 'M', 'Mi', 'J', 'V', 'S'],
+                cancel: "Cancelar"
+            };
+            $.datepicker.setDefaults($.datepicker.regional['es']);
+
+            $('.week-picker').datepicker({
+                firstDay: 1, // Start with Monday
+                showOtherMonths: true,
+                selectOtherMonths: true,
+                dateFormat: "dd-mm-yyyy",
+                onSelect: function (dateText, inst) {
+                    var date = $(this).datepicker('getDate');
+
+                    startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + 1);
+                    endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + 7);
+
+                    let formatedStartDate = formatDate(startDate);
+                    let formatedEndDate = formatDate(endDate);
+
+                    $('#startDate').text(formatedStartDate);
+                    $('#endDate').text(formatedEndDate);
+
+                    selectCurrentWeek();
+
+                    loadData()
+                },
+                beforeShowDay: function (date) {
+                    var cssClass = '';
+                    if (date >= startDate && date <= endDate)
+                        cssClass = 'ui-datepicker-current-day';
+                    return [true, cssClass];
+                },
+                onChangeMonthYear: function (year, month, inst) {
+                    selectCurrentWeek();
+                }
+            });
+
+            $('.week-picker .ui-datepicker-calendar tr').live('mousemove', function () { $(this).find('td a').addClass('ui-state-hover'); });
+            $('.week-picker .ui-datepicker-calendar tr').live('mouseleave', function () { $(this).find('td a').removeClass('ui-state-hover'); });
+
+            function formatDate(date) {
+                let year = date.getFullYear();
+                let month = date.getMonth() + 1;
+                let day = date.getDate();
+
+                let parsedMonth = month < 10 ? "0" + month : month;
+                let parsedDay = day < 10 ? "0" + day : day;
+
+                return parsedDay + "-" + parsedMonth + "-" + year;
+
+            }
+
+            function getUrlDetails(ResumeByDay) {
+                if (!ResumeByDay) {
+                    return "@Html.Raw(Url.Action("ResumeWeek", "Franchise"))?franchiseId=@Model.FranchiseId" +
+                        "&vehicleId=" + $('#vehicle-details').val() + "&initDate=" + $('#startDate').text();
+                } else {
+                    return "@Html.Raw(Url.Action("ResumeByDay", "Franchise"))?franchiseId=@Model.FranchiseId" +
+                        "&vehicleId=" + $('#vehicle-details').val() + "&initDate=" + $('#startDate').text();
+                }
+            }
+            $(document).ready(function() {
+                $("#details-grid").kendoGrid({
+                    dataSource: {
+                        type: "json",
+                        transport: {
+                            read: {
+                                url: getUrlDetails(false),
+                                type: "POST",
+                                dataType: "json",
+                                data: addAntiForgeryToken
+                            }
+                        },
+                        schema: {
+                            data: "Data",
+                            total: "Total",
+                            errors: "Errors",
+                            model: {
+                                id: "Id",
+                            }
+                        },
+                        error: function(e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true
+                    },
+                    pageable: {
+                        refresh: true,
+                        numeric: false,
+                        previousNext: false,
+                        info: false,
+                        @await Html.PartialAsync("_GridPagerMessages")
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "WeekName",
+                            title: "Semana",
+                            width: 200
+                        },
+                        {
+                            field: "OrdersCount",
+                            title: "Pedidos",
+                            width: 200
+                        }, {
+                            field: "Base",
+                            title: "Base total de pedidos entregados (sin descontar incidencias)",
+                            width: 150
+                        }, {
+                            field: "Comission",
+                            title: "Comisión (8% sobre base)",
+                            width: 150
+                        }, {
+                            field: "Bonus",
+                            title: "Bonos",
+                            width: 150
+                        }, {
+                            field: "Incidents",
+                            title: "Incidencias descuentos (incidencias y penalizaciones)",
+                            width: 150,
+                        }, {
+                            field: "Billed",
+                            title: "Facturado (comisión + bono – incidencias)",
+                            width: 150
+                        }
+                    ],
+                });
+                $("#days-grid").kendoGrid({
+                    dataSource: {
+                        type: "json",
+                        transport: {
+                            read: {
+                                url: getUrlDetails(true),
+                                type: "POST",
+                                dataType: "json",
+                                data: addAntiForgeryToken
+                            }
+                        },
+                        schema: {
+                            data: "Data",
+                            total: "Total",
+                            errors: "Errors",
+                            model: {
+                                id: "Id",
+                            }
+                        },
+                        error: function(e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true
+                    },
+                    pageable: {
+                        refresh: true,
+                        numeric: false,
+                        previousNext: false,
+                        info: false,
+                        @await Html.PartialAsync("_GridPagerMessages")
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "DayName",
+                            title: "Día",
+                            width: 200
+                        }, {
+                            field: "Orders",
+                            title: "Pedidos",
+                            width: 200,
+                        }, {
+                            field: "Base",
+                            title: "Base",
+                            width: 200
+                        }, {
+                            field: "Comission",
+                            title: "Comisión",
+                            width: 200
+                        }, {
+                            field: "BonusTexts",
+                            title: "Bonos",
+                            width: 200,
+                            template: function (dataItem) {
+                                return "<span>" + dataItem.BonusTexts + "</span>";
+                            }
+                        }, {
+                            field: "IncidentTexts",
+                            title: "Incidencias",
+                            width: 200,
+                            template: function (dataItem) {
+                                return "<span>" + dataItem.IncidentTexts + "</span>";
+                            }
+                        }, {
+                            field: "Billed",
+                            title: "Facturado",
+                            width: 200
+                        }
+                    ],
+                    dataBound: function (e) {
+                        var totals = e.sender.dataSource._data[0];
+                        $('#days-grid tbody').append('<tr class="k-alt" data-uid="8b86fa69-10e3-4535-8412-cd5d7b2d8919" role="row"><td role="gridcell">Total</td><td role="gridcell">' +
+                            totals.OrdersTotal + '</td><td role="gridcell">' +
+                            totals.BaseTotal + '</td><td role="gridcell">' +
+                            totals.ComissionTotal + '</td><td role="gridcell">' +
+                            totals.BonusTotal + '</td><td role="gridcell">' +
+                            totals.IncidentsTotal + '<td role="gridcell">' +
+                            totals.BilledTotal + '</td></tr>')
+                    },
+                });
+
+                $('#vehicle-details').change(function () {
+                    loadData()
+                });
+            });
+
+            function loadData() {
+                $('#details-grid').data('kendoGrid').dataSource.transport.options.read.url = getUrlDetails(false);
+                $('#days-grid').data('kendoGrid').dataSource.transport.options.read.url = getUrlDetails(true);
+                $('#details-grid').data('kendoGrid').dataSource.read();
+                $('#days-grid').data('kendoGrid').dataSource.read();
+                $('#details-grid').data('kendoGrid').refresh();
+                $('#days-grid').data('kendoGrid').refresh();
+            }
+        </script>
+    </div>
+</div>

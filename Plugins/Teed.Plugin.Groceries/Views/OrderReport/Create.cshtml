@@ -1,0 +1,202 @@
+﻿@{
+    Layout = "_AdminLayout";
+    var orderItems = (List<Nop.Core.Domain.Orders.OrderItem>)ViewData["OrderItems"];
+    var orderId = (int)ViewData["OrderId"];
+}
+<style>
+    th {
+        text-align: center;
+        font-size: 1.2em;
+    }
+
+    .input-validation-error {
+        border-color: red !important;
+    }
+    
+</style>
+<input type="hidden" value="@orderId" id="order-id" />
+<form>
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Crear reporte de compra
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-controller="Order" asp-action="List">Regresar a la lista de órdenes</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue" id="save">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <span style="display:none;color:red" id="error-msg">No se pudo guardar la información.</span>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Costo de pedido</th>
+                                    <th>Costo por kg/pz</th>
+                                    <th>Bodega</th>
+                                    <th>Comentarios</th>
+                                </tr>
+                                @foreach (var orderItem in orderItems)
+                                {
+                                    <tr class="product" id="@orderItem.Id">
+                                        @if (orderItem.EquivalenceCoefficient > 0 && orderItem.BuyingBySecondary)
+                                        {
+                                            var type = "gr";
+                                            var value = (orderItem.Quantity * 1000) / orderItem.EquivalenceCoefficient;
+                                            if (value >= 1000)
+                                            {
+                                                value = value / 1000;
+                                                type = "kg";
+                                            }
+                                            <td>@orderItem.Product.Name (@(value.ToString("0.##")) @type)</td>
+                                        }
+                                        else if (orderItem.WeightInterval > 0)
+                                        {
+                                            var type = "gr";
+                                            var value = orderItem.Quantity * orderItem.WeightInterval;
+                                            if (value >= 1000)
+                                            {
+                                                value = value / 1000;
+                                                type = "kg";
+                                            }
+                                            <td>@orderItem.Product.Name (@(value.ToString("0.##")) @type)</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@orderItem.Product.Name (@orderItem.Quantity pz)</td>
+                                        }
+                                        <td><input type="number" id="cost-@(orderItem.Id)" class="form-control" required name="cost-@(orderItem.Id)" /></td>
+                                        <td><input type="number" id="unit-cost-@(orderItem.Id)" class="form-control" required name="unit-cost-@(orderItem.Id)" /></td>
+                                        <td><input id="store-@(orderItem.Id)" class="form-control" required name="store-@(orderItem.Id)" /></td>
+                                        <td><input id="comment-@(orderItem.Id)" class="form-control" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div class="form-group">
+                            <h4 style="font-weight:bold" class="col-md-12">Cargar archivos</h4>
+                            <div class="col-md-12">
+                                <div class="fileinput-preview fileinput-book-cover fileinput-exists thumbnail img-raised" id="img-preview" style="display:none"></div>
+                                <input name="files" id="files" type="file" aria-label="files" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        $("form").validate();
+        var addedFiles = [];
+
+        $("form").on("submit", function (event) {
+            event.preventDefault();
+
+            if ($(this).valid()) {
+                $("#save").prop('disabled', true);
+                var dataList = [];
+                $(".product").each(function () {
+                    var id = $(this).attr("id");
+                    dataList.push({ OrderItemId: id, UnitCost: $("#unit-cost-" + id).val(), RequestedQtyCost: $("#cost-" + id).val(), Store: $("#store-" + id).val(), Comment: $("#comment-" + id).val() });
+                });
+
+                var data = {
+                    OrderId: $("#order-id").val(),
+                    OrderItemsReport: dataList,
+                    OrderReportFiles: addedFiles
+                }
+
+                $.ajax({
+                    url: '/Admin/OrderReport/CreateOrderReport',
+                    type: 'POST',
+                    data: data,
+                    success: function () {
+                        document.location.href = '/Admin/OrderReport/EditOrderReport/' + $("#order-id").val();
+                    },
+                    error: function (e) {
+                        $(this).prop('disabled', false);
+                        $("#error-msg").show();
+                        console.log(e);
+                    }
+                });
+            }
+        });
+
+        $("#files").kendoUpload({
+            select: function (e) {
+                var fileInfo = e.files;
+                var wrapper = this.wrapper;
+
+                for (var i = 0; i < fileInfo.length; i++) {
+                    addPreview(fileInfo[i], wrapper);
+                }
+            },
+            remove: function (e) {
+                for (var i = 0; i < e.files.length; i++) {
+                    $("#" + e.files[i].size).remove();
+
+                    var index = addedFiles.map(x => x.Size).indexOf(e.files[i].size);
+                    if (index > -1) {
+                        addedFiles.splice(index, 1);
+                    }
+                }
+
+                if ($("#img-preview").has("div").length === 0) {
+                    $("#img-preview").hide();
+                }
+            },
+            localization: {
+                select: 'Selecciona uno o más archivos',
+                remove: '',
+                cancel: ''
+            }
+        });
+
+        function addPreview(file, wrapper) {
+            var raw = file.rawFile;
+            var reader = new FileReader();
+
+            if (raw) {
+                reader.onloadend = function () {
+                    $("#img-preview").show();
+                    var current = $("#img-preview").html();
+                    $("#img-preview").empty();
+                    var preview = "";
+                    if (isImage(raw.type)) {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", this.result)[0].outerHTML + "</div>";
+                    }
+                    else {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", "/images/default-image.png")[0].outerHTML + "</div>";
+                    }
+                    var html = current + preview;
+                    $("#img-preview").append(html);
+
+                    addedFiles.push({ Size: file.size, Base64: this.result, Type: raw.type, Name: raw.name });
+                };
+                reader.readAsDataURL(raw);
+            }
+        }
+
+        function isImage(fileType) {
+            var validImageTypes = ["image/gif", "image/jpeg", "image/png"];
+            if ($.inArray(fileType, validImageTypes) < 0) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    });
+</script>

@@ -1,0 +1,29 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Vendor
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="VendorEnable_OverrideForStore" asp-input="VendorEnable" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Activado</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="VendorEnable" />
+                <span asp-validation-for="VendorEnable"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TitleVendor_OverrideForStore" asp-input="TitleVendor" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Título de la página</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TitleVendor" />
+                <span asp-validation-for="TitleVendor"></span>
+            </div>
+        </div>
+    </div>
+</div>

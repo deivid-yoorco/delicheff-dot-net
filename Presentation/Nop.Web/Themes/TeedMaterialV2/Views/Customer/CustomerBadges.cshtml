@@ -1,0 +1,85 @@
+﻿@model CustomerBadgesListModel
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts("Mis insignias");
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-order-list-page");
+}
+@section left
+{
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.CustomerBadges })
+}
+<style>
+    .badge-image {
+        height: 60px;
+        width: 60px;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+</style>
+<div class="page account-page points-list-page section ">
+    <div class="">
+        <h1 class="category-page-title" style="font-size: 2.5em;">@T("Account.MyAccount") - Mis insignias</h1>
+    </div>
+    <div class="page-body" style="margin-top: 40px;">
+        @if (Model.Badges.Count > 0)
+        {
+            @foreach (var badge in Model.Badges.Where(x => x.Owned))
+            {
+                <div class="row" style="display: flex;align-self: center;align-items: center;">
+                    <div class="col s6 m3">
+                        <div class="badge-image" style="background: url('@badge.Image');">
+                        </div>
+                        <p style="text-align: center;">"@badge.Name"</p>
+                    </div>
+                    <div class="col s6 m9">
+                        <p>@badge.Description</p>
+                    </div>
+                </div>
+            }
+            @if (Model.Badges.Where(x => !x.Owned).Any())
+            {
+                <div style="display: flex;align-self: center;align-items: center;margin-top: 60px; margin-bottom: 30px;">
+                    <h5>Insignias aun por conseguir</h5>
+                </div>
+                foreach (var badge in Model.Badges.Where(x => !x.Owned))
+                {
+                    <div class="row" style="display: flex;align-self: center;align-items: center;">
+                        <div class="col s6 m3">
+                            <div class="badge-image" style="background: url('@badge.Image');
+                                opacity: 0.5;
+                                filter: grayscale(100%);">
+                            </div>
+                            <p style="text-align: center;">"@badge.Name"</p>
+                        </div>
+                        <div class="col s6 m9">
+                            <p>@badge.Description</p>
+                        </div>
+                    </div>
+                }
+            }
+            <script>
+                $(document).ready(function () {
+                    var color = $('#pop-cart').parent().css('background-color');
+                    $('.points').css('color', color);
+                    $('.point').each(function (i, e) {
+                        if ($(e).css('color') == 'rgb(0, 128, 0)') {
+                            $(e).css('color', color);
+                        }
+                    });
+                });
+            </script>
+        }
+        else
+        {
+            <div class="no-data">
+                Aún no tienes insignias
+            </div>
+        }
+    </div>
+</div>

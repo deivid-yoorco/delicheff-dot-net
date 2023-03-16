@@ -1,0 +1,109 @@
+﻿@using Nop.Core.Domain
+@using StackExchange.Profiling
+@using Nop.Core.Domain.Common
+@using Nop.Core.Domain.Seo
+@using Nop.Services.Events
+@using Nop.Services.Security
+@using Nop.Web.Framework.Events
+@inject CommonSettings commonSettings
+@inject IEventPublisher eventPublisher
+@inject IPermissionService permissionService
+@inject SeoSettings seoSettings
+@inject StoreInformationSettings storeInformationSettings
+@{
+    Html.AppendScriptParts(ResourceLocation.Head, $"~/Themes/TeedMaterialV2/Content/js/site.min.js?v=2.1", isAsync: true);
+    Html.AppendScriptParts(ResourceLocation.Head, $"~/Themes/TeedMaterialV2/Content/js/custom.js?v=3.1", isAsync: true);
+    Html.AppendScriptParts(ResourceLocation.Head, $"~/Themes/TeedMaterialV2/Content/js/enhanced-ec.js?v=2.0");
+    //Html.AppendScriptParts(ResourceLocation.Footer, $"~/Themes/TeedMaterialV2/Content/js/public.js");
+    //Html.AppendScriptParts(ResourceLocation.Footer, $"~/Themes/TeedMaterialV2/Content/js/ui-choose/ui-choose.js");
+    //Html.AppendScriptParts(ResourceLocation.Head, "~/js/moment-with-locales.js");
+
+
+
+    //Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedMaterialV2/Content/css/custom.css");
+    Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedMaterialV2/Content/css/site.min.css?v=2.1");
+    //Html.AppendCssFileParts(ResourceLocation.Head, $"~/Themes/TeedMaterialV2/Content/js/ui-choose/ui-choose.css");
+    Html.AppendCssFileParts(ResourceLocation.Footer, $"~/Themes/TeedMaterialV2/Content/css/font.css?v=2.0");
+
+    if (commonSettings.RenderXuaCompatible)
+    {
+        Html.AppendHeadCustomParts($"<meta http-equiv=\"X-UA-Compatible\" content=\"{commonSettings.XuaCompatibleValue}\"/>");
+    }
+    //custom tag(s);
+    if (!string.IsNullOrEmpty(seoSettings.CustomHeadTags))
+    {
+        Html.AppendHeadCustomParts(seoSettings.CustomHeadTags);
+    }
+    var displayMiniProfiler = storeInformationSettings.DisplayMiniProfilerInPublicStore
+        && (!storeInformationSettings.DisplayMiniProfilerForAdminOnly || permissionService.Authorize(StandardPermissionProvider.AccessAdminPanel));
+    //event
+    eventPublisher.Publish(new PageRenderingEvent(this.Html));
+}
+<!DOCTYPE html>
+<html @(this.ShouldUseRtlTheme() ? Html.Raw(" dir=\"rtl\"") : null) @Html.NopPageCssClasses()>
+<head>
+    <title>@Html.NopTitle()</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <meta name="description" content="@(Html.NopMetaDescription())" />
+    <meta name="keywords" content="@(Html.NopMetaKeywords())" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+        dataLayer = []; //Google tag manager variable
+    </script>
+    <meta property="og:image" content="https://www.centralenlinea.com/images/og-image.jpg" />
+    <!-- Google Tag Manager -->
+    <script>
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-56JVH9L');</script>
+    <!-- End Google Tag Manager -->
+    @Html.NopHeadCustom()
+    @*This is used so that themes can inject content into the header*@
+    @await Html.PartialAsync("Head")
+    @await Component.InvokeAsync("Widget", new { widgetZone = "head_html_tag" })
+
+    <script src="~/Themes/TeedMaterialV2/Content/js/jquery.min.js"></script>
+
+    @Html.NopCssFiles(this.Url, ResourceLocation.Head)
+    @Html.NopScripts(this.Url, ResourceLocation.Head)
+    @Html.NopCanonicalUrls()
+    @await Component.InvokeAsync("NewsRssHeaderLink")
+    @await Component.InvokeAsync("BlogRssHeaderLink")
+    @*Favicon - upload favicon.ico file to the root directory*@
+    @await Component.InvokeAsync("Favicon")
+    @if (displayMiniProfiler)
+    {
+        <mini-profiler />
+    }
+    @Html.NopInlineScripts(this.Url, ResourceLocation.Head)
+</head>
+<body onload="try {
+        ondBodyLoad();
+    } catch (error) {
+        console.error(error);
+    }">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-56JVH9L"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    @RenderBody()
+    @Html.NopCssFiles(this.Url, ResourceLocation.Footer)
+    @Html.NopScripts(this.Url, ResourceLocation.Footer)
+    @Html.NopInlineScripts(this.Url, ResourceLocation.Footer)
+
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.CentralEnLinea)
+    {
+        <div class="call-us-container">
+            <div class="phone-icon teed-primary"><img src="/images/WA.png" alt="Whatsapp" width="15" height="19" style="margin-left:0.4em" /></div>
+            <a href="https://api.whatsapp.com/send?phone=5215540729627" class="phone teed-primary" target="_blank">Whatsapp</a>
+        </div>
+    }
+</body>
+</html>

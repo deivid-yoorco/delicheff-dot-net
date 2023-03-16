@@ -1,0 +1,292 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingZone.EditViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingZone");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" value="@Model.Id" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar zona
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de zonas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            @if (Model.ShippingZones.Count > 0)
+            {
+                <button type="button" class="btn bg-red dialog" data-target="modal">
+                    <i class="fa fa-trash"></i>
+                    @T("Admin.Common.Delete")
+                </button>
+                <div id="dialog" title="Mover órdenes">
+                    <p>¿A cuál zona se deben migrar las órdenes que de la zona que deseas eliminar?</p>
+                    <select id="new-route">
+                        @foreach (var route in Model.ShippingZones)
+                        {
+                            <option value="@(route.Id)">@(route.ZoneName)</option>
+                        }
+                    </select>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        var dialog;
+                        dialog = $("#dialog").dialog({
+                            autoOpen: false,
+                            height: 300,
+                            width: 450,
+                            modal: true,
+                            buttons: {
+                                "Eliminar zona": function () {
+                                    window.location.href = '/Admin/ShippingZone/DeleteShippingZone?id=' + @Model.Id + '&newZoneId=' + $("#new-zone").val();
+                                }
+                            }
+                        });
+
+                        $(".dialog").on("click", function () {
+                            $("#dialog").dialog("open");
+                        });
+                    });
+                </script>
+            }
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-6">
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Nombre de la zona</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="ZoneName" />
+                                    <span asp-validation-for="ZoneName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Color de la zona (hexadecimal)</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="ZoneColor" />
+                                    <span asp-validation-for="ZoneColor" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Códigos postales</label>
+                                </div>
+                                <div class="col-md-9">
+                                    @if (string.IsNullOrEmpty(Model.PostalCodesWarning))
+                                    {
+                                        <textarea class="form-control" asp-for="PostalCodes" id="postal-codes" rows="6"
+                                        readonly></textarea>
+                                    }
+                                    else
+                                    {
+                                        <textarea class="form-control" asp-for="PostalCodes" id="postal-codes"
+                                        rows="6"></textarea>
+                                    }
+                                    <span asp-validation-for="PostalCodes" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Códigos postales adicionales</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control" asp-for="AdditionalPostalCodes"
+                                        id="postal-codes-additional" rows="6"></textarea>
+                                    <span asp-validation-for="AdditionalPostalCodes" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3"></div>
+                                <div class="col-md-9">
+                                    <span class="text-danger postal-codes-warning">
+                                        @(string.IsNullOrEmpty(Model.PostalCodesWarning) ? "" :
+                                        Model.PostalCodesWarning)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="map" style="border: solid 5px @(Model.ZoneColor)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    var allZondesCp = [];
+    var takenPostalCodes = [];
+    var selectedPostalCodes = $("#postal-codes").val().split(", ");
+    $.each($("#postal-codes-additional").val().split(", "), function (i, e) {
+        selectedPostalCodes.push(e);
+    });
+
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    function initMap() {
+        $.ajax({
+            url: '/Admin/ShippingZone/GetTakenPostalCodes?zoneId=' + @Model.Id,
+            method: 'GET',
+            success: function (data) {
+                takenPostalCodes = data;
+                createMap();
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+    }
+
+    function createMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 19.3170078, lng: -99.2090609 },
+            disableDefaultUI: true,
+            zoomControl: true,
+            zoom: 13
+        });
+        map.set('styles', myStyle);
+        map.data.loadGeoJson('/shippingarea/GetGeoJson');
+
+        // zoom to show all the features
+        $.ajax({
+            url: '/Admin/ShippingZone/GetAllPostalCodesOfZones?notThisZone=' + @Model.Id,
+            method: 'GET',
+            success: function (data) {
+                console.log(data);
+                $.each(data, function (i, e) {
+                    allZondesCp.push({ id: e.Id, color: e.Color, pcs: e.Pcs });
+                });
+
+                var bounds = new google.maps.LatLngBounds();
+                map.data.addListener('addfeature', function (e) {
+                    var feature = e.feature.j;
+                    if (typeof feature == 'undefined')
+                        feature = e.feature.h;
+                    if (allZondesCp.find(x => x.pcs.includes(feature.d_cp))) {
+                        var current = allZondesCp.find(x => x.pcs.includes(feature.d_cp));
+                        e.feature.setProperty("name", current.id);
+                    }
+                    else if (selectedPostalCodes.indexOf(feature.d_cp) > -1) {
+                        e.feature.setProperty('isSelected', true);
+                    }
+                    else if (takenPostalCodes.indexOf(feature.d_cp) > -1) {
+                        e.feature.setProperty('isTaken', true);
+                    }
+                    processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+                    map.fitBounds(bounds);
+                });
+
+                map.data.setStyle(function (feature) {
+                    console.log(feature);
+                    var color = '#919191';
+                    var allZones = allZondesCp;
+                    if (typeof feature.getProperty('name') != 'undefined' &&
+                        feature.getProperty('name') != '' &&
+                        feature.getProperty('name') != null) {
+                        var current = allZones.find(x => x.id.includes(feature.getProperty('name')));
+                        color = current.color != 'null' ? (current.color.includes('#') ? current.color : "#" + current.color) : '#3fff2e';
+                    }
+                    else if (feature.getProperty('isSelected')) {
+                        color = '@(string.IsNullOrEmpty(Model.ZoneColor) ? "#3fff2e" :
+                        (Model.ZoneColor.Contains('#') ? Model.ZoneColor : "#" + Model.ZoneColor))';
+                    }
+                    else if (feature.getProperty('isTaken')) {
+                        color = '#919191';
+                    }
+                    return ({
+                        fillColor: color,
+                        strokeColor: color,
+                        strokeWeight: 3
+                    });
+                });
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+
+        // zoom on click
+        map.data.addListener('click', function (e) {
+            if (typeof e.feature.getProperty('name') == 'undefined' ||
+                e.feature.getProperty('name') == '' ||
+                e.feature.getProperty('name') == null) {
+                // The new requeriment request to avoid click if already selected
+                let currentPostalCodes = $("#postal-codes").val();
+                let extra = "";
+                if (currentPostalCodes) {
+                    extra = ", "
+                }
+
+                if (!e.feature.getProperty('isSelected')) {
+                    var feature = e.feature.j;
+                    if (typeof feature == 'undefined')
+                        feature = e.feature.h;
+                    $("#postal-codes").val(currentPostalCodes + extra + feature.d_cp);
+                    e.feature.setProperty('isSelected', true);
+                    e.feature.setProperty('isTaken', false);
+                }
+                else {
+                    if (currentPostalCodes.indexOf(extra + feature.d_cp) > -1) {
+                        $("#postal-codes").val(currentPostalCodes.replace(extra + feature.d_cp, ""));
+                    }
+                    else if (currentPostalCodes.indexOf(feature.d_cp + extra) > -1) {
+                        $("#postal-codes").val(currentPostalCodes.replace(feature.d_cp + extra, ""));
+                    }
+                    else if ($("#postal-codes-additional").val().indexOf(feature.d_cp) === -1) {
+                        $("#postal-codes").val("");
+                    }
+                    e.feature.setProperty('isSelected', false);
+                    e.feature.setProperty('isTaken', true);
+                }
+            }
+        });
+    }
+
+    function processPoints(geometry, callback, thisArg) {
+        if (geometry instanceof google.maps.LatLng) {
+            callback.call(thisArg, geometry);
+        } else if (geometry instanceof google.maps.Data.Point) {
+            callback.call(thisArg, geometry.get());
+        } else {
+            geometry.getArray().forEach(function (g) {
+                processPoints(g, callback, thisArg);
+            });
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap" async
+    defer></script>

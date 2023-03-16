@@ -1,0 +1,452 @@
+﻿@model TopMenuModel
+@using Nop.Core
+@using Nop.Services.Configuration
+@using Nop.Web.Models.HomePageImages
+@{
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+
+    var rootCategories = Model.Categories.Where(x => x.IncludeInTopMenu).ToList();
+    var rootCategoriesResponsive = Model.Categories.ToList();
+    var responsiveMenuTitle = Model.HasOnlyCategories ? T("Categories") : T("Menu");
+}
+
+<style>
+    .menu-style {
+        padding-top: 4%;
+    }
+
+    .content-center {
+        justify-content: center;
+        display: flex;
+    }
+
+    .poli {
+        justify-content: left;
+    }
+</style>
+
+
+<div class="navbar-fixed top-logo-container @if (!Model.DisplayCategoriesOnly) { <text> none-category-main </text> } else { <text> category-main </text> }"
+     @if (Model.DisplayCategoriesOnly) { <text> style="z-index: 100 !important;" </text> }>
+
+    <nav class="white z-depth-0" role="navigation">
+        <div class="nav-wrapper content-center container">
+            <div id="menuCanvasNav" class="menuOverlay hide-on-med-and-down" onclick="closeMenu()" style="width: 0%; opacity: 0;"></div>
+            @if (!Model.DisplayCategoriesOnly)
+            {
+                <div class="main-logo-container">
+                    @await Component.InvokeAsync("Logo")
+                </div>
+                <div class="cobertura hide-on-small-only">
+                    <a href="/cobertura">
+                        Zona de cobertura
+                    </a>
+                </div>
+            }
+            <a href="#" data-target="slide-out" class="sidenav-trigger teed-primary-text"><i class="material-icons">menu</i></a>
+            <a style="font-weight: bold;@if (Model.DisplayCategoriesOnly) { <text> position: absolute; left: 0px; </text> }" onclick="openMenu()" class="@if (!Model.DisplayCategoriesOnly) { <text> none-category-bar </text> } sidenav-trigger-web teed-primary-text hide-on-med-and-down">
+                <i class="material-icons" style="margin-right:5px">menu</i>
+                @if (!Model.DisplayCategoriesOnly)
+                {
+                    <text> Categorías</text>
+                }
+            </a>
+            <ul id="slide-out-web" class="vertical-nav hide-on-med-and-down collection">
+                <div class="close-menu">
+                    <div style="margin-left: 10px">
+                        @await Component.InvokeAsync("Logo")
+                    </div>
+                    <a href="javascript:void(0)" onclick="closeMenu()" style="margin-left:284px"><i class="material-icons">close</i></a>
+                </div>
+
+                @await Component.InvokeAsync("Widget", new { widgetZone = "header_menu_before" })
+                @await Component.InvokeAsync("Widget", new { widgetZone = "header_discounted_Products" })
+                @await Component.InvokeAsync("Widget", new { widgetZone = "header_favorite_products" })
+                @if (Model.DisplayHomePageMenuItem)
+                {
+                    <li class="collection-item"><a href="@Url.RouteUrl("HomePage")">@T("HomePage")</a></li>
+                }
+                @foreach (var category in rootCategories)
+                {
+                    <div id="slide-categories-container">
+                        <li id="parentCategory-@category.Id" class="collection-item parent" onmouseenter="menuHover(@category.Id)">
+                            <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })" id="@category.Id">
+                                @category.Name
+                                @if (category.NumberOfProducts.HasValue)
+                                {
+                                    @T("Categories.TotalProducts", category.NumberOfProducts.Value)
+                                }
+                                <i class="material-icons list-element-icon">chevron_right</i>
+                            </a>
+                            @if (category.SubCategories.Count() > 0)
+                            {
+                                var countSubcategories = 1;
+                                decimal totalSubcategories = category.SubCategories.Count() + 1;
+                                bool hasMiddleExact = totalSubcategories % 2 == 0;
+                                var halfSubcatecories = Math.Ceiling(totalSubcategories / 2) + 1;
+                                <ul id="container-subcategory-@category.Id" class="sub-menu collection">
+                                    <li class="collection-item title-subcategories">
+                                        <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })">
+                                            Todo @category.Name
+                                            @if (category.NumberOfProducts.HasValue)
+                                            {
+                                                <text> </text>@T("Categories.TotalProducts", category.NumberOfProducts.Value)
+                                            }
+                                        </a>
+                                    </li>
+                                    @foreach (var subcat in category.SubCategories)
+                                    {
+                                        countSubcategories++;
+                                        <li class="collection-item" style="@(countSubcategories == halfSubcatecories && !hasMiddleExact ? "padding-top:0px;" : "")">
+                                            <a href="@Url.RouteUrl("Category", new { SeName = subcat.SeName })">
+                                                @subcat.Name
+                                                @if (subcat.NumberOfProducts.HasValue)
+                                                {
+                                                    <text> </text>@T("Categories.TotalProducts", subcat.NumberOfProducts.Value)
+                                                }
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    </div>
+                }
+                @foreach (var topic in Model.Topics)
+                {
+                    <li><a href="@Url.RouteUrl("Topic", new { SeName = topic.SeName })">@topic.Name</a></li>
+                }
+                @if (Model.NewProductsEnabled && Model.DisplayNewProductsMenuItem)
+                {
+                    <li><a href="@Url.RouteUrl("NewProducts")">@T("Products.NewProducts")</a></li>
+                }
+                @if (Model.DisplayProductSearchMenuItem)
+                {
+                    <li><a href="@Url.RouteUrl("ProductSearch")">@T("Search")</a></li>
+                }
+                @if (Model.DisplayCustomerInfoMenuItem)
+                {
+                    <li><a href="@Url.RouteUrl("CustomerInfo")">@T("Account.MyAccount")</a></li>
+                }
+                @if (Model.BlogEnabled && Model.DisplayBlogMenuItem)
+                {
+                    <li style="margin-left:20px;"><a href="@Url.RouteUrl("Blog")">@T("Blog")</a></li>
+                }
+                @if (Model.ForumEnabled && Model.DisplayForumsMenuItem)
+                {
+                    <li><a href="@Url.RouteUrl("Boards")">@T("Forum.Forums")</a></li>
+                }
+                @if (Model.DisplayContactUsMenuItem)
+                {
+                    <li><a href="@Url.RouteUrl("ContactUs")">@T("ContactUs")</a></li>
+                }
+                @if (imagesSettings.ManufacturerEnable)
+                {
+                    <li><a href="/manufacturer/all">@imagesSettings.TitleManufacturer</a></li>
+                }
+                @if (imagesSettings.VendorEnable)
+                {
+                    <li><a href="/vendor/all">@imagesSettings.TitleVendor</a></li>
+                }
+                @await Component.InvokeAsync("Widget", new { widgetZone = "header_menu_after" })
+            </ul>
+            @if (!Model.DisplayCategoriesOnly)
+            {
+                <ul class="right header-links single-line">
+                    @await Component.InvokeAsync("HeaderLinks", new { ParentIsLogoContainer = true })
+                </ul>
+                @*<a href="#" data-target="slide-out" class="sidenav-trigger teed-primary-text"><i class="material-icons">menu</i></a>*@
+            }
+            else
+            {
+                <style>
+                    .top-menu-categories-slick .slick-prev {
+                        position: inherit !important;
+                        margin-right: 15px;
+                        width: auto !important;
+                        height: auto !important;
+                    }
+
+                    .top-menu-categories-slick .slick-next {
+                        position: inherit !important;
+                        margin-left: 15px;
+                        width: auto !important;
+                        height: auto !important;
+                        right: 0.5%;
+                    }
+
+                        .top-menu-categories-slick .slick-prev:before,
+                        .top-menu-categories-slick .slick-next:before {
+                            width: 40px !important;
+                            height: 40px !important;
+                            content: "" !important;
+                            background: url('@Model.SlickArrowsImgUrl') no-repeat !important;
+                            display: block !important;
+                            background-size: contain !important;
+                        }
+
+                    .top-menu-categories-slick .slick-prev {
+                        transform: rotate(180deg) translate(0, 50%);
+                        z-index: 1;
+                        left: 1%;
+                    }
+                </style>
+                <div class="top-menu-categories-slick" style="display: none !important;">
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "header_menu_before", additionalData = "category-slick-element" })
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "header_discounted_Products", additionalData = "category-slick-element" })
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "header_favorite_products", additionalData = "category-slick-element" })
+                    @foreach (var category in rootCategories)
+                    {
+                        <div class="category-slick-element">
+                            <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })" id="@category.Id">
+                                @category.Name
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+    </nav>
+</div>
+@if (!Model.DisplayCategoriesOnly)
+{
+    @await Component.InvokeAsync("SearchBox", new { showAsNavBar = true })
+}
+
+<style>
+    .title-subcategories {
+        font-weight: bold;
+        padding-bottom: 9px !important;
+    }
+
+        .title-subcategories a {
+            font-size: larger;
+        }
+
+    .menuOverlay {
+        height: 100%;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        background-color: rgba(0,0,0,0.9);
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition: opacity 1s, background-color .5s;
+    }
+
+    .vertical-nav {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        margin-left: -350px;
+        position: fixed;
+        z-index: 999;
+        top: 0;
+        left: 0;
+        background-color: #ffffff;
+        overflow-x: hidden;
+        transition: 0.5s;
+        display: none;
+    }
+
+        .vertical-nav .close-menu {
+            margin-bottom: 1em;
+        }
+
+        .vertical-nav li {
+            line-height: 25px;
+            margin: 0;
+            padding: 12px 0;
+            border: none;
+            text-align: left;
+            display: inline-block;
+            float: left;
+            clear: both;
+            width: 100%;
+        }
+
+            .vertical-nav li.parent:hover {
+                text-decoration: underline;
+                background-color: #f7f7f7;
+            }
+
+            .vertical-nav li:hover a {
+                color: black;
+            }
+
+            .vertical-nav li a {
+                text-decoration: none;
+                position: relative;
+            }
+
+            .vertical-nav li.current {
+                background-color: #F36F25;
+            }
+
+                .vertical-nav li.current a {
+                    color: #FFFFFF;
+                }
+
+        .vertical-nav ul li ul {
+            display: none;
+            list-style-type: none;
+            width: 125px;
+            padding: 0px;
+            margin-top: 0px;
+            margin-left: 0px;
+            position: relative;
+        }
+
+    vertical-nav ul li:hover ul {
+        display: block;
+    }
+
+        vertical-nav ul li:hover ul li {
+            background-color: #ffffff;
+            width: 125px;
+            height: 30px;
+            line-height: 25px;
+            display: inline-block;
+        }
+
+    vertical-nav ul li ul li:hover {
+        background-color: #9bc54c;
+        color: #FFF;
+    }
+
+    vertical-nav ul li ul li a {
+        color: black;
+        text-decoration: underline;
+    }
+
+        vertical-nav ul li ul li a:hover {
+            text-decoration: underline;
+            color: #FFF;
+        }
+
+    .vertical-nav li ul {
+        display: none;
+        padding: 0;
+        z-index: 9999;
+        background-color: #ffffff;
+    }
+
+    .vertical-nav li:hover ul {
+        display: block;
+    }
+
+    .vertical-nav li:hover .sub-menu {
+        display: block;
+        position: fixed;
+        left: 338px;
+        height: auto;
+        max-height: 80%;
+        margin-top: -29px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        columns: 2;
+        padding-bottom: 10px;
+    }
+
+    .vertical-nav li:hover .threeColumns {
+        columns: 3;
+    }
+
+    .vertical-nav li:hover .min-bottom {
+        bottom: 20px;
+    }
+
+    .sub-menu li {
+        width: 100%;
+        min-width: 180px;
+        white-space: nowrap;
+        display: table-row;
+        z-index: 1;
+        position: relative;
+        background-color: #FFFFFF;
+        padding-bottom: 4px;
+    }
+
+        .sub-menu li a {
+            display: inline-block;
+            padding: 0 10px;
+            color: black;
+        }
+
+            .sub-menu li a:hover {
+                text-decoration: underline
+            }
+
+    .list-element-icon {
+        position: absolute;
+        right: 0;
+        top: -21px;
+    }
+
+    .collection .collection-item {
+        border-bottom: none;
+    }
+</style>
+<ul id="slide-out" class="sidenav">
+    @*<div class="menu-toggle">@responsiveMenuTitle</div>*@
+    @await Component.InvokeAsync("Widget", new { widgetZone = "mob_header_menu_before" })
+    @if (Model.DisplayHomePageMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("HomePage")">@T("HomePage")</a></li>
+    }
+    @foreach (var category in rootCategoriesResponsive)
+    {
+        <li>
+            <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })">
+                @category.Name
+                @if (category.NumberOfProducts.HasValue)
+                {
+                    <text> </text>@T("Categories.TotalProducts", category.NumberOfProducts.Value)
+                }
+            </a>
+        </li>
+    }
+    @foreach (var topic in Model.Topics)
+    {
+        <li><a href="@Url.RouteUrl("Topic", new { SeName = topic.SeName })">@topic.Name</a></li>
+    }
+    @if (Model.NewProductsEnabled && Model.DisplayNewProductsMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("NewProducts")">@T("Products.NewProducts")</a></li>
+    }
+    @if (Model.DisplayProductSearchMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("ProductSearch")">@T("Search")</a></li>
+    }
+    @if (Model.DisplayCustomerInfoMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("CustomerInfo")">@T("Account.MyAccount")</a></li>
+    }
+    @if (Model.BlogEnabled && Model.DisplayBlogMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("Blog")">@T("Blog")</a></li>
+    }
+    @if (Model.ForumEnabled && Model.DisplayForumsMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("Boards")">@T("Forum.Forums")</a></li>
+    }
+    @if (Model.DisplayContactUsMenuItem)
+    {
+        <li><a href="@Url.RouteUrl("ContactUs")">@T("ContactUs")</a></li>
+    }
+    @if (imagesSettings.ManufacturerEnable)
+    {
+        <li><a href="/manufacturer/all">@imagesSettings.TitleManufacturer</a></li>
+    }
+    @if (imagesSettings.VendorEnable)
+    {
+        <li><a href="/vendor/all">@imagesSettings.TitleVendor</a></li>
+    }
+    @await Component.InvokeAsync("Widget", new { widgetZone = "mob_header_menu_after" })
+</ul>
+

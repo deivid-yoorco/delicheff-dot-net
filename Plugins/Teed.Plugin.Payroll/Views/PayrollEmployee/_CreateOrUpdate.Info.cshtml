@@ -1,0 +1,823 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollEmployee.CreateOrUpdateModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+@using Teed.Plugin.Payroll.Domain.PayrollEmployees;
+
+@{
+    var childPadding = 0;
+    var lastParent = 0;
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+<style>
+    .uploaded-image img {
+        border-radius: 50%;
+        object-fit: cover;
+        width: 100px;
+        height: 100px;
+    }
+
+    .cselect {
+        position: relative;
+    }
+
+        .cselect input {
+            background: #fff;
+            background-color: #fff !important;
+            cursor: initial !important;
+            color: black !important;
+        }
+
+        .cselect:after {
+            content: " ";
+            height: 0;
+            width: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #7d7d7d;
+            position: absolute;
+            right: 6px;
+            top: 15px;
+            transition: all 0.3s linear;
+        }
+
+        .cselect ul {
+            display: none;
+            position: absolute;
+            z-index: 997;
+            left: 0;
+            top: 1.2rem;
+            margin: 0;
+            width: 100%;
+            background: #fff;
+            box-shadow: inset 0 0 1px #d6d6d6;
+            padding: inherit;
+            overflow-y: scroll;
+            height: 200px;
+        }
+
+        .cselect li {
+            padding: 10px 5%;
+            list-style: none;
+            position: relative;
+            z-index: 999;
+        }
+
+            .cselect li:hover {
+                background: rgba(41, 128, 185, 0.2);
+            }
+
+        .cselect ul:before {
+            /* this allows a click outside the custom select box to close it (cause it covers all the viewport)! */
+            /* position: fixed;*/
+            z-index: 998;
+            top: 0;
+            left: 0;
+            background: transparent;
+            content: "";
+            width: 100%;
+            height: 100%;
+        }
+</style>
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Información principal
+                </div>
+                <div class="panel-body">
+                    @*<div class="form-group">
+                            <div class="col-md-12">
+                                <div class="avatar-upload">
+                                    <div class="avatar-preview">
+                                        <div id="imagePreview" style="background-image: url(http://i.pravatar.cc/500?img=7);">
+                                        </div>
+                                    </div>
+                                    <div class="avatar-edit">
+                                        <input type='file' id="ProfilePic" name="ProfilePic" accept=".png, .jpg, .jpeg" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+                    <script src="/lib/fineuploader/jquery.fineuploader-4.2.2.min.js" type="text/javascript"></script>
+                    <link href="/lib/fineuploader/fineuploader-4.2.2.min.css" rel="stylesheet" type="text/css">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper"><label class="control-label" for="ProfilePictureId">Imágenes de perfil</label></div>
+                        </div>
+                        <div class="col-md-9" style="display: flex;">
+                            <div style="text-align: center;">
+                                <label class="control-label">Perfil</label>
+                                <div id="profile-picture-value">
+                                    <input type="hidden" data-val="true" data-val-required="The Int32 field is required." id="ProfilePictureId" name="ProfilePictureId" value="">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="profile-picture-image" class="uploaded-image">
+                                            @if (string.IsNullOrEmpty(Model.ProfilePicture))
+                                            {
+                                                <img src="@Model.DefaultPicture">
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.ProfilePicture">
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="profile-picture" class="upload-image-button pull-left margin-t-5">
+                                            <div class="qq-uploader-selector qq-uploader">
+                                                <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone="" style="display: none;">
+                                                    <span>Arrastra los archivos aquí para cargar</span>
+                                                </div>
+                                                <div class="qq-upload-button-selector qq-upload-button" style="position: relative; overflow: hidden; direction: ltr;">
+                                                    <div>Cargar archivo</div>
+                                                    <input qq-button-id="ea583c18-eafb-40d2-a55f-e7990ea37116" type="file" name="qqfile" style="position: absolute; right: 0px; top: 0px; font-family: Arial; font-size: 118px; margin: 0px; padding: 0px; cursor: pointer; opacity: 0;">
+                                                </div>
+                                                <span class="qq-drop-processing-selector qq-drop-processing qq-hide">
+                                                    <span>Procesando los archivos arrastrados...</span>
+                                                    <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                                </span>
+                                                <ul class="qq-upload-list-selector qq-upload-list"></ul>
+                                            </div>
+                                        </div>
+                                        <div class="remove-image-button pull-left margin-t-5">
+                                            <span id="profile-picture-remove" class="btn bg-red" style="display: none;">Quitar imagen</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <script type="text/template" id="profile-picture-qq-template">
+                                    <div class="qq-uploader-selector qq-uploader">
+                                        <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+                                            <span>Arrastra los archivos aquí para cargar</span>
+                                        </div>
+                                        <div class="qq-upload-button-selector qq-upload-button">
+                                            <div>Cargar archivo</div>
+                                        </div>
+                                        <span class="qq-drop-processing-selector qq-drop-processing">
+                                            <span>Procesando los archivos arrastrados...</span>
+                                            <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                        </span>
+                                        <ul class="qq-upload-list-selector qq-upload-list">
+                                            <li>
+                                                <div class="qq-progress-bar-container-selector">
+                                                    <div class="qq-progress-bar-selector qq-progress-bar"></div>
+                                                </div>
+                                                <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
+                                                <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
+                                                <span class="qq-upload-file-selector qq-upload-file"></span>
+                                                <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
+                                                <span class="qq-upload-size-selector qq-upload-size"></span>
+                                                <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Cancelar</a>
+                                                <a class="qq-upload-retry-selector qq-upload-retry" href="#">Reintentar</a>
+                                                <a class="qq-upload-delete-selector qq-upload-delete" href="#">Eliminar</a>
+                                                <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </script>
+                                <script type="text/javascript">
+                                $(document).ready(function () {
+                                    $("#profile-picture").fineUploader({
+                                        request: {
+                                            endpoint: '/Admin/Picture/AsyncUpload?byThisSize=415'
+                                        },
+                                        template: "profile-picture-qq-template",
+                                        multiple: false
+                                    }).on("complete", function (event, id, name, responseJSON, xhr) {
+                                        if (responseJSON.success) {
+                                            $("#profile-picture-image").html("<img src='" + responseJSON.imageUrl + "'/>");
+                                            $("#profile-picture-value input").val(responseJSON.pictureId);
+                                            $("#profile-picture-remove").show();
+                                        }
+                                    });
+                                    $("#profile-picture-remove").click(function (e) {
+                                        $("#profile-picture-image").html("<img src='@Model.DefaultPicture'/>");
+                                        $("#profile-picture-value input").val(0);
+                                        $(this).hide();
+                                    });
+                                });
+                                </script>
+                                <span class="field-validation-valid" data-valmsg-for="PayrollProfilePictureId" data-valmsg-replace="true"></span>
+                            </div>
+                            <div style="margin-left: 15px;text-align: center;">
+                                <label class="control-label">Expediente</label>
+                                <div id="payroll-profile-picture-value">
+                                    <input type="hidden" data-val="true" data-val-required="The Int32 field is required." id="PayrollProfilePictureId" name="PayrollProfilePictureId" value="">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="payroll-profile-picture-image" class="uploaded-image">
+                                            @if (string.IsNullOrEmpty(Model.PayrollProfilePicture))
+                                            {
+                                                <img src="@Model.DefaultPicture">
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.PayrollProfilePicture">
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="payroll-profile-picture" class="upload-image-button pull-left margin-t-5">
+                                            <div class="qq-uploader-selector qq-uploader">
+                                                <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone="" style="display: none;">
+                                                    <span>Arrastra los archivos aquí para cargar</span>
+                                                </div>
+                                                <div class="qq-upload-button-selector qq-upload-button" style="position: relative; overflow: hidden; direction: ltr;">
+                                                    <div>Cargar archivo</div>
+                                                    <input qq-button-id="ea583c18-eafb-40d2-a55f-e7990ea37116" type="file" name="qqfile" style="position: absolute; right: 0px; top: 0px; font-family: Arial; font-size: 118px; margin: 0px; padding: 0px; cursor: pointer; opacity: 0;">
+                                                </div>
+                                                <span class="qq-drop-processing-selector qq-drop-processing qq-hide">
+                                                    <span>Procesando los archivos arrastrados...</span>
+                                                    <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                                </span>
+                                                <ul class="qq-upload-list-selector qq-upload-list"></ul>
+                                            </div>
+                                        </div>
+                                        <div class="remove-image-button pull-left margin-t-5">
+                                            <span id="payroll-profile-picture-remove" class="btn bg-red" style="display: none;">Quitar imagen</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <script type="text/template" id="payroll-profile-picture-qq-template">
+                                    <div class="qq-uploader-selector qq-uploader">
+                                        <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+                                            <span>Arrastra los archivos aquí para cargar</span>
+                                        </div>
+                                        <div class="qq-upload-button-selector qq-upload-button">
+                                            <div>Cargar archivo</div>
+                                        </div>
+                                        <span class="qq-drop-processing-selector qq-drop-processing">
+                                            <span>Procesando los archivos arrastrados...</span>
+                                            <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                        </span>
+                                        <ul class="qq-upload-list-selector qq-upload-list">
+                                            <li>
+                                                <div class="qq-progress-bar-container-selector">
+                                                    <div class="qq-progress-bar-selector qq-progress-bar"></div>
+                                                </div>
+                                                <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
+                                                <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
+                                                <span class="qq-upload-file-selector qq-upload-file"></span>
+                                                <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
+                                                <span class="qq-upload-size-selector qq-upload-size"></span>
+                                                <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Cancelar</a>
+                                                <a class="qq-upload-retry-selector qq-upload-retry" href="#">Reintentar</a>
+                                                <a class="qq-upload-delete-selector qq-upload-delete" href="#">Eliminar</a>
+                                                <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </script>
+                                <script type="text/javascript">
+                                $(document).ready(function () {
+                                    $("#payroll-profile-picture").fineUploader({
+                                        request: {
+                                            endpoint: '/Admin/Picture/AsyncUpload?byThisSize=415'
+                                        },
+                                        template: "payroll-profile-picture-qq-template",
+                                        multiple: false
+                                    }).on("complete", function (event, id, name, responseJSON, xhr) {
+                                        if (responseJSON.success) {
+                                            $("#payroll-profile-picture-image").html("<img src='" + responseJSON.imageUrl + "'/>");
+                                            $("#payroll-profile-picture-value input").val(responseJSON.pictureId);
+                                            $("#payroll-profile-picture-remove").show();
+                                        }
+                                    });
+                                    $("#payroll-profile-picture-remove").click(function (e) {
+                                        $("#payroll-profile-picture-image").html("<img src='@Model.DefaultPicture'/>");
+                                        $("#payroll-profile-picture-value input").val(0);
+                                        $(this).hide();
+                                    });
+                                });
+                                </script>
+                                <span class="field-validation-valid" data-valmsg-for="PayrollProfilePictureId" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="CustomerId" />
+                        </div>
+                        <div class="col-md-9">
+                            <select asp-for="CustomerId" asp-items="@(Model.Customers)">
+                                @if (Model.CustomerId == 0)
+                                {
+                                    <option disabled selected value="0">Selecciona un usuario...</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CustomerId"></span>
+                            @if (Model.CustomerId == 0)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FranchiseId" />
+                        </div>
+                        <div class="col-md-9">
+                            <select class="form-control valid" asp-for="FranchiseId" asp-items="@(Model.Franchises)">
+                                @if (Model.FranchiseId == null)
+                                {
+                                    <option selected value="0">No aplica/No es empleado de franquicia</option>
+                                }
+                                else
+                                {
+                                    <option value="0">No aplica/No es empleado de franquicia</option>
+                                }
+                            </select>
+                            <span asp-validation-for="FranchiseId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="FirstNames" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="FirstNames" />
+                            <span asp-validation-for="FirstNames"></span>
+                            @if (string.IsNullOrEmpty(Model.FirstNames))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="MiddleName" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="MiddleName" />
+                            <span asp-validation-for="MiddleName"></span>
+                            @if (string.IsNullOrEmpty(Model.MiddleName))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="LastName" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="LastName" />
+                            <span asp-validation-for="LastName"></span>
+                            @if (string.IsNullOrEmpty(Model.LastName))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="DateOfBirth" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="DateOfBirth" />
+                            @if (!Model.DateOfBirth.HasValue)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="DateOfAdmission" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="DateOfAdmission" />
+                            @if (!Model.DateOfAdmission.HasValue)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="TrialPeriodEndDate" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="TrialPeriodEndDate" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="DateOfDeparture" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="DateOfDeparture" />
+                            @if (!Model.DateOfDeparture.HasValue && Model.EmployeeStatus == EmployeeStatus.Discharged)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="DepartureReasonType" />
+                        </div>
+                        <div class="col-md-9">
+                            <select class="form-control" asp-for="DepartureReasonType" value="@(Model.DepartureReasonTypeId)" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Payroll.Domain.PayrollEmployees.DepartureReasonType>())"></select>
+                            <span asp-validation-for="DepartureReasonType"></span>
+                            @if (Model.DateOfDeparture.HasValue && Model.EmployeeStatus == EmployeeStatus.Discharged && Model.DepartureReasonTypeId == 0)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="SatisfactoryDepartureProcess" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="SatisfactoryDepartureProcess" />
+                            @if (Model.DateOfDeparture.HasValue && Model.EmployeeStatus == EmployeeStatus.Discharged && !Model.SatisfactoryDepartureProcess)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="DepartureComment" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="DepartureComment" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Address" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Address" />
+                            <span asp-validation-for="Address"></span>
+                            @if (string.IsNullOrEmpty(Model.Address))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Latitude" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Latitude" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Longitude" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Longitude" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Cellphone" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Cellphone" />
+                            <span asp-validation-for="Cellphone"></span>
+                            @if (string.IsNullOrEmpty(Model.Cellphone))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Landline" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Landline" />
+                            <span asp-validation-for="Landline"></span>
+                            @if (string.IsNullOrEmpty(Model.Landline))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <div class="col-md-offset-3 col-md-9">
+                            <label class="control-label">Referencias</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ReferenceOneName" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ReferenceOneName" />
+                            <span asp-validation-for="ReferenceOneName"></span>
+                            @if (string.IsNullOrEmpty(Model.ReferenceOneName))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ReferenceOneContact" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ReferenceOneContact" />
+                            <span asp-validation-for="ReferenceOneContact"></span>
+                            @if (string.IsNullOrEmpty(Model.ReferenceOneContact))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ReferenceTwoName" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ReferenceTwoName" />
+                            <span asp-validation-for="ReferenceTwoName"></span>
+                            @if (string.IsNullOrEmpty(Model.ReferenceTwoName))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ReferenceTwoContact" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ReferenceTwoContact" />
+                            <span asp-validation-for="ReferenceTwoContact"></span>
+                            @if (string.IsNullOrEmpty(Model.ReferenceTwoContact))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ReferenceThreeName" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ReferenceThreeName" />
+                            <span asp-validation-for="ReferenceThreeName"></span>
+                            @if (string.IsNullOrEmpty(Model.ReferenceThreeName))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <div class="col-md-3">
+                            <nop-label asp-for="ReferenceThreeContact" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="ReferenceThreeContact" />
+                            <span asp-validation-for="ReferenceThreeContact"></span>
+                            @if (string.IsNullOrEmpty(Model.ReferenceThreeContact))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    @*<div class="form-group">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="JobCatalogId" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="hidden" id="JobCatalogId" name="JobCatalogId" />
+                                        <select id="JobCatalogs" name="JobCatalogs"></select>
+                                        <span asp-validation-for="JobCatalogId"></span>
+                                    </div>
+                                    <script>
+                                        var $jobSelect;
+                                                                    $(document).ready(function () {
+                                                                        $jobSelect = $("#JobCatalogs").kendoComboBox({
+                                                                            placeholder: "Buscar empleo...",
+                                                                            dataTextField: "Name",
+                                                                            dataValueField: "Id",
+                                                                            filter: "contains",
+                                                                            autoBind: true,
+                                                                            minLength: 1,
+                                                                            dataSource: {
+                                                                                type: "json",
+                                                                                transport: {
+                                                                                    read: {
+                                                                                        url: "@Html.Raw(Url.Action("GetJobs", "JobCatalog", new { id = Model.JobCatalogId }))",
+                                                                                        type: "POST",
+                                                                                        data: addAntiForgeryToken
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            select: onSelect
+                                                                        });
+                                                                        function onSelect(e) {
+                                                                            $("#JobCatalogId").val(this.dataItem(e.item.index()).Id);
+                                                                        }
+                                                                        $('.k-combobox').attr('style', 'width: 100% !important')
+                                                                        @if (Model.JobCatalogId > 0)
+                        {
+                            <text>
+                                                                        setTimeout(function () {
+                                                                            $('[name="JobCatalogs_input"]').val($('#JobCatalogs option[value="@Model.JobCatalogId"]').text())
+                                                                        }, 1000);
+                                                                        </text>
+                        }
+                                                                    });
+                                    </script>
+                                </div>*@
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EmployeeStatus" />
+                        </div>
+                        <div class="col-md-9">
+                            <select class="form-control" asp-for="EmployeeStatus" value="@(Model.EmployeeStatusId)" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Payroll.Domain.PayrollEmployees.EmployeeStatus>())"></select>
+                            <span asp-validation-for="EmployeeStatus"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <div class="col-md-3">
+                            <nop-label asp-for="PayrollContractType" />
+                        </div>
+                        <div class="col-md-9">
+                            <select class="form-control" asp-for="PayrollContractType" value="@(Model.PayrollContractType)" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Payroll.Domain.PayrollEmployees.PayrollContractType>())"></select>
+                            <span asp-validation-for="PayrollContractType"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="IMSS" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="IMSS" />
+                            <span asp-validation-for="IMSS"></span>
+                            @if (string.IsNullOrEmpty(Model.IMSS))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="RFC" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="RFC" />
+                            <span asp-validation-for="RFC"></span>
+                            @if (string.IsNullOrEmpty(Model.RFC))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="CURP" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="CURP" />
+                            <span asp-validation-for="CURP"></span>
+                            @if (string.IsNullOrEmpty(Model.CURP))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="EmployeeNumber" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="EmployeeNumber" />
+                            <span asp-validation-for="EmployeeNumber"></span>
+                            @if (Model.EmployeeNumber == 0)
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="BankType" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="BankType" asp-items="@(Model.BankTypes)" />
+                            <span asp-validation-for="BankType"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Clabe" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Clabe" />
+                            <span asp-validation-for="Clabe"></span>
+                            @if (string.IsNullOrEmpty(Model.Clabe))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AccountNumber" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AccountNumber" />
+                            <span asp-validation-for="AccountNumber"></span>
+                            @if (string.IsNullOrEmpty(Model.AccountNumber))
+                            {
+                                <strong style="color: red">PENDIENTE</strong>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () { // DOM ready
+        var openedSelect; // keep track of opened Select boxes
+        $(".cselect").each(function () {
+            var $input = $(this).find("#JobCatalogId");
+            var $dropDown = $(this).find("ul");
+
+            $(this).on("click", function () {
+                $dropDown.slideToggle();
+            });
+
+            $dropDown.on("click", "li", function () {
+                $input.val($.trim($(this).data('id')));
+                $('#JobCatalogName').val($.trim($(this).text().replace('└', '')));
+            });
+        });
+        var currentJobId = @Model.JobCatalogId;
+        if (currentJobId > 0) {
+            $("#JobCatalogId").val(currentJobId);
+            $('#JobCatalogName').val($.trim($('li[data-id="' + currentJobId + '"]').text().replace('└', '')));
+        }
+    });
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#imagePreview').css('background-image', 'url(' + e.target.result + ')');
+                $('#imagePreview').hide();
+                $('#imagePreview').fadeIn(650);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    $("#ProfilePic").change(function () {
+        readURL(this);
+    });
+    $(document).ready(function () {
+        $('#CustomerId').selectize({
+            sortField: 'text'
+        });
+        $.getScript("https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&libraries=places&callback=initAutocomplete");
+        setTimeout(function () {
+            initAutocomplete();
+        }, 500);
+    });
+</script>
+@*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&libraries=places&callback=initAutocomplete"
+    async defer></script>*@
+<script>
+    var searchBox;
+    function initAutocomplete() {
+        var options = {
+            componentRestrictions: { country: 'mx' }
+        };
+        var input = document.getElementById('Address');
+        searchBox = new google.maps.places.Autocomplete(input, options);
+        searchBox.addListener('place_changed', this.onPlaceChanged);
+    }
+
+    function onPlaceChanged() {
+        var place = searchBox.getPlace();
+        $('#Latitude').val(place.geometry.location.lat());
+        $('#Longitude').val(place.geometry.location.lng());
+    }
+</script>

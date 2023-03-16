@@ -1,0 +1,15 @@
+﻿@model Teed.Plugin.Careers.Models.CareersPostulationModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts("Exito");
+    @await Component.InvokeAsync("StoreScopeConfiguration")
+}
+<div class="page shopping-cart-page section">
+    <h1 class="category-page-title">Gracias por su postulación</h1>
+    <h6 class="text" style="font-weight: bold">
+        La información ha sido enviada correctamente.
+    </h6>
+    <a href="/">Volver al inicio</a>
+</div>

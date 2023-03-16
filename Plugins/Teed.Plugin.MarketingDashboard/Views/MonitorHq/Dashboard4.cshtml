@@ -1,0 +1,238 @@
+﻿@model Teed.Plugin.MarketingDashboard.Models.MarketingExpenses.MarketingDashboardDataModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("MarketingDashboard.DashboardHq4");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    Html.AppendScriptParts("https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.min.js");
+    string chartContainerHeight = Model.FromAdmin ? "320px" : "420px";
+    int chartHeight = Model.FromAdmin ? 300 : 400;
+}
+<style>
+    .element-title {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        padding: 3px;
+    }
+
+    .chart-container {
+        margin-top: 30px;
+    }
+</style>
+
+@if (!Model.FromAdmin)
+{
+    <style>
+        body {
+            font-size: 20px;
+        }
+
+        h4 {
+            font-size: 50px;
+        }
+    </style>
+    <script>
+        setTimeout(function () {
+            $(".navbar").hide();
+            $(".main-header").hide();
+            $(".main-sidebar").hide();
+            $(".main-footer").hide();
+            $(".content-wrapper").css("margin-left", 0);
+            $("#map").css("height", 1015);
+        }, 500);
+    </script>
+}
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="chart-container">
+                    <h4 class="element-title">Total de pedidos vs. Nuevos clientes</h4>
+                    <div class="chart" style="height: @chartContainerHeight;">
+                        <canvas id="chart-1" height="@chartHeight"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4 class="element-title">Número de pedidos diarios vs. Venta diaria</h4>
+                    <div class="chart" style="height: @chartContainerHeight;">
+                        <canvas id="chart-2" height="@chartHeight"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4 class="element-title">Ticket promedio vs. recurrencia</h4>
+                    <div class="chart" style="height: @chartContainerHeight;">
+                        <canvas id="chart-3" height="@chartHeight"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4 class="element-title">MK0014 Customer Annual Contribution * Retención / CAC</h4>
+                    <div class="chart" style="height: @chartContainerHeight;">
+                        <canvas id="chart-4" height="@chartHeight"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const chartOptions = {
+        plugins: {
+            legend: {
+                labels: {
+                    font: {
+                        size: @(!Model.FromAdmin ? 25 : 10)
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                display: true,
+                position: 'left',
+                ticks: {
+                    userCallback: function (dataLabel, index) {
+                        return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                    },
+                    min: 0
+                }
+            },
+            y1: {
+                display: true,
+                position: 'right',
+                ticks: {
+                    userCallback: function (dataLabel, index) {
+                        return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                    },
+                    min: 0
+                }
+            }
+        }
+    };
+
+    var osConfig = {
+        type: 'line',
+        data: {
+            labels: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.EndDate.ToString("dd-MM-yyyy"))))),
+            datasets: [
+                {
+                    label: "MKV0004 Total de pedidos",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.PedidosCount)))
+                },
+                {
+                    label: "MKV0003 Nuevas cuentas activas",
+                    borderColor: 'rgba(221,75,57, 0.7)',
+                    backgroundColor: 'rgba(221,75,57, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y1',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.NewActiveCount)))
+                }
+            ]
+        },
+        options: chartOptions
+    };
+
+    var osConfig2 = {
+        type: 'line',
+        data: {
+            labels: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.EndDate.ToString("dd-MM-yyyy"))))),
+            datasets: [
+                {
+                    label: "MKV0005 Promedio de venta diaria",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.DailySalesAverage)))
+                },
+                {
+                    label: "MKV0004 Promedio de pedidos diarios",
+                    borderColor: 'rgba(221,75,57, 0.7)',
+                    backgroundColor: 'rgba(221,75,57, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y1',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.DailyPedidosAverage)))
+                }
+            ]
+        },
+        options: chartOptions
+    };
+
+    var osConfig3 = {
+        type: 'line',
+        data: {
+            labels: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.EndDate.ToString("dd-MM-yyyy"))))),
+            datasets: [
+                {
+                    label: "MKV0006A Ticket promedio",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.AverageTicket)))
+                },
+                {
+                    label: "MK0007 Recurrencia mensual",
+                    borderColor: 'rgba(221,75,57, 0.7)',
+                    backgroundColor: 'rgba(221,75,57, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y1',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.Recurrence)))
+                }
+            ]
+        },
+        options: chartOptions
+    };
+
+    var osConfig4 = {
+        type: 'line',
+        data: {
+            labels: @(Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.EndDate.ToString("dd-MM-yyyy"))))),
+            datasets: [
+                {
+                    label: "MK0014 Customer Annual Contribution * Retención / CAC",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                    backgroundColor: 'rgba(44, 152, 214, 0.5)',
+                    pointBorderWidth: 1,
+                    yAxisID: 'y',
+                    data: @(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Data.Select(x => x.CustomFormula2)))
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: @(!Model.FromAdmin ? 25 : 10)
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        userCallback: function (dataLabel, index) {
+                            return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                        },
+                        min: 0
+                    }
+                }
+            }
+        }
+    };
+
+    window.orderStatistics = new Chart(document.getElementById("chart-1").getContext("2d"), osConfig);
+    window.orderStatistics = new Chart(document.getElementById("chart-2").getContext("2d"), osConfig2);
+    window.orderStatistics = new Chart(document.getElementById("chart-3").getContext("2d"), osConfig3);
+    window.orderStatistics = new Chart(document.getElementById("chart-4").getContext("2d"), osConfig4);
+</script>

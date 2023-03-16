@@ -1,0 +1,128 @@
+﻿@model List<Teed.Plugin.Groceries.Controllers.OrderDeliveryReportsController.PendingReportModel>
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "OrderDeliveryReports";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Liquidación de compradores
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body"> 
+                <a data-toggle="collapse" href="#collapsePending" role="button" aria-expanded="false" aria-controls="collapsePending">
+                    <h3 style="text-align: center; background-color: #f3f3f3; padding: 1em; margin-bottom: 1em;"> <i class="fa fa-caret-right" aria-hidden="true"></i>  Compradores pendientes por liquidar: @Model.Count</h3>
+                </a>
+                <div class="collapse" id="collapsePending" style="margin-bottom: 30px">
+                    @foreach (var item in Model.GroupBy(x => x.ShippingDate).OrderByDescending(x => x.Key))
+                    {
+                        <strong>@item.Key.ToString("dd-MM-yyyy")</strong>
+                        <ul>
+                            @foreach (var pendingBuyer in item)
+                            {
+                                <li><a target="_blank" href="/Admin/OrderDeliveryReports/OrderReportStatus/@(pendingBuyer.ShippingDate.ToString("dd-MM-yyyy"))">@pendingBuyer.BuyerName</a></li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: 3,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                    width: 200
+                },
+                //{
+                //    field: "Id",
+                //    title: "Ver ordenes",
+                //    width: 50,
+                //    headerAttributes: { style: "text-align:center" },
+                //    attributes: { style: "text-align:center" },
+                //     template: `#if(IsPending){ # 
+                //                        <a class="btn btn-success" href="Edit/#=Id#"><i class="fa fa-eye"></i>Editar reporte</a> 
+                //                    # }
+                //                    else { #
+                //                        <a class="btn btn-danger" href="CreateOrderReports/#=Id#"><i class="fa fa-eye"></i>Crear reporte</a>
+                //                    # } #
+                //                    `
+                //},
+                {
+                    field: "CountNotConfirm",
+                    title: "Compradores pendientes por liquidar",
+                    width: 200,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                },
+                {
+                    field: "CountConfirm",
+                    title: "Compradores liquidados",
+                    width: 200,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                },
+                {
+                    field: "Id",
+                    title: "Ver fecha",
+                    width: 70,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-info" href="OrderReportStatus/#=Id#"><i class="fa fa-eye"></i>Ver Fecha</a> `
+                },
+            ]
+        });
+    });
+</script>

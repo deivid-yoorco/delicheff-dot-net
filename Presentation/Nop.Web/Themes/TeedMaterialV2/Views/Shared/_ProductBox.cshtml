@@ -1,0 +1,226 @@
+﻿@model ProductOverviewModel
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@inject CatalogSettings catalogSettings
+@inject IWorkContext workContext
+@{
+    //prepare "Add to cart" AJAX link
+    var addtocartlink = "";
+    var buyingBySecondary = Model.BuyingBySecondary;
+    var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+    var quantity = 1;
+    var removefromcartlink = $"";
+    if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = false/*Model.ProductPrice.ForceRedirectionAfterAddingToCart */});
+    }
+    else
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity });
+    }
+
+    var addtowishlistlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist, quantity = quantity });
+    var addtocomparelink = Url.RouteUrl("AddProductToCompare", new { productId = Model.Id });
+
+    var currentType = Model.ProductPrice.EquivalenceCoefficient == 0 && Model.WeightInterval == 0 ? "" : (Model.BuyingBySecondary && Model.ProductPrice.EquivalenceCoefficient > 0) || Model.WeightInterval > 0 ? "gr" : "pz";
+}
+
+<div class="card product-card custom-large"
+     data-productid="@Model.Id"
+     data-buyingbysecondary="@Model.BuyingBySecondary"
+     data-equivalencecoefficient="@Model.Product.EquivalenceCoefficient"
+     data-weightinterval="@Model.WeightInterval"
+     data-sku="@Model.Sku"
+     data-name="@Model.Name"
+     data-category="@(string.Join("/", Model.Product.ProductCategories.Select(x => x.Category?.Name)))"
+     data-brand="@(string.Join(",", Model.Product.ProductManufacturers.Select(x => x.Manufacturer?.Name)))"
+     data-variant="null"
+     data-list="@Model.ListName"
+     data-position="@Model.ListPosition"
+     data-price="@Model.ProductPrice.PriceValue">
+    @if (!Model.ProductPrice.DisableWishlistButton)
+    {
+        <a href="#fav-@Model.Id" title="@T("ShoppingCart.AddToWishlist")"
+           onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.Id, shoppingCartTypeId = (int) ShoppingCartType.Wishlist})', '.product-details-form-modal-@Model.Id');return false;"
+           class="wishlist waves-effect waves-light">
+            @*<i id="ifavorite" class="material-icons">
+                    @if (Model.IsInWishList)
+                    {
+                        <text>favorite</text>
+                    }
+                    else
+                    {
+                        <text>favorite_border</text>
+                    }
+                </i>*@
+            <div>
+                <input type="checkbox" id="like-checkbox-@Model.Id" @if (Model.IsInWishList) { <text> checked </text> } />
+                <label for="checkbox">
+                    <svg id="heart-svg" viewBox="467 392 58 57" xmlns="http://www.w3.org/2000/svg">
+                        <g id="Group" fill="none" fill-rule="evenodd" transform="translate(467 392)">
+                            <path d="M29.144 20.773c-.063-.13-4.227-8.67-11.44-2.59C7.63 28.795 28.94 43.256 29.143 43.394c.204-.138 21.513-14.6 11.44-25.213-7.214-6.08-11.377 2.46-11.44 2.59z" id="heart" fill="#FFFFFF00" stroke="#AAB8C2" stroke-width="3" />
+                            <circle id="main-circ" fill="#9BC54C" opacity="0" cx="29.5" cy="29.5" r="1.5" />
+
+                            <g id="grp7" opacity="0" transform="translate(7 6)">
+                                <circle id="oval1" fill="#9CD8C3" cx="2" cy="6" r="2" />
+                                <circle id="oval2" fill="#8CE8C3" cx="5" cy="2" r="2" />
+                            </g>
+
+                            <g id="grp6" opacity="0" transform="translate(0 28)">
+                                <circle id="oval1" fill="#CC8EF5" cx="2" cy="7" r="2" />
+                                <circle id="oval2" fill="#91D2FA" cx="3" cy="2" r="2" />
+                            </g>
+
+                            <g id="grp3" opacity="0" transform="translate(52 28)">
+                                <circle id="oval2" fill="#9CD8C3" cx="2" cy="7" r="2" />
+                                <circle id="oval1" fill="#8CE8C3" cx="4" cy="2" r="2" />
+                            </g>
+
+                            <g id="grp2" opacity="0" transform="translate(44 6)">
+                                <circle id="oval2" fill="#CC8EF5" cx="5" cy="6" r="2" />
+                                <circle id="oval1" fill="#CC8EF5" cx="2" cy="2" r="2" />
+                            </g>
+
+                            <g id="grp5" opacity="0" transform="translate(14 50)">
+                                <circle id="oval1" fill="#91D2FA" cx="6" cy="5" r="2" />
+                                <circle id="oval2" fill="#91D2FA" cx="2" cy="2" r="2" />
+                            </g>
+
+                            <g id="grp4" opacity="0" transform="translate(35 50)">
+                                <circle id="oval1" fill="#F48EA7" cx="6" cy="5" r="2" />
+                                <circle id="oval2" fill="#F48EA7" cx="2" cy="2" r="2" />
+                            </g>
+
+                            <g id="grp1" opacity="0" transform="translate(24)">
+                                <circle id="oval1" fill="#9FC7FA" cx="2.5" cy="3" r="2" />
+                                <circle id="oval2" fill="#9FC7FA" cx="7.5" cy="2" r="2" />
+                            </g>
+                        </g>
+                    </svg>
+                </label>
+            </div>
+        </a>
+    }
+    <div class="card-image center">
+        <img class="lazyload responsive-img" width="278" height="278" id="product_@Model.Id" alt="@Model.DefaultPictureModel.AlternateText" data-src="@Model.DefaultPictureModel.ImageUrl" title="@Model.DefaultPictureModel.Title">
+        @if (Model.VisibleDiscount.Id > 0)
+        {
+            <span class="visible-discount">-@((decimal.Round(Model.VisibleDiscount.DiscountAmount, 0)).ToString())%. Cupón: @Model.VisibleDiscount.CouponCode</span>
+        }
+    </div>
+    <div class="card-title-container">
+        <span class="card-title">@Model.Name</span>
+    </div>
+    <input type="hidden" value="@Model.CurrentQuantityInCart" class="current-qty-@Model.Id" />
+    @{
+        bool hideOldPrice = true;
+        if (!string.IsNullOrWhiteSpace(Model.ProductPrice.OldPrice))
+        {
+            decimal.TryParse(Model.ProductPrice.OldPrice?.Replace("$", ""), out decimal oldPrice);
+            hideOldPrice = !(oldPrice > 0 && oldPrice > Model.Product.Price) && string.IsNullOrWhiteSpace(Model.ProductPrice.PriceWithDiscount);
+        }
+
+        bool hasExtraText = Model.Product.EquivalenceCoefficient > 0 || Model.Product.WeightInterval > 0 ? true : false;
+        string extraText = Model.Product.EquivalenceCoefficient > 0 || Model.Product.WeightInterval > 0 ? "<small>/kg</small>" : "";
+        string extraStyle = "margin-left:-10px";
+    }
+
+    @{
+        string price = string.Empty;
+        string spaceBetween = "s6";
+        if (Model.Product.RewardPointsRequired > 0)
+        {
+            price = Model.Product.RewardPointsRequired.ToString("N") + " puntos";
+        }
+        else
+        {
+            price = !string.IsNullOrWhiteSpace(Model.ProductPrice.PriceWithDiscount) ? Model.ProductPrice.PriceWithDiscount : Model.Product.Price.ToString("C");
+        }
+        if (Model.Name.Length <= 64)
+        {
+            int priceLength = $"{Model.Product.Price.ToString("C")}{(hasExtraText ? "/kg" : "")}".Length;
+            if (priceLength > 8)
+            {
+                spaceBetween = "s12";
+            }
+        }
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ProductPrice.PriceWithDiscount))
+    {
+        <div class="col @(spaceBetween) text-red old-price" style="color:#C53b36; text-align:center">@Model.Product.Price.ToString("C")@Html.Raw(extraText)</div>
+    }
+    else
+    {
+        <div class="col @(spaceBetween) text-red old-price @(hideOldPrice ? "hide" : null)" style="color:#C53b36; text-align:center">@Model.ProductPrice.OldPrice</div>
+    }
+    <div class="col @(spaceBetween) product-price @(hideOldPrice ? "center-product-price" : null)" style="text-align:center;font-weight:bold">@(price)@(Html.Raw(extraText))</div><br />
+    <div class="col s12 checkbox-@Model.Id @(Model.ProductPrice.EquivalenceCoefficient > 0 ? null : "hide-selection")" style="text-align:center">
+        <span style="text-align:center">Comprar por:</span><br />
+        <label>
+            <input name="group-@Model.Id" type="checkbox" class="checkbox-unit-@Model.Id" onclick="handleProductTypeCheckboxClick(this)" onchange="updatedProductType(@Model.Id, @Model.Product.EquivalenceCoefficient, @Model.WeightInterval, true, true);" />
+            <span style="padding-left:23px">pieza</span>
+        </label>
+        <label style="margin-left:1em">
+            <input name="group-@Model.Id" type="checkbox" class="checkbox-weight-@Model.Id" onclick="handleProductTypeCheckboxClick(this)" onchange="updatedProductType(@Model.Id, @Model.Product.EquivalenceCoefficient, @Model.WeightInterval, true, true);" />
+            <span style="padding-left:23px">gramos</span>
+        </label>
+    </div>
+    @if (Model.Product.RewardPointsRequired == 0)
+    {
+        <div class="number-input">
+            <button class="removeQty teed-primary btnCart-remove-@Model.Id" onclick="removeFromCart(@Model.Id, @Model.Product.EquivalenceCoefficient, @Model.WeightInterval);registerRemoveFromCart('@Model.Product.Sku',
+                    '@(Model.Product.Name.Replace("'", ""))',
+                    '@(string.Join("/", Model.Product.ProductCategories.Select(x => x.Category?.Name?.Replace("'", ""))))',
+                    '@(string.Join(",", Model.Product.ProductManufacturers.Select(x => x.Manufacturer?.Name?.Replace("'", ""))))',
+                    @(Model.Product.Price),
+                    1)" disabled></button>
+            <select class="card-select browser-default selected-qty-@Model.Id" onchange="updateCartWithSelect(@Model.Id, @Model.Product.EquivalenceCoefficient, @Model.WeightInterval, this);registerAddOrRemoveFromSelectToCart('@Model.Product.Sku',
+                    '@(Model.Product.Name.Replace("'", ""))',
+                    '@(string.Join("/", Model.Product.ProductCategories.Select(x => x.Category?.Name?.Replace("'", ""))))',
+                    '@(string.Join(",", Model.Product.ProductManufacturers.Select(x => x.Manufacturer?.Name?.Replace("'", ""))))',
+                    @(Model.Product.Price),
+                    this)"></select>
+            <button class="plus addQty teed-primary btnCart-@Model.Id" onclick="addToCart(@Model.Id, @Model.Product.EquivalenceCoefficient, @Model.WeightInterval, @shoppingCartTypeId);registerAddToCart('@Model.Product.Sku',
+                    '@(Model.Product.Name.Replace("'", ""))',
+                    '@(string.Join("/", Model.Product.ProductCategories.Select(x => x.Category?.Name?.Replace("'", ""))))',
+                    '@(string.Join(",", Model.Product.ProductManufacturers.Select(x => x.Manufacturer?.Name?.Replace("'", ""))))',
+                    @(Model.Product.Price),
+                    1)" disabled></button>
+        </div>
+    }
+    else
+    {
+        <a href="javascript:void(0)" title="AGREGAR AL CARRITO" id="btnCart-@Model.Id" onclick="AjaxCart.addproducttocart_catalog('@addtocartlink');return false;" class="waves-effect waves-light btn btn-width">
+            <span class="small-cart text-small-cart">AGREGAR AL CARRITO</span>
+        </a>
+    }
+
+    @if (Model.PropertiesOptions != null)
+    {
+        <div class="product-properties-title">
+            <span>¿Cómo quieres tu producto?</span>
+        </div>
+        <div class="properties-select">
+            <select class="card-select browser-default type-selection-@Model.Id" onchange="updatePropertySelection(@Model.Id, this)">
+                @foreach (var option in Model.PropertiesOptions)
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.SelectedPropertyOption) && Model.SelectedPropertyOption.ToLower() == option.ToLower())
+                    {
+                        <option selected value="@option">@(option.First().ToString().ToUpper())@(option.Substring(1))</option>
+                    }
+                    else
+                    {
+                        <option value="@option">@(option.First().ToString().ToUpper())@(option.Substring(1))</option>
+                    }
+                }
+            </select>
+        </div>
+    }
+    else
+    {
+        <div class="extra-space"></div>
+    }
+</div>

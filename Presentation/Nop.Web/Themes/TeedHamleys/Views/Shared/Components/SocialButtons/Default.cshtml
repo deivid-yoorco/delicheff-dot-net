@@ -1,0 +1,46 @@
+﻿@model SocialModel
+
+<style>
+    .social-buttons img {
+        max-width: 30px;
+    }
+</style>
+
+<div class="social-buttons">
+    @if (!string.IsNullOrEmpty(Model.FacebookLink))
+    {
+        <a href="@Model.FacebookLink" target="_blank" title="@T("Footer.FollowUs.Facebook")">
+            <img src="/Themes/TeedHamleys/Content/images/social-media/fb.png" alt="@T("Footer.FollowUs.Facebook")" />
+        </a>
+    }
+    @if (!string.IsNullOrEmpty(Model.TwitterLink))
+    {
+        <a href="@Model.TwitterLink" target="_blank" title="@T("Footer.FollowUs.Twitter")">
+            <img src="/Themes/TeedHamleys/Content/images/social-media/twitter.png" alt="@T("Footer.FollowUs.Twitter")" />
+        </a>
+    }
+    @if (Model.NewsEnabled)
+    {
+        <a class="btn-floating waves-effect waves-light btn-social rss" href="@Url.RouteUrl("NewsRSS", new {languageId = Model.WorkingLanguageId})" target="_blank" title="@T("Footer.FollowUs.RSS")">
+            <i class="fas fa-rss"></i>
+        </a>
+    }
+    @if (!string.IsNullOrEmpty(Model.YoutubeLink))
+    {
+        <a href="@Model.YoutubeLink" target="_blank" title="@T("Footer.FollowUs.Youtube")">
+            <img src="/Themes/TeedHamleys/Content/images/social-media/youtube.png" alt="@T("Footer.FollowUs.Youtube")" />
+        </a>
+    }
+    @if (!string.IsNullOrEmpty(Model.GooglePlusLink))
+    {
+        <a class="btn-floating waves-effect waves-light btn-social googleplus" href="@Model.GooglePlusLink" target="_blank" title="@T("Footer.FollowUs.GooglePlus")">
+            <i class="fab fa-google-plus-g"></i>
+        </a>
+    }
+    @if (!string.IsNullOrEmpty(Model.InstagramLink))
+    {
+        <a href="@Model.InstagramLink" target="_blank" title="Instagram">
+            <img src="/Themes/TeedHamleys/Content/images/social-media/instagram.png" alt="Instagram" />
+        </a>
+    }
+</div>

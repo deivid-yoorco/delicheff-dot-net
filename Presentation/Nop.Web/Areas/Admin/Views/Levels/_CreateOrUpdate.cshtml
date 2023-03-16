@@ -1,0 +1,14 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.LevelModel
+@inject IEventPublisher eventPublisher
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="product-tabs">
+            <nop-tab asp-name="tab-info" asp-title="Información de nivel" asp-default="true">@await Html.PartialAsync("_CreateOrUpdate.Info", Model)</nop-tab>
+            <nop-tab asp-name="tab-log" asp-title="Bitácora">@await Html.PartialAsync("_CreateOrUpdate.Log", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>

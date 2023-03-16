@@ -1,0 +1,106 @@
+﻿@using Nop.Core.Domain.Catalog;
+@using Nop.Web.Models.HomePageImages
+@using Nop.Services.Media
+@using Nop.Services.Configuration
+@using Nop.Services.Discounts
+@using Nop.Core
+@using Nop.Core.Caching
+@using Nop.Core.Domain.Orders
+@using Nop.Services.Orders
+@model List<Product>
+
+@{
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+    @inject IDiscountService discountService
+    @inject CatalogSettings catalogSettings
+    @inject IWorkContext workContext
+    @inject RewardItemSettings RewardItemSettings
+    @inject IOrderTotalCalculationService orderTotalCalculationService
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+    string PicUrlArrow = GetPictureUrl(imagesSettings.BannerPictureArrowId);
+    var mountMinRewardItem = RewardItemSettings.MinimumAmount;
+    orderTotalCalculationService.GetShoppingCartSubTotal(workContext.CurrentCustomer.ShoppingCartItems.ToList(), true, out _, out _, out decimal TotalShopingCard, out _, out _);
+}
+
+@* @if (TotalShopingCard >= mountMinRewardItem)
+{
+    @if (workContext.CurrentCustomer.ShoppingCartItems.Where(x => (x.IsRewardItem ?? false) == true)
+     .Select(x => x.CustomerEnteredPrice).Count() == 0)
+    {
+        <div style=" margin-top: 5em; text-align: left; margin-bottom: -50px;">
+            <strong style="font-size: 40px;">Mi apapacho del día</strong>
+        </div>
+        <div class="rewardItem-slick" style="top: 50px;">
+            @foreach (var product in Model)
+            {
+                //prepare "Add to cart" AJAX link
+                var addtocartlink = "";
+                var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+                var quantity = 1;
+                var removefromcartlink = $"";
+
+                addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = product.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = true, rewardItemFlag = true });
+
+                var pictureProduct = GetPictureUrl(product.ProductPictures.Select(x => x.PictureId).FirstOrDefault());
+                <div class="card product-card"
+                     data-productid="@product.Id"
+                     data-name="@product.Name">
+
+                    <div class="card-image center">
+                        <img class="lazyload responsive-img" width="278" height="278" id="product_@product.Id" alt="@pictureProduct" data-src="@pictureProduct" title="@pictureProduct">
+                    </div>
+                    <div class="card-title-container">
+                        <span class="card-title">@product.Name</span>
+                    </div>
+
+                    <a href="javascript:void(0)" title="SELECCIONAR" id="btnCart-@product.Id" onclick="AjaxCart.addproducttocart_catalog('@addtocartlink');return false;" class="waves-effect waves-light btn btn-width">
+                        <span class="small-cart text-small-cart">SELECCIONAR</span>
+                    </a>
+                </div>
+            }
+
+
+
+        </div>
+    }
+    else
+    {
+        <div style="margin-top: 6em; text-align: left">
+            <strong style="color: red; font-size: 22px;">Ya agregamos al carrito tu apapacho ¡Disfrútalo!</strong>
+        </div>
+    }
+}
+else
+{
+    <div style="margin-top: 6em; text-align: left">
+        <strong style="color: red; font-size: 22px;">ATENCIÓN: Te falta $@Math.Round((mountMinRewardItem - TotalShopingCard), 2) para ganarte el apapacho del día</strong>
+    </div>
+} *@
+<script>
+    $(document).ready(function () {
+        $('.rewardItem-slick').slick({
+            infinite: true,
+            slidesToShow: 3,
+            slidesToScroll: 3
+        });
+    });
+</script>
+
+@inject IPictureService pictureService
+@inject IStaticCacheManager cacheManager
+
+@functions {
+    public string GetPictureUrl(int pictureId)
+    {
+
+        var cacheKey = string.Format("Teed.Nop.plugins.widgets.nivoslider2.pictureurl-{0}", pictureId);
+        return cacheManager.Get(cacheKey, () =>
+        {
+        //little hack here. nulls aren't cacheable so set it to ""
+        var url = pictureService.GetPictureUrl(pictureId, showDefaultPicture: false) ?? "";
+            return url;
+        });
+    }
+}

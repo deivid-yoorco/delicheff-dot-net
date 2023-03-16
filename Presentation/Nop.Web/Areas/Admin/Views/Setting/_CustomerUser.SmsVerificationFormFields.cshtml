@@ -1,0 +1,68 @@
+﻿@model CustomerUserSettingsModel
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var $isActive = $("#@Html.IdFor(model => model.SmsVerificationSettings.IsActive)");
+        $("#sms-active-container").css('display', ($isActive.prop('checked') ? 'block' : 'none'));
+        $isActive.click(function () {
+            $("#sms-active-container").css('display', ($(this).prop('checked') ? 'block' : 'none'));
+        });
+    });
+</script>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @T("Admin.Configuration.Settings.CustomerUser.BlockTitle.DefaultFields")
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="SmsVerificationSettings.IsActive" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="SmsVerificationSettings.IsActive" />
+                    <span asp-validation-for="SmsVerificationSettings.IsActive"></span>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" id="sms-active-container" style="display: none;">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="SmsVerificationSettings.IsSandbox" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="SmsVerificationSettings.IsSandbox" />
+                    <span asp-validation-for="SmsVerificationSettings.IsSandbox"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="SmsVerificationSettings.MinutesForCodeRequest" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="SmsVerificationSettings.MinutesForCodeRequest" />
+                    <span asp-validation-for="SmsVerificationSettings.MinutesForCodeRequest"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="SmsVerificationSettings.SandboxApiKey" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="SmsVerificationSettings.SandboxApiKey" />
+                    <span asp-validation-for="SmsVerificationSettings.SandboxApiKey"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="SmsVerificationSettings.ApiKey" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="SmsVerificationSettings.ApiKey" />
+                    <span asp-validation-for="SmsVerificationSettings.ApiKey"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

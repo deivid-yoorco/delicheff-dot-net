@@ -1,0 +1,193 @@
+﻿@model Teed.Plugin.Payments.MercadoPago.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="PaymentMercadoPago" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada. Puedes obtener tus credenciales haciendo clic <a href="https://www.mercadopago.com/mlm/account/credentials" target="_blank">aquí</a><br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="UseSandbox" />
+                        <span asp-validation-for="UseSandbox"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="PublicKey_OverrideForStore" asp-input="PublicKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Llave Pública</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="PublicKey" maxlength="256" class="form-control" />
+                        <span asp-validation-for="PublicKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AccessToken_OverrideForStore" asp-input="AccessToken" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Access Token</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="AccessToken" maxlength="256" class="form-control" />
+                        <span asp-validation-for="AccessToken" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SandboxPublicKey_OverrideForStore" asp-input="SandboxPublicKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Llave Pública de pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SandboxPublicKey" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SandboxPublicKey" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SandboxAccessToken_OverrideForStore" asp-input="SandboxAccessToken" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Access Token de pruebas</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SandboxAccessToken" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SandboxAccessToken" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AdditionalFee_OverrideForStore" asp-input="AdditionalFee" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Aplicar comisión</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFee" />
+                        <span asp-validation-for="AdditionalFee"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="AdditionalFeePercentage_OverrideForStore" asp-input="AdditionalFeePercentage" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>¿La comisión es porcentaje?</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AdditionalFeePercentage" />
+                        <span asp-validation-for="AdditionalFeePercentage"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <nop-override-store-checkbox asp-for="RequireInmediatePayment_OverrideForStore" asp-input="RequireInmediatePayment" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label class="control-label">¿Requerir pago inmediato?</label>
+                            <div title="Activa esta opción si se requiere que la aprobación del pago sea instantánea. De esta forma, el pago solo puede resultar aprobado o rechazado." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <nop-editor asp-for="RequireInmediatePayment" />
+                            <span asp-validation-for="RequireInmediatePayment"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <nop-override-store-checkbox asp-for="CashAllowed_OverrideForStore" asp-input="CashAllowed" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label class="control-label">Permitir pagos en efectivo</label>
+                            <div title="Activa esta opción si quieres que esté disponible el pago en efectivo en bancos y tiendas de conveniencia." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <nop-editor asp-for="CashAllowed" />
+                            <span asp-validation-for="CashAllowed"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <nop-override-store-checkbox asp-for="PrepaidCardAllowed_OverrideForStore" asp-input="PrepaidCardAllowed" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label class="control-label">Permitir pagos con tarjetas prepago de MercadoPago</label>
+                            <div title="Activa esta opción si quieres que esté disponible el pago con tarjetas prepagadas de MercadoPago." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <nop-editor asp-for="PrepaidCardAllowed" />
+                            <span asp-validation-for="PrepaidCardAllowed"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <nop-override-store-checkbox asp-for="DebitCardAllowed_OverrideForStore" asp-input="DebitCardAllowed" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label class="control-label">Permitir pagos con tarjetas de débito</label>
+                            <div title="Activa esta opción si quieres que esté disponible el pago con tarjetas de débito." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <nop-editor asp-for="DebitCardAllowed" />
+                            <span asp-validation-for="DebitCardAllowed"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <nop-override-store-checkbox asp-for="CreditCardAllowed_OverrideForStore" asp-input="CreditCardAllowed" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label class="control-label">Permitir pagos con tarjetas de crédito</label>
+                            <div title="Activa esta opción si quieres que esté disponible el pago con tarjetas de crédito." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <nop-editor asp-for="CreditCardAllowed" />
+                            <span asp-validation-for="CreditCardAllowed"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <nop-override-store-checkbox asp-for="BankTransferAllowed_OverrideForStore" asp-input="BankTransferAllowed" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label class="control-label">Permitir pagos con transferencia bancaria</label>
+                            <div title="Activa esta opción si quieres que esté disponible el pago con transferencia bancaria." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group" style="width:100%">
+                            <nop-editor asp-for="BankTransferAllowed" />
+                            <span asp-validation-for="BankTransferAllowed"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

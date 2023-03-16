@@ -1,0 +1,19 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.LevelModel
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Log
+                </div>
+                <div class="panel-body">
+                    @if (!string.IsNullOrEmpty(Model.Log))
+                    {
+                        @Html.Raw(Model.Log.Replace("\n", "<br />"));
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

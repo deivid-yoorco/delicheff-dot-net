@@ -1,0 +1,13 @@
+﻿@model Nop.Web.Areas.Admin.Models.Logging.ActivityLogTypeModel
+@inject IEventPublisher eventPublisher
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="logs-tabs">
+            <nop-tab asp-name="tab-info" asp-title="Información" asp-default="true">@await Html.PartialAsync("_CreateOrUpdate.Info", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>

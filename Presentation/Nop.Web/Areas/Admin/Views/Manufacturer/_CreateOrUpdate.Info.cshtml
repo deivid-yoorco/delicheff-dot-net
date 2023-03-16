@@ -1,0 +1,343 @@
+﻿@model ManufacturerModel
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Html.IdFor(model => model.AllowCustomersToSelectPageSize)").click(togglePageSize);
+        togglePageSize();
+    });
+
+    function togglePageSize() {
+        if ($('#@Html.IdFor(model => model.AllowCustomersToSelectPageSize)').is(':checked')) {
+            $('#pnlPageSize').hide();
+            $('#pnlPageSizeOptions').show();
+        } else {
+            $('#pnlPageSize').show();
+            $('#pnlPageSizeOptions').hide();
+        }
+    }
+</script>
+
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_manufacturer_details_info_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @(Html.LocalizedEditor<ManufacturerModel, ManufacturerLocalizedModel>("manufacturer-info-localized",
+                                                    @<div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <nop-label asp-for="@Model.Locales[item].Name" />
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <nop-editor asp-for="@Model.Locales[item].Name" />
+                                                                <span asp-validation-for="@Model.Locales[item].Name"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-3">
+                                                                <nop-label asp-for="@Model.Locales[item].Description" />
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                <nop-editor asp-for="@Model.Locales[item].Description" asp-template="RichEditor" />
+                                                                <span asp-validation-for="@Model.Locales[item].Description"></span>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" asp-for="@Model.Locales[item].LanguageId" />
+                                                    </div>
+  ,
+                                                                                                                                                                                                    @<div>
+                                                                                                                                                                                                        <div class="form-group">
+                                                                                                                                                                                                            <div class="col-md-3">
+                                                                                                                                                                                                                <nop-label asp-for="Name" />
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                            <div class="col-md-9">
+                                                                                                                                                                                                                <nop-editor asp-for="Name" asp-required="true" />
+                                                                                                                                                                                                                <span asp-validation-for="Name"></span>
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                        <div class="form-group">
+                                                                                                                                                                                                            <div class="col-md-3">
+                                                                                                                                                                                                                <nop-label asp-for="Description" />
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                            <div class="col-md-9">
+                                                                                                                                                                                                                <nop-editor asp-for="Description" asp-template="RichEditor" />
+                                                                                                                                                                                                                <span asp-validation-for="Description"></span>
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                    </div>
+                                              ))
+            <div class="form-group" @(Model.AvailableManufacturerTemplates.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                <div class="col-md-3">
+                    <nop-label asp-for="ManufacturerTemplateId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="ManufacturerTemplateId" asp-items="Model.AvailableManufacturerTemplates" />
+                    <span asp-validation-for="ManufacturerTemplateId"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="PictureId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="PictureId" />
+                    <span asp-validation-for="PictureId"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="DisplayTitle">Incluir en reporte por fabricante</label>
+                        <div title="Incluir en reporte por fabricante." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsIncludeInReportByManufacturer" asp-required="true" />
+                    <span asp-validation-for="IsIncludeInReportByManufacturer"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="DisplayTitle">Pago con transferencia</label>
+                        <div title="El fabricante acepta pagos con transferencia" class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsPaymentWhithTransfer" asp-required="true" />
+                    <span asp-validation-for="IsPaymentWhithTransfer"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="DisplayTitle">Pago con tarjeta corporativa</label>
+                        <div title="Pago con tarjeta corporativa" class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsPaymentWhithCorporateCard" asp-required="true" />
+                    <span asp-validation-for="IsPaymentWhithCorporateCard"></span>
+                </div>
+            </div>
+            <script>
+                $(document).ready(function () {
+                    $('#IsPaymentWhithTransfer, #IsPaymentWhithCorporateCard').change(function () {
+                        if (this.checked) {
+                            if ($(this).attr('id') == 'IsPaymentWhithTransfer') {
+                                $('#IsPaymentWhithCorporateCard').prop('checked', false);
+                            } else {
+                                $('#IsPaymentWhithTransfer').prop('checked', false);
+                            }
+                        }
+                    });
+                });
+            </script>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="DisplayTitle">Mostrar nombre</label>
+                        <div title="Mostrar el nombre en la página de fabricante." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="DisplayTitle" asp-required="true" />
+                    <span asp-validation-for="DisplayTitle"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="DisplayDescription">Mostrar descripción</label>
+                        <div title="Mostrar la descripción en la página de fabricante." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="DisplayDescription" asp-required="true" />
+                    <span asp-validation-for="DisplayDescription"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label" for="DisplayPicture">Mostrar imagen</label>
+                        <div title="Mostrar la imagen en la página de fabricante." class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="DisplayPicture" asp-required="true" />
+                    <span asp-validation-for="DisplayPicture"></span>
+                </div>
+            </div>
+            <div class="form-group advanced-setting">
+                <div class="col-md-3">
+                    <nop-label asp-for="PriceRanges" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="PriceRanges" />
+                    <span asp-validation-for="PriceRanges"></span>
+                </div>
+            </div>
+            <div class="form-group advanced-setting">
+                <div class="col-md-3">
+                    <nop-label asp-for="AllowCustomersToSelectPageSize" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="AllowCustomersToSelectPageSize" />
+                    <span asp-validation-for="AllowCustomersToSelectPageSize"></span>
+                </div>
+            </div>
+            <nop-nested-setting asp-for="AllowCustomersToSelectPageSize">
+                <div id="pnlPageSize" class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PageSize" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PageSize" />
+                        <span asp-validation-for="PageSize"></span>
+                    </div>
+                </div>
+                <div id="pnlPageSizeOptions" class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        <nop-label asp-for="PageSizeOptions" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="PageSizeOptions" />
+                        <span asp-validation-for="PageSizeOptions"></span>
+                    </div>
+                </div>
+            </nop-nested-setting>
+            <div class="form-group advanced-setting">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedDiscountIds" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="SelectedDiscountIds" asp-items="Model.AvailableDiscounts" asp-multiple="true" />
+                    <script type="text/javascript">
+            $(document).ready(function() {
+                var discountsIdsInput = $('#@Html.IdFor(model => model.SelectedDiscountIds)').data("kendoMultiSelect");
+                discountsIdsInput.setOptions({
+                    autoClose: false,
+                    filter: "contains"
+                });
+
+                @if (Model.AvailableDiscounts.Count == 0)
+                {
+                    <text>
+                        discountsIdsInput.setOptions({
+                            enable: false,
+                            placeholder: '@T("Admin.Catalog.Manufacturers.Fields.Discounts.NoDiscounts")'
+                        });
+                        discountsIdsInput._placeholder();
+                        discountsIdsInput._enable();
+                    </text>
+                }
+            });
+                    </script>
+                </div>
+            </div>
+            <div class="form-group advanced-setting">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedCustomerRoleIds" />
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <nop-select asp-for="SelectedCustomerRoleIds" asp-items="Model.AvailableCustomerRoles" asp-multiple="true" />
+                            <script type="text/javascript">
+                    $(document).ready(function() {
+                        var rolesIdsInput = $('#@Html.IdFor(model => model.SelectedCustomerRoleIds)').data("kendoMultiSelect");
+                        rolesIdsInput.setOptions({
+                            autoClose: false,
+                            filter: "contains"
+                        });
+
+                        @if (Model.AvailableCustomerRoles.Count == 0)
+                        {
+                            <text>
+                                rolesIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: 'No customer roles available'
+                                });
+                                rolesIdsInput._placeholder();
+                                rolesIdsInput._enable();
+                            </text>
+                        }
+                    });
+                            </script>
+                        </div>
+                        <div class="col-md-8">
+                            @await Component.InvokeAsync("AclDisabledWarning")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group advanced-setting">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedStoreIds" />
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <nop-select asp-for="SelectedStoreIds" asp-items="Model.AvailableStores" asp-multiple="true" />
+                            <script type="text/javascript">
+                    $(document).ready(function() {
+                        var storesIdsInput = $('#@Html.IdFor(model => model.SelectedStoreIds)').data("kendoMultiSelect");
+                        storesIdsInput.setOptions({
+                            autoClose: false,
+                            filter: "contains"
+                        });
+
+                        @if (Model.AvailableStores.Count == 0)
+                        {
+                            <text>
+                                storesIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: 'No stores available'
+                                });
+                                storesIdsInput._placeholder();
+                                storesIdsInput._enable();
+                            </text>
+                        }
+                    });
+                            </script>
+                        </div>
+                        <div class="col-md-8">
+                            @await Component.InvokeAsync("MultistoreDisabledWarning")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group advanced-setting">
+                <div class="col-md-3">
+                    <nop-label asp-for="Published" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="Published" />
+                    <span asp-validation-for="Published"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="DisplayOrder" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="DisplayOrder" />
+                    <span asp-validation-for="DisplayOrder"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_manufacturer_details_info_bottom", additionalData = Model.Id })
+</div>

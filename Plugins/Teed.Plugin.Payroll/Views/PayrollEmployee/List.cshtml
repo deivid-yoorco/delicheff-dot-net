@@ -1,0 +1,337 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollEmployee.PayrollEmployeesAdditionalModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Payroll.PayrollEmployee");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "PayrollEmployee";
+}
+
+<style>
+    .uploaded-image img {
+        border-radius: 50%;
+        object-fit: cover;
+        width: 100px;
+        height: 100px;
+    }
+
+    .order-alert-danger {
+        background-color: #fff6f6;
+        border-radius: 5px;
+        border: solid 1px #ff8383;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Expediente de empleados
+    </h1>
+    <div class="pull-right">
+        <a href="/files/CEL_SolicitudEmpleo.pdf" target="_blank" class="btn bg-blue">
+            <i class="fa fa-file-text-o"></i>
+            Descargar solicitud de empleo
+        </a>
+        <a href="/Admin/PayrollEmployee/ActivePayrollEmployees" class="btn btn-success">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar detalles de empleados activos
+        </a>
+        <a href="/Admin/PayrollEmployee/Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+<div class="content">
+    @if (Model.MissingPayrolls.Count > 0 || Model.DuplicatedCustomerPayrollEmployees.Count > 0 || Model.InTrialPeriodEmployees.Count > 0)
+    {
+        <div class="form-horizontal">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="accordion" id="accordionExample">
+                        @if (Model.MissingPayrolls.Count > 0)
+                        {
+                            <div class="card order-alert-danger">
+                                <div class="card-header" id="headingOne">
+                                    <h2 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                            Empleados faltantes de expediente (@(Model.MissingPayrolls.Count))
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                    <div class="card-body" style="margin: 30px;margin-top:0px">
+                                        <div>
+                                            <ul>
+                                                @foreach (var item in Model.MissingPayrolls)
+                                                {
+                                                    <li><a target="_blank" href="/admin/customer/edit/@item.Id">@(item.Name) (@(item.Email))</a></li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="accordion" id="accordionExample2">
+                        @if (Model.DuplicatedCustomerPayrollEmployees.Count > 0)
+                        {
+                            <div class="card order-alert-danger">
+                                <div class="card-header" id="headingTwo">
+                                    <h2 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            Empleados con usuarios ligados duplicados (@(Model.DuplicatedCustomerPayrollEmployees.Count))
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample2">
+                                    <div class="card-body" style="margin: 30px;margin-top:0px">
+                                        <div>
+                                            @foreach (var grouping in Model.DuplicatedCustomerPayrollEmployees.GroupBy(x => x.CustomerId))
+                                            {
+                                                <a target="_blank" href="/admin/customer/edit/@grouping.Key">Usuairo: @(grouping.FirstOrDefault().CustomerName)</a>
+                                                <ul>
+                                                    @foreach (var item in grouping)
+                                                    {
+                                                        <li><a target="_blank" href="/admin/payrollemployee/edit/@item.EmployeeId">Empleado: @(item.EmployeeName)</a></li>
+                                                    }
+                                                </ul>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="accordion" id="accordionExample3">
+                        @if (Model.InTrialPeriodEmployees.Count > 0)
+                        {
+                            <div class="card order-alert-danger">
+                                <div class="card-header" id="headingThree">
+                                    <h2 class="mb-0" style="margin-top: 10px">
+                                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                            Empleados en periodo de prueba (@(Model.InTrialPeriodEmployees.Count))
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample3">
+                                    <div class="card-body" style="margin: 30px;margin-top:0px">
+                                        <div>
+                                            <ul>
+                                                @foreach (var item in Model.InTrialPeriodEmployees)
+                                                {
+                                                    <li><a target="_blank" href="/admin/payrollemployee/edit/@item.EmployeeId">@(item.EmployeeName) (@item.TrialPeriodEndDate.ToString("dd/MM/yyyy"), días restantes: @item.DaysLeft)</a></li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <h4 style="font-weight:bold; color:red; display:none; text-align: center; margin-top: 25px" id="pending-count"></h4>
+            <div class="panel-body">
+                <h4 style="text-align: center; margin-top: 25px;">Activos y Candidatos</h4>
+                <div id="element-grid"></div>
+            </div>
+            <div class="panel-body">
+                <h4 style="text-align: center; margin-top: 25px;">Bajas</h4>
+                <div id="element-grid-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))?discharged=false",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Picture",
+                    title: "Perfil",
+                    template: `<div class="uploaded-image"><img src="#=Picture#"></div>`
+                }, {
+                    field: "FullName",
+                    title: "Nombre",
+                }, {
+                    field: "LinkedUser",
+                    title: "Usuario vinculado",
+                    template: `#if(LinkedUser.Id > 0){ #
+                                    <a href="/Admin/Customer/Edit/#=LinkedUser.Id#" target="_blank">#=LinkedUser.Name#</a>
+                                # }
+                                    else { #
+                                    <span>#=LinkedUser.Name#</span>
+                                # }#
+                                `
+                }, {
+                    field: "JobCatalog",
+                    title: "Puesto",
+                }, {
+                    field: "EmployeeStatus",
+                    title: "Estatus de empleado",
+                }, {
+                    field: "PendingCount",
+                    title: "Estado de expendiente",
+                    template: `#if(PendingCount.Info + PendingCount.Files + PendingCount.Salary > 0){ #
+                                    <strong style="color:red">INFORMACIÓN PENDIENTE (#=PendingCount.Total#)</strong>
+                                # }
+                                    else { #
+                                    <strong style="color:green">INFORMACIÓN COMPLETA</strong>
+                                # }#
+                                `
+                }, {
+                    field: "Id",
+                    title: "Expedientes",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-success" href="Edit?Id=#=Id#"><i class="fa fa-eye"></i>Ver expediente</a>`
+                }
+            ]
+        });
+
+        $("#element-grid-2").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))?discharged=true",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "FullName",
+                    title: "Nombre",
+                },
+                {
+                    field: "LinkedUser",
+                    title: "Usuario vinculado",
+                    template: `#if(LinkedUser.Id > 0){ #
+                                    <a href="/Admin/Customer/Edit/#=LinkedUser.Id#" target="_blank">#=LinkedUser.Name#</a>
+                                # }
+                                    else { #
+                                    <span>#=LinkedUser.Name#</span>
+                                # }#
+                                `
+                },
+                {
+                    field: "JobCatalog",
+                    title: "Puesto",
+                },
+                {
+                    field: "EmployeeStatus",
+                    title: "Estatus de empleado",
+                },
+                {
+                    field: "PendingCount",
+                    title: "Estado de expendiente",
+                    template: `#if(PendingCount.Info + PendingCount.Files + PendingCount.Salary > 0){ #
+                                    <strong style="color:red">INFORMACIÓN PENDIENTE (#=PendingCount.Total#)</strong>
+                                # }
+                                    else { #
+                                    <strong style="color:green">INFORMACIÓN COMPLETA</strong>
+                                # }#
+                                `
+                },
+                {
+                    field: "Id",
+                    title: "Expedientes",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: `<a class="btn btn-success" href="Edit?Id=#=Id#"><i class="fa fa-eye"></i>Ver expediente</a>`
+                }
+            ]
+        });
+    });
+
+    $.ajax({
+        contentType: false,
+        processData: false,
+        type: "Get",
+        url: "@(Url.Action("GetIncompleteDataCount", "PayrollEmployee"))",
+        success: function(data) {
+            $("#pending-count").show();
+            $("#pending-count").html(
+                data.incomplete + " EXPEDIENTES INCOMPLETOS <span style='color: black !important;'>(" +
+                data.complete + " expedientes completos) (" +
+                data.porcentage + "% de información cargada) " +
+                "</span>");
+        },
+        error: function(error) {
+            console.log(error)
+        }
+    });
+</script>

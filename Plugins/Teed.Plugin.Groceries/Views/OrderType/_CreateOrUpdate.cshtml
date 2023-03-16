@@ -1,0 +1,46 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderType.OrderTypeModel
+
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Nombre del tipo de pedido</label>
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="OrderTypeName" />
+            <span asp-validation-for="OrderTypeName" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Cantidad mínima de productos</label>
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="MinimumProductQty" />
+            <span asp-validation-for="MinimumProductQty" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Cantidad máxima de productos</label>
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="MaxProductQty" />
+            <span asp-validation-for="MaxProductQty" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Espacio de carga</label>
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CargoSpace" />
+            <span asp-validation-for="CargoSpace" class="text-danger"></span>
+        </div>
+    </div>
+</div>

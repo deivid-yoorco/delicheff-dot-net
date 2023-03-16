@@ -1,0 +1,532 @@
+﻿@model Teed.Plugin.Payroll.Models.Incident.OperationalIncidentListModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Teed.Plugin.Payroll.Domain.Incidents
+@{
+    Layout = "_AdminLayout";
+    if (Model.OperationalIncidentType == OperationalIncidentType.Delivery)
+    {
+        Html.SetActiveMenuItemSystemName("Payroll.OperationalIncidentsDelivery");
+    }
+    else if (Model.OperationalIncidentType == OperationalIncidentType.Buyer)
+    {
+        Html.SetActiveMenuItemSystemName("Payroll.OperationalIncidentsBuyer");
+    }
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "OperationalIncident";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Incidencias operativas - @(Model.OperationalIncidentType == OperationalIncidentType.Delivery ? "Reparto" : Model.OperationalIncidentType == OperationalIncidentType.Buyer ? "Compras" : "")
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+
+            <div id="select-options" class="panel-body">
+                <script>
+                    var employees = [
+                        {
+                            Id: 0,
+                            Name: 'No aplica'
+                        },
+                    @foreach (var employee in Model.Employees)
+                    {
+                    <text>
+                        {
+                            Id: @employee.Value,
+                            Name: '@employee.Text',
+                        },
+                    </text>
+                    }
+                    ];
+                    var franchises = [
+                        {
+                            Id: 0,
+                            Name: 'No aplica'
+                        },
+                    @foreach (var franchise in Model.FranchiseInfos)
+                    {
+                    <text>
+                        {
+                            Id: @franchise.Id,
+                            Name: '@franchise.Name',
+                        },
+                    </text>
+                    }
+                    ];
+                    var routes = [
+                        {
+                            Id: 0,
+                            Name: 'No aplica'
+                        },
+                    @foreach (var route in Model.RouteInfos)
+                    {
+                    <text>
+                        {
+                            Id: @route.Id,
+                            Name: '@route.Name',
+                        },
+                    </text>
+                    }
+                    ];
+                    var responsibleAreaTypes = [
+                    @foreach (var responsibleAreaType in Model.ResponsibleAreaTypes)
+                    {
+                    <text>
+                        {
+                            Id: @responsibleAreaType.Value,
+                            Name: '@responsibleAreaType.Text',
+                        },
+                    </text>
+                    }
+                    ];
+                    var solutionTypes = [
+                    @foreach (var solutionType in Model.SolutionTypes)
+                    {
+                    <text>
+                        {
+                            Id: @solutionType.Value,
+                            Name: '@solutionType.Text',
+                        },
+                    </text>
+                    }
+                    ];
+                    var biweeks = [
+                        {
+                            Id: '',
+                            Name: 'No aplica'
+                        },
+                    @foreach (var biweek in Model.Biweeks)
+                    {
+                    <text>
+                        {
+                            Id: '@biweek.Value',
+                            Name: '@biweek.Text',
+                        },
+                    </text>
+                    }
+                    ];
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<span id="popupNotificationOrder"></span>
+<script>
+    var popupNotificationOrder;
+    String.prototype.decodeHTML = function () {
+        var map = { "gt": ">" /* , … */ };
+        return this.replace(/&(#(?:x[0-9a-f]+|\d+)|[a-z]+);?/gi, function ($0, $1) {
+            if ($1[0] === "#") {
+                return String.fromCharCode($1[1].toLowerCase() === "x" ? parseInt($1.substr(2), 16) : parseInt($1.substr(1), 10));
+            } else {
+                return map.hasOwnProperty($1) ? map[$1] : $0;
+            }
+        });
+    };
+    $(document).ready(function () {
+        popupNotificationOrder = $("#popupNotificationOrder").kendoNotification(
+            {
+                position: {
+                    bottom: 50,
+                    right: 50
+                }
+            }).data("kendoNotification");
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("OperationalIncidentList", controllerName))?typeId=@((int)Model.OperationalIncidentType)",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    },
+                    create: {
+                        url: "@Html.Raw(Url.Action("OperationalIncidentAdd", controllerName))?typeId=@((int)Model.OperationalIncidentType)",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    },
+                    update: {
+                        url: "@Html.Raw(Url.Action("OperationalIncidentUpdate", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    },
+                    destroy: {
+                        url: "@Html.Raw(Url.Action("OperationalIncidentDelete", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: addAntiForgeryToken
+                    },
+                    parameterMap: function (data, operation) {
+                        console.log(operation);
+                        console.log(data);
+                        return data;
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors",
+                    model: {
+                        id: "Id",
+                        fields: {
+                            OperationalIncidentTypeId: { editable: false, type: "int" },
+                            ReportDate: { editable: true, type: "string" },
+                            OrderDeliveryDate: { editable: true, type: "string" },
+                            OrderId: { editable: true, type: "number" },
+                            OrderDeliveryRouteId: { editable: true, type: "number" },
+                            OrderDeliveryFranchiseId: { editable: true, type: "number" },
+                            OrderDeliveryRescuedRouteId: { editable: true, type: "number" },
+                            OrderDeliveryRescuedFranchiseId: { editable: true, type: "number" },
+                            ResponsibleArea1: { editable: true, type: "string" },
+                            ResponsibleArea2: { editable: true, type: "string" },
+                            ResponsibleCustomerId1: { editable: true, type: "number" },
+                            ResponsibleCustomerId2: { editable: true, type: "number" },
+                            IncidentAmount: { editable: true, type: "number" },
+                            IncidentDetails: { editable: true, type: "string" },
+                            Authorized: { editable: true, type: "boolean" },
+                            AppliedInBiweek: { editable: true, type: "string" },
+                            SolutionTypeId: { editable: true, type: "number" },
+                            SolutionAmount: { editable: true, type: "number" },
+                            Comments: { editable: true, type: "string" },
+                        }
+                    }
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            toolbar: [{ name: "create", text: "@T("Admin.Common.AddNewRecord")" }],
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            detailInit: detailInit,
+            scrollable: false,
+            dataBound: function (e) {
+            },
+            columns: [
+                {
+                    field: "Id",
+                    template: "<span data-id='#=Id#'></span>",
+                    hidden: true
+                },
+                {
+                    field: "ReportDate",
+                    title: "Fecha de reporte de queja",
+                    editor: createDatePicker
+                },
+                {
+                    field: "OrderDeliveryDate",
+                    title: "Fecha de entrega de la orden",
+                    editor: createDatePicker
+                },
+                {
+                    field: "OrderId",
+                    title: "# de orden",
+                    template: function (dataItem) {
+                        return dataItem.OrderId > 0 ?
+                            '<a target="_blank" href="/admin/order/edit/' + dataItem.OrderId + '">#' + dataItem.OrderId + '</a>'
+                            : "---";
+                    },
+                    editor: createOrderAjax
+                },
+                {
+                    field: "OrderDeliveryRouteId",
+                    title: "Ruta que entregó",
+                    template: function (dataItem) {
+                        return getSelectionText('OrderDeliveryRouteId', dataItem.OrderDeliveryRouteId);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "OrderDeliveryFranchiseId",
+                    title: "Franquicia que entregó",
+                    template: function (dataItem) {
+                        return getSelectionText('OrderDeliveryFranchiseId', dataItem.OrderDeliveryFranchiseId);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "OrderDeliveryRescuedRouteId",
+                    title: "Ruta que rescató y entregó",
+                    template: function (dataItem) {
+                        return getSelectionText('OrderDeliveryRescuedRouteId', dataItem.OrderDeliveryRescuedRouteId);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "OrderDeliveryRescuedFranchiseId",
+                    title: "Franquicia que rescató y entregó",
+                    template: function (dataItem) {
+                        return getSelectionText('OrderDeliveryRescuedFranchiseId', dataItem.OrderDeliveryRescuedFranchiseId);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "ResponsibleArea1",
+                    title: "Área responsable de la incidencia 1",
+                    template: function (dataItem) {
+                        return getSelectionText('ResponsibleArea1', dataItem.ResponsibleArea1);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "ResponsibleArea2",
+                    title: "Área responsable de la incidencia 2",
+                    template: function (dataItem) {
+                        return getSelectionText('ResponsibleArea2', dataItem.ResponsibleArea2);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "ResponsibleCustomerId1",
+                    title: "Responsable 1",
+                    template: function (dataItem) {
+                        return getSelectionText('ResponsibleCustomerId1', dataItem.ResponsibleCustomerId1);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "ResponsibleCustomerId2",
+                    title: "Responsable 2",
+                    template: function (dataItem) {
+                        return getSelectionText('ResponsibleCustomerId2', dataItem.ResponsibleCustomerId2);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    title: "# de responsables",
+                    template: function (dataItem) {
+                        var count = 0;
+                        count += dataItem.ResponsibleCustomerId1 > 0 ? 1 : 0;
+                        count += dataItem.ResponsibleCustomerId2 > 0 ? 1 : 0;
+                        return '<span>' + count + '</span>';
+                    },
+                },
+                {
+                    field: "IncidentAmount",
+                    title: "Monto total de la incidencia",
+                    format: "{0:c}",
+                },
+                {
+                    title: "Monto individual a cubrir",
+                    format: "{0:c}",
+                    template: function (dataItem) {
+                        var count = 0;
+                        count += dataItem.ResponsibleCustomerId1 > 0 ? 1 : 0;
+                        count += dataItem.ResponsibleCustomerId2 > 0 ? 1 : 0;
+                        var amount = 0;
+                        if (count > 0)
+                            amount = dataItem.IncidentAmount / count;
+                        return "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+                    },
+
+                },
+                {
+                    field: "IncidentDetails",
+                    title: "Descripción detallada de la incidencia",
+                    template: function (dataItem) {
+                        return createReadTextBox(dataItem.IncidentDetails);
+                    },
+                    editor: createTextArea
+                },
+                {
+                    field: "Authorized",
+                    title: "Autorización",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '# if(Authorized) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                },
+                {
+                    field: "AppliedInBiweek",
+                    title: "Quincena en que se aplicó el descuento (Sólo RRHH)",
+                    editor: createComboxBox
+                },
+                {
+                    field: "SolutionTypeId",
+                    title: "Tipo de solución",
+                    template: function (dataItem) {
+                        return getSelectionText('SolutionTypeId', dataItem.SolutionTypeId);
+                    },
+                    editor: createComboxBox
+                },
+                {
+                    field: "SolutionAmount",
+                    title: "Monto de la solución",
+                    format: "{0:c}",
+                },
+                {
+                    field: "Comments",
+                    title: "Comentarios (Opcional)",
+                    template: function (dataItem) {
+                        return createReadTextBox(dataItem.Comments);
+                    },
+                    editor: createTextArea
+                },
+                {
+                    command: [
+                        {
+                            name: "edit",
+                            text: {
+                                edit: "@T("Admin.Common.Edit")",
+                                update: "@T("Admin.Common.Update")",
+                                cancel: "@T("Admin.Common.Cancel")"
+                            }
+                        }, {
+                            name: "destroy",
+                            text: "@T("Admin.Common.Delete")"
+                        }
+                    ],
+                    width: 200
+                }
+            ]
+        });
+    });
+    function getSelectionText(type = "", value) {
+        var textValue = "---";
+        if (typeof value != 'undefined') {
+            var json = getCurrentJson(type);
+            if (typeof json != 'undefined')
+                textValue = json.filter(function (e) {
+                    return e.Id == value;
+                })?.at()?.Name;
+        }
+        if (typeof textValue == 'undefined')
+            textValue = "---";
+        else
+            textValue = textValue.trim();
+        return '<span>' + textValue + '</span>';
+    }
+    function createOrderAjax(container, options) {
+        $('<div id="order-select" style="display: flex;"><div/>')
+            .appendTo(container);
+        var parent = $('#order-select');
+        $('<input class="k-input k-textbox" data-bind="value:' + options.field + '" type="text" />')
+            .appendTo(parent);
+        $('<button style="margin: 0 !important;" onclick="searchOrderInfo()" class="btn btn-default"><i class="fa fa-search"></i></button>')
+            .appendTo(parent);
+    }
+    function searchOrderInfo() {
+        //popupNotificationOrder.show("Buscando información de la orden...", "info");
+        var id = $('[data-bind="value:OrderId"]').val();
+        var num = id.toString().match(/[\d\.]+/g);
+        if (num != null) {
+            $.ajax({
+                type: "GET",
+                url: "@Html.Raw(Url.Action("GetOrderInfo", controllerName))/" + num,
+                success: function (order) {
+                    if (order.Id == 0)
+                        popupNotificationOrder.show('La información de la orden regresó vacía, asegúrate de haber ingresado un # de orden válido.', "error");
+                    else {
+                        $('[data-bind="value:OrderDeliveryRouteId"]').data("kendoComboBox").value(order.RouteId);
+                        $('[data-bind="value:OrderDeliveryRouteId"]').data("kendoComboBox").trigger("change");
+
+                        $('[data-bind="value:OrderDeliveryFranchiseId"]').data("kendoComboBox").value(order.FranchiseId);
+                        $('[data-bind="value:OrderDeliveryFranchiseId"]').data("kendoComboBox").trigger("change");
+
+                        $('[data-bind="value:OrderDeliveryRescuedRouteId"]').data("kendoComboBox").value(order.RescuedByRouteId);
+                        $('[data-bind="value:OrderDeliveryRescuedRouteId"]').data("kendoComboBox").trigger("change");
+
+                        $('[data-bind="value:OrderDeliveryRescuedFranchiseId"]').data("kendoComboBox").value(order.RescuedByFranchiseId);
+                        $('[data-bind="value:OrderDeliveryRescuedFranchiseId"]').data("kendoComboBox").trigger("change");
+
+                        $('[data-bind="value:OrderDeliveryDate"]').val(order.SelectedShippingDate);
+                        $('[data-bind="value:OrderDeliveryDate"]').change();
+                        $('#picker-OrderDeliveryDate').val(order.SelectedShippingDate);
+
+                        popupNotificationOrder.show("La información de la orden se colocó correctamente.", "success");
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    popupNotificationOrder.show('Hubo un error al tratar de buscar la información de la orden.', "error");
+                }
+            });
+        } else {
+            alert('El formato del número de orden ingresado es incorrecto.');
+        }
+    }
+    function createComboxBox(container, options) {
+        var fieldType = options.field.toString();
+        $('<select data-bind="value:' + options.field + '"></select>')
+            .appendTo(container)
+            .kendoComboBox({
+                placeholder: "Selecciona un elemento...",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                filter: "contains",
+                autoBind: true,
+                minLength: 2,
+                dataSource: getCurrentJson(fieldType),
+            });
+    }
+    function getCurrentJson(type = "") {
+        var flatData = [];
+        if (type == 'OrderDeliveryRouteId' || type == 'OrderDeliveryRescuedRouteId')
+            flatData = routes;
+        else if (type == 'OrderDeliveryFranchiseId' || type == 'OrderDeliveryRescuedFranchiseId')
+            flatData = franchises;
+        else if (type == 'ResponsibleArea1' || type == 'ResponsibleArea2')
+            flatData = responsibleAreaTypes;
+        else if (type == 'ResponsibleCustomerId1' || type == 'ResponsibleCustomerId2')
+            flatData = employees;
+        else if (type == 'SolutionTypeId')
+            flatData = solutionTypes;
+        else if (type == 'AppliedInBiweek')
+            flatData = biweeks;
+
+        flatData = flatData.map(function (e) {
+            return { Id: e.Id, Name: e.Name.decodeHTML() };
+        });
+        return flatData;
+    }
+    function createDatePicker(container, options) {
+        $('<input style="display: none;" type="text" class="k-input k-textbox" name="' + options.field + '" data-bind="value:' + options.field + '">')
+            .appendTo(container);
+        $('<input id="picker-' + options.field + '" type="date" />')
+            .appendTo(container)
+            .kendoDatePicker({
+                format: "dd/MM/yyyy",
+                change: function () {
+                    $('[data-bind="value:' + options.field + '"]').val($('#picker-' + options.field).val());
+                    $('[data-bind="value:' + options.field + '"]').change();
+                },
+            });
+        if (options.field == "ReportDate")
+            $("#picker-" + options.field).val(options.model.ReportDate);
+        else if (options.field == "OrderDeliveryDate")
+            $("#picker-" + options.field).val(options.model.OrderDeliveryDate);
+        $('[data-bind="value:' + options.field + '"]').change();
+    }
+    function createReadTextBox(value = '') {
+        return '<textarea disabled readonly>' + (value == null || value == 'null' ? '' : value) + '</textarea>';
+    }
+    function createTextArea(container, options) {
+        $('<textarea data-bind="value:' + options.field + '" name="' + options.field + '" style="width: ' + container.width() + 'px;height:' + container.height() + 'px" />')
+            .appendTo(container);
+    }
+    function detailInit(e) {
+        console.log(e);
+        $("<div/>").appendTo(e.detailCell).append('<span>' + e.data.Log + '</span>');
+    }
+</script>

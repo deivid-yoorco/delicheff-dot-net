@@ -1,0 +1,49 @@
+﻿@model IList<VendorModel>
+@using Nop.Core
+@using Nop.Services.Configuration
+@using Nop.Web.Models.HomePageImages
+@{
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Vendors").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-vendor-list-page");
+
+    HomePageImagesSettings imagesSettings = settingsService.LoadSetting<HomePageImagesSettings>(storeContext.CurrentStore.Id);
+}
+<div class="page vendor-list-page">
+    @if (!string.IsNullOrEmpty(imagesSettings.TitleVendor))
+    {
+        <h1 class="category-page-title">@imagesSettings.TitleVendor</h1>
+    }
+    else
+    {
+        <h1 class="category-page-title">@T("Vendors.List")</h1>
+    }
+    <div class="page-body">
+        <div class="vendor-grid">
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <div class="col s6 m4">
+                        <div class="card">
+                            <div class="card-image">
+                                <a href="@Url.RouteUrl("Vendor", new { SeName = item.SeName })" title="@item.Name">
+                                    <img alt="@item.PictureModel.AlternateText" src="@item.PictureModel.ImageUrl" title="@item.Name">
+                                </a>
+                            </div>
+                            <div class="card-action">
+                                <a href="@Url.RouteUrl("Vendor", new { SeName = item.SeName })" title="@item.Name">
+                                    @item.Name
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

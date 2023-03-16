@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Teed Plugins",
+  "FriendlyName": "Teed Message Bird",
+  "SystemName": "Teed.Plugin.MessageBird",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.MessageBird.dll",
+  "Description": "Teed Message Bird"
+}

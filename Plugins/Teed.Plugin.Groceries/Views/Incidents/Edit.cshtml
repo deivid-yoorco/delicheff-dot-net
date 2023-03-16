@@ -1,0 +1,201 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.IncidentsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Incidents");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <input hidden asp-for="FranchiseId" id="franchise-id" value="@(Model.FranchiseId)" />
+    <input hidden asp-for="VehicleId" id="vehicle-id" value="@(Model.VehicleId)" />
+    <input hidden asp-for="DateString" id="date" value="@(Model.DateString)" />
+    <input hidden asp-for="Id" id="date" value="@(Model.Id)" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar incidencia
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="IncidentsList" asp-route-date="@Model.DateString" asp-route-franchiseId="@Model.FranchiseId" asp-route-vehicleId="@Model.VehicleId">regresar a lista de incidencias</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Edit" class="btn bg-blue post-button">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+            @*<span id="incident-delete" class="btn bg-red">
+                    <i class="fa fa-trash-o"></i>
+                    @T("Admin.Common.Delete")
+                </span>*@
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-franchise" asp-title="Franquicia" asp-default="true">
+                        <div class="content">
+                            <div class="form-horizontal">
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="col-md-12">
+                                                <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                                <div class="col-md-12">
+                                                    <div class="col-md-3"></div>
+                                                    <div class="col-md-9">
+                                                        <div style="margin-bottom: 1em;background-color: #f1f1f1; padding: 1em;">
+                                                            <p>Si la incidencia corresponde a una semana con la comisión ya calculada, y esta comisión tiene un bono por no incidencias, el bono será restado de la comisión.</p>
+                                                            <p><strong>Fecha:</strong> @(Model.Date.ToString("dddd, dd-MM-yyyy", new System.Globalization.CultureInfo("es-MX")))</p>
+                                                            <p><strong>Franquicia:</strong> @(Model.FranchiseName)</p>
+                                                            <p><strong>Vehículo:</strong> @(Model.VehicleName)</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Código de incidencia</label>
+                                                            <div title="El tipo de incidencia." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <span id="code-description">@Model.Penalties.Where(x => x.Value == Model.IncidentCode).FirstOrDefault().Text</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Monto de la incidencia</label>
+                                                            <div title="El monto que se le descontará al franquiciatario por la incidencia." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <span>@Model.Amount.ToString("C")</span>
+                                                    </div>
+                                                </div>
+
+                                                @if (Model.Orders.Count > 0)
+                                                {
+                                                    <div class="form-group">
+                                                        <div class="col-md-3 text-right">
+                                                            <div class="label-wrapper">
+                                                                <label class="control-label">Orden de la incidencia</label>
+                                                                <div title="La(s) orden(es) que fueron afectadas por esta incidencia." class="ico-help">
+                                                                    <i class="fa fa-question-circle"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <p>@(string.Join(", ", Model.Orders))</p>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (Model.ReportedAmount.HasValue)
+                                                {
+                                                    <div class="form-group">
+                                                        <div class="col-md-3 text-right">
+                                                            <div class="label-wrapper">
+                                                                <label class="control-label">Monto reportado</label>
+                                                                <div title="Monto reportado del incidente (ej, el valor de la multa)." class="ico-help">
+                                                                    <i class="fa fa-question-circle"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <span>@(Model.ReportedAmount.Value.ToString("C"))</span>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (Model.Products.Count > 0)
+                                                {
+                                                    <div class="form-group">
+                                                        <div class="col-md-3 text-right">
+                                                            <div class="label-wrapper">
+                                                                <label class="control-label">Producto de la incidencia</label>
+                                                                <div title="El/los producto(s) que fueron afectados por esta incidencia." class="ico-help">
+                                                                    <i class="fa fa-question-circle"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <ul>
+                                                                @foreach (var item in Model.Products.OrderBy(x => x))
+                                                                {
+                                                                    <li>@item</li>
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Comentarios</label>
+                                                            <div title="Comentario de la incidencia." class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        @Html.TextAreaFor(m => m.Comments, 4, 20, new { @class = "form-control" })
+                                                        <span asp-validation-for="Comments" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Autorizar</label>
+                                                            <div title="Selecciona si deseas autorizar esta incidencia. Las incidencias no autorizadas no serán tomadas en cuenta para la facturación" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <nop-select asp-for="AuthorizedStatusId" asp-items="@Model.Status" />
+                                                        <span asp-validation-for="AuthorizedStatusId"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-tab>
+                    <nop-tab asp-name="tab-files" asp-title="Archivos">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Incidents/_Files.cshtml", Model)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                        <div class="raw clearfix">
+                            <div class="col-md-12">
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            Log
+                                        </div>
+                                        <div class="panel-body">
+                                            <pre>@Model.Log</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>

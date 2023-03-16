@@ -1,0 +1,112 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.InfoModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Teed.Plugin.Groceries.Models.Franchise
+@{
+    Layout = "_AdminLayout";
+    //Html.SetActiveMenuItemSystemName("Groceries.Franchises");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Franchise";
+}
+
+<style>
+    @@media (min-width: 768px) {
+        .modal-dialog {
+            width: 50%;
+        }
+    }
+</style>
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @if (Model.IsAdmin)
+        {
+            <text>
+                @*Información de franquicia*@
+                @Model.FranchiseName
+                <small>
+                    <i class="fa fa-arrow-circle-left"></i>
+                    <a asp-action="FranchiseList">regresar a la lista de franquicias</a>
+                </small>
+            </text>
+        }
+        else
+        {
+            <text>
+                @*Mi franquicia*@
+                @Model.FranchiseName
+                <script>
+                    $(document).ready(function () {
+                        $('.sidebar-menu').append('<li>' +
+                            '<a href="/Admin/ShippingRoute/AssignRouteOrder?isForMonitor=true&franchiseId=@Model.FranchiseId" class="menu-item-link">' +
+                            '<i class="fa fa-dot-circle-o"></i>' +
+                            '<span class="menu-item-title">Monitoreo de rutas</span>' +
+                            '</a>' +
+                            '</li>');
+                    });
+                </script>
+            </text>
+        }
+    </h1>
+    <div class="pull-right">
+        <!-- Button trigger modal -->
+        @*Se desactiva mientras se registran los repartidores de franquicia en el checador*@
+        <a href="@Url.Action("DownloadAssistancesForFranchise", "Assistance", new { customerIds = string.Join(",", Model.Customers.Where(x => x.Active).Select(x => x.Id)) })" class="btn btn-primary">
+            <i class="fa fa-file-excel-o"></i>
+            Descargar reporte de asistencias
+        </a>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tutorialVideo">
+            <i class="fa fa-play-circle"></i>
+            ¿Cómo utilizar la plataforma?
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="tutorialVideo" tabindex="-1" role="dialog" aria-labelledby="tutorialVideoTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="display: inline-flex;">
+                        <h5 class="modal-title" id="tutorialVideoLongTitle" style="font-weight:bold">Tutorial plataforma de franquicias</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="right: 30px;position:absolute">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <video width="100%" controls>
+                            <source src="/Plugins/Teed.Plugin.Groceries/src/files/manual_franquicia.mp4" type="video/mp4">
+                            El reproductor de video no es compatible con tu navegador.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <nop-tabs id="categories-price">
+                <nop-tab asp-name="tab-resume" asp-title="Resumen" asp-default="true">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Resume.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-weeks" asp-title="Detalle por semana">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_WeekDetails.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-bills" asp-title="Comisiones">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Bills.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-statement" asp-title="Estado de cuenta">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Statement.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-payment" asp-title="Pagos">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Payments.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-routes" asp-title="Camionetas">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Vehicles.cshtml", new FranchiseData { Id = Model.FranchiseId, CanEdit = false })
+                </nop-tab>
+                <nop-tab asp-name="tab-employees" asp-title="Empleados">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/Franchise/_Employees.cshtml", new FranchiseData { Id = Model.FranchiseId, CanEdit = false })
+                </nop-tab>
+            </nop-tabs>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+﻿@model Teed.Plugin.Groceries.Models.CorporateCard.CorporateCardModel
+
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Empleado vinculado</label>
+        </div>
+        <div class="col-md-9">
+            <input asp-for="EmployeeId" type="hidden" value="@Model.EmployeeId"/>
+            <input id="employees" style="width: 100% !important;" />
+            <span asp-validation-for="EmployeeId" class="text-danger"></span>
+            <script>
+                $(document).ready(function () {
+                    $("#employees").kendoComboBox({
+                        placeholder: "Selecciona el usuario a vincular...",
+                        dataTextField: "Name",
+                        dataValueField: "Id",
+                        filter: "contains",
+                        autoBind: true,
+                        minLength: 3,
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "@Html.Raw(Url.Action("GetExternalEmployees", "CorporateCard"))",
+                                    type: "POST",
+                                    data: addAntiForgeryToken
+                                }
+                            }
+                        },
+                        dataBound: function (e) {
+                            if (!$("#employees").data("kendoComboBox").value()) {
+                                $("#employees").data("kendoComboBox").value($("#EmployeeId").val());
+                            }
+                        },
+                        select: onSelect
+                    });
+                    function onSelect(e) {
+                        $("#EmployeeId").val(this.dataItem(e.item.index()).Id);
+                    }
+                });
+            </script>
+        </div>
+    </div>
+</div>
+@if (Model.Id > 0)
+{
+    <div class="col-md-12">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Información de empleado vinculado</label>
+            </div>
+            <div class="col-md-9">
+                <ul>
+                    <li>Nómbre completo: @Model.FullName</li>
+                    <li>RFC: @Model.Rfc</li>
+                    <li>CURP: @Model.Curp</li>
+                    <li>Teléfono: @Model.Phone</li>
+                    <li>Puesto: @Model.Job</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Número de tarjeta</label>
+        </div>
+        <div class="col-md-9">
+            <input class="form-control text-box single-line valid" id="CardNumber" name="CardNumber" type="text" maxlength="16" value="@Model.CardNumber">
+            <span asp-validation-for="CardNumber" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Estatus de la tarjeta</label>
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="StatusId" asp-items="@Model.Statuses" />
+            <span asp-validation-for="StatusId" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="form-group">
+        <div class="col-md-3 text-right">
+            <label>Reglas</label>
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="RuleId" asp-items="@Model.Rules" />
+            <span asp-validation-for="RuleId" class="text-danger"></span>
+        </div>
+    </div>
+</div>

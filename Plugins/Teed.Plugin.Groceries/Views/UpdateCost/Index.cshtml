@@ -1,0 +1,35 @@
+﻿@model Teed.Plugin.Groceries.Controllers.ReportGroupModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.UpdateCost");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Actualizar costo de productos
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <nop-tabs id="product-edit">
+                        <nop-tab asp-name="tab-less30days" asp-title="Reportados menos de 30 días" asp-default="true">
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UpdateCost/_Index.Less30Days.cshtml", Model)
+                        </nop-tab>
+                        <nop-tab asp-name="tab-more30days" asp-title="Reportados más de 30 días">
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UpdateCost/_Index.More30Days.cshtml", Model)
+                        </nop-tab>
+                        <nop-tab asp-name="tab-noreported" asp-title="Nunca reportados">
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UpdateCost/_Index.NoReportedProducts.cshtml", Model)
+                        </nop-tab>
+                    </nop-tabs>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

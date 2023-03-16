@@ -1,0 +1,114 @@
+﻿
+@model Teed.Plugin.Groceries.Models.MonitorHq.GoalsTodayModel
+@{
+    Layout = "_ConfigurePlugin";
+    Html.SetActiveMenuItemSystemName("Groceries.DashboardConfig");
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="GoalsToday" asp-action="GoalsTodayView" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa las metas por día<br /><br />
+
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Metas del día lunes</label>
+                            <div title="Escriba el " class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GoalsMonday" />
+                        <span asp-validation-for="GoalsMonday"></span>
+                    </div>
+                </div>
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Metas del día martes</label>
+                            <div title="Escriba el texto que desea aparezca en el menú" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GoalsTuesday" />
+                        <span asp-validation-for="GoalsTuesday"></span>
+                    </div>
+                </div>
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Metas del día miércoles</label>
+                            <div title="Escriba el texto que desea aparezca en el menú" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GoalsWednesday" />
+                        <span asp-validation-for="GoalsWednesday"></span>
+                    </div>
+                </div>
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Metas del día jueves</label>
+                            <div title="Escriba el texto que desea aparezca en el menú" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GoalsThursday" />
+                        <span asp-validation-for="GoalsThursday"></span>
+                    </div>
+                </div>
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Metas del día viernes</label>
+                            <div title="Escriba el texto que desea aparezca en el menú" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GoalsFriday" />
+                        <span asp-validation-for="GoalsFriday"></span>
+                    </div>
+                </div>
+                <!--Texto en el menu-->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Metas del día sábado</label>
+                            <div title="Escriba el texto que desea aparezca en el menú" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="GoalsSaturday" />
+                        <span asp-validation-for="GoalsSaturday"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,210 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderItemBuyer.ManufacturerBuyerModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Nop.Services.Customers;
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+
+    var hasPaymentOptionSelected = Model.ManufacturerBuyers.Where(x => x.IsCorporateCard != null).ToList();
+    var corporateCardBuyers = hasPaymentOptionSelected.Where(x => x.IsCorporateCard ?? false).ToList();
+    var transferBuyers = hasPaymentOptionSelected.Where(x => !(x.IsCorporateCard ?? false)).ToList();
+}
+<style>
+    .ok {
+        /*text-align: center;
+            font-weight: bold;
+            #dff0d8
+        */
+        padding: 1em;
+        margin: 1em 0;
+        border-color: blue;
+        background-color: white;
+    }
+
+    .order-alert-danger {
+        margin-top: auto;
+        background-color: white;
+        border-radius: 5px;
+        border: solid 2px #3c8dbc;
+    }
+
+    .complete-list {
+        margin-top: auto;
+        font-size: 12px;
+        text-align: left;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #dff0d8;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        @if (Model.Manufacturers.Count > Model.ManufacturerBuyers.Count || Model.ManufacturerBuyers.Select(x => x.ManufacturerBuyer).Where(x => x.BuyerId == 0).Any())
+        {
+            <div class="alert alert-error alert-dismissable">
+                Existen fabricantes sin comprador asignado.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success alert-dismissable">
+                Todos los fabricantes tienen asignado un comprador.
+            </div>
+        }
+
+        <div class="row" style="margin-left: 0 !important; margin-right: 0 !important; margin-bottom: 30px !important;">
+            <div class="accordion" id="accordionExample">
+                @if (Model.BuyersWithoutCards.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingFour">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Compradores asignados a fabricantes que aceptan tarjeta corporativa sin tarjeta asignada ( @(Model.BuyersWithoutCards.Count) )</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+                            <div class="card-body">
+                                <ul>
+                                    @foreach (var item in Model.BuyersWithoutCards.OrderBy(x => x.Name))
+                                    {
+                                        <li>
+                                            <a target="_blank" href="/admin/customer/edit/@item.Id"><b>@item.Name<b /></a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingFour">
+                            <h3 class="mb-0 complete-list">No hay compradores asignados a fabricantes que aceptan tarjeta corporativa sin tarjeta asignada.</h3>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="row" style="margin-left: 0 !important; margin-right: 0 !important; margin-bottom: 30px !important;">
+            <div class="col-md-6 col-sm-12">
+                <h4 style="text-align: center;">Fabricantes que aceptan pagos por transferrina y sus compradores</h4>
+                <div>
+                    @foreach (var buyer in Model.Customers)
+                    {
+                        var customerName = buyer.GetFullName();
+                        var manufacturerIds = transferBuyers.Where(x => x.ManufacturerBuyer.BuyerId == buyer.Id).Select(x => x.ManufacturerBuyer.ManufacturerId).ToList();
+                        if (manufacturerIds.Any())
+                        {
+                            var manufacturerNames = Model.Manufacturers.Where(x => manufacturerIds.Contains(x.Id)).Select(x => x.Name).OrderBy(x => x).ToList();
+                            <p><span style="font-weight: bold;">@customerName:</span> @string.Join(", ", manufacturerNames)</p>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <h4 style="text-align: center;">Fabricantes que aceptan pagos por tarjeta corporativa y sus compradores</h4>
+                <div>
+                    @foreach (var buyer in Model.Customers)
+                    {
+                        var customerName = buyer.GetFullName();
+                        var manufacturerIds = corporateCardBuyers.Where(x => x.ManufacturerBuyer.BuyerId == buyer.Id).Select(x => x.ManufacturerBuyer.ManufacturerId).ToList();
+                        if (manufacturerIds.Any())
+                        {
+                            var manufacturerNames = Model.Manufacturers.Where(x => manufacturerIds.Contains(x.Id)).Select(x => x.Name).OrderBy(x => x).ToList();
+                            <p><span style="font-weight: bold;">@customerName:</span> @string.Join(", ", manufacturerNames)</p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <p style="margin-top:10px">
+            La lista de fabricantes está ordenada por los que no tienen comprador asignado y luego por nombre.
+        </p>
+
+        @foreach (var manufacturer in Model.Manufacturers)
+        {
+            <div class="manufacturer">
+                <h3><a target="_blank" href="/Admin/Manufacturer/Edit/@(manufacturer.Id)">@manufacturer.Name</a></h3>
+                <input type="hidden" value="@(manufacturer.Id)" />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="input-group" style="width:100%">
+                            <select class="ui-choose">
+                                <option value="0">No asignado</option>
+                                @foreach (var buyer in Model.Customers)
+                                {
+                                    @if (Model.ManufacturerBuyers.Select(x => x.ManufacturerBuyer).Where(x => x.BuyerId == buyer.Id && x.ManufacturerId == manufacturer.Id).Any())
+                                    {
+                                        <option selected value="@(buyer.Id)">@(buyer.GetFullName())</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@(buyer.Id)">@(buyer.GetFullName())</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    let buildUiChoose = () => {
+        $('ul.ui-choose').remove();
+        $('.ui-choose').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: false,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    };
+
+    buildUiChoose();
+
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $("#submit-button").hide();
+        let result = [];
+        let manufacturers = $(".manufacturer");
+        $.each(manufacturers, (index, element) => {
+            let manufacturerId = $(element).find('input').val();
+            let selectedCustomerId = $(element).find('select').val();
+            result.push({ manufacturerId, customerId: selectedCustomerId });
+        });
+
+        let body = {
+            result: result,
+        };
+
+        $.ajax({
+            url: '/Admin/ManufacturerBuyer/Configure',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

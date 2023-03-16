@@ -1,0 +1,39 @@
+﻿@model Teed.Plugin.Groceries.Models.CorporateCard.CorporateCardModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.CorporateCard");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nueva tarjeta corporativa
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="Index">regresar a la lista de tarjetas corporativas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @(await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/CorporateCard/_CreateOrUpdate.cshtml", Model))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

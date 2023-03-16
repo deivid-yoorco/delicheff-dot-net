@@ -1,0 +1,37 @@
+﻿@model Teed.Plugin.Medical.Models.Branch.BranchModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedBranches.Branches");
+}
+
+<form asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar sucursal
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de sucursales</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <nop-tabs id="recipe">
+                            <nop-tab asp-name="tab-info" asp-title="Detalles" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Branch/_Create.Info.cshtml", Model)</nop-tab>
+                            <nop-tab asp-name="tab-products" asp-title="Horarios de atención">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Branch/_Create.Schedule.cshtml", Model)</nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

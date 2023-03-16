@@ -1,0 +1,249 @@
+﻿@model Teed.Plugin.SaleRecord.Models.SaleRecords.SaleRecordModel
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <input id="Id" style="display: none;" name="Model.Id" value="@Model.Id"></input>
+                            <div class="label-wrapper">
+                                <label class="control-label">Fecha</label>
+                                <div title="Seleccione la fecha" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <input type="hidden" id="dateinput-init" asp-for="SaleDateString" name="Model.SaleDateString" />
+                                <input type="text" id="datepicker-init" class="form-control" value="@Model.SaleDateString">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar">
+                                    </i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Cantidad</label>
+                                <div title="Ingresa ela cantidad de boletos vendidos" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="number" asp-for="Quantity" name="Model.Quantity" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Total</label>
+                                <div title="Ingresa el total" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="number" asp-for="Total" name="Model.Total" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Horario</label>
+                                <div title="Ingresa el horario" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <select id="timepicker" class="form-control" asp-for="Time" name="Model.Time">
+                                <option value="0" selected>Selecciona el horario de la visita</option>
+                                @foreach (var times in Model.ListTimes)
+                                {
+                                    if (Model.Time == times.Value)
+                                    {
+                                        <option selected value="@times.Value">@times.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@times.Value">@times.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Nombre del cliente</label>
+                                <div title="Ingresa el nombre y apellido del cliente." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="text" asp-for="CustomerFullName" name="Model.CustomerFullName" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Correo electrónico</label>
+                                <div title="Ingresa el correo electrónico" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="text" asp-for="CustomerEmail" name="Model.CustomerEmail" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Número de teléfono</label>
+                                <div title="Ingresa el un número de teléfono" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="number" asp-for="CustomerPhoneNumber" name="Model.CustomerPhoneNumber" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Método de pago</label>
+                                <div title="Ingresa el método de pago" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <select id="paymentType" asp-for="PaymentMethod" class="form-control" name="Model.PaymentMethod">
+                                    <option value="0" selected>Seleccione el tipo de pago</option>
+                                    <option value="Tarjeta">Tarjeta de Crédito</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divEnable" style="display:none;">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label">Tipo de tarjeta</label>
+                                    <div title="Ingresa el tipo de tarjeta Visa, Mastercard, American Express, Otro" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <select class=" form-control" asp-for="CardTypeId" name="Model.CardTypeId" id="targetType">
+                                        <option value="0" selected>Seleccione el tipo de pago</option>
+                                        <option value="10">Visa</option>
+                                        <option value="20">Master Card</option>
+                                        <option value="30">American Express</option>
+                                        <option value="40">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label">4 últimos digitos de la tarjeta</label>
+                                    <div title="Ingresa los ultimos 4 digitos de la tarjeta de credito" class="ico-help">
+                                        <i class="fa fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <input class="form-control" type="number" asp-for="CardLast4Numbers" id="4numbers" name="model.CardLast4Numbers" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">Comentarios</label>
+                                <div title="Ingresa un comentario al pago (opcional)" class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" type="text" asp-for="Comment" name="Model.Comment" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#datepicker-init").datepicker({
+        dateFormat: "dd-mm-yy",
+        defaultDate: '(@Model.SaleDateString)',
+        onSelect: function(dateVal) {
+        let dateArray = dateVal.split("-");
+        let day = dateArray[0];
+        let month = parseInt(dateArray[1]) - 1;
+            let year = dateArray[2];
+            $("#dateinput-init").val(formatDate(new Date(year, month, day)));
+        },
+    });
+
+    function formatDate(date) {
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+
+        let parsedMonth = month < 10 ? "0" + month : month;
+        let parsedDay = day < 10 ? "0" + day : day;
+
+        return parsedDay + "-" + parsedMonth + "-" + year;
+    }
+
+    $("#paymentType").change(function () {
+        var select = $("#paymentType").val();
+        if (select == "Tarjeta") {
+            $("#divEnable").show();
+        }
+        else {
+            $("#divEnable").hide();
+            $('#targetType').val(0);
+            $("#4numbers").val(0);
+        }
+    });
+
+    $("document").ready(function () {
+        if ('@Model.PaymentMethod' == "") {
+            $("#divEnable").show();
+
+        }
+    });
+
+</script>

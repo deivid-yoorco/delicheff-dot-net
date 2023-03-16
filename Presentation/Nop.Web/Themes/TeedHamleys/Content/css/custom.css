@@ -1,0 +1,122 @@
+﻿body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.brand-logo {
+    width: 100%;
+    position: unset !important;
+    padding-left: 3em !important;
+    text-align: center !important;
+}
+
+    .brand-logo img {
+        height: auto !important;
+    }
+
+@media only screen and (max-width: 992px) {
+    nav .brand-logo {
+        padding: 0 !important;
+        transform: none !important;
+        max-height: 60px !important;
+    }
+
+        nav .brand-logo img {
+            max-height: 60px !important;
+        }
+}
+
+.sidenav-trigger {
+    position: absolute !important;
+    top: 50%;
+    left: 2em;
+    color: #fff !important;
+    transform: translateY(-50%);
+    width: 5em;
+}
+
+#slide-out {
+    background-color: #dd042b;
+}
+
+    #slide-out li a {
+        color: #fff;
+    }
+
+.custom-nav {
+    background-color: #E31D2A;
+    width: 100% !important;
+}
+
+.notify-bubble {
+    box-shadow: 1px 1px 1px #e31d2a !important;
+}
+
+.tabs {
+    display: flex !important;
+    justify-content: center !important;
+    height: 38px !important;
+    overflow-x: hidden !important;
+}
+
+    .tabs li {
+        width: 100%;
+    }
+
+    .tabs .tab {
+        line-height: 38px !important;
+    }
+
+    .logo-banner {
+        background: url('/Themes/TeedHamleys/Content/images/logo-banner.png') no-repeat 80% center;
+        background-size: auto !important;
+        -webkit-transition: all 0.5s ease-in;
+        -moz-transition: all 0.5s ease-in;
+        -o-transition: all 0.5s ease-in;
+        transition: all 0.5s ease-in;
+    }
+
+#logo-image {
+    max-height: 250px;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s;
+}
+
+.scrolled {
+    max-height: 60px !important;
+}
+
+.category-page-title {
+    margin-top: 1em !important;
+    font-size: 1.5em !important;
+}
+
+.card .card-image {
+    overflow: hidden;
+    height: 220px;
+}
+
+    .card .card-image img {
+        top: -100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: -100% !important;
+        position: absolute !important;
+        margin: auto !important;
+        width: auto !important;
+        height: 100% !important;
+    }
+
+@media only screen and (max-width: 992px) {
+    .card .card-image img {
+        top: -100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: -100% !important;
+        position: absolute !important;
+        margin: auto !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}

@@ -1,0 +1,785 @@
+﻿@model ShoppingCartModel
+@using Nop.Core
+@using Nop.Core.Domain.Tax
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+@{
+    bool IsMoto = false;
+}
+<div class="order-summary-content">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "order_summary_content_before" })
+    @await Html.PartialAsync("_OrderReviewData", Model.OrderReviewData)
+    @if (Model.Items.Count > 0)
+    {
+        if (Model.Warnings.Count > 0)
+        {
+            <div class="message-error">
+                <ul>
+                    @foreach (var warning in Model.Warnings)
+                    {
+                        <li style="color:#ff0000;">@warning</li>
+                    }
+                </ul>
+            </div>
+        }
+        @*we add enctype = "multipart/form-data" because "File upload" attribute control type requires it*@
+        <form asp-route="ShoppingCart" method="post" enctype="multipart/form-data" id="shopping-cart-form">
+            <div class="table-wrapper hide-on-small-only">
+                <table class="cart">
+                    <colgroup>
+                        @if (Model.IsEditable)
+                        {
+                            <col width="1" />
+                        }
+                        @if (Model.ShowSku)
+                        {
+                            <col width="1" />
+                        }
+                        @if (Model.ShowProductImages)
+                        {
+                            <col width="1" />
+                        }
+                        <col />
+                        <col width="1" />
+                        <col width="1" />
+                        <col width="1" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            @if (Model.IsEditable)
+                            {
+                                <th class="remove-from-cart">
+                                    @T("ShoppingCart.Remove")
+                                </th>
+                            }
+                            @if (Model.ShowSku)
+                            {
+                                <th class="sku">
+                                    @T("ShoppingCart.SKU")
+                                </th>
+                            }
+                            @if (Model.ShowProductImages)
+                            {
+                                <th class="product-picture hide-on-small-only">
+                                    @T("ShoppingCart.Image")
+                                </th>
+                                <th class="product-picture hide-on-med-and-up show-on-small" style="height: 9em;padding-top: 4em;">
+                                    @T("ShoppingCart.Image")
+                                </th>
+                            }
+                            <th class="product">
+                                @T("ShoppingCart.Product(s)")
+                            </th>
+                            <th class="unit-price">
+                                @T("ShoppingCart.UnitPrice")
+                            </th>
+                            <th class="quantity hide-on-small-only">
+                                @T("ShoppingCart.Quantity")
+                            </th>
+                            <th class="quantity hide-on-med-and-up show-on-small" style="height: 5.8em;padding-top: 2.5em;">
+                                @T("ShoppingCart.Quantity")
+                            </th>
+                            <th class="subtotal">
+                                @T("ShoppingCart.ItemTotal")
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (var item in Model.Items)
+                            {
+                                @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                {
+                                    if (!IsMoto)
+                                    {
+                                        if (item.Category.Equals("Motos"))
+                                        {
+                                            IsMoto = true;
+                                        }
+                                    }
+                                }
+                                <tr>
+                                    @if (Model.IsEditable)
+                                    {
+                                        <td class="remove-from-cart center-align">
+                                            @if (item.DisableRemoval)
+                                            {
+                                                <text>&nbsp;</text>
+                                            }
+                                            else
+                                            {
+                                                <div class="preloader-wrapper small" id="loading-@(item.Id)" style="display:none;">
+                                                    <div class="spinner-layer">
+                                                        <div class="circle-clipper left">
+                                                            <div class="circle"></div>
+                                                        </div><div class="gap-patch">
+                                                            <div class="circle"></div>
+                                                        </div><div class="circle-clipper right">
+                                                            <div class="circle"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="btn-floating btn-small waves-effect waves-light teed-primary" name="updatecart" id="btn-@(item.Id)">
+                                                    <i class="material-icons">clear</i>
+                                                </button>
+                                                <input type="checkbox" name="removefromcart" id="remove-@(item.Id)" value="@(item.Id)" class="filled-in" style="display:none;" />
+                                            }
+                                        </td>
+                                    }
+                                    @if (Model.ShowSku)
+                                    {
+                                        <td class="sku">
+                                            <span class="sku-number">@item.Sku</span>
+                                        </td>
+                                    }
+                                    @if (Model.ShowProductImages)
+                                    {
+                                        <td class="product-picture">
+                                            <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">
+                                                @if (!string.IsNullOrEmpty(item.FancyDesign))
+                                                {
+                                                    string src = item.FancyDesign.Split('#').ToArray()[0];
+                                                    src = src.Split('#').ToArray()[0];
+                                                    <img alt="@item.Picture.AlternateText" class="responsive-img" src="@src" title="@item.Picture.Title" />
+                                                }
+                                                else
+                                                {
+                                                    <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                                }
+                                            </a>
+                                        </td>
+                                    }
+                                    <td class="product">
+                                        <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="product-name">@item.ProductName</a>
+                                        @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                        {
+                                            <div class="attributes">
+                                                @Html.Raw(item.AttributeInfo)
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.RecurringInfo))
+                                        {
+                                            <div class="recurring-info">
+                                                @Html.Raw(item.RecurringInfo)
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.RentalInfo))
+                                        {
+                                            <div class="rental-info">
+                                                @Html.Raw(item.RentalInfo)
+                                            </div>
+                                        }
+                                        @*@if (Model.IsEditable && item.AllowItemEditing)
+                                            {
+                                                var editCartItemUrl = Url.RouteUrl("Product", new { SeName = item.ProductSeName });
+                                                editCartItemUrl = webHelper.ModifyQueryString(editCartItemUrl, "updatecartitemid=" + item.Id, null);
+                                                <div class="edit-item">
+                                                    <a href="@editCartItemUrl">@T("Common.Edit")</a>
+                                                </div>
+                                            }*@
+                                        @if (item.Warnings.Count > 0)
+                                        {
+                                            <div class="message-error">
+                                                <ul>
+                                                    @foreach (var warning in item.Warnings)
+                                                    {
+                                                        <li style="color:#ff0000;">@*El producto ya no está dísponible en nuestro catálogo o está agotado.<br />*@@warning</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="unit-price">
+                                        <span class="product-unit-price">@item.UnitPrice</span>
+                                    </td>
+                                    <td class="quantity">
+                                        @if (!item.Sku.Contains("Empaque-"))
+                                        {
+                                            <select id="opt-@item.Id">
+                                                @*@if (item.AllowedQuantities.ToList()[0].Selected)
+                                                    {
+                                                    <option value="0">@(item.AllowedQuantities.ToList()[0].Value)</option>
+                                                    }*@
+                                                @{
+                                                    var count = item.StockQuantity > 10 ? 10 : item.StockQuantity;
+                                                    for (int i = 0; i < count; i++)
+                                                    {
+                                                        if (item.Quantity == (i + 1))
+                                                        {
+                                                            <option selected value="@(i + 1)">@(i + 1)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(i + 1)">@(i + 1)</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <input name="itemquantity@(item.Id)" type="text" id="qty-@item.Id" value="@(item.Quantity)" class="qty-input" hidden />
+                                        }
+                                        else
+                                        {
+                                            <input disabled value="@item.Quantity" />
+                                        }
+                                    </td>
+                                    <td class="subtotal">
+                                        @if (!string.IsNullOrEmpty(item.Discount))
+                                        {
+                                            <span style="text-decoration:line-through;">@(GetOriginalPrice(item.SubTotal, item.Discount))</span>
+                                            <div class="discount">
+                                                @T("ShoppingCart.ItemYouSave", item.SubTotal)
+                                            </div>
+                                            @*<div class="discount">
+                                                    @T("ShoppingCart.ItemYouSave", item.Discount)
+                                                </div>
+                                                if (item.MaximumDiscountedQty.HasValue)
+                                                {
+                                                    <div class="discount-additional-info">
+                                                        @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
+                                                    </div>
+                                                }*@
+                                        }
+                                        else
+                                        {
+                                            <span class="product-subtotal">@item.SubTotal</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="show-on-small hide-on-med-and-up">
+                <style>
+                    .btn-flat i {
+                        font-size: 1.5rem !important;
+                    }
+
+                    .row-cards {
+                        margin-bottom: 0;
+                    }
+
+                    .cards-elements {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                </style>
+                @foreach (var item in Model.Items)
+                {
+                    if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                    {
+                        if (!IsMoto)
+                        {
+                            if (item.Category.Equals("Motos"))
+                            {
+                                IsMoto = true;
+                            }
+                        }
+                    }
+
+                    <div class="col s12 m12">
+                        <div class="card-panel">
+                            <div class="row valign-wrapper row-cards">
+                                <div class="col s4">
+                                    @if (Model.ShowProductImages)
+                                    {
+                                        <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">
+                                            <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                        </a>
+                                    }
+                                </div>
+                                <div class="col s8">
+                                    <div>
+                                        <strong><a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="product-name">@item.ProductName</a></strong>
+                                        @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                        {
+                                            <div class="attributes">
+                                                @Html.Raw(item.AttributeInfo)
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="cards-elements">
+                                        <div class="col s4 center">
+                                            @if (Model.IsEditable)
+                                            {
+                                                <div class="remove-from-cart">
+                                                    @if (item.DisableRemoval)
+                                                    {
+                                                        <text>&nbsp;</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="preloader-wrapper small" id="responsive-loading-@(item.Id)" style="display:none;">
+                                                            <div class="spinner-layer">
+                                                                <div class="circle-clipper left">
+                                                                    <div class="circle"></div>
+                                                                </div><div class="gap-patch">
+                                                                    <div class="circle"></div>
+                                                                </div><div class="circle-clipper right">
+                                                                    <div class="circle"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button type="submit" class="btn-flat waves-effect waves-light teed-primary-text" name="responsiveupdatecart" id="responsive-btn-@(item.Id)" style="padding:0;">
+                                                            <i class="material-icons">delete</i>
+                                                        </button>
+                                                        <input type="checkbox" name="responsiveremovefromcart" id="responsive-remove-@(item.Id)" value="@(item.Id)" class="filled-in" style="display:none;" />
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col s4">
+                                            <select id="responsive-opt-@item.Id">
+                                                @{
+                                                    var count = item.StockQuantity > 10 ? 10 : item.StockQuantity;
+                                                    for (int i = 0; i < count; i++)
+                                                    {
+                                                        if (item.Quantity == (i + 1))
+                                                        {
+                                                            <option selected value="@(i + 1)">@(i + 1)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(i + 1)">@(i + 1)</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <input name="responsiveitemquantity@(item.Id)" type="text" id="responsive-qty-@item.Id" value="@(item.Quantity)" class="qty-input" hidden />
+                                        </div>
+                                        <div class="col s4">
+                                            @if (!string.IsNullOrEmpty(item.Discount))
+                                            {
+                                                <span style="text-decoration:line-through;">@(GetOriginalPrice(item.SubTotal, item.Discount))</span>
+                                                <div class="discount">
+                                                    @T("ShoppingCart.ItemYouSave", item.SubTotal)
+                                                </div>
+                                                @*<div class="discount">
+                                                        @T("ShoppingCart.ItemYouSave", item.Discount)
+                                                    </div>
+                                                    if (item.MaximumDiscountedQty.HasValue)
+                                                    {
+                                                        <div class="discount-additional-info">
+                                                            @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
+                                                        </div>
+                                                    }*@
+                                            }
+                                            else
+                                            {
+                                                <span class="product-subtotal">@item.SubTotal</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @foreach (var item in Model.Items)
+                {
+                    <script type="text/javascript" asp-location="Footer">
+                    $('#responsive-opt-@item.Id').change(function () {
+                        var v = $('#responsive-opt-@item.Id').val();
+                        $('#responsive-qty-@item.Id').val(v);
+
+                        var url = '@Url.Action("ResponsiveUpdateCartAjax", "ShoppingCart")';
+                        var data = $('#shopping-cart-form').serialize();
+                        $.ajax({
+                            url: url,
+                            data: data,
+                            type: 'POST',
+                            success: function (result) {
+                                location.reload();
+                            },
+                            //complete: this.resetLoadWaiting,
+                            error: function (error) {
+                                $("#error").empty();
+                                $("#error").append("Ocurrió un error inesperado.");
+                            }
+                        });
+                    });
+                    </script>
+                }
+                @foreach (var item in Model.Items)
+
+                {
+                    <script type="text/javascript" asp-location="Footer">
+                        $('#responsive-btn-@(item.Id)').click(function () {
+                            $('input[id=responsive-remove-@(item.Id)]').prop('checked', true);
+                            $('#responsive-btn-@(item.Id)').hide();
+                            $('#responsive-loading-@(item.Id)').addClass('active');
+                            $('#responsive-loading-@(item.Id)').show();
+                        });
+                    </script>
+                }
+            </div>
+            @foreach (var item in Model.Items)
+            {
+                <script type="text/javascript" asp-location="Footer">
+                    $('#opt-@item.Id').change(function () {
+                        var v = $('#opt-@item.Id').val();
+                        $('#qty-@item.Id').val(v);
+
+                        var url = '@Url.Action("UpdateCartAjax","ShoppingCart")';
+                        var data = $('#shopping-cart-form').serialize();
+                        $.ajax({
+                            url: url,
+                            data: data,
+                            type: 'POST',
+                            success: function (result) {
+                                location.reload();
+                            },
+                            //complete: this.resetLoadWaiting,
+                            error: function (error) {
+                                $("#error").empty();
+                                $("#error").append("Ocurrió un error inesperado.");
+                            }
+                        });
+                    });
+                </script>
+            }
+            @foreach (var item in Model.Items)
+            {
+                <script type="text/javascript" asp-location="Footer">
+                    $('#btn-@(item.Id)').click(function () {
+                        $('input[id=remove-@(item.Id)]').prop('checked', true);
+                        $('#btn-@(item.Id)').hide();
+                        $('#loading-@(item.Id)').addClass('active');
+                        $('#loading-@(item.Id)').show();
+                    });
+                </script>
+            }
+            @if (Model.IsEditable && Model.Items.Count > 0 && Model.DisplayTaxShippingInfo)
+            {
+                var inclTax = workContext.TaxDisplayType == TaxDisplayType.IncludingTax;
+                //tax info is already included in the price (incl/excl tax). that's why we display only shipping info here
+                //of course, you can modify appropriate locales to include VAT info there
+                <div class="tax-shipping-info">
+                    @T(inclTax ? "ShoppingCart.TaxShipping.InclTax" : "ShoppingCart.TaxShipping.ExclTax", Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("shippinginfo") }))
+                </div>
+            }
+            <div class="row section">
+                @if (Model.IsEditable)
+                {
+                    @if (string.IsNullOrEmpty(Model.MinOrderSubtotalWarning) && !Model.HideCheckoutButton)
+                    {
+                        <div class="col s12 right-align">
+                            @if (IsMoto)
+                            {
+                                <a class="waves-effect waves-light btn modal-trigger" href="#modal-motos">Pagar</a>
+                            }
+                            else
+                            {
+                                <div id="modal-terms-top" class="modal">
+                                    <div class="modal-content center">
+                                        <h4>@T("Checkout.TermsOfService")</h4>
+                                        <p>@T("Checkout.TermsOfService.PleaseAccept")</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+                                    </div>
+                                </div>
+                                <div id="terms-of-service-warning-box" title="@T("Checkout.TermsOfService")" style="display: none;">
+                                    <p>@T("Checkout.TermsOfService.PleaseAccept")</p>
+                                </div>
+                                <div class="terms-of-service">
+                                    <input id="termsofservice-top" type="checkbox" name="termsofservice" />
+                                    <label for="termsofservice-top">@T("Checkout.TermsOfService.IAccept")</label>
+                                    <a href="@Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("conditionsofuse") })" target="_blank">@T("Checkout.TermsOfService.Read")</a>
+                                </div>
+                                <style>
+                                    [type=checkbox]:checked, [type=checkbox]:not(:checked) {
+                                        position: relative;
+                                        opacity: inherit;
+                                        pointer-events: all;
+                                        vertical-align: middle;
+                                    }
+                                </style>
+                                <script type="text/javascript" asp-location="Footer">
+                                    $(document).ready(function () {
+                                        $('#checkout-top').click(function () {
+                                            $('#modal-terms-top').modal();
+                                            //terms of service
+                                            var termOfServiceOk = true;
+                                            if ($('#termsofservice-top').length > 0) {
+                                                //terms of service element exists
+                                                if (!$('#termsofservice-top').is(':checked')) {
+                                                    //$("#terms-of-service-warning-box").dialog();
+                                                    $('#modal-terms-top').modal('open');
+                                                    $('#warn').modal('close');
+                                                    termOfServiceOk = false;
+                                                } else {
+                                                    termOfServiceOk = true;
+                                                }
+                                            }
+                                            return termOfServiceOk;
+                                        });
+                                    });
+
+                                    $('#termsofservice-top').change(function () {
+                                        if ($('#termsofservice-top').is(':checked')) {
+                                            $('#termsofservice').prop("checked", true);
+                                        } else {
+                                            $('#termsofservice').prop("checked", false);
+                                        }
+                                    });
+                                </script>
+                                <button type="submit" id="checkout-top" name="checkout" value="checkout" class="btn-large waves-effect waves-light" style="margin-top:10px;">
+                                    Pagar
+                                </button>
+                            }
+                        </div>
+                    }
+                    @*<div class="col s12 right-align shopping-cart-action-buttons">
+                            @*<button type="submit" class="btn btn-small waves-effect waves-light" name="updatecart">
+                                    @T("ShoppingCart.UpdateCart")
+                                </button>*
+                            <button type="submit" class="btn-flat waves-effect waves-light" name="continueshopping">
+                                @T("ShoppingCart.ContinueShopping")
+                            </button>
+                        </div>*@
+                }
+                @if (Model.IsEditable)
+                {
+                    @await Html.PartialAsync("_CheckoutAttributes", Model)
+                }
+                @await Component.InvokeAsync("SelectedCheckoutAttributes")
+            </div>
+            <div class="cart-footer row">
+                @await Component.InvokeAsync("Widget", new { widgetZone = "order_summary_cart_footer" })
+                @if (Model.IsEditable)
+                {
+                    <div class="cart-collaterals col s12 m6">
+                        <div class="deals">
+                            @await Html.PartialAsync("_DiscountBox", Model.DiscountBox)
+                            @await Html.PartialAsync("_GiftCardBox", Model.GiftCardBox)
+                            @await Component.InvokeAsync("Widget", new { widgetZone = "order_summary_content_deals" })
+                        </div>
+                        @await Component.InvokeAsync("EstimateShipping")
+                    </div>
+                    <div class="totals col s12 m6">
+                        @await Component.InvokeAsync("OrderTotals", new { isEditable = Model.IsEditable })
+                        @if (Model.IsEditable)
+                        {
+                            if (!string.IsNullOrEmpty(Model.MinOrderSubtotalWarning))
+                            {
+                                <div class="min-amount-warning">
+                                    @Model.MinOrderSubtotalWarning
+                                </div>
+                            }
+                        }
+                        @if (Model.IsEditable)
+                        {
+                            @if (string.IsNullOrEmpty(Model.MinOrderSubtotalWarning) && !Model.HideCheckoutButton)
+                            {
+                                @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+                                {
+                                    <!-- Modal Structure -->
+                                    <div id="modal-motos" class="modal">
+                                        <div class="modal-content">
+                                            <h4>Importante</h4>
+                                            <p>Para el envío de las motos debes comunicarte con nosotros a través de nuestra <a href="https://www.kromtekstore.com/contactus" target="_blank">sección de contacto</a> o llamando al teléfono:  <strong>01-800-570-6835</strong>  </p>
+                                        </div>
+                                        <div class="modal-footer" style="margin-left:-7px;">
+                                            <a href="#!" class="modal-close waves-effect waves-green btn">Cerrar</a>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col s12 right-align">
+                                    @if (IsMoto)
+                                    {
+                                        <a class="waves-effect waves-light btn modal-trigger" href="#modal-motos" style="margin-top:2%;">Pagar</a>
+                                    }
+                                    else
+                                    {
+                                        <div id="modal-terms" class="modal">
+                                            <div class="modal-content center">
+                                                <h4>@T("Checkout.TermsOfService")</h4>
+                                                <p>@T("Checkout.TermsOfService.PleaseAccept")</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+                                            </div>
+                                        </div>
+                                        <div id="terms-of-service-warning-box" title="@T("Checkout.TermsOfService")" style="display: none;">
+                                            <p>@T("Checkout.TermsOfService.PleaseAccept")</p>
+                                        </div>
+                                        <div class="terms-of-service">
+                                            <input id="termsofservice" type="checkbox" name="termsofservice" />
+                                            <label for="termsofservice">@T("Checkout.TermsOfService.IAccept")</label>
+                                            <a href="@Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("conditionsofuse") })" target="_blank">@T("Checkout.TermsOfService.Read")</a>
+                                        </div>
+                                        <style>
+                                            [type=checkbox]:checked, [type=checkbox]:not(:checked) {
+                                                position: relative;
+                                                opacity: inherit;
+                                                pointer-events: all;
+                                                vertical-align: middle;
+                                            }
+                                        </style>
+                                        <script type="text/javascript" asp-location="Footer">
+                                            $(document).ready(function () {
+                                                $('#checkout').click(function () {
+                                                    $('#modal-terms').modal();
+                                                    //terms of service
+                                                    var termOfServiceOk = true;
+                                                    if ($('#termsofservice').length > 0) {
+                                                        //terms of service element exists
+                                                        if (!$('#termsofservice').is(':checked')) {
+                                                            //$("#terms-of-service-warning-box").dialog();
+                                                            $('#modal-terms').modal('open');
+                                                            $('#warn').modal('close');
+                                                            termOfServiceOk = false;
+                                                        }
+                                                        else {
+                                                            termOfServiceOk = true;
+                                                        }
+                                                    }
+                                                    return termOfServiceOk;
+                                                });
+                                            });
+                                        </script>
+                                        <button type="submit" id="checkout" name="checkout" value="checkout" class="btn-large waves-effect waves-light modal-trigger" style="margin-top:10px;">
+                                            Pagar
+                                        </button>
+
+                                        <div class="modal" id="warn">
+                                            <div class="modal-content">
+                                                Algún producto en tu carrito no está publicado en nuestro catálogo o está agotado.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ok</a>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top:2%;vertical-align:middle;text-align:right">
+                                            <img src="~/images/Pagos_PayPal_250px.png" alt="Paypal" width="150" style="vertical-align:middle;">
+                                            <div id="providers-images-payment" style="margin-top:2%;vertical-align:middle;text-align:right;"></div>
+                                        </div>
+                                        <style>
+                                            .sold-out-product {
+                                                padding-top: 4em;
+                                                text-align: center;
+                                                color: red;
+                                                display: block !important;
+                                            }
+                                        </style>
+                                        @foreach (var item in Model.Items)
+                                        {
+                                            if (item.StockQuantity == 0)
+                                            {
+                                                <div class="sold-out-product">
+                                                </div>
+                                                <script type="text/javascript" asp-location="Footer">
+                                                    $(document).ready(function () {
+                                                        $('.modal').modal();
+                                                    });
+
+                                                    $('#checkout').click(function () {
+                                                        $('#warn').addClass('sold-out-product');
+                                                        $('#warn').modal('open');
+                                                    });
+                                                    $('#checkout-top').click(function () {
+                                                        $('#warn').addClass('sold-out-product');
+                                                        $('#warn').modal('open');
+                                                    });
+                                                </script>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            }
+                            <div class="addon-buttons">
+                                @*Payment method buttons (e.g. GoogleCheckoutButton, Paypal Express)*@
+                                @foreach (var pm in Model.ButtonPaymentMethodViewComponentNames)
+                                {
+                                    @await Component.InvokeAsync(pm)
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="col s12 m8"></div>
+                    <div class="totals col s12 m4">
+                        @await Component.InvokeAsync("OrderTotals", new { isEditable = Model.IsEditable })
+                        @if (Model.IsEditable)
+                        {
+                            if (!string.IsNullOrEmpty(Model.MinOrderSubtotalWarning))
+                            {
+                                <div class="min-amount-warning">
+                                    @Model.MinOrderSubtotalWarning
+                                </div>
+                            }
+                        }
+                        @if (Model.IsEditable)
+                        {
+                            <div class="row section">
+                                @if (string.IsNullOrEmpty(Model.MinOrderSubtotalWarning) && !Model.HideCheckoutButton)
+                                {
+                                    <div class="col s12 right-align">
+                                        <button type="submit" id="checkout" name="checkout" value="checkout" class="btn btn-small waves-effect waves-light">
+                                            @T("Checkout.Button")
+                                        </button>
+                                        @if (Model.TermsOfServiceOnShoppingCartPage)
+                                        {
+                                            <br />
+                                            <label>
+                                                <span>@T("Checkout.TermsOfService.IAccept") <a href="@Url.RouteUrl("Topic", new { SeName = Html.GetTopicSeName("conditionsofuse") })" target="_blank" id="read-terms">@T("Checkout.TermsOfService.Read")</a></span>
+                                            </label>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="addon-buttons">
+                                @*Payment method buttons (e.g. GoogleCheckoutButton, Paypal Express)*@
+                                @foreach (var pm in Model.ButtonPaymentMethodViewComponentNames)
+                                {
+                                    @await Component.InvokeAsync(pm)
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+            </div>
+            @if (Model.IsEditable)
+            {
+                @await Component.InvokeAsync("CrossSellProducts")
+            }
+        </form>
+    }
+    else
+    {
+        <div class="section">
+            <div class="card horizontal">
+                <div class="card-stacked">
+                    <div class="card-content" style="font-size:16px;">
+                        @T("ShoppingCart.CartIsEmpty")
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                @await Component.InvokeAsync("HomepageBestSellers")
+            </div>
+        </div>
+    }
+    @await Component.InvokeAsync("Widget", new { widgetZone = "order_summary_content_after" })
+</div>
+@functions{
+    public string GetOriginalPrice(string newPriceString, string discountString)
+    {
+        decimal.TryParse(newPriceString.Replace("$", ""), out decimal newPrice);
+        decimal.TryParse(discountString.Replace("$", ""), out decimal discount);
+
+        if (newPrice == 0 && discount == 0)
+        {
+            return newPriceString;
+        }
+
+        return "$" + (newPrice + discount).ToString();
+    }
+}

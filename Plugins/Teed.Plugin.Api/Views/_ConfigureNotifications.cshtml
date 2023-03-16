@@ -1,0 +1,101 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+
+<div class="panel panel-default">
+    <div style="margin-bottom: 1em">
+        <span>Ingresa los textos de las notificaciones que serán enviadas de forma automática. Si algún campo está vacío no se enviará la notificación. Las notificaciones solo serán enviadas si la plantilla de correos correspondiente también está activada. La longitud máxima del título de la notificación son 30 caracteres, recomendamos tener cuidado con las variables en los títulos porque podrían sobrepasar los 30 caracteres y la notificación no será enviada.</span><br />
+        <h5>Variables:</h5>
+        <ul>
+            <li>{{NAME}} -> Primer nombre del cliente</li>
+            <li>{{ORDER_NUMBER}} -> Número de orden (si aplica)</li>
+        </ul>
+    </div>
+
+    <div class="panel-heading" style="font-weight:bold">
+        Carrito abandonado
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="AbandonedShoppingCartTitle" data-val-maxlength-max="30" type="text" maxlength="30" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Contenido</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="AbandonedShoppingCartBody" />
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-heading" style="font-weight:bold">
+        Nueva orden
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="OrderPlacedTitle" data-val-maxlength-max="30" type="text" maxlength="30" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Contenido</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="OrderPlacedBody" />
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-heading" style="font-weight:bold">
+        Orden pagada
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="OrderPaidTitle" data-val-maxlength-max="30" type="text" maxlength="30" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Contenido</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="OrderPaidBody" />
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-heading" style="font-weight:bold">
+        Orden completada
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="OrderCompletedTitle" data-val-maxlength-max="30" type="text" maxlength="30" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Contenido</label>
+            </div>
+            <div class="col-md-9">
+                <input class="form-control text-box single-line" asp-for="OrderCompletedBody" />
+            </div>
+        </div>
+    </div>
+
+</div>

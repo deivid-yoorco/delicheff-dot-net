@@ -1,0 +1,148 @@
+﻿@model Teed.Plugin.Groceries.Models.RatesAndBonuses.RatesAndBonusesModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.RatesAndBonusesSettings");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Tarifas y bonos
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="RatesAndBonuses" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-franchise" asp-title="Configuracíon" asp-default="true">
+                        <div class="content">
+                            <div class="form-horizontal">
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="col-md-12">
+                                                <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Tarifa base fija para CDMX</label>
+                                                            <div title="Ingresa el monto de la tarifa fija para CDMX" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input asp-for="BaseFixedRateCDMX" class="form-control" type="number" />
+                                                        <span asp-validation-for="BaseFixedRateCDMX" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Tarifa base variable para CDMX</label>
+                                                            <div title="Ingresa el valor de la tarifa variable para CDMX (Ej. 0.08 para 8%)" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input asp-for="BaseVariableRateCDMX" class="form-control" type="number" />
+                                                        <span asp-validation-for="BaseVariableRateCDMX" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Tarifa base fija otros estados</label>
+                                                            <div title="Ingresa el monto de la tarifa base fija para otros estados" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input asp-for="BaseFixedRateOtherStates" class="form-control" type="number" />
+                                                        <span asp-validation-for="BaseFixedRateOtherStates" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Tarifa base variable para otros estados</label>
+                                                            <div title="Ingresa el valor de la tarifa variable para otros estados (Ej. 0.08 para 8%)" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input asp-for="BaseVariableRateOtherStates" class="form-control" type="number" />
+                                                        <span asp-validation-for="BaseVariableRateOtherStates" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Bono diario fijo por cero incidencias</label>
+                                                            <div title="Ingresa el monto correspondiente al bono diario fijo por cero incidencias" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input asp-for="FixedWeeklyBonusCeroIncidents" class="form-control" type="number" />
+                                                        <span asp-validation-for="FixedWeeklyBonusCeroIncidents" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3 text-right">
+                                                        <div class="label-wrapper">
+                                                            <label class="control-label">Bono diario variable por cero incidencias</label>
+                                                            <div title="Ingresa el valor del bono diario variable por cero incidencias (Ej. 0.08 para 8%)" class="ico-help">
+                                                                <i class="fa fa-question-circle"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input asp-for="VariableWeeklyBonusCeroIncidents" class="form-control" type="number" />
+                                                        <span asp-validation-for="VariableWeeklyBonusCeroIncidents" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-tab>
+                    <nop-tab asp-name="tab-log" asp-title="Bitacora">
+                        <div class="raw clearfix">
+                            <div class="col-md-12">
+                                <div class="panel-group">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            Log
+                                        </div>
+                                        <div class="panel-body">
+                                            <pre>@Model.Log</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>

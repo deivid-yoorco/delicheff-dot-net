@@ -1,0 +1,53 @@
+﻿@model IList<ProductOverviewModel>
+
+@if (Model.Count > 0)
+{
+    <style>
+        .product-line-img {
+            height: 9vh !important;
+            max-width: 90% !important;
+        }
+    </style>
+    <div class="section">
+        @*<h5>@T("ShoppingCart.CrossSells")</h5>*@
+        <h5 class="center">De este grupo de productos</h5>
+
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                @if (item.Name != "Test name")
+                {
+                    <div class="col s12 m6 l4">
+                        @*@await Html.PartialAsync("_ProductBox", item)*@
+                        <div class="main-product-container" style="margin-top:25px">
+                            <div class="center-content-card card-action" style="padding:0 !important;height: auto!important;">
+                                <div class="col s12 module line-clamp teed-primary-text left" style="min-height: 44px;padding:0!important;padding-left:5px !important;margin-right:auto;">
+                                    <a href="@Url.RouteUrl("Product", new { SeName = item.SeName })" title="@item.Name">
+                                        <div class="center product-line-img" style="background-image: url(@item.DefaultPictureModel.ImageUrl);">
+                                        </div>
+                                        <div class="center" style="font-size: 15px;">
+                                            <p style="margin: auto;color: black !important;">
+                                                LAMY @item.Name
+                                                @if (item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Any())
+                                                {
+                                                    if (!string.IsNullOrEmpty(item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Select(x => x.CustomValue).FirstOrDefault()))
+                                                    {
+                                                        @Html.Raw(item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Select(x => x.CustomValue).FirstOrDefault())
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.Raw(item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Select(x => x.SpecificationAttributeOption.Name).FirstOrDefault())
+                                                    }
+                                                }
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}

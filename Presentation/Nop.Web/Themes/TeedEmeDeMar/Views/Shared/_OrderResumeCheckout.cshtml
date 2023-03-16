@@ -1,0 +1,369 @@
+﻿@model OnePageCheckoutModel
+@using System.Text.RegularExpressions
+@using Nop.Core
+@inject IWebHelper webHelper
+@inject IWorkContext workContext
+
+<div class="order-summary-content">
+    <div class="table-wrapper hide-on-small-only">
+        <table class="cart">
+            <colgroup>
+                <col width="1" />
+                <col />
+                <col width="1" />
+                <col width="1" />
+                <col width="1" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="product-picture">
+                        @T("ShoppingCart.Image")
+                    </th>
+                    <th class="product">
+                        @T("ShoppingCart.Product(s)")
+                    </th>
+                    <th class="unit-price">
+                        @T("ShoppingCart.UnitPrice")
+                    </th>
+                    <th class="quantity">
+                        @T("ShoppingCart.Quantity")
+                    </th>
+                    <th class="subtotal">
+                        @T("ShoppingCart.ItemTotal")
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (var item in Model.CartModel.Items)
+                    {
+                        <tr>
+                            <td class="product-picture">
+                                <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">
+                                    @if (!string.IsNullOrEmpty(item.FancyDesign))
+                                    {
+                                        string src = item.FancyDesign.Split('#').ToArray()[0];
+                                        src = src.Split('#').ToArray()[0];
+                                        <img alt="@item.Picture.AlternateText" class="responsive-img" src="@src" title="@item.Picture.Title" />
+                                    }
+                                    else
+                                    {
+                                        <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                                    }
+                                </a>
+                            </td>
+
+                            <td class="product">
+                                <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="product-name">@item.ProductName</a>
+                                @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                                {
+                                    <div class="attributes">
+                                        @Html.Raw(item.AttributeInfo)
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(item.RecurringInfo))
+                                {
+                                    <div class="recurring-info">
+                                        @Html.Raw(item.RecurringInfo)
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(item.RentalInfo))
+                                {
+                                    <div class="rental-info">
+                                        @Html.Raw(item.RentalInfo)
+                                    </div>
+                                }
+                                @if (item.Warnings.Count > 0)
+                                {
+                                    <div class="message-error">
+                                        <ul>
+                                            @foreach (var warning in item.Warnings)
+                                            {
+                                                <li>@warning</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </td>
+                            <td class="unit-price">
+                                <span class="product-unit-price">@item.UnitPrice</span>
+                            </td>
+                            <td class="quantity center">
+                                @item.Quantity
+                            </td>
+                            <td class="subtotal">
+                                <span class="product-subtotal">@item.SubTotal</span>
+                                @if (!string.IsNullOrEmpty(item.Discount))
+                                {
+                                    <div class="discount">
+                                        @T("ShoppingCart.ItemYouSave", item.Discount)
+                                    </div>
+                                    if (item.MaximumDiscountedQty.HasValue)
+                                    {
+                                        <div class="discount-additional-info">
+                                            @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
+                                        </div>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col s12 m12 show-on-small hide-on-med-and-up" style="padding:0;">
+        <style>
+            .row-cards {
+                margin-bottom: 0;
+            }
+        </style>
+        @foreach (var item in Model.CartModel.Items)
+        {
+            <div class="card-panel">
+                <div class="row valign-wrapper row-cards">
+                    <div class="col s4">
+                        <a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })">
+                            <img alt="@item.Picture.AlternateText" class="responsive-img" src="@item.Picture.ImageUrl" title="@item.Picture.Title" />
+                        </a>
+                    </div>
+                    <div class="col s8">
+                        <div>
+                            <strong><a href="@Url.RouteUrl("Product", new { SeName = item.ProductSeName })" class="product-name">@item.ProductName</a></strong>
+                            @if (!string.IsNullOrEmpty(item.AttributeInfo))
+                            {
+                                <div class="attributes">
+                                    @Html.Raw(item.AttributeInfo)
+                                </div>
+                                <br />
+                            }
+                        </div>
+                        <div class="col s12">
+                            <div class="quantity right">
+                                <strong>Cantidad: </strong>@item.Quantity
+                            </div>
+                        </div>
+                        <div class="col s12">
+                            <div class="subtotal right">
+                                <strong>Precio: </strong><span class="product-subtotal">@item.SubTotal</span>
+                                @if (!string.IsNullOrEmpty(item.Discount))
+                                {
+                                    <div class="discount">
+                                        @T("ShoppingCart.ItemYouSave", item.Discount)
+                                    </div>
+                                    if (item.MaximumDiscountedQty.HasValue)
+                                    {
+                                        <div class="discount-additional-info">
+                                            @T("ShoppingCart.MaximumDiscountedQty", item.MaximumDiscountedQty.Value)
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<style>
+    .td-total {
+        text-align: right;
+        padding: 0px;
+    }
+
+    .tr-total {
+        border-bottom: none;
+    }
+</style>
+<div class="total-info center-align" style="margin-top:10px;">
+    <table class="cart-total">
+        <tbody>
+            <tr class="order-subtotal tr-total">
+                <td class="cart-total-left td-total">
+                    <label>@T("ShoppingCart.Totals.SubTotal"):</label>
+                </td>
+                <td class="cart-total-right td-total">
+                    <span class="value-summary" id="calculate-subtotal">@Model.TotalModel.SubTotal</span>
+                </td>
+            </tr>
+            @if (!string.IsNullOrEmpty(Model.TotalModel.SubTotalDiscount))
+            {
+                <tr class="order-subtotal-discount tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.SubTotalDiscount"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary" id="calculate-discount">@Model.TotalModel.SubTotalDiscount</span>
+                    </td>
+                </tr>
+            }
+            @if (!Model.TotalModel.HideShippingTotal)
+            {
+                <tr class="shipping-cost tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.Shipping"):</label>
+                        @*@if (Model.TotalModel.RequiresShipping && !string.IsNullOrEmpty(Model.TotalModel.SelectedShippingMethod))
+                            {
+                                <span class="selected-shipping-method">@T("ShoppingCart.Totals.Shipping.Method", Model.TotalModel.SelectedShippingMethod)</span>
+                            }*@
+                    </td>
+                    <td class="cart-total-right td-total">
+                        @if (Model.TotalModel.RequiresShipping)
+                        {
+                            if (!string.IsNullOrEmpty(Model.TotalModel.Shipping))
+                            {
+                                <span class="value-summary" id="calculate-shipping">@Model.TotalModel.Shipping</span>
+                            }
+                            else
+                            {
+                                <span id="calculate-shipping">@T("ShoppingCart.Totals.CalculatedDuringCheckout")</span>
+                            }
+                        }
+                        else
+                        {
+                            <span>@T("ShoppingCart.Totals.Shipping.NotRequired")</span>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!string.IsNullOrEmpty(Model.TotalModel.PaymentMethodAdditionalFee))
+            {
+                <tr class="additional-fees tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.PaymentMethodAdditionalFee"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary" id="calculate-additional-fee">@Model.TotalModel.PaymentMethodAdditionalFee</span>
+                    </td>
+                </tr>
+            }
+            @if (Model.TotalModel.DisplayTaxRates && Model.TotalModel.TaxRates.Count > 0)
+            {
+                foreach (var taxRate in Model.TotalModel.TaxRates)
+                {
+                    <tr class="tax-rate tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@string.Format(T("ShoppingCart.Totals.TaxRateLine").Text, taxRate.Rate):</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span>@taxRate.Value</span>
+                        </td>
+                    </tr>
+                }
+            }
+            @if (Model.TotalModel.DisplayTax)
+            {
+                <tr class="tax-value tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.Tax"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary" id="calculate-tax">@Model.TotalModel.Tax</span>
+                    </td>
+                </tr>
+            }
+            @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotalDiscount))
+            {
+                <tr class="discount-total tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.OrderTotalDiscount"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary" id="calculate-total-discount">@Model.TotalModel.OrderTotalDiscount</span>
+                    </td>
+                </tr>
+            }
+            @if (Model.TotalModel.GiftCards.Count > 0)
+            {
+                foreach (var gc in Model.TotalModel.GiftCards)
+                {
+                    <tr class="giftcard-summary tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>@T("ShoppingCart.Totals.GiftCardInfo"):</label>
+                            <span>@T("ShoppingCart.Totals.GiftCardInfo.Code", gc.CouponCode)</span>
+                            @if (Model.TotalModel.IsEditable)
+                            {
+                                //little hack here with empty "value" element
+                                <input type="submit" name="removegiftcard-@gc.Id" value=" " title="@T("Common.Remove")" class="remove-gift-card-button" />
+                            }
+                            <span class="giftcard-remaining">@string.Format(T("ShoppingCart.Totals.GiftCardInfo.Remaining").Text, gc.Remaining)</span>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            <span class="value-summary">@gc.Amount</span>
+                        </td>
+                    </tr>
+                }
+            }
+            @if (Model.TotalModel.RedeemedRewardPoints > 0)
+            {
+                <tr class="reward-points tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@string.Format(T("ShoppingCart.Totals.RewardPoints").Text, Model.TotalModel.RedeemedRewardPoints):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary">@Model.TotalModel.RedeemedRewardPointsAmount</span>
+                    </td>
+                </tr>
+            }
+            <tr class="order-total tr-total">
+                <td class="cart-total-left td-total">
+                    <label>@T("ShoppingCart.Totals.OrderTotal"):</label>
+                </td>
+                <td class="cart-total-right td-total">
+                    @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotal))
+                    {
+                        <span class="value-summary"><strong id="calculate-total">@Model.TotalModel.OrderTotal</strong></span>
+                    }
+                    else
+                    {
+                        <span id="calculate-total">@T("ShoppingCart.Totals.CalculatedDuringCheckout")</span>
+                    }
+                </td>
+            </tr>
+            @*@if (Convert.ToDecimal(Regex.Replace(Model.TotalModel.SubTotal, "[^-?\\d+\\.]", "")) > 899)
+                {
+                    <tr class="order-total tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>Envío GRATIS:</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotal))
+                            {
+                                <span class="value-summary">GRATIS</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    decimal subTotal = Convert.ToDecimal(Regex.Replace(Model.TotalModel.SubTotal, "[^-?\\d+\\.]", ""));
+                    decimal envio = 900 - subTotal;
+
+                    <tr class="order-total tr-total">
+                        <td class="cart-total-left td-total">
+                            <label>Envío GRATIS:</label>
+                        </td>
+                        <td class="cart-total-right td-total">
+                            @if (!string.IsNullOrEmpty(Model.TotalModel.OrderTotal))
+                            {
+                                <span class="value-summary">Agrega <strong>@string.Format("{0:C}", envio)</strong> para obtener tu envío gratis</span>
+                            }
+                        </td>
+                    </tr>
+                }*@
+            @if (Model.TotalModel.WillEarnRewardPoints > 0)
+            {
+                <tr class="earn-reward-points tr-total">
+                    <td class="cart-total-left td-total">
+                        <label>@T("ShoppingCart.Totals.RewardPoints.WillEarn"):</label>
+                    </td>
+                    <td class="cart-total-right td-total">
+                        <span class="value-summary">@string.Format(T("ShoppingCart.Totals.RewardPoints.WillEarn.Point").Text, Model.TotalModel.WillEarnRewardPoints)</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

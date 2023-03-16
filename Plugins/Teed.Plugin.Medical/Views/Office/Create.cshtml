@@ -1,0 +1,92 @@
+﻿@model Teed.Plugin.Medical.Models.Office.OfficeModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedBranches.Offices");
+    var currentYear = DateTime.Now.Year;
+}
+
+<form asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar consultorio
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de consultorios</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Sucursal</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="BranchId" type="hidden" id="branchId" />
+                                <input id="branches" style="width: 100%;" />
+                                <script>
+                                    $(document).ready(function () {
+                                        $("#branches").kendoComboBox({
+                                            placeholder: "Selecciona la sucursal...",
+                                            dataTextField: "Branch",
+                                            dataValueField: "Id",
+                                            filter: "contains",
+                                            autoBind: true,
+                                            minLength: 1,
+                                            dataSource: {
+                                                type: "json",
+                                                transport: {
+                                                    read: {
+                                                        url: "@Html.Raw(Url.Action("BranchListData", "Office"))",
+                                                        type: "POST",
+                                                        data: addAntiForgeryToken
+                                                    }
+                                                }
+                                            },
+                                            dataBound: onDataBound,
+                                            select: onSelect,
+                                            change: onChange
+                                        });
+                                        function onDataBound(e) {
+                                            @*if (@Model.BranchId != 0 && !$("#branches").data("kendoComboBox").value()) {
+                                                $("#branches").data("kendoComboBox").value(@Model.BranchId);
+                                                $("#branchId").val(@Model.BranchId);
+                                            }*@
+                                        };
+                                        function onSelect(e) {
+                                            $("#branchId").val(this.dataItem(e.item.index()).Id);
+                                        };
+                                        function onChange(e) {
+                                            if (this.selectedIndex == -1) {
+                                                $("#branches").data("kendoComboBox").value("");
+                                            }
+                                        };
+                                    });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Nombre del Consultorio</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="Name" maxlength="256" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

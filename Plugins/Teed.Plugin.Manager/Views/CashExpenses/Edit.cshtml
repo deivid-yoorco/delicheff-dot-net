@@ -1,0 +1,264 @@
+﻿@model Teed.Plugin.Manager.Models.CashExpenses.EditViewModel
+@using Teed.Plugin.Manager.Domain.CashExpenses
+@inject Nop.Core.IWorkContext workContext
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.CashExpenses");
+}
+<link href="~/Plugins/Teed.Plugin.Manager/Content/js/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Manager/Content/js/ui-choose/ui-choose.js"></script>
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar movimiento de efectivo
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de movimientos de efectivo</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div>
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <input asp-for="SelectedDate" type="hidden" id="filterDate" />
+                                <div class="col-md-3 text-right">
+                                    <label>Fecha</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group" style="width:100%">
+                                        <input class="form-control" id="datepicker" value="@Model.SelectedDate" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Concepto</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Concept" />
+                                    <span asp-validation-for="Concept" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Monto</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input class="form-control" asp-for="Amount" disabled />
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Tipo de transacción</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="hidden" id="transaction-type" value="@((int)Model.TransactionType)" />
+                                    <input class="form-control" value="@Nop.Services.Helpers.EnumHelper.GetDisplayName(Model.TransactionType)" disabled />
+                                    <span asp-validation-for="TransactionType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="display:none" id="receptorUserInput">
+                                <div class="col-md-3 text-right">
+                                    <label>Usuario quien recibe</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="hidden" asp-for="ReceptorUserId" id="receptorUserId" />
+                                    <div class="input-group" style="width:100%">
+                                        <input id="users" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Comments">Comentarios</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Comments" class="form-control"></textarea>
+                                    <span asp-validation-for="Comments" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <h4 style="font-weight:bold" class="col-md-12">Archivos cargados</h4>
+                                <div class="col-md-12">
+                                    <ul>
+                                        @foreach (var file in Model.UploadedFiles)
+                                        {
+                                            <li><a href="@file.FileUrl" target="_blank">@file.FileName</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <h4 style="font-weight:bold" class="col-md-12">Cargar archivos</h4>
+                                <div class="col-md-12">
+                                    <div class="fileinput-preview fileinput-book-cover fileinput-exists thumbnail img-raised" id="img-preview" style="display:none"></div>
+                                    <input asp-for="Files" name="files" id="files" type="file" aria-label="files" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        if (self !== top) {
+            $(".main-header").hide();
+            $('body').addClass("sidebar-collapse");
+            $('body').removeClass("sidebar-mini");
+            $(".main-footer").hide();
+        };
+
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker();
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        $('.ui-choose').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose',
+            change: function (data) {
+                if (data == 0) {
+                    $("#receptorUserInput").hide();
+                }
+                else {
+                    $("#receptorUserInput").show();
+                }
+            },
+            click: null
+        });
+
+        if ($("#transaction-type").val() == "2" || $("#transaction-type").val() == "3") {
+            $("#receptorUserInput").show();
+        }
+
+        $("#files").kendoUpload({
+            select: function (e) {
+                var fileInfo = e.files;
+                var wrapper = this.wrapper;
+
+                for (var i = 0; i < fileInfo.length; i++) {
+                    addPreview(fileInfo[i], wrapper);
+                }
+            },
+            remove: function (e) {
+                for (var i = 0; i < e.files.length; i++) {
+                    $("#" + e.files[i].size).remove();
+                }
+
+                if ($("#img-preview").has("div").length === 0) {
+                    $("#img-preview").hide();
+                }
+            },
+            localization: {
+                select: 'Selecciona uno o más archivos',
+                remove: '',
+                cancel: ''
+            }
+        });
+
+        function addPreview(file, wrapper) {
+            var raw = file.rawFile;
+            var reader = new FileReader();
+
+            if (raw) {
+                reader.onloadend = function () {
+                    $("#img-preview").show();
+                    var current = $("#img-preview").html();
+                    $("#img-preview").empty();
+                    var preview = "";
+                    if (isImage(raw.type)) {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", this.result)[0].outerHTML + "</div>";
+                    }
+                    else {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", "/images/default-image.png")[0].outerHTML + "</div>";
+                    }
+                    var html = current + preview;
+                    $("#img-preview").append(html);
+                };
+                reader.readAsDataURL(raw);
+            }
+        }
+
+        function isImage(fileType) {
+            var validImageTypes = ["image/gif", "image/jpeg", "image/png"];
+            if ($.inArray(fileType, validImageTypes) < 0) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        $("#users").kendoComboBox({
+            placeholder: "Selecciona al usuario...",
+            dataTextField: "User",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/CashExpenses/UserListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#users").data("kendoComboBox").value()) {
+                    $("#users").data("kendoComboBox").value($("#receptorUserId").val());
+                }
+            },
+            select: function (e) {
+                $("#receptorUserId").val(this.dataItem(e.item.index()).Id);
+            }
+        });
+    });
+</script>

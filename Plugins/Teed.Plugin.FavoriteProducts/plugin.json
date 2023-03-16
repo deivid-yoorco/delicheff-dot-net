@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Config methods",
+  "FriendlyName": "FavoriteProducts",
+  "SystemName": "Teed.Plugin.FavoriteProducts",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.FavoriteProducts.dll",
+  "Description": "Config Favorite Products"
+}

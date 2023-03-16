@@ -1,0 +1,36 @@
+﻿@model Teed.Plugin.Medical.Models.Visit.VisitModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<form asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Detalles de la consulta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-controller="Patient" asp-action="Details" asp-route-id="@Model.PatientId">regresar a expediente del paciente</a>
+            </small>
+        </h1>
+        @*<div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>*@
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <nop-tabs id="visit">
+                            <nop-tab asp-name="tab-visit" asp-title="Consulta" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Visit/_Update.Visit.cshtml", Model)</nop-tab>
+                            @*<nop-tab asp-name="tab-treatment" asp-title="Tratamiento Aplicado">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Visit/_Update.Products.cshtml", Model)</nop-tab>*@
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

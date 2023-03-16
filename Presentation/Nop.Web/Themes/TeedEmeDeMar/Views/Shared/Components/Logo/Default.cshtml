@@ -1,0 +1,14 @@
+﻿@model LogoModel
+
+<a id="logo-container" href="/" class="brand-logo">
+    @{ string newStyle = ""; }
+    @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+    {
+        newStyle = "style=\"height: 50px;\"";
+    }
+    else
+    {
+        newStyle = "";
+    }
+    <img title="" alt="@Model.StoreName" src="@Model.LogoPath" @Html.Raw(newStyle)/>
+</a>

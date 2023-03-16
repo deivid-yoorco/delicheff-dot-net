@@ -1,0 +1,167 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingZone");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "ShippingZone";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Lista de Zonas
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+        @*<a class="btn bg-blue dialog-reasign-zones">
+            <i class="fa fa-refresh"></i>
+            Reasignar zonas
+        </a>*@
+        <div id="dialog-reasign-zones" title="Reasignar todas las zonas">
+            <p>¿Estás seguro que deseas reasignar las zonas de TODAS las órdenes? Este cambio no se podrá deshacer.</p>
+        </div>
+    </div>
+</div>
+<div class="postal-messages">
+    <div class="alert alert-error alert-dismissable" style="display:none">
+        CP pendientes por asignar a una zona: <text class="pending-pcs"></text>
+    </div>
+    <div class="alert alert-success alert-dismissable" style="display:none">
+        Todos los códigos postales han sido asignados a una zona.
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<span id="popupNotification"></span>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "/Admin/ShippingZone/GetUnassignedPcs",
+            type: "GET",
+            success: function (data) {
+                if (data.length > 0) {
+                    $(".pending-pcs").text(data.join(", "));
+                    $(".postal-messages .alert-success").hide();
+                    $(".postal-messages .alert-error").show();
+                } else {
+                    $(".postal-messages .alert-success").show();
+                    $(".postal-messages .alert-error").hide();
+                }
+            },
+            error: function (e) {
+                console.log(e);
+            },
+        });
+        $(".dialog-reasign-zones").on('click', function () {
+            $("#dialog-reasign-zones").dialog("open");
+        });
+    $("#dialog-reasign-zones").dialog({
+        autoOpen: false,
+        height: 250,
+        width: 450,
+        modal: true,
+        buttons: {
+            Aceptar: function () {
+                $.ajax({
+                    url: "/Admin/ShippingRoute/AjaxReassignRoutes",
+                    type: "GET",
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        popupNotification.show("La reasignación de todas las zonas se actualizó correctamente.", "success");
+                    },
+                    error: function (e) {
+                        console.log(e);
+                        popupNotification.show("La fecha/hora de entrega se actualizó correctamente: " + e, "error");
+                    },
+                });
+            },
+        },
+    });
+        var popupNotification = $("#popupNotification").kendoNotification(
+                            {
+                                position: {
+                                    bottom: 50,
+                                    right: 50
+                                }
+            }).data("kendoNotification");
+
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "ZoneName",
+                    title: "Nombre de zona",
+                },
+                {
+                    field: "PostalCodes",
+                    title: "Códigos postales",
+                },
+                {
+                    field: "AdditionalPostalCodes",
+                    title: "Códigos postales adicionales",
+                },
+                {
+                    field: "Color",
+                    title: "Color",
+                    template: "<div style='width:80px;height:20px;background:#=Color#'></div>"
+                },
+                //{
+                //    field: "CurrentUser",
+                //    title: "Encargado actual",
+                //},
+                {
+                    field: "Id",
+                    title: "Editar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>Editar</a>'
+                }
+            ]
+        });
+    });
+</script>

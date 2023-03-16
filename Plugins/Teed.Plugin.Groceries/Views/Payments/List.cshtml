@@ -1,0 +1,151 @@
+﻿@model Teed.Plugin.Groceries.Models.Franchise.PaymentListModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Payments");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Payment";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Lista de pagos
+    </h1>
+    <div class="pull-right">
+        <a asp-action="Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Agregar pago
+        </a>
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Fraquicia</label>
+                                        <div title="Selecciona la franquicia correspondiente a la información que quieres ver" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select id="franchise-select" asp-for="SelectedFranchiseId" asp-items="@Model.Franchises" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="element-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<span id="popupNotification"></span>
+<script>
+    $(document).ready(function () {
+
+        $("#franchise-select").on('change', function () {
+            console.log($(this).val());
+            var url = window.location.origin + window.location.pathname;
+            window.location.href = url + "?franchiseId=" + $(this).val();
+        });
+
+        var popupNotification = $("#popupNotification").kendoNotification(
+                            {
+                                position: {
+                                    bottom: 50,
+                                    right: 50
+                                }
+            }).data("kendoNotification");
+
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName, new { franchiseId = Model.SelectedFranchiseId }))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: 100,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Id",
+                    title: "Identificador",
+                },
+                {
+                    field: "CreationDate",
+                    title: "Fecha de creación",
+                },
+                {
+                    field: "Franchise",
+                    title: "Franquicia",
+                },
+                {
+                    field: "PaymentAmount",
+                    title: "Monto",
+                },
+                {
+                    field: "PaymentDate",
+                    title: "Fecha de pago",
+                },
+                {
+                    field: "Status",
+                    title: "Estatus",
+                    width: 200,
+                    template: function (dataItem) {
+                        var status = dataItem.Status;
+                        return '<span class="grid-report-item ' + status +
+                            '">' + (status == "yellow" ? "Pendiente de pago" :
+                                status == "red" ? "Factura pendiente" : "Completado") + '</span>';
+                    }
+                },
+                {
+                    field: "Id",
+                    title: "Editar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>Editar</a>'
+                }
+            ]
+        });
+    });
+</script>

@@ -1,0 +1,42 @@
+﻿@model Teed.Plugin.Groceries.Models.UrbanPromoter.UrbanPromoterModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.UrbanPromoters");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "UrbanPromoter";
+}
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Promotor - @Model.AccountOwnerName
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="Index">regresar a la lista de promotores</a>
+        </small>
+    </h1>
+    <div class="pull-right">
+        <a href="/Admin/@controllerName/Edit?id=@Model.Id" class="btn bg-blue">
+            <i class="fa fa-pencil"></i>
+            Editar
+        </a>
+    </div>
+    <div class="pull-right" style="margin-right: 10px;">
+        <a href="/Admin/@controllerName/AddCoupon?id=@Model.Id" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            Agregar cupón
+        </a>
+    </div>
+</div>
+<input type="hidden" value="@Model.Id" />
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="product-edit">
+            <nop-tab asp-name="tab-general" asp-title="General" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UrbanPromoter/_View.General.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-coupons" asp-title="Cupones">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UrbanPromoter/_View.Coupons.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-account-status" asp-title="Estado de cuenta">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UrbanPromoter/_View.AccountStatus.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-payments" asp-title="Pagos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/UrbanPromoter/_View.Payments.cshtml", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>

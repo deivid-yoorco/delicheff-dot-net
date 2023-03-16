@@ -1,0 +1,108 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+@{
+    var availableProducts = (List<SelectListItem>)ViewData["Products"];
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Productos destacados:</strong><br />
+
+        Los productos seleccionados se mostrarán en la página principal de la aplicación móvil, con el título indicado.
+    </div>
+    <br />
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Texto del header</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ProductsHeader" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Productos para mostrar en Home</label>
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="SelectedProductsIds" asp-items="availableProducts" asp-multiple="true" />
+                <script type="text/javascript">
+                $(document).ready(function() {
+                    var productIdsInput = $('#@Html.IdFor(model => model.SelectedProductsIds)').data("kendoMultiSelect");
+                        productIdsInput.setOptions({
+                        autoClose: false,
+                        filter: "contains"
+                    });
+                    @if (availableProducts.Count == 0)
+                    {
+                        <text>
+                                productIdsInput.setOptions({
+                                enable: false,
+                                placeholder: 'No hay productos disponibles.'
+                            });
+                            productIdsInput._placeholder();
+                            productIdsInput._enable();
+                        </text>
+                    }
+                });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="panel-heading">
+        <strong>Complementos:</strong><br />
+
+        Se mostrarán productos de la categoría seleccionada como complemento de la compra. Si no se selecciona ninguna categoría, no se ofrecerán artículos complementarios a la compra.
+    </div>
+    <br />
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3" style="text-align:right">
+                <label>Categoría de productos complementarios</label>
+            </div>
+            <div class="col-md-9">
+                <input asp-for="CategoryId" type="hidden" id="categoryId" />
+                <input id="categories" style="width: 100%;" />
+                <script>
+                $(document).ready(function () {
+                    $("#categories").kendoComboBox({
+                        placeholder: "Selecciona la categoría...",
+                        dataTextField: "Category",
+                        dataValueField: "Id",
+                        filter: "contains",
+                        autoBind: true,
+                        minLength: 1,
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "@Html.Raw(Url.Action("CategoryListData", "TeedApi"))",
+                                    type: "POST",
+                                    data: addAntiForgeryToken
+                                }
+                            }
+                        },
+                        dataBound: onDataBound,
+                        select: onSelect,
+                        change: onChange
+                    });
+                    function onDataBound(e) {
+                        if (@Model.CategoryId != 0 && !$("#categories").data("kendoComboBox").value()) {
+                            $("#categories").data("kendoComboBox").value(@Model.CategoryId);
+                            $("#categoryId").val(@Model.CategoryId);
+                        }
+                    };
+                    function onSelect(e) {
+                        $("#categoryId").val(this.dataItem(e.item.index()).Id);
+                    };
+                    function onChange(e) {
+                        if (this.selectedIndex == -1) {
+                            $("#categories").data("kendoComboBox").value("");
+                        }
+                    };
+                });
+                </script>
+            </div>
+        </div>
+    </div>*@
+</div>

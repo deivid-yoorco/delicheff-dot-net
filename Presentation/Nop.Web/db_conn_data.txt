@@ -1,0 +1,12 @@
+﻿
+#PRODUCTION DATABASE
+Server: teedsql2.cloudapp.net
+DbName: nopmaterialize
+DbUser: nopmaterialize
+Password: 2ptVzcUGXbWbZrFPsd3wknT7j  #always 25 chars long (letters and numbers only)
+
+#TEST DATABASE
+Server: teedsql2.cloudapp.net
+DbName: teedec_aldoratest
+DbUser: teedec_aldoratest
+Password: yW1c061bB98keip2nNAZY5ZXh  #always 25 chars long (letters and numbers only)

@@ -1,0 +1,8 @@
+@font-face {
+    font-family: "Quicksand";
+    src: url("/Themes/TeedMaterialV2/Content/fonts/Quicksand/Quicksand-VariableFont_wght.ttf");
+    font-display: swap;
+}
+html {
+    font-family: Quicksand !important;
+}

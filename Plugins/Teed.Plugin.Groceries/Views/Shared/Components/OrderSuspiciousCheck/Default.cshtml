@@ -1,0 +1,53 @@
+﻿@model List<string>
+<style>
+    .order-alert-danger {
+        background-color: #fff6f6;
+        border-radius: 5px;
+        border: solid 1px #ff8383;
+        margin: 10px;
+    }
+
+    .order-alert-success {
+        background-color: #f6fff6;
+        border-radius: 5px;
+        border: solid 1px #008f1f;
+        margin: 10px;
+    }
+
+        .order-alert-success .btn-link:hover {
+            text-decoration: none;
+            cursor: default;
+        }
+</style>
+@if (Model.Count > 0)
+{
+    <div class="card order-alert-danger">
+        <div class="card-header" id="headingOne">
+            <h2 class="mb-0" style="margin-top: 10px">
+                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Esta orden presenta características sospechosas (@(Model.Count))
+                </button>
+            </h2>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+            <div class="card-body" style="margin: 30px;margin-top:0px">
+                @foreach (var item in Model)
+                {
+                    <li>@item</li>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card order-alert-success">
+        <div class="card-header">
+            <h2 class="mb-0" style="margin-top: 10px">
+                <button class="btn btn-link btn-block text-left" type="button">
+                    <i class="fa fa-check-square" aria-hidden="true"></i> Esta orden no presenta características sospechosas
+                </button>
+            </h2>
+        </div>
+    </div>
+}

@@ -1,0 +1,25 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollEmployee.CreateOrUpdateModel
+@{
+    string infoTitle = Model.PendingDataCount != null && Model.PendingDataCount.Info > 0 ? $"Información <span style='color:red; font-weight: bold'>({Model.PendingDataCount.Info} pendientes)</span>" : "Información";
+    string fileTitle = Model.PendingDataCount != null && Model.PendingDataCount.Files > 0 ? $"Archivos <span style='color:red; font-weight: bold'>({Model.PendingDataCount.Files} pendientes)</span>" : "Archivos";
+    string salaryTitle = Model.PendingDataCount != null && Model.PendingDataCount.Salary > 0 ? $"Salarios <span style='color:red; font-weight: bold'>({Model.PendingDataCount.Salary} pendientes)</span>" : "Salarios";
+    string jobTitle = Model.PendingDataCount != null && Model.PendingDataCount.JobCatalog > 0 ? $"Empleos <span style='color:red; font-weight: bold'>({Model.PendingDataCount.JobCatalog} pendientes)</span>" : "Empleos";
+}
+<input type="hidden" value="@Model.Id" />
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="product-edit">
+            <nop-tab asp-name="tab-info" asp-title="@infoTitle" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Info.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-files" asp-title="@fileTitle">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Files.cshtml", Model)</nop-tab>
+            @*@if (!Model.IsParnter)
+        {*@
+            <nop-tab asp-name="tab-job" asp-title="@jobTitle">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.JobCatalog.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-salary" asp-title="@salaryTitle">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Salary.cshtml", Model)</nop-tab>
+            @*}*@
+            @*<nop-tab asp-name="tab-Subordinates" asp-title="Subordinados">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Subordinates.cshtml", Model)</nop-tab>*@
+            <nop-tab asp-name="tab-payments" asp-title="Pagos">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Payments.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-vacations" asp-title="Vacaciones">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Vacations.cshtml", Model)</nop-tab>
+            <nop-tab asp-name="tab-log" asp-title="Bitácora">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/PayrollEmployee/_CreateOrUpdate.Log.cshtml", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+﻿@model Teed.Plugin.Api.Models.OnboardingModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedApi.Onboardings");
+}
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" value="@Model.Id" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar Onboarding
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de Onboardings</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+            <span id="onboarding-delete" class="btn bg-red">
+                <i class="fa fa-trash-o"></i>
+                @T("Admin.Common.Delete")
+            </span>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <nop-tabs id="onboarding">
+                <nop-tab asp-name="tab-slider" asp-title="Información" asp-default="true">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/OnboardingConfig/_CreateOrUpdate.cshtml", Model)
+                </nop-tab>
+                <nop-tab asp-name="tab-parallax" asp-title="Log">
+                    @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/OnboardingConfig/_Log.cshtml", Model)
+                </nop-tab>
+            </nop-tabs>
+        </div>
+    </div>
+</form>
+<nop-delete-confirmation asp-model-id="@Model.Id" asp-button-id="onboarding-delete" />

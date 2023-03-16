@@ -1,0 +1,153 @@
+﻿@model VerificationFilteringModel
+@using Nop.Core
+@inject AdminAreaSettings adminAreaSettings
+@inject IWorkContext workContext;
+
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    //page title
+    ViewBag.Title = T("Admin.Customers.SmsVerifications").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("SmsVerifications");
+}
+
+<form asp-controller="Customer" asp-action="SmsVerificationsList" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Customers.SmsVerifications")
+        </h1>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Verified" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <select class="form-control" id="Verified" name="Verified">
+                                            <option value="0" selected>Todo</option>
+                                            <option value="1">Verificados</option>
+                                            <option value="2">No verificados</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="PhoneNumber" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="PhoneNumber" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7 col-md-offset-5">
+                                <button type="button" id="search-sms" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="sms-grid"></div>
+
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $("#sms-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("SmsVerificationsList", "Customer"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: additionalData
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors"
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        pageSize: @(defaultGridPageSize),
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        pageSizes: [@(gridPageSizes)],
+                                        @await Html.PartialAsync("_GridPagerMessages")
+                                    },
+                                    scrollable: false,
+                                    columns: [
+                                        {
+                                            field: "CreatedOn",
+                                            title: "Fecha de solicitud",
+                                        }, {
+                                            field: "Customer",
+                                            title: "Usuario solicitante",
+                                            template: "# if(!Customer.includes('Aún no registrado')) {# <a target='_blank' href='@Html.Raw(Url.Action("Edit", "Customer"))/#=CustomerId#'>#=Customer#</a> #} else {# <span>#=Customer#</span> #} #",
+                                        }, {
+                                            field: "PhoneNumber",
+                                            title: "Número de celular",
+                                            attributes: { style: "text-align:center" },
+                                        }, {
+                                            field: "VerificationCode",
+                                            title: "Codigo de verificación",
+                                            attributes: { style: "text-align:center" },
+                                        }, {
+                                            field: "IsVerified",
+                                            title: "Verificado",
+                                            headerAttributes: { style: "text-align:center" },
+                                            attributes: { style: "text-align:center" },
+                                            template: '# if(IsVerified) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                                        },
+                                    ]
+                                });
+                            });
+                        </script>
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                //search button
+                                $('#search-sms').click(function() {
+                                    var grid = $('#sms-grid').data('kendoGrid');
+                                    grid.dataSource.page(1);
+                                    return false;
+                                });
+                            });
+                            function additionalData() {
+                                var data = {
+                                    PhoneNumber: $('#@Html.IdFor(model => model.PhoneNumber)').val(),
+                                    Verified: $('#@Html.IdFor(model => model.Verified)').val()
+                                };
+                                addAntiForgeryToken(data);
+                                return data;
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

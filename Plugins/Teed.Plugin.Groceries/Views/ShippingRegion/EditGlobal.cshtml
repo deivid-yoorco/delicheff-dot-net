@@ -1,0 +1,94 @@
+﻿@model Teed.Plugin.Groceries.Models.Settings.GlobalScheduleSettingsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRegion");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar disponibilidad global por horario
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de regiones</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            <div style="margin-bottom:1em">
+                                Cuando se calcula la disponibilidad por horarios, primero se considera la capacidad global por horario, si ya se alcanzó la capacidad global el horario se mostrará como HORARIO LLENO aunque la región tenga más disponibilidad en ese horario.
+                            </div>
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Número de pedidos para el primer horario</label>
+                                        <div title="Número de pedidos para el horario de 1:00 PM - 3:00 PM" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Schedule1Quantity" />
+                                    <span asp-validation-for="Schedule1Quantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Número de pedidos para el segundo horario</label>
+                                        <div title="Número de pedidos para el horario de 3:00 PM - 5:00 PM" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Schedule2Quantity" />
+                                    <span asp-validation-for="Schedule2Quantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Número de pedidos para el tercer horario</label>
+                                        <div title="Número de pedidos para el horario de 5:00 PM - 7:00 PM" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Schedule3Quantity" />
+                                    <span asp-validation-for="Schedule3Quantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <div class="label-wrapper">
+                                        <label class="control-label">Número de pedidos para el cuarto horario</label>
+                                        <div title="Número de pedidos para el horario de 7:00 PM - 9:00 PM" class="ico-help">
+                                            <i class="fa fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Schedule4Quantity" />
+                                    <span asp-validation-for="Schedule4Quantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

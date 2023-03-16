@@ -1,0 +1,88 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollEmployee.CreateOrUpdateModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+@using Teed.Plugin.Payroll.Domain.PayrollEmployees;
+
+<span id="popupNotification"></span>
+<div class="panel-group">
+    @if (Model.Id > 0)
+    {
+        <div class="panel panel-default">
+            <div class="panel-body" style="display: grid;">
+                <h3 style="text-align: center;margin-top: 0px !important;">Nóminas pagadas al empleado</h3>
+                <div id="element-grid"></div>
+
+                <script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListPaymentsData", "PayrollEmployee"))?id=@Model.Id",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: 10,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [10],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha de nómina",
+                },
+                {
+                    field: "Id",
+                    title: "Pagos",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return '<a class="btn btn-success" href="/Admin/BiweeklyPayment/PaymentOfEmployee?Id=' + kendo.htmlEncode(dataItem.Id) + '&date=' + kendo.htmlEncode(dataItem.Date) + '"><i class="fa fa-eye"></i>Ver pago</a>';
+                    }
+                }
+            ]
+        });
+    });
+                </script>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                You need to save the employee before you can see the payments.
+            </div>
+        </div>
+    }
+</div>

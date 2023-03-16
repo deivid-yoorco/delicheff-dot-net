@@ -1,0 +1,22 @@
+﻿@model Nop.Web.Areas.Admin.Models.RewardItem.RewardItemSettingViewModel
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="control-label">Monto mínimo de compra</label>
+                        <div title="Monto minimo que debe haber en el subtotal del carrito para activar los apapachos" class="ico-help">
+                            <i class="fa fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="MinimumAmount" />
+                    <span asp-validation-for="MinimumAmount"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

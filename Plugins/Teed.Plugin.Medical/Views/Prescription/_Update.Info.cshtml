@@ -1,0 +1,121 @@
+﻿@model Teed.Plugin.Medical.Models.Prescription.PrescriptionsModel
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Prescriptions");
+    var now = DateTime.Now;
+    var patients = (IEnumerable<Teed.Plugin.Medical.Domain.Patient>)ViewData["Patients"];
+}
+
+@if (Model != null)
+{
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="PatientId">Paciente</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="PatientId" type="hidden" id="patientId" />
+                                    <input id="patients" style="width: 100%;" />
+                                    <script>
+                                            $(document).ready(function () {
+                                                $("#patients").kendoComboBox({
+                                                    placeholder: "Selecciona al paciente...",
+                                                    dataTextField: "Patient",
+                                                    dataValueField: "Id",
+                                                    filter: "contains",
+                                                    autoBind: true,
+                                                    minLength: 1,
+                                                    dataSource: {
+                                                        type: "json",
+                                                        transport: {
+                                                            read: {
+                                                                url: "@Html.Raw(Url.Action("PatientListData", "Prescription"))",
+                                                                type: "POST",
+                                                                data: addAntiForgeryToken
+                                                            }
+                                                        }
+                                                    },
+                                                    dataBound: onDataBound,
+                                                    select: onSelect,
+                                                    change: onChange
+                                                });
+                                                function onDataBound(e) {
+                                                    if (!$("#patients").data("kendoComboBox").value()) {
+                                                        $("#patients").data("kendoComboBox").value(@Model.PatientId);
+                                                    }
+                                                };
+                                                function onSelect(e) {
+                                                    $("#patientId").val(this.dataItem(e.item.index()).Id);
+                                                };
+                                                function onChange(e) {
+                                                    if (this.selectedIndex == -1) {
+                                                        $("#patients").data("kendoComboBox").value("");
+                                                    }
+                                                };
+                                            });
+                                    </script>
+                                    <span asp-validation-for="PatientId"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Comments">Comentarios</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Comments" class="form-control"></textarea>
+                                    <span asp-validation-for="Comments" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @*<form asp-action="Create" method="post">
+            <div class="content">
+                <div class="form-horizontal">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div>
+                                    <div class="form-group">
+                                        <div class="col-md-3 text-right">
+                                            <label for="PatientId">Paciente</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <select class="form-control" data-style="select-with-transition" asp-for="PatientId">
+                                                <option value="">Selecciona el paciente...</option>
+                                                @foreach (var element in patients)
+                                                {
+
+                                                    <option value="@element.Id">@(element.FirstName) @(element.LastName)</option>
+                                                }
+                                            </select>
+                                            <span asp-validation-for="PatientId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-3 text-right">
+                                            <label for="Comments">Comentarios</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <textarea asp-for="Comments" class="form-control"></textarea>
+                                            <span asp-validation-for="Comments" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>*@
+}

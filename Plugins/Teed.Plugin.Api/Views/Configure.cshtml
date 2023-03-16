@@ -1,0 +1,54 @@
+﻿@model Teed.Plugin.Api.Models.ConfigurationModel
+
+@{
+    Html.SetActiveMenuItemSystemName("TeedApi");
+    Layout = "_AdminLayout";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="TeedApi" asp-action="Configure" method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Teed Api
+        </h1>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="homepage-images">
+                    <nop-tab asp-name="tab-general" asp-title="General" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureGeneral.cshtml", Model)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-banner" asp-title="Banner">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureBanner.cshtml", Model)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-notifications" asp-title="Notificaciones automáticas">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureNotifications.cshtml", Model)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-welcome" asp-title="Bienvenida">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureWelcome.cshtml", Model)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-categories" asp-title="Categorías">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureCategories.cshtml", Model)
+                    </nop-tab>
+                    @*<nop-tab asp-name="tab-smartlook" asp-title="Smartlook">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureSmartlook.cshtml", Model)
+                    </nop-tab>*@
+                    @*<nop-tab asp-name="tab-facebook" asp-title="Facebook">
+            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Api/Views/_ConfigureFacebook.cshtml", Model)
+        </nop-tab>*@
+                </nop-tabs>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <input type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

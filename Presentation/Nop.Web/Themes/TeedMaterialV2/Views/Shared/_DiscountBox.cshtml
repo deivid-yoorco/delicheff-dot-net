@@ -1,0 +1,223 @@
+﻿@model ShoppingCartModel.DiscountBoxModel
+@using Nop.Web.Models.HomePageImages
+@using Nop.Services.Media
+@using Nop.Services.Configuration
+@using Nop.Services.Discounts
+@using Nop.Core
+@using Nop.Core.Caching
+@{
+    @inject IStoreContext storeContext
+    @inject ISettingService settingsService
+    @inject IDiscountService discountService
+}
+
+<style>
+    @@media only screen and (max-width: 992px) {
+        .slick-prev:before,
+        .slick-next:before {
+            content: "";
+            background: url('/images/CELcssV2/cupones_derecha.png') no-repeat;
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+        }
+
+        .medium.material-icons {
+            top: 38px !important;
+            right: -75px !important;
+            position: absolute;
+            font-size: 2rem;
+        }
+
+        .totals.col.s12.m6 {
+            top: 30px;
+        }
+
+        .btn-floating.btn-small.teed-primary .material-icons {
+            margin-top: 0px;
+        }
+    }
+
+    @@media only screen and (min-width: 992px) {
+        .slick-prev:before,
+        .slick-next:before {
+            content: "";
+            background: url('/images/CELcssV2/cupones_derecha.png') no-repeat;
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+        }
+    }
+
+    .slick-prev, .slick-next {
+        width: auto !important;
+        height: auto !important;
+    }
+
+    .slick-prev {
+        transform: rotate(180deg) translate(0, 50%);
+        z-index: 1;
+        left: -37.333px;
+        position: absolute;
+    }
+
+    .slick-next {
+        right: -37.333px;
+        position: absolute;
+    }
+
+    .slick-slide {
+        width: 156px;
+        margin-right: 5px;
+    }
+
+    .coupon-slick {
+        top: 25px;
+        width: 90%;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .medium.material-icons {
+        bottom: 0px;
+        left: 0px;
+        top: 35px;
+        right: -99px;
+        position: absolute;
+    }
+
+    .check-image-icon {
+        position: absolute;
+        z-index: 1;
+        bottom: 19px;
+        right: -85px;
+        width: 35px;
+        height: 35px;
+    }
+</style>
+
+@if (Model.Display)
+{
+    <div class="coupon-box">
+        <div class="title">
+            <strong>@T("ShoppingCart.DiscountCouponCode")</strong>
+        </div>
+        <div class="input-field right-align">
+            <input name="discountcouponcode" id="discountcouponcode" type="text" class="discount-coupon-code" />
+            <label for="discountcouponcode">@T("ShoppingCart.DiscountCouponCode.Tooltip")</label>
+            @foreach (var message in Model.Messages)
+            {
+                <span class="helper-text @(Model.IsApplied ? "green-text" : "red-text")">
+                    @message
+                </span>
+            }
+            <button type="submit" name="applydiscountcouponcode" id="applydiscountcouponcode" class="btn btn-small waves-effect waves-light">
+                @T("ShoppingCart.DiscountCouponCode.Button")
+            </button>
+        </div>
+
+        @foreach (var discount in Model.AppliedDiscountsWithCodes)
+        {
+            <div class="current-code">
+                <span class="applied-discount-code">@string.Format(T("ShoppingCart.DiscountCouponCode.CurrentCode").Text, discount.CouponCode)</span>
+                @*empty value (little hack for FormValueExistsAttribute)*@
+                @*<input type="submit" name="removediscount-@discount.Id" value=" " title="@T("Common.Remove")" class="remove-discount-button" />*@
+                <button class="btn-floating btn-small teed-primary" name="removediscount-@discount.Id" type="submit" title="Quitar">
+                    <i class="material-icons">clear</i>
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="coupon-slick">
+        @for (var i = 0; i <= Model.DiscountViewList.Count() - 1; i = i + 2)
+        {
+            <div>
+                @if (!string.IsNullOrEmpty(Model.DiscountViewList[i].PictureId.ToString()))
+                {
+                    var hrefString = "/ShoppingCart/ApplyDiscountCouponFromClick/" + Model.DiscountViewList[i].CouponCode;
+                    var isChecked = Model.AppliedDiscountsWithCodes.Select(x => x.CouponCode).Contains(Model.DiscountViewList[i].CouponCode);
+                    string pictureDiscount = GetPictureUrl(Model.DiscountViewList[i].PictureId ?? 0);
+                    if (isChecked)
+                    {
+                        <a href="#a" id="@Model.DiscountViewList[i].CouponCode" style="position: relative;">
+                            <img width="300" height="142" class="responsive-img" src="@pictureDiscount">
+                            <img class="check-image-icon" src="/images/CELcssV2/cupones_palomita.png" />
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@hrefString" id="@Model.DiscountViewList[i].CouponCode" style="position: relative;">
+                            <img width="300" height="142" class="responsive-img" src="@pictureDiscount">
+                        </a>
+                    }
+                }
+                <br />
+                @if (i + 1 <= Model.DiscountViewList.Count() - 1 && !string.IsNullOrEmpty(Model.DiscountViewList[i + 1].PictureId.ToString()))
+                {
+                    var hrefString = "/ShoppingCart/ApplyDiscountCouponFromClick/" + Model.DiscountViewList[i + 1].CouponCode;
+                    var isChecked = Model.AppliedDiscountsWithCodes.Select(x => x.CouponCode).Contains(Model.DiscountViewList[i + 1].CouponCode);
+                    string pictureDiscount = GetPictureUrl(Model.DiscountViewList[i + 1].PictureId ?? 0);
+                    if (isChecked)
+                    {
+                        <a href="#a" name="@pictureDiscount" id="@Model.DiscountViewList[i + 1].CouponCode" style="position: relative;">
+                            <img width="300" height="142" class="responsive-img" src="@pictureDiscount">
+                            <img class="check-image-icon" src="/images/CELcssV2/cupones_palomita.png" />
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@hrefString" name="@pictureDiscount" id="@Model.DiscountViewList[i + 1].CouponCode" style="position: relative;">
+                            <img width="300" height="142" class="responsive-img" src="@pictureDiscount">
+                        </a>
+                    }
+                }
+                else
+                {
+                    <h3> </h3>
+                }
+            </div>
+        }
+    </div>
+
+    <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+            $('#discountcouponcode').keydown(function (event) {
+                if (event.keyCode == 13) {
+                    $('#applydiscountcouponcode').click();
+                    return false;
+                }
+            });
+
+            $('.coupon-slick').slick({
+                infinite: true,
+                slidesToShow: 3,
+                slidesToScroll: 3
+            });
+        });
+    </script>
+}
+
+<div>
+    @await Component.InvokeAsync("RewardItemCart")
+</div>
+
+
+@inject IPictureService pictureService
+@inject IStaticCacheManager cacheManager
+
+@functions {
+    public string GetPictureUrl(int pictureId)
+    {
+
+        var cacheKey = string.Format("Teed.Nop.plugins.widgets.nivoslider2.pictureurl-{0}", pictureId);
+        return cacheManager.Get(cacheKey, () =>
+        {
+        //little hack here. nulls aren't cacheable so set it to ""
+        var url = pictureService.GetPictureUrl(pictureId, showDefaultPicture: false) ?? "";
+            return url;
+        });
+    }
+}

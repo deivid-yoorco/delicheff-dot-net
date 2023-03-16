@@ -1,0 +1,137 @@
+﻿@model Teed.Plugin.LamyShop.Components.DatesIniEndModel
+<button type="button" class="btn bg-olive reportsExcelby4" data-target="modal2" style="margin-right: 6px;">
+    <i class="fa fa-file-excel-o"></i>
+    Descargar reporte de ventas
+</button>
+<div id="reportsExcelby4" title="Selecciona rango de fechas">
+    <p>Selecciona el rango de fechas de las órdenes.</p>
+    <div class="row col-md-12" style="text-align: center; margin: 30px">
+        <label class="control-label col-md-12 requiredField" for="@Model.DateIni">
+            Fecha inicial
+        </label>
+        <div class="col-md-12">
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="fa fa-calendar">
+                    </i>
+                </div>
+                <input class="form-control" id="dateIni" name="dateIni" placeholder="DD/MM/YYYY" type="text" style="z-index:99999 !important;" />
+            </div>
+        </div>
+    </div>
+    <div class="row col-md-12" style="text-align: center; margin: 30px">
+        <label class="control-label col-md-12 requiredField" for="@Model.DateEnd">
+            Fecha final
+        </label>
+        <div class="col-md-12">
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="fa fa-calendar">
+                    </i>
+                </div>
+                <input class="form-control" id="dateEnd" name="dateEnd" placeholder="DD/MM/YYYY" type="text" style="z-index:99999 !important;" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <label id="dateError" class="text-red control-label" hidden>
+            La fecha o fechas ingresadas son invalidas
+        </label>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var date_input_ini = $('input[name="dateIni"]');
+        var date_input_end = $('input[name="dateEnd"]');
+        var containerIni = $("#dateIni");
+        var containerEnd = $("#dateEnd");
+        date_input_ini.datepicker({
+            dateFormat: 'dd/mm/yy',
+            containerIni: containerIni,
+            todayHighlight: true,
+            autoclose: true,
+        });
+        date_input_end.datepicker({
+            dateFormat: 'dd/mm/yy',
+            containerEnd: containerEnd,
+            todayHighlight: true,
+            autoclose: true,
+        });
+
+        var reportsExcelby4;
+        reportsExcelby4 = $("#reportsExcelby4").dialog({
+            autoOpen: false,
+            height: 450,
+            width: 450,
+            modal: true,
+            buttons: {
+                Descargar: function () {
+                    var dateI = (($("#dateIni").val()).toString());
+                    var dateE = (($("#dateEnd").val()).toString());
+                    var doTheSearch = true;
+
+                    if (dateI) {
+                        if (!dateI.includes("/")) {
+                            doTheSearch = false;
+                        }
+                        if ((dateI.length) < 10 || (dateI.length) > 10) {
+                            doTheSearch = false;
+                        }
+                    }
+                    if (dateE) {
+                        if (!dateE.includes("/")) {
+                            doTheSearch = false;
+                        }
+                        if ((dateE.length) < 10 || (dateE.length) > 10) {
+                            doTheSearch = false;
+                        }
+                    }
+
+                    if (dateI.length < 2 && dateE.length < 2)
+                        doTheSearch = false;
+
+                    if (doTheSearch) {
+                        console.log(dateI);
+                        console.log(dateE);
+                        var data = additionalData();
+                        console.log(data);
+                        window.open('/ReportSalesProducts?dateI=' + dateI.toString() + '&dateE=' + dateE.toString());
+                    } else {
+                        $("#dateError").show();
+                    }
+                }
+            }
+        });
+
+        function additionalData() {
+            var data = {
+                DateI: (($("#dateIni").val()).toString()),
+                DateE: (($("#dateEnd").val()).toString())
+            };
+            return data;
+        }
+
+        $(".reportsExcelby4").on("click", function () {
+            $("#reportsExcelby4").dialog("open");
+        });
+
+        $("#datepicker-Ini").datepicker();
+        $("#datepicker-End").datepicker();
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        function resetSearch() {
+            $("#dateIni").val("");
+            $("#dateEnd").val("");
+            var dataSources = $("#element-grid").data('kendoGrid').dataSource;
+            dataSources.page(1);
+        }
+
+        function selectedAutomaticEndDate() {
+            $('dateEnd').val() = $("#dateIni").val();
+        }
+    });
+</script>
+

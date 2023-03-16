@@ -1,0 +1,41 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var controllerName = "Patient";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.Allergies))
+{
+
+    <div class="panel panel-default  bg-yellow">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-9 col-md-offset-3">
+
+                    <p><strong>Alergias:</strong> @Model.Allergies</p>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.Commentary))
+{
+    
+    <div class="panel panel-default bg-blue">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-9 col-md-offset-3 ">
+                    <p><strong>Comentario:</strong> @Model.Commentary</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+

@@ -1,0 +1,143 @@
+﻿@model Teed.Plugin.Payroll.Models.Bonus.BonusModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+
+<div class="raw clearfix">
+    <div class="col-md-12">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Información principal
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Nombre</label>
+                                <div title="Nombre para el bono." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Condición del bono</label>
+                                <div title="El tipo de condición para autorizar el bono." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="ConditionTypeId" asp-items="@(Model.ConditionTypes)" />
+                            <span asp-validation-for="ConditionTypeId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Tipo del bono</label>
+                                <div title="El tipo del bono se utiliza para saber de que forma se autorizara el bono, de forma grupal o individual." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="BonusTypeId" asp-items="@(Model.BonusTypes)" />
+                            <span asp-validation-for="BonusTypeId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Frecuencia del bono</label>
+                                <div title="La frecuencia en la que se aplicará el bono." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="FrequencyTypeId" asp-items="@(Model.FrequencyTypes)" />
+                            <span asp-validation-for="FrequencyTypeId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Empleado que autoriza</label>
+                                <div title="Único empleado que puede autorizar o desautorizar la aplicación de un bono." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="AuthorizationEmployeeId" asp-items="@(Model.AuthorizationEmployees)" />
+                            <span asp-validation-for="AuthorizationEmployeeId"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Empleos</label>
+                                <div title="Empleos a los que aplica el bono." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="JobIds" asp-items="@(Model.Jobs)" asp-multiple="true" />
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    var manufacturersIdsInput = $('#JobIds').data("kendoMultiSelect");
+                                    manufacturersIdsInput.setOptions({
+                                        autoClose: false,
+                                        filter: "contains",
+                                    });
+
+                            @if (Model.Jobs.Count() == 0)
+                            {
+                                <text>
+                                    manufacturersIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: 'No hay empleos disponibles'
+                                    });
+                                    manufacturersIdsInput._placeholder();
+                                    manufacturersIdsInput._enable();
+                                </text>
+                            }
+                                });
+                            </script>
+                            <span asp-validation-for="JobIds" class="text-danger"></span>
+                        </div>
+                    </div>
+                    @*<div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Activado</label>
+                                <div title="Activar esta opción para que el bono pueda ser autorizado y por tanto aplicado en las quincenas." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="IsActive" />
+                            <span asp-validation-for="IsActive" class="text-danger"></span>
+                        </div>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+</script>

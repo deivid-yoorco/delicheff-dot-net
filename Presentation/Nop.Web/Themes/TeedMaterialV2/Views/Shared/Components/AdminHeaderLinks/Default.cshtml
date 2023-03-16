@@ -1,0 +1,62 @@
+﻿@model AdminHeaderLinksModel
+@await Component.InvokeAsync("Widget", new { widgetZone = "admin_links" })
+@using Nop.Core.Data
+@{
+    var manager = new DataSettingsManager();
+    var settings = manager.LoadSettings(reloadSettings: true);
+    bool isTest = settings.DataConnectionString.Contains("test");
+}
+
+@if (Model.IsCustomerImpersonated || Model.DisplayAdminLink)
+{
+    <div class="navbar-fixed top-small-navbar">
+        <nav class="black z-depth-0">
+            <div class="nav-wrapper container">
+                <ul class="left">
+                    @if (Model.IsCustomerImpersonated)
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("Logout")" title="@T("Account.ImpersonatedAs.Finish.Hint")">
+                                @T("Account.ImpersonatedAs.Finish")
+                            </a>
+                        </li>
+                    }
+                    @if (Model.DisplayAdminLink && !Model.IsCustomerImpersonated)
+                    {
+                        <li>
+                            <a href="@Url.Content("~/Admin")">
+                                @T("Account.Administration")
+                            </a>
+                        </li>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.EditPageUrl) && !Model.IsCustomerImpersonated)
+                    {
+                        <li>
+                            <a href="@Model.EditPageUrl">
+                                @T("Common.ManagePage")
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    </div>
+}
+@if (isTest)
+{
+    string url = "https://" + Context.Request.Host;
+    string mainUrl = url.Replace("//test.", "//www.");
+    <div class="navbar-fixed top-small-navbar">
+        <nav class="red z-depth-0">
+            <div class="nav-wrapper container">
+                <ul>
+                    <li>
+                        <a href="@(mainUrl)" style="color:white;font-weight:bold">
+                            ESTA ES UNA PÁGINA DE PRUEBAS. SI DESEAS COMPRAR NUESTROS PRODUCTOS DA CLIC AQUÍ.
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+}

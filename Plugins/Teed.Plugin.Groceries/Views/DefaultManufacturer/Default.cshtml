@@ -1,0 +1,56 @@
+﻿@model Teed.Plugin.Groceries.Components.DefaultManufacturerComponentModel
+@if (Model.ProductModel != null)
+{
+    <div class="form-group" id="main-manufacturer-selector-container">
+        <div class="col-md-4 text-right">
+            <div class="label-wrapper">
+                <label class="control-label">Fabricante principal</label>
+                <div title="Selecciona el fabricante principal del producto. Si no se selecciona ninguno el sistema tomará como principal el que cumpla con los criterios definidos por area de operaciones." class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="input-group input-group-required">
+                <select class="form-control" id="main-manufacturer-select">
+                    <option value="0">Selecciona el fabricante principal...</option>
+                    @foreach (var item in Model.ProductModel.AvailableManufacturers)
+                    {
+                        @if (item.Value == Model.SelectedMainManufacturerId.ToString())
+                        {
+                            <option selected value="@item.Value">@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).on('submit', function () {
+            $.ajax({
+                url: "/Admin/ProductMainManufacturer/SaveMainManufacturer?selectedMainManufacturerId=" + $("#main-manufacturer-select").val() + "&productId=" + "@(Model.ProductModel.Id)",
+                method: 'POST',
+                success: function () { },
+                error: function (error) { console.log("ERROR", error) }
+            });
+        });
+    </script>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.DefaultManufacturer))
+{
+    <div style="text-align: right;font-style: italic; margin-bottom: 15px">
+        <span><strong>Actual fabricante principal del producto:</strong> @Model.DefaultManufacturer</span>
+    </div>
+}
+
+@if (Model.SelectedMainManufacturerId.HasValue && Model.SelectedMainManufacturerId > 0 && !Model.ProductModel.SelectedManufacturerIds.Contains(Model.SelectedMainManufacturerId.Value))
+{
+    <div style="text-align: right;font-style: italic; margin-bottom: 15px;">
+        <strong style="color:red">El fabricante principal seleccionado no forma parte de los fabricantes del producto. Agrega el fabricante principal seleccionado a los fabricantes del producto para que pueda ser considerado por el sistema.</strong>
+    </div>
+} 

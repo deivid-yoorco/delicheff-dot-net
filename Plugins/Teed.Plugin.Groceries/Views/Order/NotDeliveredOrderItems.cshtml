@@ -1,0 +1,129 @@
+﻿@model Teed.Plugin.Groceries.Models.Order.NotDeliveredOrderItemsModel
+
+@if (Model.Items.Count() > 0)
+{
+    <h3 class="pull-left" style="padding-left: 15px;">
+        Productos no entregados
+    </h3>
+    <div class="col-md-12" style="overflow-x: auto;">
+        <table class="table table-hover table-bordered text-center not-delivered-order-items-@Model.OrderId">
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <thead>
+                <tr>
+                    <th>
+                        @T("Admin.Orders.Products.Picture")
+                    </th>
+                    <th>
+                        @T("Admin.Orders.Products.ProductName")
+                    </th>
+                    <th>
+                        @*@T("Admin.Orders.Products.Price")*@
+                        Precio unitario
+                    </th>
+                    <th>
+                        @T("Admin.Orders.Products.Quantity")
+                    </th>
+                    <th>
+                        @T("Admin.Orders.Products.Discount")
+                    </th>
+                    <th>
+                        @*@T("Admin.Orders.Products.Total")*@
+                        Importe
+                    </th>
+                    <th>
+                        Razón de no entrega
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <img src="@item.PictureThumbnailUrl" alt="" title="" />
+                        </td>
+                        <td style="text-align: left; width: 15%;">
+                            <em>@item.Name</em>
+                            @if (!string.IsNullOrWhiteSpace(item.SelectedPropertyOption))
+                            {
+                                <p>
+                                    @(item.SelectedPropertyOption.First().ToString().ToUpper())@(item.SelectedPropertyOption.Substring(1))
+                                </p>
+                            }
+                            @if (!string.IsNullOrEmpty(item.Sku))
+                            {
+                                <p>
+                                    <strong>@T("Admin.Orders.Products.SKU")</strong><text>:</text>
+                                    @item.Sku
+                                </p>
+                            }
+                        </td>
+                        <td style="width: 10%;">
+                            @{
+                                var priceInfo = item.Price.Split(' ').ToList();
+                                var discountInfo = item.Discount.Split(' ').ToList();
+                                var unitPriceValue = (decimal.Parse(priceInfo[0].Replace("$", "")) + decimal.Parse(discountInfo[0].Replace("$", "")));
+                                unitPriceValue = unitPriceValue / item.Quantity;
+                                @if (item.EquivalenceCoefficient > 0 && item.BuyingBySecondary)
+                                {
+                                    var value = item.EquivalenceCoefficient;
+                                    unitPriceValue = unitPriceValue * value;
+                                }
+                                else if (item.WeightInterval > 0)
+                                {
+                                    var value = 1000 / item.WeightInterval;
+                                    unitPriceValue = unitPriceValue * value;
+                                }
+                                var unitPrice = $"{decimal.Round(unitPriceValue, 2).ToString("C")} {string.Join(" ", priceInfo.Skip(1))}";
+                            }
+                            @unitPrice
+                        </td>
+                        <td style="width: 10%;">
+                            @if (item.EquivalenceCoefficient > 0 && item.BuyingBySecondary)
+                            {
+                                var type = "gr";
+                                var value = (item.Quantity * 1000) / item.EquivalenceCoefficient;
+                                if (value >= 1000)
+                                {
+                                    value = value / 1000;
+                                    type = "kg";
+                                }
+                                <span>@(value.ToString("0.##")) @type</span>
+                            }
+                            else if (item.WeightInterval > 0)
+                            {
+                                var type = "gr";
+                                var value = item.Quantity * item.WeightInterval;
+                                if (value >= 1000)
+                                {
+                                    value = value / 1000;
+                                    type = "kg";
+                                }
+                                <span>@(value.ToString("0.##")) @type</span>
+                            }
+                            else
+                            {
+                                <div>@item.Quantity pz</div>
+                            }
+                        </td>
+                        <td style="width: 10%;">
+                            @item.Discount
+                        </td>
+                        <td style="width: 10%;">
+                            @item.Total
+                        </td>
+                        <td style="width: 20%;">
+                            @item.NotDeliveredReason
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

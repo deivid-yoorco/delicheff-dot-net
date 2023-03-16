@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Config methods",
+  "FriendlyName": "RecentProducts",
+  "SystemName": "RecentProducts",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.RecentProducts.dll",
+  "Description": "Config Recent Products"
+}

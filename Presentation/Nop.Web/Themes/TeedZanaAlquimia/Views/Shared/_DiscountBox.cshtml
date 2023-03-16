@@ -1,0 +1,44 @@
+﻿@model ShoppingCartModel.DiscountBoxModel
+@if (Model.Display)
+{
+    <div class="coupon-box">
+        <div class="title">
+            <strong>@T("ShoppingCart.DiscountCouponCode")</strong>
+        </div>
+        <div class="input-field right-align">
+            <input name="discountcouponcode" id="discountcouponcode" type="text" class="discount-coupon-code" />
+            <label for="discountcouponcode">@T("ShoppingCart.DiscountCouponCode.Tooltip")</label>
+            @foreach (var message in Model.Messages)
+            {
+                <span class="helper-text @(Model.IsApplied ? "green-text" : "red-text")">
+                    @message
+                </span>
+            }
+            <button type="submit" name="applydiscountcouponcode" id="applydiscountcouponcode" class="btn btn-small waves-effect waves-light">
+                @T("ShoppingCart.DiscountCouponCode.Button")
+            </button>
+        </div>
+
+        @foreach (var discount in Model.AppliedDiscountsWithCodes)
+        {
+            <div class="current-code">
+                <span class="applied-discount-code">@string.Format(T("ShoppingCart.DiscountCouponCode.CurrentCode").Text, discount.CouponCode)</span>
+                @*empty value (little hack for FormValueExistsAttribute)*@
+                @*<input type="submit" name="removediscount-@discount.Id" value=" " title="@T("Common.Remove")" class="remove-discount-button" />*@
+                <button class="btn-floating btn-small teed-primary" name="removediscount-@discount.Id" type="submit" title="Quitar">
+                    <i class="material-icons">clear</i>
+                </button>
+            </div>
+        }
+    </div>
+    <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+            $('#discountcouponcode').keydown(function (event) {
+                if (event.keyCode == 13) {
+                    $('#applydiscountcouponcode').click();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

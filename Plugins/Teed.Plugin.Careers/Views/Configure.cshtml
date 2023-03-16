@@ -1,0 +1,121 @@
+﻿@model Teed.Plugin.Careers.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-controller="Careers" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Mensaje</label>
+                            <div title="Escriba el Mensaje que aparecera en la pagina" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Body" asp-template="RichEditor" />
+                        <span asp-validation-for="Body"></span>
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">¿Activar?</label>
+                            <div title="¿Deseas activar la bolsa de trabajo? Si está desactivada los usuarios no podrán acceder a la pantalla para enviar su CV" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Published" />
+                        <span asp-validation-for="Published"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Incluir en el footer (columna 1)</label>
+                            <div title="¿Desea incluir en la comlumna 1 a pie de pagina?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ShowInFooter1" />
+                        <span asp-validation-for="ShowInFooter1"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">
+                                Incluir en el footer (columna 2)
+                            </label>
+                            <div title="¿Desea incluir en la comlumna 2 a pie de pagina?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ShowInFooter2" />
+                        <span asp-validation-for="ShowInFooter2"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Incluir en el footer (columna 3)</label>
+                            <div title="¿Desea incluir en la comlumna 3 a pie de pagina?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ShowInFooter3" />
+                        <span asp-validation-for="ShowInFooter3"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Incluir en el menu desplegable</label>
+                            <div title="¿Desea incluir en el menú desplegable de la página?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ShowInMobileMenu" />
+                        <span asp-validation-for="ShowInMobileMenu"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Incluir en el header</label>
+                            <div title="¿Desea incluir en la Cabecera?" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ShowInHeader" />
+                        <span asp-validation-for="ShowInHeader"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

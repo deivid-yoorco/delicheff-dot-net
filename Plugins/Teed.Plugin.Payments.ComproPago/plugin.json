@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Compro Pago",
+  "SystemName": "Payments.ComproPago",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.ComproPago.dll",
+  "Description": "Payment Method ComproPago"
+}

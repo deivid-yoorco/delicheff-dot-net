@@ -1,0 +1,296 @@
+﻿@model Teed.Plugin.Manager.Models.Expenses.CreateViewModel
+@inject Nop.Core.IWorkContext workContext
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.Expenses");
+    var onlyCash = !(workContext.CurrentCustomer.Email == "abarrientos@teed.com.mx" || workContext.CurrentCustomer.Email == "cmartinez@teed.com.mx" || workContext.CurrentCustomer.Email == "alopez@teed.com.mx");
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar nuevo gasto
+            @if (!onlyCash)
+            {
+                <small>
+                    <i class="fa fa-arrow-circle-left"></i>
+                    <a asp-action="List">regresar a la lista de gastos</a>
+                </small>
+            }
+            else
+            {
+                <small>
+                    <i class="fa fa-arrow-circle-left"></i>
+                    <a asp-action="List" asp-controller="CashExpenses">regresar a la lista de gastos en efectivo</a>
+                </small>
+            }
+        </h1>
+        <div class="pull-right">
+            @if (onlyCash)
+            {
+                <button type="submit" asp-action="Create" class="btn bg-blue" name="cash">
+                    <i class="fa fa-plus-square"></i>
+                    @T("Admin.Common.Save")
+                </button>
+            }
+            else
+            {
+                <button type="submit" asp-action="Create" class="btn bg-blue">
+                    <i class="fa fa-plus-square"></i>
+                    @T("Admin.Common.Save")
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div>
+                            <input asp-for="SelectedDate" type="hidden" id="filterDate" />
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Fecha</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group" style="width:100%">
+                                        <input class="form-control" id="datepicker" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Concepto del gasto</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Concept" />
+                                    <span asp-validation-for="Concept" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Categoría</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="CategoryId" type="hidden" id="categoryId" />
+                                    <input id="categories" style="width: 100% !important;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Importe</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Amount" asp-postfix="MXN" />
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>IVA</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Tax" asp-postfix="MXN" />
+                                    <span asp-validation-for="Tax" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Total</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Total" asp-postfix="MXN" />
+                                    <span asp-validation-for="Total" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Tipo de comprobante</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <select class="form-control" asp-for="VoucherType" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Manager.Domain.Expenses.VoucherType>())"></select>
+                                    <span asp-validation-for="VoucherType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            @if (onlyCash)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Forma de pago</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <select class="form-control" asp-for="PaymentType">
+                                            <option value="@Teed.Plugin.Manager.Domain.Expenses.PaymentType.Cash">@Nop.Services.Helpers.EnumHelper.GetDisplayName(Teed.Plugin.Manager.Domain.Expenses.PaymentType.Cash)</option>
+                                        </select>
+                                        <span asp-validation-for="PaymentType" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Forma de pago</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <select class="form-control" asp-for="PaymentType" asp-items="@(Html.GetEnumSelectList<Teed.Plugin.Manager.Domain.Expenses.PaymentType>())"></select>
+                                        <span asp-validation-for="PaymentType" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            }
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Comments">Descripción y comentarios</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Comments" class="form-control"></textarea>
+                                    <span asp-validation-for="Comments" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <h4 style="font-weight:bold" class="col-md-12">Cargar archivos</h4>
+                                <div class="col-md-12">
+                                    <div class="fileinput-preview fileinput-book-cover fileinput-exists thumbnail img-raised" id="img-preview" style="display:none"></div>
+                                    <input asp-for="Files" name="files" id="files" type="file" aria-label="files" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+    $(document).ready(function () {
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker();
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        $("#files").kendoUpload({
+            select: function (e) {
+                var fileInfo = e.files;
+                var wrapper = this.wrapper;
+
+                for (var i = 0; i < fileInfo.length; i++) {
+                    addPreview(fileInfo[i], wrapper);
+                }
+            },
+            remove: function (e) {
+                for (var i = 0; i < e.files.length; i++) {
+                    $("#" + e.files[i].size).remove();
+                }
+
+                if ($("#img-preview").has("div").length === 0) {
+                    $("#img-preview").hide();
+                }
+            },
+            localization: {
+                select: 'Selecciona uno o más archivos',
+                remove: '',
+                cancel: ''
+            }
+        });
+
+        function addPreview(file, wrapper) {
+            var raw = file.rawFile;
+            var reader = new FileReader();
+
+            if (raw) {
+                reader.onloadend = function () {
+                    $("#img-preview").show();
+                    var current = $("#img-preview").html();
+                    $("#img-preview").empty();
+                    var preview = "";
+                    if (isImage(raw.type)) {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", this.result)[0].outerHTML + "</div>";
+                    }
+                    else {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", "/images/default-image.png")[0].outerHTML + "</div>";
+                    }
+                    var html = current + preview;
+                    $("#img-preview").append(html);
+                };
+                reader.readAsDataURL(raw);
+            }
+        }
+
+        function isImage(fileType) {
+            var validImageTypes = ["image/gif", "image/jpeg", "image/png"];
+            if ($.inArray(fileType, validImageTypes) < 0) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        $("#categories").kendoComboBox({
+        placeholder: "Selecciona la categoría...",
+        dataTextField: "Category",
+        dataValueField: "Id",
+        filter: "contains",
+        autoBind: true,
+        minLength: 1,
+        dataSource: {
+            type: "json",
+            transport: {
+                read: {
+                    url: "@Html.Raw(Url.Action("CategoryListData", "Expenses"))",
+                    type: "POST",
+                    data: addAntiForgeryToken
+                }
+            }
+        },
+        dataBound: function (e) {
+            var combobox = $("#categories").data('kendoComboBox');
+            if (combobox.dataSource.data().length == 1) {
+                var id = combobox.dataSource.data()[0].Id;
+                combobox.value(id);
+                $("#categoryId").val(id);
+            }
+            if (!$("#categoryId").val()) {
+                $("#categories").data("kendoComboBox").value($("#categoryId").val());
+            }
+        },
+        select: function (e) {
+            $("#categoryId").val(this.dataItem(e.item.index()).Id);
+        },
+        change: function (e) {
+            if (this.selectedIndex == -1) {
+                $("#categories").data("kendoComboBox").value("");
+            }
+        }
+        });
+    });
+</script>

@@ -1,0 +1,107 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingRoute.EditViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingRoute");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" value="@Model.Id" />
+    <div id="id-container" style="display: none!important;">
+        <nop-editor asp-for="Id" />
+    </div>
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar ruta
+        </h1>
+        <div class="pull-right">
+            @if (Model.ShippingRoutes.Count > 0)
+            {
+                <button type="button" class="btn bg-red dialog" data-target="modal">
+                    <i class="fa fa-trash"></i>
+                    @T("Admin.Common.Delete")
+                </button>
+                <div id="dialog" title="Mover órdenes">
+                    <p>¿A cuál ruta se deben migrar las órdenes que de la ruta que deseas eliminar?</p>
+                    <select id="new-route">
+                        @foreach (var route in Model.ShippingRoutes)
+                        {
+                            <option value="@(route.Id)">@(route.RouteName)</option>
+                        }
+                    </select>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        var dialog;
+                        dialog = $("#dialog").dialog({
+                            autoOpen: false,
+                            height: 300,
+                            width: 450,
+                            modal: true,
+                            buttons: {
+                                "Eliminar ruta": function () {
+                                    window.location.href = '/Admin/ShippingRoute/DeleteShippingRoute?id=' + @Model.Id + '&newRouteId=' + $("#new-route").val();
+                                }
+                            }
+                        });
+
+                        $(".dialog").on("click", function () {
+                            $("#dialog").dialog("open");
+                        });
+                    });
+                </script>
+            }
+            <button type="submit" asp-action="Edit" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-6">
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Nombre de la ruta</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="RouteName" />
+                                    <span asp-validation-for="RouteName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Activa</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Active" />
+                                    <span asp-validation-for="Active" class="text-danger"></span>
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Códigos postales</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea class="form-control" asp-for="PostalCodes" id="postal-codes" rows="6" readonly></textarea>
+                                        <span asp-validation-for="PostalCodes" class="text-danger"></span>
+                                    </div>
+                                </div>*@
+                        </div>
+                        <div class="col-md-6">
+                            @*<div id="map"></div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

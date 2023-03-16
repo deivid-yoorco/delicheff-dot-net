@@ -1,0 +1,168 @@
+﻿@model int
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "CustomerComment";
+}
+@if (Model > 0)
+{
+    <div class="tab-pane" id="tab-customercomments" style="display: none">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="comments-grid"></div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Agregar nota de cliente
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Nota</label>
+                                <div title="La nota a agregar a este cliente."
+                                     class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <input class="form-control text-box single-line valid" id="Message" name="Message" type="text">
+                            <span class="field-validation-valid" data-valmsg-for="Message" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9 comment-error" style="color: red;display: none;margin-bottom: 10px;">
+                        Todos los campos son requeridos para agregar una nueva nota.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                        <button type="button" id="addComment" class="btn btn-primary">Agregar nota al cliente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#customer-edit .nav-tabs').append('<li><a data-tab-name="tab-customercomments" data-toggle="tab" href="#tab-customercomments" aria-expanded="true">Notas del cliente</a></li>');
+            $('#tab-customercomments').appendTo('.tab-content');
+            $('#tab-customercomments').attr('style', '');
+            $("#comments-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "@Html.Raw(Url.Action("CommentsData", controllerName))?customerId=@Model",
+                            type: "POST",
+                            dataType: "json",
+                            data: null
+                        },
+                        destroy: {
+                            url: "@Html.Raw(Url.Action("Delete", controllerName))",
+                            type: "POST",
+                            dataType: "json",
+                            data: addAntiForgeryToken
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors",
+                        model: {
+                            id: "Id",
+                            fields: {
+                                Message: { editable: false, type: "string" },
+                            }
+                        }
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: false,
+                    serverFiltering: false,
+                    serverSorting: false
+                },
+                pageable: {
+                    refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "CreatedOn",
+                        title: "Fecha y hora de creación",
+                    },
+                    {
+                        field: "Message",
+                        title: "Comentario"
+                    },
+                    {
+                        field: "CreatedByCustomer",
+                        title: "Creado por administrador",
+                    },
+                    {
+                        command: [
+                            {
+                                name: "destroy",
+                                text: "Eliminar"
+                            }
+                        ],
+                        width: 100
+                    }
+                ]
+            });
+            $('#addComment').click(function () {
+                var customerId = @Model;
+                var message = $("#Message").val();
+                if (message.trim() != '' &&
+                    message != null &&
+                    typeof message != 'undefined') {
+                    var postData = {
+                        message: message,
+                        customerId: customerId,
+                    };
+                    addAntiForgeryToken(postData);
+                    var formData = new FormData();
+                    $.each(postData, function (name, value) {
+                        formData.append(name, value);
+                    });
+                    $.ajax({
+                        contentType: false,
+                        processData: false,
+                        type: "POST",
+                        url: "@(Url.Action("Create", controllerName))",
+                        data: formData,
+                        success: function (data) {
+                            var grid = $("#comments-grid");
+                            grid.data('kendoGrid').dataSource.read();
+                            $('#addComment').attr('disabled', false);
+                            $('.comment-error').hide();
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            alert('Failed to add comment.');
+                            $('#addComment').attr('disabled', false);
+                            $('.comment-error').hide();
+                        }
+                    });
+                }
+                else
+                    $('.comment-error').show();
+            });
+        });
+    </script>
+}

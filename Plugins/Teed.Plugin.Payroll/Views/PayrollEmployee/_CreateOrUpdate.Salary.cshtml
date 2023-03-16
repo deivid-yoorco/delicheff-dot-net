@@ -1,0 +1,519 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollEmployee.CreateOrUpdateModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+@using Teed.Plugin.Payroll.Domain.PayrollEmployees
+
+<div class="panel-group">
+    @if (Model.Id > 0)
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3 style="text-align: center;margin-top: 0px !important;">Salarios de empleado</h3>
+                <h4 style="text-align: center;font-weight: bold;margin-bottom: 20px !important;">(Salario actual en negritas)</h4>
+                <h4 style="text-align: center;font-weight: bold; color: red; display: none;margin-bottom: 20px !important;" id="salary-pending">PENDIENTE</h4>
+                <div id="salary-grid"></div>
+
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $("#salary-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("EmployeeSalaryList", "PayrollEmployee", new {payrollId = Model.Id}))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("EmployeeSalaryUpdate", "PayrollEmployee"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    destroy: {
+                                        url: "@Html.Raw(Url.Action("EmployeeSalaryDelete", "PayrollEmployee"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            ApplyDate: { editable: true, type: "string" },
+                                            GrossSalary: { editable: false, type: "string" },
+                                            NetIncome: { editable: true, type: "decimal" },
+                                            WithheldISR: { editable: false, type: "decimal" },
+                                            SocialSecurityContributions: { editable: false, type: "decimal" },
+                                            Bonds: { editable: false, type: "decimal" },
+                                            Benefits: { editable: false, type: "decimal" },
+                                            IntegratedDailyWage: { editable: false, type: "decimal" },
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            editable: {
+                                confirmation: "confirmar",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "Id",
+                                    template: "<span data-id='#=Id#'></span>",
+                                    hidden: true
+                                },
+                                {
+                                    field: "IsCurrent",
+                                    template: "<span data-is-current='#=IsCurrent#'></span>",
+                                    hidden: true
+                                },
+                            {
+                                field: "ApplyDate",
+                                title: "Fecha de aplicación",
+                                width: 150,
+                                //format: "{0:dd-MM-yyyy}",
+                                editor: dateEditor,
+                            }, {
+                                field: "GrossSalary",
+                                title: "Sueldo bruto",
+                                width: 150
+                            },
+                                {
+                                field: "IntegratedDailyWage",
+                                title: "Salario diario",
+                                width: 150
+                            }, {
+                                field: "Benefits",
+                                title: "Prestaciones",
+                                width: 150
+                            }, {
+                                field: "NetIncome",
+                                title: "Sueldo neto",
+                                width: 150
+                            },
+                            {
+                                command: [
+                                {
+                                    name: "edit",
+                                    text: {
+                                        edit: "Editar",
+                                        update: "Actualizar",
+                                        cancel: "Cancelar"
+                                    }
+                                },
+                                    {
+                                        name: "destroy",
+                                        text: "Borrar"
+                                    }
+                                ],
+                                width: 200
+                            }
+                            ],
+                            dataBound: function (e) {
+                                $('#salary-grid [data-is-current="true"]').parentsUntil('[role="rowgroup"]').last().css('font-weight', 'bold');
+                                //$('#salary-grid tbody tr').first().css('font-weight', 'bold');
+                                if (this.dataSource.total() < 1) {
+                                    $("#salary-pending").show();
+                                }
+                            }
+                        });
+                    });
+                    function dateEditor(container, options) {
+                        $('<input value="' + options.model.ApplyDate + '" class="temp-date-editor" data-bind="value:ApplyDateString"/>')
+                            .appendTo(container);
+                        $('.temp-date-editor').kendoDatePicker({
+                            parseFormats: ["dd/MM/yyyy"],
+                            format: "dd/MM/yyyy"
+                        });
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Agregar nuevo salario
+            </div>
+            <div class="panel-body">
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('#addEmployeeSalary').click(function() {
+                            $('.salary-error').hide();
+                            var applyDate = $("#@Html.IdFor(model => model.AddEmployeeSalary.ApplyDate)").val();
+                            var benefits = $("#@Html.IdFor(model => model.AddEmployeeSalary.Benefits)").val();
+                            var bonds = $("#@Html.IdFor(model => model.AddEmployeeSalary.Bonds)").val();
+                            var netIncome = $("#@Html.IdFor(model => model.AddEmployeeSalary.NetIncome)").val();
+                            var socialSecurityContributions = $("#@Html.IdFor(model => model.AddEmployeeSalary.SocialSecurityContributions)").val();
+                            var withheldISR = $("#@Html.IdFor(model => model.AddEmployeeSalary.WithheldISR)").val();
+                            var integratedDailyWage = $("#@Html.IdFor(model => model.AddEmployeeSalary.IntegratedDailyWage)").val();
+
+                            if (
+                                //benefits == "" || typeof benefits == 'undefined' ||
+                                //bonds == "" || typeof bonds == 'undefined' ||
+                                netIncome == "" || typeof netIncome == 'undefined'
+                                //||
+                                //socialSecurityContributions == "" || typeof socialSecurityContributions == 'undefined' ||
+                                //withheldISR == "" || typeof withheldISR == 'undefined'
+                            ) {
+                                $('.salary-error').show();
+                                return false;
+                            }
+
+                            $('#addEmployeeSalary').attr('disabled', true);
+
+                            var postData = {
+                                applyDate: applyDate,
+                                benefits: benefits,
+                                bonds: bonds,
+                                netIncome: netIncome,
+                                socialSecurityContributions: socialSecurityContributions,
+                                withheldISR: withheldISR,
+                                integratedDailyWage: integratedDailyWage,
+                                payrollEmployeeId: @Model.Id,
+                            };
+                            addAntiForgeryToken(postData);
+                            var formData = new FormData();
+                            $.each(postData, function (name, value) {
+                                formData.append(name, value);
+                            });
+
+                            $.ajax({
+                                contentType: false,
+                                processData: false,
+                                type: "POST",
+                                url: "@(Url.Action("EmployeeSalaryAdd", "PayrollEmployee"))",
+                                data: formData,
+                                success: function(data) {
+                                    var grid = $("#salary-grid");
+                                    grid.data('kendoGrid').dataSource.read();
+                                    $('#addEmployeeSalary').attr('disabled', false);
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    alert('Failed to add employee salary.');
+                                    $('#addEmployeeSalary').attr('disabled', false);
+                                }
+                            });
+                        });
+                    });
+                </script>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddEmployeeSalary.ApplyDate" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AddEmployeeSalary.ApplyDate" />
+                    </div>
+                </div>
+                @*<div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddEmployeeSalary.Bonds" />
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="AddEmployeeSalary.Bonds" class="form-control text-box single-line" type="number">
+                        </div>
+                    </div>*@
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddEmployeeSalary.NetIncome" />
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="AddEmployeeSalary.NetIncome" class="form-control text-box single-line" type="number">
+                    </div>
+                </div>
+                @*<div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddEmployeeSalary.SocialSecurityContributions" />
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="AddEmployeeSalary.SocialSecurityContributions" class="form-control text-box single-line" type="number">
+                        </div>
+                    </div>*@
+                @*<div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddEmployeeSalary.WithheldISR" />
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="AddEmployeeSalary.WithheldISR" class="form-control text-box single-line" type="number">
+                        </div>
+                    </div>*@
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddEmployeeSalary.IntegratedDailyWage" />
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="AddEmployeeSalary.IntegratedDailyWage" class="form-control text-box single-line" type="number">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-3 col-md-9 salary-error" style="color: red;display: none;margin-bottom: 10px;">
+                    Todos los campos son requeridos para agregar un nuevo salario
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                    <button type="button" id="addEmployeeSalary" class="btn btn-primary">Agregar salario al expediente</button>
+                </div>
+            </div>
+        </div>
+
+        @*<div class="panel panel-default">
+                <div class="panel-body">
+                    <h3 style="text-align: center;margin-top: 0px !important;">Prestaciones de salario</h3>
+                    <div id="benefits-grid"></div>
+
+                    <script type="text/javascript">
+                        function getUrl(id) {
+                            return "@Html.Raw(Url.Action("BenefitList", "PayrollEmployee"))?Id=" + id + "&ForSalary=true";
+                        }
+                        $(document).ready(function() {
+                            $("#benefits-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("BenefitList", "PayrollEmployee", new {Id = Model.Id, ForSalary = true}))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        },
+                                        destroy: {
+                                            url: "@Html.Raw(Url.Action("BenefitDelete", "PayrollEmployee"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors",
+                                        model: {
+                                            id: "Id",
+                                            fields: {
+                                                Name: { editable: false, type: "string" },
+                                                Description: { editable: false, type: "string" },
+                                                Amount: { editable: false, type: "decimal" },
+                                            }
+                                        }
+                                    },
+                                    requestEnd: function(e) {
+                                        if (e.type == "update") {
+                                            this.read();
+                                        }
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    numeric: false,
+                                    previousNext: false,
+                                    info: false,
+                                    @await Html.PartialAsync("_GridPagerMessages")
+                                },
+                                editable: {
+                                    confirmation: "confirmar",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "Id",
+                                        template: "<span data-id='#=Id#'></span>",
+                                        hidden: true
+                                    },
+                                    {
+                                        field: "Name",
+                                        title: "Nombre",
+                                        width: 200
+                                    }, {
+                                        field: "Description",
+                                        title: "Descripción",
+                                        width: 150
+                                    }, {
+                                        field: "Amount",
+                                        title: "Monto",
+                                        width: 150
+                                    }, {
+                                    command: [
+                                    {
+                                        name: "destroy",
+                                        text: "Borrar"
+                                    }
+                                    ],
+                                    width: 200
+                                }
+                                ],
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Agregar nueva prestación
+                </div>
+                <div class="panel-body">
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $('#Salaries').change(function () {
+                                $('#benefits-grid').data('kendoGrid').dataSource.transport.options.read.url = getUrl(parseInt($('#Salaries').val()));
+                                $('#benefits-grid').data('kendoGrid').dataSource.read();
+                                $('#benefits-grid').data('kendoGrid').refresh();
+                            });
+                            $('#BenefitTypes').change(function () {
+                                var value = $(this).val();
+                                if (value == "Otras prestaciones") {
+                                    $('.name-input').show();
+                                    $('.desc-input').show();
+                                    $("#@Html.IdFor(model => model.AddBenefit.Name)").val('');
+                                    $("#@Html.IdFor(model => model.AddBenefit.Description)").val('');
+                                } else {
+                                    $('.name-input').hide();
+                                    $('.desc-input').hide();
+                                    $("#@Html.IdFor(model => model.AddBenefit.Name)").val(value);
+                                    $("#@Html.IdFor(model => model.AddBenefit.Description)").val(value);
+                                }
+                            });
+                            $('#BenefitTypes').change();
+                            $('#addBenefit').click(function() {
+                                var name = $("#@Html.IdFor(model => model.AddBenefit.Name)").val();
+                                var description = $("#@Html.IdFor(model => model.AddBenefit.Description)").val();
+                                var amount = $("#@Html.IdFor(model => model.AddBenefit.Amount)").val();
+
+                                $('#addBenefit').attr('disabled', true);
+
+                                var postData = {
+                                    name: name,
+                                    description: description,
+                                    amount: amount,
+                                    isForSalary: true,
+                                    linkId: $('#Salaries').val(),
+                                };
+                                addAntiForgeryToken(postData);
+                                var formData = new FormData();
+                                $.each(postData, function (name, value) {
+                                    formData.append(name, value);
+                                });
+
+                                $.ajax({
+                                    contentType: false,
+                                    processData: false,
+                                    type: "POST",
+                                    url: "@(Url.Action("BenefitAdd", "PayrollEmployee"))",
+                                    data: formData,
+                                    success: function(data) {
+                                        var grid = $("#salary-grid");
+                                        grid.data('kendoGrid').dataSource.read();
+                                        grid = $("#benefits-grid");
+                                        grid.data('kendoGrid').dataSource.read();
+                                        $('#addBenefit').attr('disabled', false);
+                                    },
+                                    error: function(xhr, ajaxOptions, thrownError) {
+                                        alert('Failed to add employee salary.');
+                                        $('#addBenefit').attr('disabled', false);
+                                    }
+                                });
+                            });
+                        });
+                    </script>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Salaries" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="Salaries" asp-items="@(Model.Salaries)" />
+                            <span asp-validation-for="Salaries"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="BenefitTypes" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="BenefitTypes" asp-items="@(Model.BenefitTypes)" />
+                            <span asp-validation-for="BenefitTypes"></span>
+                        </div>
+                    </div>
+                    <div class="form-group name-input">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddBenefit.Name" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AddBenefit.Name" />
+                            <span asp-validation-for="AddBenefit.Name"></span>
+                        </div>
+                    </div>
+                    <div class="form-group desc-input">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddBenefit.Description" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AddBenefit.Description" />
+                            <span asp-validation-for="AddBenefit.Description"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="AddBenefit.Amount" />
+                        </div>
+                        <div class="col-md-9">
+                            <input asp-for="AddBenefit.Amount" class="form-control text-box single-line" type="number">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                        <button type="button" id="addBenefit" class="btn btn-primary">Agregar prestacion al salario</button>
+                    </div>
+                </div>
+            </div>*@
+    }
+    else
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                You need to save the employee before you can add tier prices for this employee page.
+            </div>
+        </div>
+    }
+</div>

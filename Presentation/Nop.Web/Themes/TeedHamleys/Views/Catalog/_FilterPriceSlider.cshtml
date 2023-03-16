@@ -1,0 +1,23 @@
+﻿<link src="/Themes/TeedMaterial/Content/css/nouislider.css" />
+<script src="/Themes/TeedMaterial/Content/js/nouislider.js"></script>
+<script src="/Themes/TeedMaterial/Content/js/wNumb.js"></script>
+
+<div id="test-slider" class="col s12 m12"></div>
+<script>
+    $(document).ready(function () {
+        var slider = document.getElementById('test-slider');
+        noUiSlider.create(slider, {
+            start: [20, 80],
+            connect: true,
+            step: 1,
+            orientation: 'horizontal', // 'horizontal' or 'vertical'
+            range: {
+                'min': 0,
+                'max': 100
+            },
+            format: wNumb({
+                decimals: 0
+            })
+        });
+    });
+</script>

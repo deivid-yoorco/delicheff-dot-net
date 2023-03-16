@@ -1,0 +1,50 @@
+﻿@model Teed.Plugin.Payroll.Models.MinimumWagesCatalog.MinimumWagesCatalogModel
+
+<input type="hidden" value="@Model.Id" />
+<div class="content">
+    <div class="form-horizontal">
+        <div class="raw clearfix">
+            <div class="col-md-12">
+                <div class="panel-group">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Información principal
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="Year" />
+                                </div>
+                                <div class="col-md-9" style="max-width: 330px;">
+                                    <input asp-for="Year" class="form-control valid" min="1900" type="number" value="@DateTime.Now.Year.ToString()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="Amount" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Amount" />
+                                    <span asp-validation-for="Amount"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="Uma" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Uma" />
+                                    <span asp-validation-for="Uma"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,158 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingUserRoute.AssignBuyersModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.AssignBuyers");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+<script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+<style>
+    .loading-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+</style>
+<form method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Asignar compradores suplentes para la fecha de entrega @(Model.Date.ToString("dd-MM-yyyy"))
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="ListDatesAssignBuyers">regresar a la lista de fechas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <div style="display:none" class="loading-container" id="loading-container">
+                <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                    <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <span style="margin-left: 10px">Guardando...</span>
+            </div>
+            <button type="button" id="submit-button" class="btn bg-blue" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong style="display: none;color: red" id="submit-error"></strong>
+                            @if (Model.Buyers.Count > 0)
+                            {
+                                @foreach (var buyer in Model.Buyers)
+                                {
+                                    bool hasSelected = Model.SubstituteBuyers.Where(x => x.Value == buyer.SubstituteCustomerId.ToString()).Any();
+                                    <h3>@(buyer.BuyerName)</h3>
+                                    <div class="buyer">
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <div class="input-group" style="width:100%">
+                                                    <select data-selectorbuyerid="@(buyer.BuyerId)" data-hasSelected="@(hasSelected)" class="ui-choose">
+                                                        @if (!hasSelected)
+                                                        {
+                                                            <option selected value="0">No asignado</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="0">No asignado</option>
+                                                        }
+                                                        @foreach (var substituteBuyer in Model.SubstituteBuyers.Where(x => x.Value != buyer.BuyerId.ToString()))
+                                                        {
+                                                            if (substituteBuyer.Value == buyer.SubstituteCustomerId.ToString())
+                                                            {
+                                                                <option selected value="@(substituteBuyer.Value)">@(substituteBuyer.Text)</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@(substituteBuyer.Value)">@(substituteBuyer.Text)</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <h4>No se encontró ninguna orden con la fecha seleccionada para mostrar los compradores.</h4>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    let buildUiChoose = () => {
+        $('ul.ui-choose').remove();
+        $('.ui-choose').ui_choose({
+            itemWidth: null,
+            skin: '',
+            multi: true,
+            active: 'selected',
+            full: false,
+            colNum: null,
+            dataKey: 'ui-choose',
+            change: function (data) {
+                console.log(data);
+            },
+            click: null
+        });
+    };
+
+    buildUiChoose();
+
+    const onSubmit = () => {
+        $("#submit-error").hide();
+        $("#loading-container").show();
+        $("#submit-button").hide();
+
+        let result = [];
+        let buyers = $(".buyer").find('select');
+        $.each(buyers, (index, element) => {
+            let buyerId = $(element).data('selectorbuyerid');
+            let selectedCustomerId = $(element).val();
+            if (selectedCustomerId != null && selectedCustomerId != 0)
+                result.push({ buyerId, selectedCustomerId });
+        });
+
+        let body = {
+            date: '@Model.Date',
+            data: result
+        };
+
+        $.ajax({
+            url: '/Admin/ShippingRouteUser/AssignSubstituteBuyers',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#submit-error").show();
+                $("#submit-error").html(error.responseText);
+                $("#loading-container").hide();
+                $("#submit-button").show();
+            }
+        })
+    }
+</script>

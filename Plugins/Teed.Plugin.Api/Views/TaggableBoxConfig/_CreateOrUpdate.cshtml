@@ -1,0 +1,244 @@
+﻿@model Teed.Plugin.Api.Models.TaggableBoxModel
+
+<style>
+    #loading {
+        border: 5px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 5px solid #3498db;
+        width: 40px;
+        height: 40px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+    }
+
+    #ElementIdContainer {
+        display: none !important;
+    }
+
+    /* Safari */
+    @@-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Nombre</label>
+                                <div title="Nombre de la caja etiquetable. El nombre es únicamente para que lo puedan identificar internamente." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Imagen</label>
+                                <div title="La imagen para la caja etiquetable." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="PictureId" />
+                            <span asp-validation-for="PictureId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Posición</label>
+                                <div title="La posición de la caja." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="Position" asp-items="Model.Positions" />
+                            <span asp-validation-for="Position" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Tipo de elemento</label>
+                                <div title="El tipo de elemento que con el que estará ligada la caja." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="Type" asp-items="Model.Types" />
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <div class="label-wrapper">
+                                <label class="control-label">Elemento</label>
+                                <div title="El elemento para la caja. Se debe seleccionar un tipo de elemento para poder cargar esta lista." class="ico-help">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-select asp-for="SelectElementId" asp-items="Model.Elements" asp-multiple="true" />
+                            <div id="ElementIdContainer">
+                                <nop-editor asp-for="ElementId" />
+                            </div>
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    var manufacturersIdsInput = $('#SelectElementId').data("kendoMultiSelect");
+                                    manufacturersIdsInput.setOptions({
+                                        autoClose: false,
+                                        filter: "contains",
+                                        maxSelectedItems: 1,
+                                        enable: false,
+                                        placeholder: 'Selecciona un tipo para cargar los elementos...'
+                                    });
+                                    manufacturersIdsInput._placeholder();
+                                    manufacturersIdsInput._enable();
+                                });
+                            </script>
+                            <span asp-validation-for="SelectElementId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group center" style="text-align: -webkit-center;">
+                        <div id="loading" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var firstRun = true;
+    $(document).ready(function () {
+        $('#Type').change(function () {
+            $('#loading').show();
+            var $select = $(this);
+            if ($select.val() != "-1") {
+                $.ajax({
+                    url: "/Admin/TaggableBoxConfig/GetElementsByType?type=" + $select.val(),
+                    type: "GET",
+                    success: function (data) {
+                        RecreateSelect(data);
+                    },
+                    error: function (e) {
+                        console.log(e);
+                        RecreateSelect([]);
+                    }
+                });
+            }
+        });
+        $('#SelectElementId').change(function () {
+            var $select = $(this);
+            var id = $select.val() != null ? ($select.length > 0 ? $select.val()[0] : '-1') : '-1';
+            $('#ElementId').val(id);
+            ButtonCheck(id);
+        });
+        @if (Model.Id < 1)
+        {
+        <text>
+        $('#ElementId').val('-1');
+        $('#Type').val('-1');
+        </text>
+        } else {
+        <text>
+        $('#Type').change();
+        </text>
+        }
+    });
+    function ButtonCheck(value) {
+        if (value != '-1') {
+            $('button[name="save"]').removeAttr('disabled');
+            $('button[name="save-continue"]').removeAttr('disabled');
+        } else {
+            $('button[name="save"]').attr('disabled', 'disabled');
+            $('button[name="save-continue"]').attr('disabled', 'disabled');
+        }
+    }
+    function RecreateSelect(data) {
+        var multiSelect = $("#SelectElementId").data("kendoMultiSelect");
+        multiSelect.value([]);
+        if (data.length > 0) {
+            var multiData = [];
+            $.each(data, function (i, e) {
+                multiData.push({ text: e.Text, value: e.Value });
+            });
+            multiSelect.dataSource.data(multiData);
+            multiSelect.setOptions({
+                placeholder: 'Selecciona un elemento...'
+            });
+            multiSelect.enable(true);
+        } else {
+            multiSelect.setOptions({
+                placeholder: 'Selecciona un tipo para cargar los elementos...'
+            });
+            multiSelect.enable(false);
+        }
+        multiSelect._placeholder();
+
+        @if (Model.Id < 1)
+        {
+        <text>
+        ButtonCheck('-1');
+        </text>
+        } else {
+        <text>
+        ButtonCheck('0');
+        </text>
+        }
+
+        // In first load kendoMultiSelect sets data as "[object Object]",
+        // normally redoing the set data process fixes the issue
+        if ($('#SelectElementId-list ul li[role="option"]').first().html().trim() == "[object Object]") {
+            RecreateSelect(data);
+            $('#loading').show();
+        } else {
+            setTimeout(function () {
+                @if(Model.ElementId > 0)
+                {
+                <text>
+                if (firstRun) {
+                    $("#SelectElementId").data("kendoMultiSelect").value(['@Model.ElementId']);
+                    firstRun = false;
+                } else
+                    $('#ElementId').val('-1');
+                </text>
+                } else {
+                <text>
+                $('#ElementId').val('-1');
+                </text>
+                }
+                $('#loading').hide();
+            }, 100);
+        }
+    }
+</script>

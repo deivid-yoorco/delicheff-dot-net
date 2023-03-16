@@ -1,0 +1,28 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var tagsText = "Para que se muestren todas las tags, el valor de cantidad tags debe ser 0";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Cantidad de tags
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Activado</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TagsEnable" />
+                <span asp-validation-for="TagsEnable"></span>
+            </div>
+            <div class="col-md-3 text-right">
+                <label>Cantidad de tags</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TagsQty" />
+                <span asp-validation-for="TagsQty"></span>
+                <em>@tagsText</em>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,154 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderReport.EditOrderReportModel
+@{
+    Layout = "_AdminLayout";
+}
+<style>
+    th {
+        text-align: center;
+        font-size: 1.2em;
+    }
+</style>
+<input type="hidden" value="@Model.OrderId" id="order-id" />
+<form>
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar reporte de compra
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-controller="Order" asp-action="List">regresar a la lista de órdenes</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue" id="save">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <span style="display:none;color:red" id="error-msg">No se pudo guardar la información.</span>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-parent" asp-title="Datos" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/OrderReport/_EditInfo.cshtml", null)
+                    </nop-tab>
+                    <nop-tab asp-name="tab-children" asp-title="Bitácora">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.Groceries/Views/OrderReport/_EditLog.cshtml", null)
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function () {
+        if (self !== top) {
+            $(".main-header").hide();
+            $('body').addClass("sidebar-collapse");
+            $('body').removeClass("sidebar-mini");
+            $(".main-footer").hide();
+        };
+
+        $("form").validate();
+        var addedFiles = [];
+
+        $("form").on("submit", function (event) {
+            event.preventDefault();
+
+            if ($(this).valid()) {
+                $("#save").prop('disabled', true);
+                var dataList = [];
+                $(".product").each(function () {
+                    var id = $(this).attr("id");
+                    dataList.push({ OrderItemId: id, UnitCost: $("#unit-cost-" + id).val(), RequestedQtyCost: $("#cost-" + id).val(), Store: $("#store-" + id).val(), Comment: $("#comment-" + id).val() });
+                });
+
+                var data = {
+                    OrderId: $("#order-id").val(),
+                    OrderItemsReport: dataList,
+                    OrderReportFiles: addedFiles
+                }
+
+                $.ajax({
+                    url: '/Admin/OrderReport/EditOrderReport',
+                    type: 'POST',
+                    data: data,
+                    success: function () {
+                        document.location.href = '/Admin/OrderReport/EditOrderReport/' + $("#order-id").val();
+                    },
+                    error: function (e) {
+                        $(this).prop('disabled', false);
+                        $("#error-msg").show();
+                        console.log(e);
+                    }
+                });
+            }
+        });
+
+        $("#files").kendoUpload({
+            select: function (e) {
+                var fileInfo = e.files;
+                var wrapper = this.wrapper;
+
+                for (var i = 0; i < fileInfo.length; i++) {
+                    addPreview(fileInfo[i], wrapper);
+                }
+            },
+            remove: function (e) {
+                for (var i = 0; i < e.files.length; i++) {
+                    $("#" + e.files[i].size).remove();
+
+                    var index = addedFiles.map(x => x.Size).indexOf(e.files[i].size);
+                    if (index > -1) {
+                        addedFiles.splice(index, 1);
+                    }
+                }
+
+                if ($("#img-preview").has("div").length === 0) {
+                    $("#img-preview").hide();
+                }
+            },
+            localization: {
+                select: 'Selecciona uno o más archivos',
+                remove: '',
+                cancel: ''
+            }
+        });
+
+        function addPreview(file, wrapper) {
+            var raw = file.rawFile;
+            var reader = new FileReader();
+
+            if (raw) {
+                reader.onloadend = function () {
+                    $("#img-preview").show();
+                    var current = $("#img-preview").html();
+                    $("#img-preview").empty();
+                    var preview = "";
+                    if (isImage(raw.type)) {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", this.result)[0].outerHTML + "</div>";
+                    }
+                    else {
+                        preview = "<div id='" + file.size + "' style='display:inline-block;height:100px;width:100px;overflow:hidden'>" + $("<img style='max-width:100px' class='image-preview'>").attr("src", "/images/default-image.png")[0].outerHTML + "</div>";
+                    }
+                    var html = current + preview;
+                    $("#img-preview").append(html);
+
+                    addedFiles.push({ Size: file.size, Base64: this.result, Type: raw.type, Name: raw.name });
+                };
+                reader.readAsDataURL(raw);
+            }
+        }
+
+        function isImage(fileType) {
+            var validImageTypes = ["image/gif", "image/jpeg", "image/png"];
+            if ($.inArray(fileType, validImageTypes) < 0) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    });
+</script>

@@ -1,0 +1,38 @@
+﻿.card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating) {
+    margin-right: 0 !important;
+}
+
+.card .card-action:last-child {
+    margin-top: 15px;
+    border: 0;
+}
+
+.center-content-card {
+    height: 65px !important;
+}
+
+.search-page {
+    margin-top: 15px;
+}
+
+.navbar-fixed li:not(.cobertura) {
+    text-transform: uppercase;
+}
+
+.product-name {
+    text-transform: uppercase;
+}
+
+.min-amount-warning {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.fb_dialog_mobile {
+    margin-bottom: 40px;
+}
+
+.fb-customerchat iframe {
+    margin-bottom: 40px;
+}

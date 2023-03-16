@@ -1,0 +1,359 @@
+﻿@model Teed.Plugin.Groceries.Models.Warnings.IndexViewModel;
+
+<div class="panel-group" style="margin:15px;margin-bottom: 0px">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="accordion" id="accordionExample">
+                @if (Model.ProductsWithoutParentCategory.Any())
+                {
+                    <div class="card order-alert-danger text-left ok">
+                        <div class="card-header panel-heading" id="headingOne">
+                            <h1 class="mb-0" style="margin-top: 10px; font-style: normal">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos sin categoría padre ( @(Model.ProductsWithoutParentCategory.Count) )</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                            <div class="card-body" style="margin: 30px;margin-top:0px">
+                                @*<h3>Productos sin categoría padre</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithoutParentCategory)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card complete-list">
+                        <div class="card-header" id="headingOne">
+                            <h3 class="mb-0 complete-list" style="margin-top: 10px; font-style: normal">Todos los productos tienen categoría padre.</h3>
+                        </div>
+                    </div>
+                }
+
+
+                @if (Model.ProductsWithoutChildCategory.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingTwo">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos sin categoría hijo ( @(Model.ProductsWithoutChildCategory.Count) )</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos sin categoría hijo</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithoutChildCategory)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h3 class="mb-0 complete-list">Todos los productos tienen categoría hijo.</h3>
+                        </div>
+                    </div>
+                }
+
+
+
+                @if (Model.ProductsWithoutEarnings.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingThree">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos con precio y costo iguales ( @(Model.ProductsWithoutEarnings.Count) )</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos con precio y costo iguales</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithoutEarnings)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <h3 class="mb-0 complete-list">No hay productos con precio y costo igual.</h3>
+                        </div>
+                    </div>
+                }
+
+
+                @*@if (Model.ProductsWithWrongChildCategory.Any())
+                    {
+                        <h3>Productos con categoría hijo que no corresponde a su categoría padre</h3>
+                        <ul>
+                            @foreach (var item in Model.ProductsWithWrongChildCategory)
+                            {
+                                <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="col-md-12 ok">
+                            <span>No hay productos con categoría hijo que no corresponde a su categoría padre.</span>
+                        </div>
+                    }*@
+
+                @if (Model.ProductsWithMoreThanOneParentCategory.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingFour">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos con más de una categoría padre (@(Model.ProductsWithMoreThanOneParentCategory.Count))</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos con más de una categoría padre</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithMoreThanOneParentCategory)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingFour">
+                            <h3 class="mb-0 complete-list">No hay productos con más de una categoría padre.</h3>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.ProductsWithMoreThanOneChildCategory.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingFive">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos con más de una categoría hijo ( @(Model.ProductsWithMoreThanOneChildCategory.Count) )</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos con más de una categoría hijo</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithMoreThanOneChildCategory)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card complete-list">
+                        <div class="card-header" id="headingFive">
+                            <h3 class="mb-0 complete-list" style="margin-top: 10px; font-style: normal">No existen productos con más de una categoría hijo.</h3>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.ProductsWithoutImage.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingSix">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos sin imagen (@(Model.ProductsWithoutImage.Count))</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos sin imagen</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithoutImage)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingSix">
+                            <h3 class="mb-0 complete-list">No hay productos sin imagen.</h3>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.ProductsWithLowMargin.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingSeven">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos con margen menor a 10% (@(Model.ProductsWithLowMargin.Count))</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos con margen menor a 10%</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithLowMargin)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName &nbsp &nbsp (@(Math.Round(((item.Calculate*100)*100)/100, 2).ToString() + "%") )</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingSeven">
+                            <h3 class="mb-0 complete-list">No existen productos con margen menor a 10%.</h3>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.ProductsWithLowMargin13.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingNine">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseNine" aria-expanded="false" aria-controls="collapseNine">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos con margen mayor a 10% y menor a 13% (@(Model.ProductsWithLowMargin13.Count))</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseNine" class="collapse" aria-labelledby="headingNine" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos con margen menor a 10%</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithLowMargin13)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName &nbsp &nbsp (@(Math.Round(((item.Calculate*100)*100)/100, 2).ToString() + "%") )</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingSeven">
+                            <h3 class="mb-0 complete-list">No existen productos con margen mayor a 10% y menor a 13%.</h3>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.productsSkuRepeatedList.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingEigth">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseEigth" aria-expanded="false" aria-controls="collapseEigth">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos con Sku repetido ( @(Model.productsSkuRepeatedList.Count))</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseEigth" class="collapse" aria-labelledby="headingEigth" data-parent="#accordionExample">
+                            <div class="card-body">
+                                @*<h3>Productos con Sku repetido</h3>*@
+                                <ul>
+                                    @foreach (var item in Model.productsSkuRepeatedList)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductSku &nbsp @item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingEigth">
+                            <h3 class="mb-0 complete-list">No hay productos con Sku repetido</h3>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.ProductsWithoutManufacturer.Any())
+                {
+                    <div class="card order-alert-danger left ok">
+                        <div class="card-header panel-heading" id="headingTen">
+                            <h1 class="mb-0" style="margin-top: 10px">
+                                <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapseTen" aria-expanded="false" aria-controls="collapseTen">
+                                    <i class="pull-left more-less glyphicon glyphicon-plus"></i>
+                                    <i class="pull-left" style="font-weight: bold; font-style: normal">&nbsp &nbsp Productos publicados sin fabricante ( @(Model.ProductsWithoutManufacturer.Count))</i>
+                                </button>
+                            </h1>
+                        </div>
+                        <div id="collapseTen" class="collapse" aria-labelledby="headingTen" data-parent="#accordionExample">
+                            <div class="card-body">
+                                <ul>
+                                    @foreach (var item in Model.ProductsWithoutManufacturer)
+                                    {
+                                        <li><a target="_blank" href="/admin/product/edit/@item.ProductId">@item.ProductName</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header" id="headingTen">
+                            <h3 class="mb-0 complete-list">No hay productos publicados sin fabricante</h3>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,122 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminPopupLayout";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "ShoppingCartUrl";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Generar widget de receta
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">Selecciona la url de carrito</label>
+                            <div title="Selecciona la url de carrito para que podamos mostrar los productos asociados y sus cantidades." class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input id="shopping-cart-selector" style="width: 100%;" />
+                    </div>
+                </div>
+                <div id="products-container"></div>
+                <div id="generated-code" style="margin-top: 15px"></div>
+                <script>
+                    $("#shopping-cart-selector").kendoComboBox({
+                        placeholder: "Busca la url por código...",
+                        dataTextField: "ShoppingCartUrl",
+                        dataValueField: "Id",
+                        filter: "contains",
+                        autoBind: false,
+                        minLength: 3,
+                        dataSource: {
+                            type: "json",
+                            serverFiltering: true,
+                            transport: {
+                                read: {
+                                    url: "/Admin/ShoppingCartUrl/SearchListData"
+                                }
+                            },
+                        },
+                        change: (e) => {
+                            $("#products-container").html("");
+                            let selectedId = $("#shopping-cart-selector").data("kendoComboBox").value();
+                            $.ajax({
+                                url: '/Admin/ShoppingCartUrl/GetWidgetProducts?id=' + selectedId,
+                                method: 'GET',
+                                success: (data) => {
+                                    let str = '<h3>Lista de productos de la url</h3>';
+                                    str += '<span>Para cada producto ingresa el nombre correspondiente al ingrediente de la receta</span><br/><br/>';
+                                    $.each(data, (index, value) => {
+                                        str += '<strong>Producto:</strong> ' + value.Product.Name + '<br/>';
+                                        str += '<strong>Cantidad:</strong> ' + value.Quantity + '<br/>';
+                                        if (value.SelectedPropertyOption) {
+                                            str += '<strong>Propiedades del producto:</strong> ' + value.SelectedPropertyOption + '<br/>';
+                                        }
+                                        if (!value.Product.Published) {
+                                            str += '<strong style="color:red">Este producto no está publicado</strong>';
+                                        }
+                                        str += `
+                                                            <div class="form-group">
+                                                                <div class="col-md-3">
+                                                                    <div class="label-wrapper">
+                                                                        <label class="control-label">Nombre del ingrediente</label>
+                                                                        <div title="Texto que se utilizará para mostrar el ingrediente en la receta, por favor no utilices ; en el nombre" class="ico-help">
+                                                                            <i class="fa fa-question-circle"></i>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-9">
+                                                                    <div class="input-group" style="width:100%">
+                                                                        <input class="form-control ingredient-value" data-productid="` + value.Product.Id + `" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        `;
+                                        str += "<hr>";
+                                    });
+                                    str += `
+                                                        <button type="button" onclick="generateWidgetCode(${selectedId})" class="btn btn-primary">
+                                                            Generar widget
+                                                        </button>
+                                                    `;
+                                    $("#products-container").html(str);
+                                },
+                                error: (err) => {
+                                    console.log(err);
+                                }
+                            });
+                        },
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function generateWidgetCode(selectedId) {
+        let data = $(".ingredient-value");
+        let str = '[[sc:' + selectedId + ';';
+        $.each(data, (index, value) => {
+            console.log($(value).val(), $(value).data("productid"));
+            str += $(value).data("productid") + ':' + $(value).val() + ';';
+        });
+        str += ']]';
+
+        var div = document.getElementById("generated-code");
+        var input = document.createElement("textarea");
+        input.name = "code";
+        input.cols = "80";
+        input.rows = "10";
+        input.innerHTML = str;
+        div.appendChild(input);
+    };
+</script>

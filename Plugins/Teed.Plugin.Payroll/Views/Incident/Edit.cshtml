@@ -1,0 +1,150 @@
+﻿@model Teed.Plugin.Payroll.Models.Incident.AddIncident
+
+@{
+    Layout = "_AdminLayout";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Payroll.PayrollEmployee");
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar incidencia - @(Model.Date == null ? "" : (Model.Date ?? DateTime.Now).ToString("dd/MM/yyyy"))
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a href="CheckOrUpdate?Id=@Model.Id">regresar a la lista de incidencias</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+        </div>
+    </div>
+
+    <input type="hidden" value="@Model.Id" asp-for="Id" />
+    <input type="hidden" value="@Model.PayrollEmployeeId" asp-for="PayrollEmployeeId" />
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="raw clearfix">
+                <div class="col-md-12">
+                    <div class="panel-group">
+                        <nop-tabs id="categories-price">
+                            <nop-tab asp-name="tab-penalty" asp-title="Fecha festiva" asp-default="true">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        Incidencia
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <div class="col-md-3">
+                                                <nop-label asp-for="Type" />
+                                            </div>
+                                            <div class="col-md-9">
+                                                <nop-select asp-for="Type" asp-items="@(Model.Types)" />
+                                                <span asp-validation-for="Type"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group justified-input">
+                                            <div class="col-md-3">
+                                                <nop-label asp-for="Justified" />
+                                            </div>
+                                            <div class="col-md-9">
+                                                <nop-editor asp-for="Justified" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group file-input">
+                                            <div class="col-md-3">
+                                                <div class="label-wrapper">
+                                                    <label class="control-label">Archivo</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input class="form-control text-box single-line" type="file" asp-for="File">
+                                            </div>
+                                        </div>
+                                        <div class="form-group amount-input">
+                                            <div class="col-md-3">
+                                                <nop-label asp-for="Amount" />
+                                            </div>
+                                            <div class="col-md-9">
+                                                <nop-editor asp-for="Amount" />
+                                                <span asp-validation-for="Amount"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group reason-input">
+                                            <div class="col-md-3">
+                                                <nop-label asp-for="Reason" />
+                                            </div>
+                                            <div class="col-md-9">
+                                                <nop-editor asp-for="Reason" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </nop-tab>
+                            <nop-tab asp-name="tab-log" asp-title="Bitácora">
+                                <div class="raw clearfix">
+                                    <div class="col-md-12">
+                                        <div class="panel-group">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    Log
+                                                </div>
+                                                <div class="panel-body">
+                                                    <pre>@Model.Log</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#@Html.IdFor(model => model.Justified)').change(function () {
+            var checked = $(this).prop('checked');
+            if (checked)
+                $('.file-input').show();
+            else
+                $('.file-input').hide();
+        });
+        $('#Type').change(function () {
+            var typeId = $(this).val();
+            if (typeId == 1) {
+                // Absence
+                $('#@Html.IdFor(model => model.Justified)')
+                    .prop('checked', false);
+                $('.justified-input').show();
+                $('.file-input').hide();
+                $('.amount-input').hide();
+                $('.reason-input').hide();
+            } else if (typeId == 2) {
+                // Delay
+                $('.justified-input').show();
+                $('.file-input').hide();
+                $('.amount-input').hide();
+                $('.reason-input').hide();
+            } else if (typeId == 3) {
+                // Discount
+                $('.justified-input').hide();
+                $('.date-input').hide();
+                $('.file-input').hide();
+                $('.amount-input').show();
+                $('.reason-input').show();
+            }
+        });
+        $('#Type').change();
+    });
+</script>

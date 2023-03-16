@@ -1,0 +1,277 @@
+﻿@model Teed.Plugin.Groceries.Controllers.PaymentDashboardModel
+@using Nop.Services.Helpers;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.CorporateCardList");
+}
+<style>
+    .orange {
+        background-color: #e86f12;
+        color: white !important;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Pagos solicitados, proyectados y pendientes con tarjeta corporativa
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3 style="font-weight:bold">Pagos solicitados y proyectados el @(Model.Date.ToString("dddd dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-MX")))</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tr style="background-color:#95d8ff">
+                            <th>
+                                Fecha y hora de solicitud de pago
+                            </th>
+                            <th>Fabricante</th>
+                            <th>Empleado</th>
+                            <th>Tarjeta</th>
+                            <th>Monto del día</th>
+                            @*<th>Monto solicitado</th>
+                                <th>Recibo (comprador)</th>
+                                <th>Comprobante de pago (admin)</th>
+                                <th>Estatus de pago (admin)</th>
+                                <th>Factura (comprador)</th>
+                                <th>Opciones</th>*@
+                        </tr>
+                        @foreach (var item in Model.DatePayments)
+                        {
+                            <tr style="background-color: @(GetRowColor(item))">
+                                <td>@(item.RequestedAmount == 0 ? item.Date.ToString("dd/MM/yyyy") : item.CreationDate.ToString("dd/MM/yyyy HH:mm"))</td>
+                                <td>@(item.ManufacturerName)</td>
+                                <td>@(item.BuyerName)</td>
+                                <td>@(string.IsNullOrEmpty(item.CorporateCard) ? "SIN TARJETA ESPECIFICADA" : item.CorporateCard)</td>
+                                <td>@(item.ProjectedAmount == 0 ? "N/A" : item.ProjectedAmount.ToString("C"))</td>
+                                @*<td>@(item.RequestedAmount == 0 ? "-" : item.RequestedAmount.ToString("C"))</td>
+                                    @if (item.TicketBuyerFileIds.Count > 0)
+                                    {
+                                        <td>
+                                            <ul>
+                                                @for (int i = 0; i < item.TicketBuyerFileIds.Count; i++)
+                                                {
+                                                    <li>
+                                                        <a class="btn bg-blue" target="_blank" href="/admin/buyerPayment/GetPicture?id=@(item.TicketBuyerFileIds[i])">Ticket @(i + 1)</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+                                    }
+                                    @if (item.PaymentFileId > 0)
+                                    {
+                                        <td style="text-align: center;">
+                                            <a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.PaymentFileId })">Descargar</a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }
+                                    @if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Payed)
+                                    {
+                                        <td>
+                                            <span class="grid-report-item green">
+                                                @(item.PaymentStatus.GetDisplayName())
+                                            </span>
+                                        </td>
+                                    }
+                                    else if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Unauthorized)
+                                    {
+                                        <td>
+                                            <span class="grid-report-item red">
+                                                @(item.PaymentStatus.GetDisplayName())
+                                            </span>
+                                        </td>
+                                    }
+                                    else if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Pending && item.TicketBuyerFileIds.Count > 0)
+                                    {
+                                        <td>
+                                            <span class="grid-report-item orange">
+                                                @(item.PaymentStatus.GetDisplayName())
+                                            </span>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }
+                                    @if (item.InvoiceFileXmlId > 0 && item.InvoiceFilePdfId > 0)
+                                    {
+                                        <td>
+                                            <ul>
+                                                <li><a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.InvoiceFileXmlId })">XML</a></li>
+                                                <li><a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.InvoiceFilePdfId })">PDF</a></li>
+                                            </ul>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+
+                                    }
+                                    @if (item.BuyerPaymentId > 0)
+                                    {
+                                        <td style="text-align: center;">
+                                            <a class="btn bg-blue" href="/Admin/BuyerPayment/Edit?id=@(item.BuyerPaymentId)">Modificar</a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }*@
+                            </tr>
+                        }
+                    </table>
+                </div>
+                @*<div>
+                        <h3 style="font-weight:bold">Proveedores con facturas pendientes de días anteriores (@(Model.PendingBillings.Select(x => x.Count).DefaultIfEmpty().Sum()) facturas pendientes)</h3>
+                        <ul>
+                            @foreach (var item in Model.PendingBillings)
+                            {
+                                <li>@(item.Manufacturer) (Comprador: @(item.Buyer)): @(item.Count)</li>
+                            }
+                        </ul>
+                    </div>*@
+                @*<h3 style="font-weight:bold">Pagos con pendientes de días anteriores</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <tr style="background-color:#95d8ff">
+                                <th>
+                                    Fecha y hora de solicitud de pago
+                                </th>
+                                <th>Fecha de pedido</th>
+                                <th>Fabricante</th>
+                                <th>Comprador solicitante</th>
+                                <th>Monto solicitado</th>
+                                <th>Recibo (comprador)</th>
+                                <th>Comprobante de pago (admin)</th>
+                                <th>Estatus de pago (admin)</th>
+                                <th>Factura (comprador)</th>
+                                <th>Opciones</th>
+                            </tr>
+                            @foreach (var item in Model.PendingPayments)
+                            {
+                                <tr style="background-color: @(GetRowColor(item))">
+                                    <td>@(item.RequestedAmount == 0 ? item.Date.ToString("dd/MM/yyyy") : item.CreationDate.ToString("dd/MM/yyyy HH:mm"))</td>
+                                    <td>@(item.Date.ToString("dd-MM-yyyy"))</td>
+                                    <td>@(item.ManufacturerName)</td>
+                                    <td>@(item.BuyerName)</td>
+                                    <td>@(item.RequestedAmount == 0 ? "-" : item.RequestedAmount.ToString("C"))</td>
+                                    @if (item.TicketBuyerFileIds.Count > 0)
+                                    {
+                                        <td>
+                                            <ul>
+                                                @for (int i = 0; i < item.TicketBuyerFileIds.Count; i++)
+                                                {
+                                                    <li>
+                                                        <a class="btn bg-blue" target="_blank" href="/admin/buyerPayment/GetPicture?id=@(item.TicketBuyerFileIds[i])">Ticket @(i + 1)</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+                                    }
+                                    @if (item.PaymentFileId > 0)
+                                    {
+                                        <td style="text-align: center;">
+                                            <a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.PaymentFileId })">Descargar</a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }
+                                    @if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Payed)
+                                    {
+                                        <td>
+                                            <span class="grid-report-item green">
+                                                @(item.PaymentStatus.GetDisplayName())
+                                            </span>
+                                        </td>
+                                    }
+                                    else if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Unauthorized)
+                                    {
+                                        <td>
+                                            <span class="grid-report-item red">
+                                                @(item.PaymentStatus.GetDisplayName())
+                                            </span>
+                                        </td>
+                                    }
+                                    else if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Pending && item.TicketBuyerFileIds.Count > 0)
+                                    {
+                                        <td>
+                                            <span class="grid-report-item orange">
+                                                @(item.PaymentStatus.GetDisplayName())
+                                            </span>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }
+                                    @if (item.InvoiceFileXmlId > 0 && item.InvoiceFilePdfId > 0)
+                                    {
+                                        <td>
+                                            <ul>
+                                                <li><a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.InvoiceFileXmlId })">XML</a></li>
+                                                <li><a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.InvoiceFilePdfId })">PDF</a></li>
+                                            </ul>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+
+                                    }
+                                    @if (item.BuyerPaymentId > 0)
+                                    {
+                                        <td style="text-align: center;">
+                                            <a class="btn bg-blue" href="/Admin/BuyerPayment/Edit?id=@(item.BuyerPaymentId)">Modificar</a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </table>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetRowColor(Teed.Plugin.Groceries.Controllers.BuyerPaymentModel item)
+    {
+        if (item.RequestedAmount == 0 || item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Unauthorized)
+            return "#ffcaca";
+        else if (item.RequestedAmount > 0 && (item.InvoiceFilePdfId == 0 || item.InvoiceFileXmlId == 0 || item.PaymentFileId == 0 || item.TicketBuyerFileIds.Count == 0 || item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Pending))
+            return "#ffe5bb";
+        else if (item.RequestedAmount > 0 && item.InvoiceFileXmlId > 0 && item.InvoiceFilePdfId > 0 && item.PaymentFileId > 0 && item.TicketBuyerFileIds.Count > 0 && item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Payed)
+            return "#b3fbb3";
+        else return "#FFFFFF";
+    }
+}

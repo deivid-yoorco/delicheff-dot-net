@@ -1,0 +1,116 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+@{
+    var imageNote = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es: 500x750 píxeles. Formato .JPG";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 1 de las cajas
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="Picture15Id_OverrideForStore" asp-input="Picture15Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="Picture15Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Picture15Id" />
+                <span asp-validation-for="Picture15Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="Link15_OverrideForStore" asp-input="Link15" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Link15" />
+                <span asp-validation-for="Link15"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 2 de las cajas
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="Picture16Id_OverrideForStore" asp-input="Picture16Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="Picture16Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Picture16Id" />
+                <span asp-validation-for="Picture16Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="Link16_OverrideForStore" asp-input="Link16" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Link16" />
+                <span asp-validation-for="Link16"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 3 de las cajas
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="Picture17Id_OverrideForStore" asp-input="Picture17Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="Picture17Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Picture17Id" />
+                <span asp-validation-for="Picture17Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="Link17_OverrideForStore" asp-input="Link17" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Link17" />
+                <span asp-validation-for="Link17"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen 4 de las cajas
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-override-store-checkbox asp-for="Picture18Id_OverrideForStore" asp-input="Picture18Id" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <nop-label asp-for="Picture18Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Picture18Id" />
+                <span asp-validation-for="Picture18Id"></span>
+                <em>@imageNote</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="Link18_OverrideForStore" asp-input="Link18" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Link18" />
+                <span asp-validation-for="Link18"></span>
+            </div>
+        </div>
+    </div>
+</div>

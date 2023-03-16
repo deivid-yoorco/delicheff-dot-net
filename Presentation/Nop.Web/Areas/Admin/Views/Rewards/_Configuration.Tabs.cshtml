@@ -1,0 +1,14 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.RewardModel
+
+<div asp-validation-summary="All"></div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="configuration-edit">
+            <nop-tab asp-name="tab-general" asp-title="General" asp-default="true">@await Html.PartialAsync("_Configuration.General", Model)</nop-tab>
+            <nop-tab asp-name="tab-points" asp-title="Puntos">@await Html.PartialAsync("_Configuration.Points", Model)</nop-tab>
+            <nop-tab asp-name="tab-rewards" asp-title="Página de recompensas">@await Html.PartialAsync("_Configuration.Rewards", Model)</nop-tab>
+            @*<nop-tab asp-name="tab-levels" asp-title="Niveles">@await Html.PartialAsync("_Configuration.Levels", Model)</nop-tab>*@
+        </nop-tabs>
+    </div>
+</div>

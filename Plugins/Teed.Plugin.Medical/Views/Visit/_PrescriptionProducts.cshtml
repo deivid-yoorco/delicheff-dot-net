@@ -1,0 +1,272 @@
+﻿@model Teed.Plugin.Medical.Models.Visit.VisitModel
+@{
+    Html.SetActiveMenuItemSystemName("TeedMedical.Prescriptions");
+    var selectedUser = (int)ViewData["SelectedUser"];
+    var now = DateTime.Now;
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                     Comentario de receta
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label for="Comments">Comentarios</label>
+                        </div>
+                        <div class="col-md-9">
+                            <textarea asp-for="Comments" class="form-control"></textarea>
+                            <span asp-validation-for="Comments" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Agregar producto
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="ProductId">Medicamento</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="ProductId" type="hidden" id="productId" />
+                                <input id="products" style="width: 100%;" />
+                                <a style="margin-left:10px" id="noExist" href="#">El producto no existe en el catálogo</a>
+                                <script>
+                                            $(document).ready(function () {
+                                                $("#products").kendoComboBox({
+                                                    placeholder: "Selecciona el producto...",
+                                                    dataTextField: "Name",
+                                                    dataValueField: "Id",
+                                                    filter: "contains",
+                                                    autoBind: true,
+                                                    minLength: 1,
+                                                    dataSource: {
+                                                        type: "json",
+                                                        transport: {
+                                                            read: {
+                                                                url: "@Html.Raw(Url.Action("ProductListData", "Prescription"))",
+                                                                type: "POST",
+                                                                data: addAntiForgeryToken
+                                                            }
+                                                        }
+                                                    },
+                                                    select: onSelect
+                                                });
+                                                function onSelect(e) {
+                                                    if (this.dataItem(e.item.index()).Id == 0) {
+                                                        document.getElementById("item-name").style.display = "block";
+                                                    } else {
+                                                        document.getElementById("item-name").style.display = "none";
+                                                    }
+                                                    document.getElementById("selectProduct").style.display = "none";
+                                                    $("#productId").val(this.dataItem(e.item.index()).Id);
+                                                }
+
+                                                $("#noExist").click(function () {
+                                                    document.getElementById("item-name").style.display = "block";
+                                                    document.getElementById("selectProduct").style.display = "none";
+                                                    $("#products").data("kendoComboBox").value(0);
+                                                    $("#productId").val(0);
+                                                    return false;
+                                                });
+                                            });
+                                </script>
+                                <span id="selectProduct" style="display:none" class="text-danger">Debes seleccionar un producto</span>
+                                <span asp-validation-for="ProductId"></span>
+                            </div>
+                        </div>
+                        <div id="item-name" class="form-group" style="display:none">
+                            <div class="col-md-3 text-right">
+                                <label for="ItemName">Ingresa el nombre del producto</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="ItemName" maxlength="256" class="form-control" />
+                                <span asp-validation-for="ItemName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label for="Dosage">Dosificación</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input asp-for="Dosage" maxlength="256" class="form-control" />
+                                <span asp-validation-for="Dosage" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <button type="button" id="addProductSpec" class="btn btn-primary">Agregar</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            @if (Model != null)
+            {
+
+                <div id="products-grid"></div>
+                <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#products-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("GetPrescriptionProductsList", "Visit", new {id = selectedUser}))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        },
+                                        update: {
+                                            url: "@Html.Raw(Url.Action("UpdatePrescriptionProduct", "Prescription"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        },
+                                        destroy: {
+                                            url: "@Html.Raw(Url.Action("DeletePrescriptionProduct", "Prescription"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors",
+                                        model: {
+                                            id: "Id",
+                                            fields: {
+                                                ItemName: { editable: false, type: "string" },
+                                                Dosage: { editable: true, type: "string" },
+                                            }
+                                        }
+                                    },
+                                    requestEnd: function(e) {
+                                        if (e.type == "update") {
+                                            this.read();
+                                        }
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    numeric: false,
+                                    previousNext: false,
+                                    info: false,
+                                    @*@await Html.PartialAsync("_GridPagerMessages")*@
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "ItemName",
+                                        title: "Nombre del producto",
+                                        width: 150
+                                    }, {
+                                        field: "Dosage",
+                                        title: "Dosificación",
+                                        width: 200
+                                    },
+                                    {
+                                        command: [
+                                            {
+                                                name: "edit",
+                                                text: {
+                                                    edit: "@T("Admin.Common.Edit")",
+                                                    update: "@T("Admin.Common.Update")",
+                                                    cancel: "@T("Admin.Common.Cancel")"
+                                                }
+                                            }, {
+                                                name: "destroy",
+                                                text: "@T("Admin.Common.Delete")"
+                                            }
+                                        ],
+                                        width: 200
+                                    }
+                                ]
+                            });
+                        });
+                </script>
+
+                if (Model.ItemsCount <= 0)
+                {
+                    <div id="empty-message" class="panel panel-default">
+                        <div class="panel-body">
+                            No se han agregado productos o tratamientos a esta receta.
+                        </div>
+                    </div>
+                }
+                <br />
+                <script>
+                    $(document).ready(function () {
+                        $('#addProductSpec').click(function () {
+                                var productId = $('#productId').val();
+                                var itemName = $("#@Html.IdFor(model => model.ItemName)").val();
+                                var dosage = $("#@Html.IdFor(model => model.Dosage)").val();
+
+                                if (!productId) {
+                                    document.getElementById("selectProduct").style.display = "block";
+                                }
+                                else {
+                                    var postData = {
+                                        productId: productId,
+                                        itemName: itemName,
+                                        dosage: dosage,
+                                        prescriptionId: @selectedUser
+                                    };
+                                    addAntiForgeryToken(postData);
+
+                                    $.ajax({
+                                        cache: false,
+                                        type: "POST",
+                                        url: "@(Url.Action("AddProductToPrescription", "Visit"))",
+                                        data: postData,
+                                        success: function (data) {
+                                            var grid = $("#products-grid").data('kendoGrid');
+                                            grid.dataSource.read();
+                                            $('#addProductSpec').attr('disabled', false);
+                                            $('#empty-message').hide();
+                                        },
+                                        error: function (xhr, ajaxOptions, thrownError) {
+                                            alert('Ocurrió un error al agregar el producto.');
+                                            $('#addProductSpec').attr('disabled', false);
+                                        }
+                                    });
+                                }
+                        });
+                    });
+                </script>
+
+            }
+            else
+            {
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        Debes guardar la receta antes de poder agregar medicamentos o tratamientos.
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

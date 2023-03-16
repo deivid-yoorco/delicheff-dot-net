@@ -1,0 +1,654 @@
+﻿@model Teed.Plugin.Medical.Models.Appointment.AppointmentModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Appointments");
+    var controllerName = "Appointment";
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var userBranches = (List<int>)ViewData["BranchesId"];
+    var currentDoctor = (int)ViewData["DoctorId"];
+    var now = DateTime.Now.ToString("dd-MM-yyyy");
+    var allowedToFilterByDoctor = (bool)ViewData["AllowedToFilterByDoctor"];
+}
+<script>
+    function printTodayAppointments() {
+        window.open('PrintAppointments?did=' + $("#currentDoctor").val() + '&bid=' + $("#userBranch").val(), '_blank');
+    }
+
+    function printAllAppointments() {
+        var date = new Date($('#datepicker').datepicker('getDate'));
+        var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+        window.open('PrintAppointments?did=' + $("#currentDoctor").val() + '&bid=' + $("#userBranch").val() + '&d=' + dateFormated, '_blank');
+    }
+
+    function formatDate(n) {
+        return n < 10 ? '0' + n : '' + n;
+    }
+</script>
+<form asp-controller="Plugin" asp-action="List" method="post" id="plugins-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Citas doctor
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                Agendar cita
+            </a>
+            <a asp-action="ManualCreate" class="btn bg-green">
+                <i class="fa fa-plus-square"></i>
+                Agendar cita manual
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <input type="hidden" value="@(userBranches.Count > 1 ? 0 : userBranches.FirstOrDefault())" id="userBranch" />
+        <input type="hidden" value="@currentDoctor" id="currentDoctor" />
+        <input type="hidden" id="filterDate" />
+        <div class="form-horizontal">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Sucursal</label>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input id="branches" />
+                            </div>
+                            <em>Selecciona para filtrar las citas por sucursal.</em>
+                        </div>
+                    </div>
+                    @if (allowedToFilterByDoctor)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Encargado</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group" style="width:100%">
+                                    <input id="doctors" />
+                                </div>
+                                <em>Selecciona para filtrar por encargado.</em>
+                            </div>
+                        </div>
+
+                    }
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <label>Fecha</label>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="input-group" style="width:100%">
+                                <input class="form-control" id="datepicker" />
+                            </div>
+                            <em>Selecciona la fecha para filtrar. <a style="display:none" id="removeDateFilter" href="#">Quitar este filtro</a></em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="content-header clearfix" id="today-appointmets-data">
+                        <h1 class="pull-left">
+                            Citas de hoy (@DateTime.Now.ToString("dd-MM-yyyy"))
+                        </h1>
+                        <div class="pull-right">
+                            <a href="#" onclick="printTodayAppointments()">
+                                <i class="fa fa-print"></i>
+                                Imprimir citas de hoy
+                            </a>
+                        </div>
+                    </div>
+                    <div id="element-grid-today"></div>
+
+                    <div class="content-header clearfix">
+                        <h1 class="pull-left">
+                            Todas las citas
+                        </h1>
+                        <div class="pull-right">
+                            <a href="#" onclick="printAllAppointments()">
+                                <i class="fa fa-print"></i>
+                                Imprimir todas las citas
+                            </a>
+                        </div>
+                    </div>
+                    <div id="element-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div id="details"></div>
+<script>
+    $(document).ready(function () {
+
+        $.datepicker.regional['es'] = {
+            closeText: 'Cerrar',
+            prevText: '< Ant',
+            nextText: 'Sig >',
+            currentText: 'Hoy',
+            monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'],
+            dayNamesMin: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'],
+            weekHeader: 'Sm',
+            dateFormat: 'dd-mm-yy',
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ''
+        };
+        $.datepicker.setDefaults($.datepicker.regional['es']);
+
+        $('#datepicker').datepicker({
+            minDate: 0
+        });
+
+        $('#datepicker').change(function () {
+            var date = new Date($('#datepicker').datepicker('getDate'));
+            var dateFormated = formatDate(date.getDate()) + "-" + formatDate(date.getMonth() + 1) + "-" + date.getFullYear();
+            $("#filterDate").val(dateFormated);
+            $("#element-grid-today").hide();
+            $("#today-appointmets-data").hide();
+            $("#removeDateFilter").show();
+            appointmentsList();
+        });
+
+        $("#removeDateFilter").click(function () {
+            $("#datepicker").val("");
+            $("#filterDate").val("");
+            $('selector').datepicker('setDate', null);
+            $("#element-grid-today").show();
+            $("#today-appointmets-data").show();
+            $("#removeDateFilter").hide();
+            appointmentsList();
+            return false;
+        });
+
+        function formatDate(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        let data = {
+            showAllAvailable: true
+        };
+        addAntiForgeryToken(data);
+
+        $("#branches").kendoComboBox({
+            placeholder: "Selecciona la sucursal...",
+            dataTextField: "Branch",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/Appointment/BranchListData",
+                        type: "POST",
+                        data: data
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#branches").data("kendoComboBox").value()) {
+                    $("#branches").data("kendoComboBox").value($("#userBranch").val());
+                }
+
+            },
+            select: function (e) {
+                $("#userBranch").val(this.dataItem(e.item.index()).Id);
+                todayAppointmentsList();
+                appointmentsList();
+            }
+        });
+
+        $("#doctors").kendoComboBox({
+            placeholder: "Selecciona al encargado...",
+            dataTextField: "Doctor",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            minLength: 1,
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "/Admin/Appointment/DoctorListData",
+                        type: "POST"
+                    }
+                }
+            },
+            dataBound: function (e) {
+                if (!$("#doctors").data("kendoComboBox").value()) {
+                    $("#doctors").data("kendoComboBox").value($("#currentDoctor").val());
+                }
+
+            },
+            select: function (e) {
+                $("#currentDoctor").val(this.dataItem(e.item.index()).Id);
+                todayAppointmentsList();
+                appointmentsList();
+            }
+        });
+
+        todayAppointmentsList();
+        appointmentsList();
+
+        function todayAppointmentsList() {
+            var data = {
+                branchId: $("#userBranch").val(),
+                doctorId: $("#currentDoctor").val()
+            };
+
+            $("#element-grid-today").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "@Html.Raw(Url.Action("ListDataToday", controllerName))",
+                            type: "POST",
+                            dataType: "json",
+                            data: data
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors"
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "AppointmentDate",
+                        title: "Hora",
+                        width: 170,
+                        template: '<a href="Edit/#=Id#">#=AppointmentDate#</a>'
+                    },
+                    {
+                        field: "FirstName" ,
+                        title: "Nombre del paciente",
+                        width: 150,
+                        template: '<a href="/Admin/Patient/Details/#=Patient.Id#">#=Patient.FirstName# #=Patient.LastName#</a>'
+                    },
+                    {
+                        field: "Branch",
+                        width: 150,
+                        title: "Sucursal",
+                    },
+                    {
+                        field: "Doctor",
+                        width: 150,
+                        title: "Encargado",
+                    },
+                    {
+                        field: "VisitType",
+                        width: 150,
+                        title: "Tipo de visita",
+                    },
+                    {
+                        field: "Comments",
+                        width: 150,
+                        title: "Comentarios",
+                    },
+                    {
+                        field: "Status",
+                        width: 100,
+                        title: "Estado",
+                    },
+                    {
+                        title: "Opciones",
+                        width: 200,
+                        template: `<a class="btn bg-yellow" href="/Admin/Patient/Details/#=Patient.Id#">Ver expediente</a>
+                                   <a class="btn bg-red" href="/Admin/Visit/Create?id=#=Patient.Id#&aid=#=Id#">Nueva consulta</a>
+                                   <a class="btn bg-green" href="/Admin/Appointment/Create/#=Patient.Id#">Nueva cita</a>
+                                   `
+                    }
+                ]
+            });
+
+            var wnd = $("#details")
+                .kendoWindow({
+                    title: "Cancelar cita",
+                    modal: true,
+                    visible: false,
+                    resizable: false,
+                    width: 300
+                }).data("kendoWindow");
+
+            var detailsTemplate = kendo.template($("#template").html());
+            var dataItem;
+
+            function showDetails(e) {
+                e.preventDefault();
+                detailsTemplate = kendo.template($("#template").html());
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                wnd.content(detailsTemplate(dataItem));
+                wnd.center().open();
+            };
+
+            function NoConfirmed(e) {
+                e.preventDefault();
+                detailsTemplate = kendo.template($("#NoConfirmed").html());
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                wnd.content(detailsTemplate(dataItem));
+                wnd.center().open();
+            };
+
+            function registered(e) {
+                e.preventDefault();
+                //detailsTemplate = kendo.template($("#registered").html());
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "RegisteredAppoiment/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        //wnd.close();
+                    }
+                });
+                //wnd.content(detailsTemplate(dataItem));
+                //wnd.center().open();
+            };
+
+            function confirmed(e) {
+                e.preventDefault();
+
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "ConfirmedAppoiment/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        //wnd.close();
+                    }
+                });
+
+            };
+
+            $("#details").data("kendoWindow").element.on("click", "#btnClose", function () {
+
+                $.ajax({
+                    url: "CancelAppoiment/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        wnd.close();
+                    }
+                });
+
+            });
+
+            $("#details").data("kendoWindow").element.on("click", "#btncomment", function () {
+
+                console.log($("#txt").val());
+                $.ajax({
+                    url: "NoConfirmedAppoiment?id=" + dataItem.Id + "&note=" + $("#txt").val() ,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        wnd.close();
+                    }
+                });
+
+            });
+        }
+
+        function appointmentsList() {
+            var data = {
+                branchId: $("#userBranch").val(),
+                doctorId: $("#currentDoctor").val(),
+                filterDate: $("#filterDate").val()
+            };
+
+            $("#element-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                            type: "POST",
+                            dataType: "json",
+                            data: data
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors"
+                    },
+                    error: function(e) {
+                        display_kendoui_grid_error(e);
+                        // Cancel the changes
+                        this.cancelChanges();
+                    },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                pageable: {
+                    refresh: true,
+                    pageSizes: [@(gridPageSizes)],
+                    @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                columns: [
+                    {
+                        field: "AppointmentDate",
+                        title: "Fecha y hora",
+                        width: 170,
+                        template: '<a href="Edit/#=Id#">#=AppointmentDate#</a>'
+                    },
+                    {
+                        field: "FirstName" ,
+                        title: "Nombre del paciente",
+                        width: 150,
+                        template: '<a href="/Admin/Patient/Details/#=Patient.Id#">#=Patient.FirstName# #=Patient.LastName#</a>'
+                    },
+                    {
+                        field: "Branch",
+                        width: 150,
+                        title: "Sucursal",
+                    },
+                    {
+                        field: "Doctor",
+                        width: 150,
+                        title: "Encargado",
+                    },
+                    {
+                        field: "VisitType",
+                        width: 150,
+                        title: "Tipo de visita",
+                    },
+                    {
+                        field: "Comments",
+                        width: 150,
+                        title: "Comentarios",
+                    },
+                    {
+                        field: "Status",
+                        width: 100,
+                        title: "Estado",
+                    },
+                    {
+                        //command: [{ text: "Ver expediente", click: patientDetails, className: "btn bg-red" }, { text: "Nueva consulta", click: NoConfirmed, className: "btn bg-yellow" }, { text: "Nueva cita", click: registered, className: "btn bg-green" }, { text: "Crear receta", click: confirmed, className: "btn bg-blue" }],
+                        title: "Opciones",
+                        width: 200,
+                        template: `<a class="btn bg-yellow" href="/Admin/Patient/Details/#=Patient.Id#">Ver expediente</a>
+                                   <a class="btn bg-red" href="/Admin/Visit/Create?id=#=Patient.Id#&aid=#=Id#">Nueva consulta</a>
+                                   <a class="btn bg-green" href="/Admin/Appointment/Create/#=Patient.Id#">Nueva cita</a>
+                                   `
+                    }
+                ]
+            });
+
+            var wnd = $("#details")
+                .kendoWindow({
+                    title: "Cancelar cita",
+                    modal: true,
+                    visible: false,
+                    resizable: false,
+                    width: 300
+                }).data("kendoWindow");
+
+            var detailsTemplate = kendo.template($("#template").html());
+            var dataItem;
+
+            function patientDetails(e) {
+                window.location.replace("/Admin/Patient/Details/37658");
+            };
+
+            function NoConfirmed(e) {
+                e.preventDefault();
+                detailsTemplate = kendo.template($("#NoConfirmed").html());
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                wnd.content(detailsTemplate(dataItem));
+                wnd.center().open();
+            };
+
+            function registered(e) {
+                e.preventDefault();
+                //detailsTemplate = kendo.template($("#registered").html());
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "RegisteredAppoiment/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        //wnd.close();
+                    }
+                });
+                //wnd.content(detailsTemplate(dataItem));
+                //wnd.center().open();
+            };
+
+            function confirmed(e) {
+                e.preventDefault();
+
+                dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                $.ajax({
+                    url: "ConfirmedAppoiment/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        //wnd.close();
+                    }
+                });
+
+            };
+
+            $("#details").data("kendoWindow").element.on("click", "#btnClose", function () {
+
+                $.ajax({
+                    url: "CancelAppoiment/" + dataItem.Id,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        wnd.close();
+                    }
+                });
+
+            });
+
+            $("#details").data("kendoWindow").element.on("click", "#btncomment", function () {
+
+                console.log($("#txt").val());
+                $.ajax({
+                    url: "NoConfirmedAppoiment?id=" + dataItem.Id + "&note=" + $("#txt").val() ,
+                    type: "POST",
+                    success: function (result) {
+                        var grid = $("#element-grid").data('kendoGrid');
+                        grid.dataSource.read();
+                        wnd.close();
+                    }
+                });
+
+            });
+        }
+    });
+</script>
+<script type="text/x-kendo-template" id="template">
+    <div id="details-container">
+        <h4> ¿Desea reagendar?</h4>
+        <em></em>
+        <dl>
+            <dt> </dt>
+            <dt> </dt>
+        </dl>
+        <div class="pull-right">
+            <a class="btn bg-red k-button" id="btnClose">No</a>
+            <a class="btn bg-green" href="Edit/#=Id#">Si</a>
+        </div>
+    </div>
+
+</script>
+<script type="text/x-kendo-template" id="NoConfirmed">
+    <div id="">
+        <h4>Razón:</h4>
+        <em></em>
+        <dl>
+            <dt> </dt>
+            <dt> </dt>
+        </dl>
+        <textarea id="txt" style="width:100%">
+
+        </textarea>
+        <em></em>
+        <dl>
+            <dt> </dt>
+            <dt> </dt>
+        </dl>
+        <div class="pull-right">
+            <a class="btn bg-green" id="btncomment">OK</a>
+        </div>
+    </div>
+
+</script>
+<style type="text/css">
+    #details-container {
+        padding: 10px;
+    }
+
+        #details-container h2 {
+            margin: 0;
+        }
+
+        #details-container em {
+            color: #8c8c8c;
+        }
+
+        #details-container dt {
+            margin: 0;
+            display: inline;
+        }
+</style>

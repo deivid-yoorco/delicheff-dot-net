@@ -1,0 +1,221 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@{
+    Layout = "_Layout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var now = Model.DateOfBirthDay == 0 ? DateTime.Now : Model.DateOfBirth;
+    var email = string.IsNullOrWhiteSpace(Model.Email) ? "El paciente no tiene correo electrónico" : Model.Email;
+}
+<div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+@if (Model.ActiveUpdate)
+{
+
+    <form asp-action="Update" method="post">
+        <div class="content-header clearfix">
+            <h1 class="pull-left">
+                Actualizar datos
+
+            </h1>
+            <div class="pull-right">
+                <button type="submit" name="save" class="btn bg-blue">
+                    <i class="fa fa-floppy-o"></i>
+                    @T("Admin.Common.Save")
+                </button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="form-horizontal">
+                <div class="panel-group">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div>
+
+                                <div style="margin-bottom:3%" class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="Email">Correo electrónico</label>
+                                    </div>
+                                    <div class="col-md-9">
+
+                                        <input maxlength="256" asp-for="Email" class="form-control" value="@email" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="Gender">@T("Account.Fields.Gender")</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <span class="male">
+                                            <input type="radio" asp-for="Gender" value="M" checked="@(Model.Gender == "M")" id="gender-male" />
+                                            <label class="forcheckbox" for="gender-male">@T("Account.Fields.Gender.Male")</label>
+                                        </span>
+                                        <span class="female">
+                                            <input type="radio" asp-for="Gender" value="F" checked="@(Model.Gender == "F")" id="gender-female" />
+                                            <label class="forcheckbox" for="gender-female">@T("Account.Fields.Gender.Female")</label>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="FirstName">Nombre(s)</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="FirstName" maxlength="256" class="form-control" />
+                                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="FirstName">Apellido(s)</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="LastName" maxlength="256" class="form-control" />
+                                        <span asp-validation-for="LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>@T("Account.Fields.DateOfBirth"):</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="inputs date-of-birth">
+                                            <nop-date-picker asp-day-name="@Html.NameFor(x => x.DateOfBirthDay)"
+                                                             asp-month-name="@Html.NameFor(x => x.DateOfBirthMonth)"
+                                                             asp-year-name="@Html.NameFor(x => x.DateOfBirthYear)"
+                                                             asp-begin-year="@(now.Year - 110)"
+                                                             asp-end-year="@(now.Year)"
+                                                             asp-selected-day="@(now.Day)"
+                                                             asp-selected-month="@(now.Month)"
+                                                             asp-selected-year="@(now.Year)" />
+
+                                            <span asp-validation-for="DateOfBirthDay"></span>
+                                            <span asp-validation-for="DateOfBirthMonth"></span>
+                                            <span asp-validation-for="DateOfBirthYear"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="Phone">Teléfono*</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="Phone" maxlength="256" class="form-control" />
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="StreetAddress">Línea de dirección 1</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="StreetAddress" maxlength="256" class="form-control" />
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="StreetAddress2">Línea de dirección 2</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="StreetAddress2" maxlength="256" class="form-control" />                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="CountryId">País</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="CountryId" asp-items="Model.AvailableCountries" />
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="StateProvinceId">Estado</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-select asp-for="StateProvinceId" asp-items="Model.AvailableStates" />
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="City">Municipio/Delegación</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="City" maxlength="256" class="form-control" />
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="ZipPostalCode">Código Postal</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input asp-for="ZipPostalCode" maxlength="256" class="form-control" />
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="FamilyBackground">Antecedentes heredo familiares</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="FamilyBackground" class="form-control"></textarea>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="PersonalPathologicalHistory">Antecedentes personales patológicos</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="PersonalPathologicalHistory" class="form-control"></textarea>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="PersonalNonPathologicalHistory">Antecedentes personales no patológicos</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="PersonalNonPathologicalHistory" class="form-control"></textarea>
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label for="CurrentConditions">Padecimientos actuales</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="CurrentConditions" class="form-control"></textarea>
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Alergias</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea asp-for="Allergies" class="form-control"></textarea>
+                                        
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Acepto el aviso de privacidad</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="checkbox" asp-for="Acepted" />
+                                    </div>
+
+                                </div>                                
+                                <input type="hidden" asp-for="Commentary" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+

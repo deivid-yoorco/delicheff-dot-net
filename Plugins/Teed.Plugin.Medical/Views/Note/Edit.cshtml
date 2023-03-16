@@ -1,0 +1,46 @@
+﻿@model Teed.Plugin.Medical.Models.Note.NotesModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Prescriptions");
+    var now = DateTime.Now;
+    var patients = (IEnumerable<Teed.Plugin.Medical.Domain.Patient>)ViewData["Patients"];
+    var selectedUser = (int)ViewData["SelectedUser"];
+}
+
+<form asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Generar Nota
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                @if (selectedUser == 0)
+                {
+                    <a asp-action="List">regresar a la lista de recetas</a>
+                }
+                else
+                {
+                    <a asp-controller="Patient" asp-action="Details" asp-route-id="@selectedUser">regresar a expediente de usuario</a>
+                }
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <nop-tabs id="recipe">
+                            <nop-tab asp-name="tab-info" asp-title="Detalles" asp-default="true">@await Html.PartialAsync("~/Plugins/Teed.Plugin.Medical/Views/Note/_Update.Info.cshtml", Model)</nop-tab>
+                        </nop-tabs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

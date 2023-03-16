@@ -1,0 +1,262 @@
+﻿@model Teed.Plugin.Payroll.Models.PayrollEmployee.CreateOrUpdateModel
+
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services.Catalog;
+@using System.Text;
+@using System.Text.Encodings.Web
+@using Nop.Services
+@using Nop.Services.Stores
+@using Teed.Plugin.Payroll.Domain.PayrollEmployees
+
+<div class="panel-group">
+    @if (Model.Id > 0)
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3 style="text-align: center;margin-top: 0px !important;">Empleos de empleado</h3>
+                <h4 style="text-align: center;font-weight: bold;margin-bottom: 20px !important;">(Empleo actual en negritas)</h4>
+                <h4 style="text-align: center;font-weight: bold; color: red; display: none;margin-bottom: 20px !important;" id="job-pending">PENDIENTE</h4>
+                <div id="job-grid"></div>
+
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $("#job-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("EmployeeJobList", "PayrollEmployeeJob", new {payrollId = Model.Id}))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("EmployeeJobUpdate", "PayrollEmployeeJob"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    destroy: {
+                                        url: "@Html.Raw(Url.Action("EmployeeJobDelete", "PayrollEmployeeJob"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            ApplyDate: { editable: true, type: "string" },
+                                            JobName: { editable: true, type: "string" },
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            editable: {
+                                confirmation: "confirmar",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "Id",
+                                    template: "<span data-id='#=Id#'></span>",
+                                    hidden: true
+                                },
+                                {
+                                    field: "IsCurrent",
+                                    template: "<span data-is-current='#=IsCurrent#'></span>",
+                                    hidden: true
+                                },
+                            {
+                                field: "ApplyDate",
+                                title: "Fecha de aplicación",
+                                width: 150,
+                                //format: "{0:dd-MM-yyyy}",
+                                editor: dateEditor,
+                            }, {
+                                field: "JobName",
+                                title: "Nombre del empleo",
+                                width: 150
+                            },
+                            {
+                                command: [
+                                //{
+                                //    name: "edit",
+                                //    text: {
+                                //        edit: "Editar",
+                                //        update: "Actualizar",
+                                //        cancel: "Cancelar"
+                                //    }
+                                //},
+                                    {
+                                        name: "destroy",
+                                        text: "Borrar"
+                                    }
+                                ],
+                                width: 200
+                            }
+                            ],
+                            dataBound: function (e) {
+                                $('#job-grid [data-is-current="true"]').parentsUntil('[role="rowgroup"]').last().css('font-weight', 'bold');
+                                if (this.dataSource.total() < 1) {
+                                    $("#job-pending").show();
+                                }
+                            }
+                        });
+                    });
+                    function dateEditor(container, options) {
+                        $('<input value="' + options.model.ApplyDate + '" class="temp-date-editor" data-bind="value:ApplyDateString"/>')
+                            .appendTo(container);
+                        $('.temp-date-editor').kendoDatePicker({
+                            parseFormats: ["dd/MM/yyyy"],
+                            format: "dd/MM/yyyy"
+                        });
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Agregar nuevo salario
+            </div>
+            <div class="panel-body">
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('#addEmployeeJob').click(function() {
+                            $('.job-error').hide();
+                            var applyDate = $("#@Html.IdFor(model => model.AddEmployeeJob.ApplyDate)").val();
+                            var jobCatalogId = $("#@Html.IdFor(model => model.AddEmployeeJob.JobCatalogId)").val();
+
+                            if (
+                                jobCatalogId == "" || typeof jobCatalogId == 'undefined' || jobCatalogId == "0" ||
+                                applyDate == "" || typeof applyDate == 'undefined'
+                            ) {
+                                $('.job-error').show();
+                                return false;
+                            }
+
+                            $('#addEmployeeJob').attr('disabled', true);
+
+                            var postData = {
+                                applyDate: applyDate,
+                                jobCatalogId: jobCatalogId,
+                                payrollEmployeeId: @Model.Id,
+                            };
+                            addAntiForgeryToken(postData);
+                            var formData = new FormData();
+                            $.each(postData, function (name, value) {
+                                formData.append(name, value);
+                            });
+
+                            $.ajax({
+                                contentType: false,
+                                processData: false,
+                                type: "POST",
+                                url: "@(Url.Action("EmployeeJobAdd", "PayrollEmployeeJob"))",
+                                data: formData,
+                                success: function(data) {
+                                    var grid = $("#job-grid");
+                                    grid.data('kendoGrid').dataSource.read();
+                                    $('#addEmployeeJob').attr('disabled', false);
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    alert('Failed to add employee job.');
+                                    $('#addEmployeeJob').attr('disabled', false);
+                                }
+                            });
+                        });
+                    });
+                </script>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddEmployeeJob.ApplyDate" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="AddEmployeeJob.ApplyDate" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="AddEmployeeJob.JobCatalogId" />
+                    </div>
+                    <div class="col-md-9">
+                        <input type="hidden" id="@Html.IdFor(model => model.AddEmployeeJob.JobCatalogId)" name="@Html.IdFor(model => model.AddEmployeeJob.JobCatalogId)" />
+                        <select id="JobCatalogs" name="JobCatalogs"></select>
+                        <span asp-validation-for="AddEmployeeJob.JobCatalogId"></span>
+                    </div>
+                    <script>
+                            var $@Html.IdFor(model => model.AddEmployeeJob.JobCatalogId);
+                                                        $(document).ready(function () {
+                                                            $@Html.IdFor(model => model.AddEmployeeJob.JobCatalogId) = $("#JobCatalogs").kendoComboBox({
+                                                                placeholder: "Buscar empleo...",
+                                                                dataTextField: "Name",
+                                                                dataValueField: "Id",
+                                                                filter: "contains",
+                                                                autoBind: true,
+                                                                minLength: 1,
+                                                                dataSource: {
+                                                                    type: "json",
+                                                                    transport: {
+                                                                        read: {
+                                                                            url: "@Html.Raw(Url.Action("GetJobs", "JobCatalog"))",
+                                                                            type: "POST",
+                                                                            data: addAntiForgeryToken
+                                                                        }
+                                                                    }
+                                                                },
+                                                                select: onSelectJob
+                                                            });
+                                                            function onSelectJob(e) {
+                                                                $("#@Html.IdFor(model => model.AddEmployeeJob.JobCatalogId)").val(this.dataItem(e.item.index()).Id);
+                                                            }
+                                                        });
+                    </script>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-3 col-md-9 job-error" style="color: red;display: none;margin-bottom: 10px;">
+                    Todos los campos son requeridos para agregar un nuevo empleo.
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3" style="margin-bottom: 10px;">
+                    <button type="button" id="addEmployeeJob" class="btn btn-primary">Agregar empleo al expediente</button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                You need to save the employee before you can add jobs for this employee page.
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,105 @@
+﻿@model Teed.Plugin.ShippingByAddress.Models.EditDatesViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("ShippingByAddress");
+}
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+<form method="post" enctype="multipart/form-data" id="shipping-form">
+    <input type="hidden" value="@Model.Id" id="Id" asp-for="Id" />
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Editar ruta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="Index">regresar a la lista</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn bg-red">
+                <i class="fa fa-trash"></i>
+                Eliminar
+            </a>
+            <button type="button" asp-action="Edit" class="btn bg-blue" id="submit-btn">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Código postal</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <nop-editor asp-for="PostalCode" />
+                                    <span asp-validation-for="PostalCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Días de envío</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" asp-for="DaysToShip" id="DaysFinal" hidden />
+                                    <select id="DaySelect">
+                                        <option value="1">Lunes</option>
+                                        <option value="2">Martes</option>
+                                        <option value="3">Miércoles</option>
+                                        <option value="4">Jueves</option>
+                                        <option value="5">Viernes</option>
+                                        <option value="6">Sábado</option>
+                                        <option value="0">Domingo</option>
+                                    </select>
+                                    <span asp-validation-for="DaysToShip" class="text-danger"></span>
+                                </div>
+                            </div>
+                            @if (Model.Branches?.Count() > 0)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-3 text-right">
+                                        <label>Sucursal</label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <nop-select asp-for="ShippingBranchId" asp-items="@Model.Branches" />
+                                        <span asp-validation-for="ShippingBranchId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#DaySelect").kendoMultiSelect();
+        // For edit
+        var splitDates = $("#DaysFinal").val().split(',');
+        if (splitDates.length > 0)
+            $("#DaySelect").getKendoMultiSelect().value(splitDates);
+        //
+        $("#submit-btn").click(function () {
+            var days = $("#DaySelect").val();
+            var finalDays = "";
+            $.each(days, function (i, e) {
+                finalDays += e + ",";
+            });
+            finalDays = finalDays.substring(0, finalDays.length - 1);
+            $("#DaysFinal").val(finalDays);
+            $("#shipping-form").submit();
+        });
+    });
+</script>

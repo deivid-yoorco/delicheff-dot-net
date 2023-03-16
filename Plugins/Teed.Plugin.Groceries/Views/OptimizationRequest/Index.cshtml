@@ -1,0 +1,1227 @@
+﻿@model Teed.Plugin.Groceries.Models.ShippingRoute.OptimizationRequestDataModel
+@using System.Globalization;
+@using Teed.Plugin.Groceries.Domain.ShippingRoutes;
+@inject Nop.Services.Security.IPermissionService permissionService;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OptimizationRequest");
+    List<string> selectedShippingTimes = new List<string> { "1:00 PM - 3:00 PM", "3:00 PM - 5:00 PM", "5:00 PM - 7:00 PM", "7:00 PM - 9:00 PM" };
+    var isManager =
+        permissionService.Authorize(Teed.Plugin.Groceries.Security.TeedGroceriesPermissionProvider.OptimizationRequestManager)
+        ;
+    var optimizationTypesOrderBy = new List<int> {
+        (int)OrderOptimizationTypes.Inmediate,
+        (int)OrderOptimizationTypes.RequestedByClient,
+        (int)OrderOptimizationTypes.ToConsider,
+        (int)OrderOptimizationTypes.EvaluationProcess,
+        (int)OrderOptimizationTypes.ApplicableOnWay
+    };
+}
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/oms.min.js"></script>
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/custom.js"></script>
+<link href="~/Plugins/Teed.Plugin.Groceries/src/css/custom.css" rel="stylesheet">
+
+<style>
+    .select-color-10 {
+        background-color: #d3d3d3;
+    }
+
+    .select-color-20 {
+        background-color: #ffff00;
+    }
+
+    .select-color-30 {
+        background-color: #4efb4e;
+    }
+
+    .select-color-40 {
+        background-color: #ffadad;
+    }
+</style>
+
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @if (isManager)
+        {
+            <text>
+                Solicitudes de optimización @(Model.Date.ToString("dddd, dd 'de' MMMM yyyy", new CultureInfo("es-MX")))
+            </text>
+        }
+        else
+        {
+            <text>
+                Respuestas de optimización @(Model.Date.ToString("dddd, dd 'de' MMMM yyyy", new CultureInfo("es-MX")))
+            </text>
+        }
+    </h1>
+    <div class="pull-right">
+        <div style="display:none" class="loading-container" id="loading-container">
+            <div class="preloader-wrapper small active" style="width:24px;height:24px">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div><div class="gap-patch">
+                        <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <span style="margin-left: 10px">Guardando...</span>
+        </div>
+        @if (isManager)
+        {
+            <text>
+                <button type="button" class="btn bg-blue submit-button" onclick="onOptimizationSubmit()">
+                    <i class="fa fa-plus-square"></i>
+                    @T("Admin.Common.Save") nueva optimización
+                </button>
+            </text>
+        }
+        else
+        {
+            <button type="button" class="btn bg-blue submit-button" onclick="onSubmit()">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        }
+        <span id="saving-error" style="margin-left: 10px; color:red; display:none">Ocurrió un problema guardando la información</span>
+    </div>
+</div>
+<div class="content" id="order-optimize-content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @if (isManager)
+                {
+                    <div class="col-md-12" id="optimize-schedule-container" style="display:none; margin-bottom: 20px">
+                        <h3>Optimizaciones seleccionadas:</h3>
+                        <table class="table" id="optimize-changes-table">
+                            <tr id="optimize-changes-header">
+                                <th>Ruta</th>
+                                <th>Orden</th>
+                                <th>Horario original de entrega</th>
+                                <th>Recomendación de optimización</th>
+                                <th>Horario sugerido</th>
+                                <th>Horario sugerido 2</th>
+                                <th>Horario sugerido 3</th>
+                                <th>Comentario de coordinación</th>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="map" style="height:55em;width:100%"></div>
+                    <div class="row">
+                        <div class="row" style="margin-bottom: 1em">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label style="text-align:right;margin-top: 7px;">¿Mostrar división por zonas?</label>
+                                            <div title="Selecciona si deseas mostrar la división por zonas" class="ico-help"><i class="fa fa-question-circle"></i></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input checked class="check-box" id="display-zones" type="checkbox" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @{
+                    var dataGroup = Model.Data.SelectMany(x => x.OptimizationRequest).GroupBy(x => x.RouteId).OrderBy(x => x.Key).ToList();
+                }
+                @if (dataGroup != null)
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Resumen de optimización</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <tr>
+                                        <th>Ruta</th>
+                                        <th>Estatus de las solicitudes</th>
+                                        <th>Distribución actual por horario</th>
+                                        <th>¿Ya se puede optimizar?</th>
+                                    </tr>
+
+                                    @foreach (var item in dataGroup)
+                                    {
+                                        <tr>
+                                            <td>@(item.FirstOrDefault().RouteName)</td>
+                                            <td>
+                                                <ul style="list-style-type: none;text-align: end">
+                                                    @{
+                                                        var status = (Enum.GetValues(typeof(Teed.Plugin.Groceries.Domain.ShippingRoutes.OrderOptimizationStatus)))
+                                                            .Cast<Teed.Plugin.Groceries.Domain.ShippingRoutes.OrderOptimizationStatus>()
+                                                            .Select(x => new
+                                                            {
+                                                                Text = Nop.Services.Helpers.EnumHelper.GetDisplayName(x),
+                                                                Value = (int)x
+                                                            });
+                                                    }
+                                                    @foreach (var statusItem in status)
+                                                    {
+                                                        <li><span class="select-color-@(statusItem.Value.ToString())">@statusItem.Text</span>: @(item.Where(x => x.CurrentStatusId == statusItem.Value && (x.OptimizationTypeId == (int)OrderOptimizationTypes.Inmediate || x.OptimizationTypeId == (int)OrderOptimizationTypes.RequestedByClient)).Count())</li>
+                                                    }
+                                                    @if (!item.Where(x => x.EmptyRoute).Any())
+                                                    {
+                                                        <li style="font-weight: bold">Total: @(item.Where(x => x.OptimizationTypeId == (int)OrderOptimizationTypes.Inmediate || x.OptimizationTypeId == (int)OrderOptimizationTypes.RequestedByClient).Count())</li>
+                                                    }
+                                                    else
+                                                    {
+                                                        <li style="font-weight: bold">Total: 0</li>
+                                                    }
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                <ul style="list-style-type: none;text-align: end">
+                                                    @{
+                                                        var times = Model.CurrentOrdersData.Where(x => x.RouteId == item.Key)
+                                                            .GroupBy(x => x.SelectedShippingTime).OrderBy(x => x.Key).Select(x => new
+                                                            {
+                                                                Time = x.Key,
+                                                                Count = x.Count(),
+                                                            }).ToList();
+                                                        for (int i = 0; i < 4; i++)
+                                                        {
+                                                            var time = selectedShippingTimes[i];
+                                                            var currentTime = times.Where(x => x.Time == time).FirstOrDefault();
+                                                            if (currentTime != null)
+                                                            {
+                                                                <li>@currentTime.Time: @currentTime.Count</li>
+                                                            }
+                                                            else
+                                                            {
+                                                                <li>@time: 0</li>
+                                                            }
+                                                        }
+                                                    }
+                                                    <li style="font-weight: bold">Total: @Model.CurrentOrdersData.Where(x => x.RouteId == item.Key).Count()</li>
+                                                </ul>
+                                            </td>
+                                            <td style="text-align:center">
+                                                @if (item.Where(x => x.CurrentStatusId != (int)OrderOptimizationStatus.Authorized && x.CurrentStatusId != (int)OrderOptimizationStatus.Rejected && !x.EmptyRoute && x.OptimizationTypeId == (int)Teed.Plugin.Groceries.Domain.ShippingRoutes.OrderOptimizationTypes.Inmediate).Any())
+                                                {
+                                                    <span style="color:red;font-size:25px"><i class="fa fa-ban" aria-hidden="true"></i></span>
+                                                }
+                                                else if (item.Where(x => (x.OptimizationTypeId == (int)OrderOptimizationTypes.Inmediate || x.OptimizationTypeId == (int)OrderOptimizationTypes.RequestedByClient) && x.CurrentStatusId == (int)OrderOptimizationStatus.Authorized).Any() && !item.Where(x => (x.OptimizationTypeId == (int)OrderOptimizationTypes.Inmediate || x.OptimizationTypeId == (int)OrderOptimizationTypes.RequestedByClient) && (x.CurrentStatusId == (int)OrderOptimizationStatus.Pending || x.CurrentStatusId == (int)OrderOptimizationStatus.Requested)).Any())
+                                                {
+                                                    <span style="color:green;font-size:25px"><i class="fa fa-check-square" aria-hidden="true"></i></span>
+                                                }
+                                                else
+                                                {
+                                                    <span style="color:gray;font-size:25px"><i class="fa fa-check-square" aria-hidden="true"></i></span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    @if (isManager)
+                    {
+                        <text>
+                            <div class="col-md-12">
+                                <a style="margin-right: 20px;" onclick="return confirm('¿Confirmas que deseas regresar todas las órdenes a su horario original? Esto no afectará a las solicitudes realizadas por el cliente. Considera que este cambio no se puede deshacer.')" href="/admin/orderoptimizationrequest/resetschedules?date=@(Model.Date.ToString("dd-MM-yyyy"))" class="btn btn-primary">Regresar todos los horarios al horario original</a>
+                                <a style="margin-right: 20px;" onclick="massiveSend(true)" href="javascript:void(0)" class="btn btn-primary massive-send disabled">Convertir los seleccionados en solicitud inmediata</a>
+                                <a style="margin-right: 20px;" onclick="massiveSend(false)" href="javascript:void(0)" class="btn btn-primary massive-send disabled">Cancelar los seleccionados</a>
+                            </div>
+                        </text>
+                    }
+                    @foreach (var item in Model.Data.OrderBy(x => optimizationTypesOrderBy.IndexOf(x.OptimizationTypeId)))
+                    {
+                        @if (isManager || item.OptimizationTypeId == 1 || item.OptimizationTypeId == 4)
+                        {
+                            <div class="col-md-12">
+                                <h3 class="@(GetOptimizationClassName(item.OptimizationTypeId))">► @item.OptimizationTypeName</h3>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <tr>
+                                            @if (isManager && item.OptimizationTypeId != 1 && item.OptimizationTypeId != 4)
+                                            {
+                                                <th><input style="vertical-align: inherit;" onchange="selectAllInTable(this)" class="all-massive-check check-box" type="checkbox"></th>
+                                            }
+                                            <th>Ruta</th>
+                                            <th>Pedido / Cliente / Teléfono</th>
+                                            <th>Dirección</th>
+                                            <th>Horario de entrega actual</th>
+                                            <th>Horario de entrega original</th>
+                                            <th>Nuevos horarios sugeridos</th>
+                                            <th>Estatus</th>
+                                            <th>Comentario</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                        @foreach (var opt in item.OptimizationRequest.Where(x => !x.EmptyRoute).OrderBy(x => x.RouteId).ThenBy(x => x.CurrentStatusId).ToList())
+                                        {
+                                            var shouldBeDisabled = opt.CurrentStatusId == 30 || DateTime.Now.Date != Model.Date || isManager;
+                                            <tr class="optimization-data" data-orderids="@(opt.OrderIds)">
+                                                @if (isManager && item.OptimizationTypeId != 1 && item.OptimizationTypeId != 4)
+                                                {
+                                                    <td>
+                                                        <input onchange="addToMassive(this, '@opt.OrderIds')" class="massive-check check-box" type="checkbox">
+                                                    </td>
+                                                }
+                                                <td>
+                                                    @(opt.RouteName)
+                                                </td>
+                                                <td>
+                                                    @(Html.Raw(opt.OrderNames)) /
+                                                    <a href="/Admin/Customer/Edit/@opt.CustomerId" target="_blank">@(opt.CustomerName)</a> / @(opt.PhoneNumber)
+                                                </td>
+                                                <td>
+                                                    @(opt.Address)
+                                                </td>
+                                                <td>
+                                                    @(opt.CurrentTime)
+                                                </td>
+                                                <td>
+                                                    @(opt.OriginalTime)
+                                                </td>
+                                                <td class="time-option">
+                                                    @if (!string.IsNullOrWhiteSpace(opt.TimeOption2))
+                                                    {
+                                                        @if (opt.FinalTimeSelected == opt.TimeOption1)
+                                                        {
+                                                            <input disabled="@(shouldBeDisabled)" checked onchange="scheduleSelectHandler('@(opt.OrderIds)')" type="radio" id="time1-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption1)">
+                                                        }
+                                                        else
+                                                        {
+                                                            <input disabled="@(shouldBeDisabled)" onchange="scheduleSelectHandler('@(opt.OrderIds)')" type="radio" id="time1-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption1)">
+                                                        }
+                                                        <label for="time1-@(opt.OrderIds)">@(opt.TimeOption1)</label>
+                                                        @if (!string.IsNullOrWhiteSpace(opt.TimeOption2))
+                                                        {
+                                                            <br />
+                                                            @if (opt.FinalTimeSelected == opt.TimeOption2)
+                                                            {
+                                                                <input disabled="@(shouldBeDisabled)" checked onchange="scheduleSelectHandler('@(opt.OrderIds)')" type="radio" id="time2-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption2)">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input disabled="@(shouldBeDisabled)" onchange="scheduleSelectHandler('@(opt.OrderIds)')" type="radio" id="time2-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption2)">
+                                                            }
+                                                            <label for="time2-@(opt.OrderIds)">@(opt.TimeOption2)</label>
+                                                            if (!string.IsNullOrWhiteSpace(opt.TimeOption3))
+                                                            {
+                                                                <br />
+                                                                @if (opt.FinalTimeSelected == opt.TimeOption3)
+                                                                {
+                                                                    <input disabled="@(shouldBeDisabled)" checked onchange="scheduleSelectHandler('@(opt.OrderIds)')" type="radio" id="time3-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption3)">
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input disabled="@(shouldBeDisabled)" onchange="scheduleSelectHandler('@(opt.OrderIds)')" type="radio" id="time3-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption3)">
+                                                                }
+                                                                <label for="time3-@(opt.OrderIds)">@(opt.TimeOption3)</label>
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <input disabled="@(shouldBeDisabled)" type="radio" id="time1-@(opt.OrderIds)" name="time-@(opt.OrderIds)" value="@(opt.TimeOption1)" checked>
+                                                        <label for="time1-@(opt.OrderIds)">@(opt.TimeOption1)</label>
+                                                    }
+                                                </td>
+                                                <td class="selector-status">
+                                                    @if (item.OptimizationTypeId == (int)Teed.Plugin.Groceries.Domain.ShippingRoutes.OrderOptimizationTypes.Inmediate)
+                                                    {
+                                                        <select disabled="@(opt.CurrentStatusId == 30 || isManager)" onchange="updateSelectColor(this)" id="selector-status-@(opt.OrderIds)" asp-for="@opt.CurrentStatusId">
+                                                            <option style="background-color:#d3d3d3" value="10">No procesado</option>
+                                                            <option style="background-color:#ffff00" value="20">Solicitado al cliente y pendiente de respuesta</option>
+                                                            @if ((string.IsNullOrWhiteSpace(opt.TimeOption2) && string.IsNullOrWhiteSpace(opt.TimeOption3)) || !string.IsNullOrWhiteSpace(opt.FinalTimeSelected))
+                                                            {
+                                                                <option style="background-color:#4efb4e;" value="30">Autorizado por el cliente y aplicado</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option disabled style="background-color:#4efb4e;" value="30">Autorizado por el cliente y aplicado</option>
+                                                            }
+                                                            <option style="background-color:#ffadad;" value="40">Rechazado por el cliente</option>
+                                                        </select>
+                                                    }
+                                                    else if (item.OptimizationTypeId == (int)Teed.Plugin.Groceries.Domain.ShippingRoutes.OrderOptimizationTypes.RequestedByClient)
+                                                    {
+                                                        <select disabled="@(opt.CurrentStatusId == 30 || isManager)" onchange="updateSelectColor(this)" id="selector-status-@(opt.OrderIds)" asp-for="@opt.CurrentStatusId">
+                                                            <option style="background-color:#d3d3d3" value="10">No procesado</option>
+                                                            @if ((string.IsNullOrWhiteSpace(opt.TimeOption2) && string.IsNullOrWhiteSpace(opt.TimeOption3)) || !string.IsNullOrWhiteSpace(opt.FinalTimeSelected))
+                                                            {
+                                                                <option style="background-color:#4efb4e;" value="30">Aceptado por Central en línea</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option disabled style="background-color:#4efb4e;" value="30">Aceptado por Central en línea</option>
+                                                            }
+                                                            <option style="background-color:#ffadad;" value="40">No aceptado por Central en línea</option>
+                                                        </select>
+                                                    }
+                                                    else
+                                                    {
+                                                        <select style="display: none" id="selector-status-@(opt.OrderIds)" asp-for="@opt.CurrentStatusId">
+                                                            <option selected style="background-color:#d3d3d3" value="10">No procesado</option>
+                                                        </select>
+                                                        <span>-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(opt.ManagerComment))
+                                                    {
+                                                        <span style="white-space: pre-line">Comentario del coordinador: @opt.ManagerComment</span>
+                                                    }
+                                                    @if (isManager)
+                                                    {
+                                                        @opt.Comments
+                                                    }
+                                                    else
+                                                    {
+                                                        <textarea oninput="auto_grow(this)" id="comments-@(opt.OrderIds)">@opt.Comments</textarea>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (DateTime.Now.Date == Model.Date && isManager)
+                                                    {
+                                                        <a onclick="return confirm('¿Confirmas que deseas cancelar esta solicitud de optimización? Los cambios no guardados se perderán y el horario regresará al original (si aplica).')" href="/admin/orderoptimizationrequest/DeleteOptimization?orderids=@(opt.OrderIds)&date=@(Model.Date.ToString("dd-MM-yyyy"))" style="color:red" title="Eliminar optimización"><i class="fa fa-times" aria-hidden="true"></i></a>
+                                                        @if (item.OptimizationTypeId != 1 && item.OptimizationTypeId != 4)
+                                                        {
+                                                            <a onclick="return confirm('¿Confirmas que deseas convertir esta solicitud en inmediata? Los cambios no guardados se perderán')" href="/admin/orderoptimizationrequest/UpgradeOptimization?orderids=@(opt.OrderIds)&date=@(Model.Date.ToString("dd-MM-yyyy"))" class="optimize-color-pink" title="Convertir en optimización inmediata"><i class="fa fa-retweet" aria-hidden="true"></i></a>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var allZondesCp = [];
+    var map;
+    var currentStyle;
+    let ordersToUpdate = [];
+    let ordersToOptimize = [];
+    let markers = [];
+    let oms;
+    let massiveSelection = [];
+
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    function addToMassive(element, orderIds) {
+        var checked = $(element).prop('checked');
+        if (checked) {
+            massiveSelection.push(orderIds);
+        } else {
+            massiveSelection = $.grep(massiveSelection, function (value) {
+                return value != orderIds;
+            });
+        }
+        var parent = $(element).parentsUntil('.table-responsive').last();
+        if (massiveSelection.length > 0) {
+            $('.massive-send').removeClass('disabled');
+            var allCount = parent.find('.massive-check').length;
+            var checkedCount = parent.find('.massive-check:checkbox:checked').length;
+            if (allCount == checkedCount)
+                parent.find('.all-massive-check').prop('checked', true);
+            else
+                parent.find('.all-massive-check').prop('checked', false);
+        }
+        else {
+            $('.massive-send').addClass('disabled');
+            parent.find('.all-massive-check').prop('checked', false);
+        }
+        console.log(massiveSelection);
+    }
+
+    function selectAllInTable(element) {
+        var checked = $(element).prop('checked');
+        $(element).parentsUntil('.table-responsive').last().find('.massive-check').each(function (i, e) {
+            var currentChecked = $(e).prop('checked');
+            if (currentChecked != checked)
+                $(e).click();
+        });
+    }
+
+    function massiveSend(isConvert) {
+        if (massiveSelection.length > 0) {
+            var msg = isConvert ?
+                '¿Confirmas que deseas convertir las solicitudes seleccionadas a solicitud inmediata? Considera que este cambio no se puede deshacer.' :
+                '¿Confirmas que deseas cancelar las solicitudes seleccionadas? Considera que este cambio no se puede deshacer.';
+            var doTheMassiveSend = confirm(msg);
+            if (doTheMassiveSend) {
+                var massiveFormated = massiveSelection.length > 1 ? massiveSelection.join(",") : massiveSelection[0];
+                var url = '/admin/orderoptimizationrequest/' +
+                    (isConvert ? 'UpgradeOptimization' : 'DeleteOptimization') +
+                    '?orderids=' + massiveFormated + '&date=@(Model.Date.ToString("dd-MM-yyyy"))';
+                window.location.href = location.origin + url;
+            }
+        } else
+            return false
+    }
+
+    function scheduleSelectHandler(orderIds) {
+        $("#selector-status-" + orderIds + " option[value='30']").prop('disabled', false);
+    }
+
+    initiateTextAreas();
+    function initiateTextAreas() {
+        var areas = $("textarea");
+        $.each(areas, function (index, element) {
+            auto_grow(element);
+        });
+    }
+
+    function auto_grow(element) {
+        element.style.height = "5px";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+
+    function getNumberByTime(time) {
+        switch (time) {
+            case "1:00 PM - 3:00 PM":
+                return 1;
+            case "3:00 PM - 5:00 PM":
+                return 2;
+            case "5:00 PM - 7:00 PM":
+                return 3;
+            case "7:00 PM - 9:00 PM":
+                return 4;
+            default:
+                return 0;
+        }
+    };
+
+    function processTemplate(str) {
+        var template = str.split('`');
+        for (var i = 0, len = template.length; i < len; i += 2) template[i] = encodeURIComponent(template[i]);
+        return template;
+    };
+
+    $("#display-zones").change(function () {
+        if (this.checked) {
+            map.data.setStyle(currentStyle);
+        } else {
+            map.data.setStyle({ visible: false });
+        }
+    });
+
+    @if (isManager)
+    {
+        <text>
+            function initMap() {
+                createMap();
+            }
+
+            function createMap() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 19.3170078, lng: -99.2090609 },
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    zoom: 12
+                });
+
+                map.set('styles', myStyle);
+                map.data.loadGeoJson('/shippingarea/GetGeoJson');
+
+                oms = new OverlappingMarkerSpiderfier(map, {
+                    markersWontMove: true,
+                    markersWontHide: true,
+                    basicFormatEvents: true,
+                    keepSpiderfied: true,
+                    nearbyDistance: 5
+                });
+            }
+
+            $.ajax({
+                url: '/Admin/ShippingZone/GetAllPostalCodesOfZones',
+                method: 'GET',
+                success: function (data) {
+                    setTimeout(function () {
+                        $.each(data, function (i, e) {
+                            allZondesCp.push({ id: e.Id, color: e.Color, pcs: e.Pcs, zoneName: e.ZoneName });
+                        });
+
+                        var filteredZones = [...new Set(allZondesCp.map(x => x.zoneName))];
+                        $.each(filteredZones, function (index, element) {
+                            let i = allZondesCp.map(x => x.zoneName).indexOf(element);
+                            let color = allZondesCp[i].color;
+                            let id = allZondesCp[i].id;
+                            let zoneTableRow = `<tr><td style="padding: 5px 0"><div style="width:20px;height:20px;background:${color};margin-right: 5px;"></td>
+                                                <td style="padding: 5px 0"><a href="/Admin/ShippingZone/Edit/${id}" target="_blank">${element}</a></td></tr>`;
+                            $("#zone-colors-table").append(zoneTableRow);
+                        });
+
+
+
+                        var bounds = new google.maps.LatLngBounds();
+                        map.data.addListener('addfeature', function (e) {
+                            var feature = e.feature.j;
+                            if (typeof feature == 'undefined')
+                                feature = e.feature.h;
+                            if (allZondesCp.find(x => x.pcs.includes(feature.d_cp))) {
+                                var current = allZondesCp.find(x => x.pcs.includes(feature.d_cp));
+                                e.feature.setProperty("name", current.id);
+                            }
+                            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+                            map.fitBounds(bounds);
+                        });
+
+                        map.data.setStyle(function (feature) {
+                            var color = '#919191';
+                            var allZones = allZondesCp;
+                            if (typeof feature.getProperty('name') != 'undefined' &&
+                                feature.getProperty('name') != '' &&
+                                feature.getProperty('name') != null) {
+                                var current = allZones.find(x => x.id.includes(feature.getProperty('name')));
+                                color = current.color != 'null' ? (current.color.includes('#') ? current.color : "#" + current.color) : '#3fff2e';
+                            }
+
+                            return ({
+                                fillColor: color,
+                                strokeColor: color,
+                                strokeWeight: 3
+                            });
+                        });
+
+                        currentStyle = map.data.getStyle();
+                    }, 1000);
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+
+            function processPoints(geometry, callback, thisArg) {
+                if (geometry instanceof google.maps.LatLng) {
+                    callback.call(thisArg, geometry);
+                } else if (geometry instanceof google.maps.Data.Point) {
+                    callback.call(thisArg, geometry.get());
+                } else {
+                    geometry.getArray().forEach(function (g) {
+                        processPoints(g, callback, thisArg);
+                    });
+                }
+            };
+
+            var mapSelectorIds = [];
+            $.ajax({
+                type: 'GET',
+                url: '/Admin/ShippingRoute/RouteMapData?date=' + '@(Model.Date.ToString("dd-MM-yyyy"))',
+                success: (data) => {
+                    data.Routes.unshift({
+                        RouteName: 'Sin ruta asignada',
+                        Id: 0
+                    });
+                    $.each(data.Data, function (index, element) {
+                        if (!element.Route) {
+                            element.Route = {
+                                Id: 0,
+                                RouteName: 'Sin ruta asignada',
+                                GuidId: '00'
+                            }
+                        }
+                        let pinColor = "cccccc";
+                        if (element.Route.Id > 0) { pinColor = routeColors[index]; }
+                        $.each(element.Orders, function (i, e) {
+                            setTimeout(function () {
+                                var ind = makeid(5);
+                                do {
+                                    ind = makeid(5);
+                                } while (mapSelectorIds.filter(x => x == ind).length > 0);
+                                mapSelectorIds.push(ind);
+                                console.log(ind);
+                                console.log(e);
+                                console.log('-----');
+                                var pinNumber = getNumberByTime(e.SelectedShippingTime);
+                                var imageUrl = "https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=" + pinNumber + "|" + pinColor;
+                                if (e.OptimizeTypeId > 0) {
+                                    var starColor = getStarColor(e.OptimizeTypeId);
+                                    console.log(starColor);
+                                    imageUrl = "https://chart.apis.google.com/chart?chst=d_map_xpin_letter&chld=pin_star|" + pinNumber + "|" + pinColor + "|000000|" + starColor;
+                                }
+                                var pinImage = new google.maps.MarkerImage(imageUrl);
+                                var marker = new google.maps.Marker({
+                                    position: { lat: parseFloat(e.Latitude), lng: parseFloat(e.Longitude) },
+                                    animation: google.maps.Animation.DROP,
+                                    icon: pinImage,
+                                    id: e.OrderIds
+                                });
+                                //marker.setMap(map);
+                                if (e.OrderStatusId == 30) {
+                                    marker.setOptions({ 'opacity': 0.3 });
+                                }
+                                oms.addMarker(marker)
+                                markers.push(marker);
+                                var infowindow = new google.maps.InfoWindow({
+                                    content: `
+                                        <div>
+                                            <strong>${e.OrderNumber}</strong><br/>
+                                            <strong>${e.OrderTotal}</strong><br/>
+                                            <strong>${e.PaymentMethodSystemName}</strong><br/>
+                                            <strong>${e.ProductCount}</strong><br/>
+                                            <strong>${element.Route.RouteName}</strong><br/><br/>
+                                            <span>${e.ShippingFullName}</span><br/>
+                                            <span>${e.ShippingAddress}</span><br/>
+                                            <span>${e.SelectedShippingTime}</span><br/>
+                                            <span>CP: ${e.PostalCode}</span><br/>
+                                            <span>${e.ZoneName}</span>
+                                            ${getOptimizationElement(ind, e.SelectedShippingTime, e.OrderIds, e.OrderNumber, e.OptimizeTypeId, e.OptimizationTimes, e.OptimizeStatusId, element.Route.RouteName)}
+                                        </div>
+                                    `
+                                });
+
+                                google.maps.event.addListener(infowindow, 'closeclick', function () {
+                                    // Close jQuery ui tooltip related to the close button
+                                    jQuery("[role='tooltip']").remove();
+                                });
+
+                                marker.addListener('spider_click', function () {
+                                    infowindow.open(map, marker);
+                                    setTimeout(function () { jQuery("[role='tooltip']").remove(); }, 300);
+                                });
+                            }, (index + i) * 200);
+                        });
+                    });
+                },
+                error: (error) => {
+                    console.log('ERROR CARGANDO DATOS PARA EL MAPA:', error);
+                }
+            });
+        </text>
+    }
+
+    function getOptimizationElement(i, selectedShippingTime, orderIds, orderNames, optimizeTypeId, optimizationTimes, optimizeStatusId, routeName) {
+        if (optimizeTypeId > 0) {
+            let html = `<br/><br/><strong>Recomendación de optimización activa:</strong>${getOptimizationType(optimizeTypeId)}`;
+            if (optimizationTimes) {
+                if (optimizationTimes[0]) {
+                    html += `<br/><strong>Opción 1 de horario:</strong> <span>${optimizationTimes[0]}</span>`;
+                }
+                if (optimizationTimes[1]) {
+                    html += `<br/><strong>Opción 2 de horario:</strong> <span>${optimizationTimes[1]}</span>`;
+                }
+                if (optimizationTimes[2]) {
+                    html += `<br/><strong>Opción 3 de horario:</strong> <span>${optimizationTimes[2]}</span>`;
+                }
+            }
+            if (optimizeStatusId > 0 && (optimizeTypeId == 1 || optimizeTypeId == 4)) {
+                switch (optimizeStatusId) {
+                    case 10:
+                        html += `<br /><strong style="color:gray">No procesado</strong>`;
+                        break;
+                    case 20:
+                        html += `<br /><strong style="color:yellow">Solicitado al cliente y pendiente de respuesta</strong>`;
+                        break;
+                    case 30:
+                        html += `<br /><strong style="color:green">` + (optimizeTypeId == 4 ? `Aceptado por Central en línea` : `Autorizado por el cliente y aplicado`) + `</strong>`;
+                        break;
+                    case 40:
+                        html += `<br /><strong style="color:red">` + (optimizeTypeId == 4 ? `No aceptado por Central en línea` : `Rechazado por el cliente`) + `</strong>`;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return html;
+        }
+        else if (selectedShippingTime == "1:00 PM - 3:00 PM") {
+            @if (isManager)
+            {
+                <text>
+            return `<br/><br/>
+
+                    <strong>Recomendación de optimización</strong><br/>
+
+                    <select id="optimize-selector-${i}" onchange="optimizeOptionSelected(this, '${i}', '${selectedShippingTime}', '${orderIds}', '${routeName}')">
+
+                        <option value="0">Selecciona una opción...</option>
+
+                        <option value="4" class="optimize-color-orange">► Solicitud realizada por el cliente</option>
+                </select>
+                <br/><br/>
+                <div id="schedule-container-${i}" style="display:none">
+                    <strong>Horario sugerido</strong><br/>
+                    <select id="schedule-${i}" onchange="scheduleSelected('${i}', '${selectedShippingTime}', 1, '${orderIds}', '${orderNames}', '${routeName}')"></select>
+                </div>
+                <br/><br/>
+                <div id="manager-comment-${i}" style="display:none">
+                    <strong>Comentario de coordinación</strong><br/>
+                    <textarea style="width: 100%" rows=3 onchange="setManagerComment('${i}')" onkeyup="setManagerComment('${i}')"></textarea>
+                </div>`;
+                </text>
+            }
+            else
+            {
+                <text>return '';</text>
+            }
+
+        } else {
+    @if(isManager)
+    {
+     <text>
+            return `<br/><br/>
+                <strong>Recomendación de optimización</strong><br/>
+                <select id="optimize-selector-${i}" onchange="optimizeOptionSelected(this, '${i}', '${selectedShippingTime}', '${orderIds}', '${routeName}')">
+                    <option value="0">Selecciona una opción...</option>
+                    <option value="1" class="optimize-color-pink">► Solicitud inmediata</option>
+                    <option value="2" class="optimize-color-blue">► Solicitud en consideración</option>
+                    <option value="3" class="optimize-color-black">► Solicitud en proceso de evaluación</option>
+                    <option value="4" class="optimize-color-orange">► Solicitud realizada por el cliente</option>
+                    <option value="5" class="optimize-color-green">► Solicitud aplicable en trayecto</option>
+                </select>
+                <br/><br/>
+                <div id="schedule-container-${i}" style="display:none">
+                    <strong>Horario sugerido</strong><br/>
+                    <select id="schedule-${i}" onchange="scheduleSelected('${i}', '${selectedShippingTime}', 1, '${orderIds}', '${orderNames}', '${routeName}')"></select>
+                </div>
+                <div id="schedule-container-2-${i}" style="display:none">
+                    <strong>Segundo horario sugerido (opcional)</strong><br/>
+                    <select id="schedule-2-${i}" onchange="scheduleSelected('${i}', '${selectedShippingTime}', 2, '${orderIds}', '${orderNames}', '${routeName}')"></select>
+                </div>
+                <div id="schedule-container-3-${i}" style="display:none">
+                    <strong>Tercer horario sugerido (opcional)</strong><br/>
+                    <select id="schedule-3-${i}" onchange="scheduleSelected('${i}', '${selectedShippingTime}', 3, '${orderIds}', '${orderNames}', '${routeName}')"></select>
+                </div>
+                <br/><br/>
+                <div id="manager-comment-${i}" style="display:none">
+                    <strong>Comentario de coordinación</strong><br/>
+                    <textarea style="width: 100%" rows=3 onchange="setManagerComment('${i}')" onkeyup="setManagerComment('${i}')"></textarea>
+                </div>`;
+     </text>
+    }
+    else
+    {
+     <text>
+            return '';
+     </text>
+    }
+        }
+    }
+
+    function optimizeRouteUpdated(index, orderIds, orderNames, originalTime, selectedOptimizationTypeId, selectedOptimizationTypeName, timeOption1, timeOption2, timeOption3, colorClass, routeName, managerComment) {
+        let existingIndex = ordersToOptimize.map(x => x.orderIds).indexOf(orderIds);
+        if (existingIndex > -1) {
+            ordersToOptimize.splice(existingIndex, 1);
+        }
+
+        if (selectedOptimizationTypeId > 0 && timeOption1 && timeOption1 != '0') {
+            ordersToOptimize.push({
+                index: index,
+                orderIds: orderIds,
+                orderNames: orderNames,
+                originalTime: originalTime,
+                selectedOptimizationTypeId: selectedOptimizationTypeId,
+                selectedOptimizationTypeName: selectedOptimizationTypeName,
+                timeOption1: timeOption1,
+                timeOption2: timeOption1 == 0 ? 0 : timeOption2,
+                timeOption3: timeOption2 == 0 ? 0 : timeOption3,
+                colorClass: colorClass,
+                routeName: routeName,
+                managerComment: managerComment
+            });
+        }
+
+        if (ordersToOptimize.length > 0) {
+            $("#optimize-schedule-container").show();
+        } else {
+            $("#optimize-schedule-container").hide();
+        }
+
+        $("#optimize-changes-table tr:gt(0)").remove();
+        $.each(ordersToOptimize, function (index, el) {
+            let option1 = el.timeOption1;
+            let option2 = el.timeOption2 && el.timeOption2 != '0' ? el.timeOption2 : "-";
+            let option3 = el.timeOption3 && el.timeOption3 != '0' ? el.timeOption3 : "-";
+            let managerComment = "";
+            if (el.managerComment && typeof el.managerComment != 'undefined') {
+                managerComment = el.managerComment;
+            }
+            let row = "<tr><td>" + el.routeName + "</td><td>" + el.orderNames + "</td><td>" + el.originalTime + "</td><td class='" + el.colorClass + "'>" + el.selectedOptimizationTypeName + "</td><td>" + option1 + "</td><td>" + option2 + "</td><td>" + option3 + "</td><td id='new-manager-comment-" + el.index + "' style='white-space: pre-line'>" + managerComment + "</td></tr>";
+            $("#optimize-changes-table").append(row);
+        });
+    }
+
+    function optimizeOptionSelected(element, index, currentTime, orderIds, routeName) {
+        const selectedValue = $(element).val();
+
+        optimizeRouteUpdated(index,
+            orderIds,
+            '',
+            '',
+            0,
+            0,
+            0,
+            0,
+            '',
+            '',
+            routeName,
+            $('#manager-comment-' + index + ' textarea').val());
+
+        if (currentTime == "1:00 PM - 3:00 PM" && selectedValue != 4 && selectedValue != 0) return;
+        const selectedOptionClass = $(element).find(":selected").attr('class');
+
+        // Set select class
+        if (selectedOptionClass) {
+            $(element).removeClass().addClass(selectedOptionClass);
+        }
+        else {
+            $(element).removeClass();
+        }
+
+        // Set suggested time
+        if (selectedValue == 0) {
+            $("#schedule-container-" + index).hide();
+            $("#schedule-container-2-" + index).hide();
+            $("#schedule-container-3-" + index).hide();
+            $("#schedule-" + index).empty();
+            $("#schedule-2-" + index).empty();
+            $("#schedule-3-" + index).empty();
+            $('#manager-comment-' + index).hide();
+            $('#manager-comment-' + index + ' textarea').val('');
+        }
+        else {
+            $("#schedule-container-" + index).show();
+            $("#schedule-container-2-" + index).hide();
+            $("#schedule-container-3-" + index).hide();
+            $("#schedule-2-" + index).empty();
+            $("#schedule-3-" + index).empty();
+            $('#manager-comment-' + index).show();
+            generateTimeOptions(currentTime, index, selectedValue);
+        }
+    };
+
+    function scheduleSelected(index, currentTime, selectElementNumber, orderIds, orderNames, routeName) {
+
+        if (selectElementNumber != '3') {
+            $("#schedule-container-2-" + index).hide();
+            $("#schedule-container-3-" + index).hide();
+
+            // If time is from 3 to 5 we dont have to show any additional option
+            if (currentTime != "3:00 PM - 5:00 PM" && $("#optimize-selector-" + index).val() != 4) {
+                // If changed was the first option select, we empty and hide the others
+                if (selectElementNumber == 1) {
+                    $("#schedule-2-" + index).empty();
+                    $("#schedule-3-" + index).empty();
+                }
+
+                // If selected no option we hide and remove other options
+                if (selectElementNumber == 1 && $("#schedule-" + index).val() == "0") {
+                    $("#schedule-2-" + index).empty();
+                    $("#schedule-3-" + index).empty();
+                    optimizeRouteUpdated(index,
+                        orderIds,
+                        orderNames,
+                        currentTime,
+                        0,
+                        0,
+                        0,
+                        0,
+                        '',
+                        '',
+                        routeName,
+                        $('#manager-comment-' + index + ' textarea').val());
+                    return;
+                }
+
+                // If time is from 5 to 7 we only have to show a second option
+                if (currentTime == "5:00 PM - 7:00 PM") {
+                    $("#schedule-container-2-" + index).show();
+                    // If selected is from select 2 we dont want to rebuild select 2
+                    if (selectElementNumber != 2) {
+                        let options = "";
+                        // If selected by first schedule is 1 to 3 we add only 3 to 5, else, we show 1 to 3
+                        if ($("#schedule-" + index).val() == "1:00 PM - 3:00 PM") {
+                            options = `<option value="0">Selecciona un horario...</option>
+                           <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>`;
+
+                        }
+                        else {
+                            options = `<option value="0">Selecciona un horario...</option>
+                           <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>`;
+                        }
+                        $("#schedule-2-" + index).html(options);
+                    }
+                }
+                // If time is from 7 to 9 we have to show maximum two options
+                else if (currentTime == "7:00 PM - 9:00 PM") {
+                    let select1Value = $("#schedule-" + index).val();
+                    let select2Value = $("#schedule-2-" + index).val();
+                    let options = `<option value="0">Selecciona un horario...</option>`;
+                    // If option 1 and 2 have any option selected, we show option 3
+                    if (select1Value && select2Value) {
+                        if (select2Value != 0) $("#schedule-container-3-" + index).show();
+                        $("#schedule-container-2-" + index).show();
+                        if (select1Value != "1:00 PM - 3:00 PM" && select2Value != "1:00 PM - 3:00 PM") {
+                            options += `<option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>`;
+                        }
+                        else if (select1Value != "3:00 PM - 5:00 PM" && select2Value != "3:00 PM - 5:00 PM") {
+                            options += `<option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>`;
+                        }
+                        else if (select1Value != "5:00 PM - 7:00 PM" && select2Value != "5:00 PM - 7:00 PM") {
+                            options += `<option value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</option>`;
+                        }
+                        $("#schedule-3-" + index).html(options);
+                    }
+                    // else, we show option 2, we hide option 1 selected value
+                    else {
+                        $("#schedule-3-" + index).empty();
+                        $("#schedule-container-3-" + index).hide();
+
+                        $("#schedule-container-2-" + index).show();
+                        if ($("#schedule-" + index).val() == "1:00 PM - 3:00 PM") {
+                            options = `<option value="0">Selecciona un horario...</option>
+                            <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>
+                            <option value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</option>`;
+                        }
+                        else if ($("#schedule-" + index).val() == "3:00 PM - 5:00 PM") {
+                            options = `<option value="0">Selecciona un horario...</option>
+                            <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>
+                            <option value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</option>`;
+                        }
+                        else {
+                            options = `<option value="0">Selecciona un horario...</option>
+                                <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>
+                               <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>`;
+                        }
+                        $("#schedule-2-" + index).html(options);
+                    }
+                }
+            };
+        }
+
+        const selectedOptionClass = $("#optimize-selector-" + index).find(":selected").attr('class');
+        optimizeRouteUpdated(index,
+            orderIds,
+            orderNames,
+            currentTime,
+            $("#optimize-selector-" + index).val(),
+            $("#optimize-selector-" + index + " option:selected").text(),
+            $("#schedule-" + index).val(), $("#schedule-2-" + index).val(),
+            $("#schedule-3-" + index).val(),
+            selectedOptionClass,
+            routeName,
+            $('#manager-comment-' + index + ' textarea').val());
+    }
+
+    function setManagerComment(index) {
+        var newComment = $('#manager-comment-' + index + ' textarea').val();
+        $('#new-manager-comment-' + index).html(newComment);
+        var currentOptimization = ordersToOptimize.firstOrDefault({ index: index });
+        if (currentOptimization != null && typeof currentOptimization != 'undefined')
+            currentOptimization.managerComment = newComment;
+    }
+
+    function generateTimeOptions(currentTime, index, selectedOption) {
+        let option1 = "";
+        if (currentTime == "3:00 PM - 5:00 PM") {
+            option1 = `<option value="0" selected>Selecciona un horario...</option>
+                       <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>`;
+            if (selectedOption == 4) {
+                option1 += `<option value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</option>
+                            <option value="7:00 PM - 9:00 PM">7:00 PM - 9:00 PM</option>`;
+            }
+        }
+        else if (currentTime == "5:00 PM - 7:00 PM") {
+            option1 = `<option value="0" selected>Selecciona un horario...</option>
+                       <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>
+                       <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>`;
+            if (selectedOption == 4) {
+                option1 += `<option value="7:00 PM - 9:00 PM">7:00 PM - 9:00 PM</option>`;
+            }
+        }
+        else if (currentTime == "7:00 PM - 9:00 PM") {
+            option1 = `<option value="0" selected>Selecciona un horario...</option>
+                      <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>
+                      <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>
+                      <option value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</option>`;
+        }
+        else {
+            option1 = `<option value="0" selected>Selecciona un horario...</option>
+                      <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>
+                      <option value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</option>
+                      <option value="7:00 PM - 9:00 PM">7:00 PM - 9:00 PM</option>`;
+        }
+        $("#schedule-" + index).html(option1);
+    }
+
+    initialConfig();
+    function initialConfig() {
+        var statusSelect = $(".selector-status select");
+        $.each(statusSelect, function (index, element) {
+            updateSelectColor(element);
+        });
+    }
+
+    function updateSelectColor(element) {
+        var $select = $(element);
+        var selectedValue = $select.val();
+        var selectClass = "select-color-" + selectedValue;
+        $select.removeClass();
+        $select.addClass(selectClass);
+    }
+
+    const onOptimizationSubmit = () => {
+        $("#loading-container").show();
+        $(".submit-button").hide();
+        $("#saving-error").hide();
+
+        let body = {
+            data: ordersToUpdate,
+            optimizationData: ordersToOptimize,
+            date: '@(Model.Date.ToString("dd-MM-yyyy"))'
+        }
+
+        $.ajax({
+            url: '/Admin/ShippingRoute/UpdateOrdersFromMap',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#saving-error").show();
+                $("#loading-container").hide();
+                $(".submit-button").show();
+            }
+        })
+    }
+
+    const onSubmit = () => {
+        $("#loading-container").show();
+        $(".submit-button").hide();
+        $("#saving-error").hide();
+
+        let allRows = $(".optimization-data");
+        $.each(allRows, function (index, element) {
+            var orderIds = $(element).data('orderids');
+            var selectedTime = $(element).find("td.time-option").find("input:checked").val();
+            var selectedStatusId = $(element).find("td.selector-status").find("select").val();
+            ordersToUpdate.push({
+                orderIds,
+                selectedTime,
+                selectedStatusId,
+                comments: $("#comments-" + orderIds).val()
+            });
+        });
+
+        let body = {
+            data: ordersToUpdate
+        }
+
+        $.ajax({
+            url: '/Admin/OrderOptimizationRequest/UpdateOptimizationRequest',
+            type: 'POST',
+            data: body,
+            success: () => {
+                location.reload();
+            },
+            error: (error) => {
+                console.log('ERROR SAVING DATA: ', error);
+                $("#saving-error").show();
+                $("#loading-container").hide();
+                $(".submit-button").show();
+            }
+        })
+    }
+
+    Array.prototype.where = function (filter) {
+
+        var collection = this;
+
+        switch(typeof filter) {
+
+            case 'function':
+                return $.grep(collection, filter);
+
+            case 'object':
+                for(var property in filter) {
+                  if(!filter.hasOwnProperty(property))
+                      continue; // ignore inherited properties
+
+                  collection = $.grep(collection, function (item) {
+                      return item[property] === filter[property];
+                  });
+                }
+                return collection.slice(0); // copy the array
+                                          // (in case of empty object filter)
+
+            default:
+                throw new TypeError('func must be either a' +
+                    'function or an object of properties and values to filter by');
+        }
+    };
+
+    Array.prototype.firstOrDefault = function(func){
+        return this.where(func)[0] || null;
+    };
+
+    function round(value, precision) {
+        var multiplier = Math.pow(10, precision || 0);
+        return Math.round(value * multiplier) / multiplier;
+    }
+
+    function makeid(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() *
+                charactersLength));
+        }
+        return result;
+    }
+</script>
+@if (isManager)
+{
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap"
+            async defer></script>
+}
+
+@functions {
+    private string GetOptimizationClassName(int optimizationId)
+    {
+        switch (optimizationId)
+        {
+            case 1:
+                return "optimize-color-pink";
+            case 2:
+                return "optimize-color-blue";
+            case 3:
+                return "optimize-color-black";
+            case 4:
+                return "optimize-color-orange";
+            case 5:
+                return "optimize-color-green";
+            default:
+                return "";
+        }
+    }
+}

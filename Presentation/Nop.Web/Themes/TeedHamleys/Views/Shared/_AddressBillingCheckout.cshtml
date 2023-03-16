@@ -1,0 +1,97 @@
+﻿@model AddressModel
+<script type="text/javascript" asp-location="Footer">
+    //we don't move this script to the footer as it's used in Ajax requests where footer is not available
+        $(document).ready(function () {
+            $(".input-card-Country").change(function () {
+            var selectedItem = $(this).val();
+                var ddlStates = $(".input-card-State");
+            var statesProgress = $("#states-loading-progress-new");
+            statesProgress.show();
+                $.ajax({
+                cache: false,
+                    type: "GET",
+                    url: "@(Url.RouteUrl("GetStatesByCountryId"))",
+                    data: { "countryId": selectedItem, "addSelectStateItem": "true" },
+                    success: function (data) {
+                    ddlStates.html('');
+                        $.each(data, function (id, option) {
+                        ddlStates.append($('<option></option>').val(option.id).html(option.name));
+                        });
+                        $('select').formSelect();
+                    statesProgress.hide();
+                },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Failed to retrieve states.');
+                    statesProgress.hide();
+                }
+            });
+        });
+        });
+</script>
+
+<div class="edit-address row" style="margin-top:2%;">
+    <h5>Datos del titular de la tarjeta</h5>
+    <div class="inputs col s12 m6">
+        <label>*Nombre(s)</label>
+        <input id="input-card-FirstName" />
+        <span class="helper-text red-text" id="first-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    <div class="inputs col s12 m6">
+        <label>*Apellidos</label>
+        <input id="input-card-LastName" />
+        <span class="helper-text red-text" id="last-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    <div class="inputs col s12 m12">
+        <label>*@Html.DisplayNameFor(m => m.Email)</label>
+        <input id="input-card-email" />
+        <span class="helper-text red-text" id="email-field-teed" style="display:none;">Este campo es obligatorio</span>
+        <span class="helper-text red-text" id="validate-email-field-teed" style="display:none;">Debes ingresar un correo electrónico válido</span>
+    </div>
+    <div class="inputs col s12 m12">
+        <label>*@Html.DisplayNameFor(m => m.CountryId)</label>
+        <select asp-items="Model.AvailableCountries" class="input-card-Country"></select>
+        <span class="helper-text red-text" id="countryId-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.StateProvinceId)</label>
+        <select asp-items="Model.AvailableStates" class="state-input input-card-State"></select>
+        <span class="helper-text red-text" id="stateId-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    @{
+        string cityReq = Model.CityRequired ? "*" : "";
+        <div class="inputs col s12 m6">
+            <label>@Html.Raw(cityReq)@Html.DisplayNameFor(m => m.City)</label>
+            <input id="input-card-City" />
+            <span class="helper-text red-text" id="city-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string add1Req = Model.StreetAddressRequired ? "*" : "";
+        <div class="inputs col s12 m12">
+            <label>@Html.Raw(add1Req)@Html.DisplayNameFor(m => m.Address1)</label>
+            <input id="input-card-Address1" />
+            <span class="helper-text red-text" id="address1-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string add2Req = Model.StreetAddress2Required ? "*" : "";
+        <div class="inputs col s12 m12">
+            <label>@Html.Raw(add2Req)@Html.DisplayNameFor(m => m.Address2)</label>
+            <input id="input-card-Address2" />
+            <span class="helper-text red-text" asp-validation-for="Address2"></span>
+        </div>
+
+        string zipReq = Model.ZipPostalCodeRequired ? "*" : "";
+        <div class="inputs col s12 m6">
+            <label>@Html.Raw(zipReq)@Html.DisplayNameFor(m => m.ZipPostalCode)</label>
+            <input id="input-card-ZCP" />
+            <span class="helper-text red-text" id="zcp-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string phoneReq = Model.PhoneRequired ? "*" : "";
+        <div class="inputs col s12 m6">
+            <label>@Html.Raw(phoneReq)@Html.DisplayNameFor(m => m.PhoneNumber)</label>
+            <input id="input-card-Phone" />
+            <span class="helper-text red-text" id="phone-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+    }
+</div>

@@ -1,0 +1,166 @@
+﻿@model ProductDetailsModel.AddToCartModel
+@using Nop.Core.Domain.Orders
+@if (Model.UpdatedShoppingCartItemId > 0)
+{
+    <input asp-for="UpdatedShoppingCartItemId" type="hidden" />
+}
+@if (!Model.DisableBuyButton || Model.CustomerEntersPrice)
+{
+    <div class="add-to-cart">
+        @if (Model.CustomerEntersPrice)
+        {
+            <div class="customer-entered-price">
+                <div class="price-input">
+                    <label asp-for="CustomerEnteredPrice" asp-postfix=":" class="enter-price-label"></label>
+                    @*round price*@
+                    <input asp-for="CustomerEnteredPrice" value="@Convert.ToInt32(Math.Ceiling(Model.CustomerEnteredPrice))" class="enter-price-input" />
+                </div>
+                <div class="price-range">
+                    @Model.CustomerEnteredPriceRange
+                </div>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.MinimumQuantityNotification))
+        {
+            <div class="min-qty-notification">@Model.MinimumQuantityNotification</div>
+        }
+        @if (!Model.DisableBuyButton)
+        {
+            <div class="row">
+                <div class="input-field col s3" style="margin-bottom:0;">
+                    <style>
+                        .qty-label {
+                            position: absolute !important;
+                            top: -26px !important;
+                            font-size: .8rem !important;
+                        }
+                    </style>
+                    <label asp-for="EnteredQuantity" class="qty-label" style="margin-top: -8px;"></label>
+                    @if (Model.AllowedQuantities.Count > 0)
+                    {
+                        <select asp-for="EnteredQuantity" asp-items="Model.AllowedQuantities" class="qty-input browser-default"></select>
+                    }
+                    else if (Model.StockQty > 0)
+                    {
+                        <select asp-for="EnteredQuantity" class="qty-input browser-default">
+                            @{
+                                var count = Model.StockQty > 50 ? 50 : Model.StockQty;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    if ((i + 1) == 1)
+                                    {
+                                        <option selected value="@(i + 1)">@(i + 1)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@(i + 1)">@(i + 1)</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        @*<input asp-for="EnteredQuantity" class="qty-input" type="text" />
+            <script type="text/javascript" asp-location="Footer">
+                //when a customer clicks 'Enter' button we submit the "add to cart" button (if visible)
+                $(document).ready(function() {
+                    $("#@Html.IdFor(model => model.EnteredQuantity)").keydown(function(event) {
+                        if (event.keyCode == 13) {
+                            $("#add-to-cart-button-@Model.ProductId").click();
+                            return false;
+                        }
+                    });
+                });
+            </script>*@
+                        <select asp-for="EnteredQuantity" class="qty-dropdown select-qty"></select>
+                        <script>
+                            $(document).ready(function () {
+                                setTimeout(function () {
+                                    $.ajax({
+                                     cache: false,
+                                        url: '@Html.Raw(Url.Action("productdetails_stockquantity", "shoppingcart", new { productId = Model.ProductId }))',
+                                        data: $('#product-details-form').serialize(),
+                                        type: 'post',
+                                        success: function (data) {
+                                            var selectAppend = '';
+                                            var count = 0;
+                                            if (data > 0) {
+                                                count = data > 50 ? 50 : data;
+                                            } else {
+                                                count = 50;
+                                            }
+                                                for (var i = 1; i < (count + 1); i++) {
+                                                    if(i == 1)
+                                                        selectAppend += '<option selected value="' + i + '">' + i + '</option>';
+                                                    else
+                                                        selectAppend += '<option value="' + i + '">' + i + '</option>';
+                                                }
+                                            $('.select-qty').append(selectAppend);
+                                            $('.select-qty').formSelect();
+                                            $('label[for="' + $('.select-qty').attr('id') + '"]').addClass('active-label');
+                                        },
+                                        error: function (err) {
+                                            console.log(err);
+                                            var selectAppend = '';
+                                                for (var i = 1; i < (51); i++) {
+                                                    if(i == 1)
+                                                        selectAppend += '<option selected value="' + i + '">' + i + '</option>';
+                                                    else
+                                                        selectAppend += '<option value="' + i + '">' + i + '</option>';
+                                                }
+                                            $('.select-qty').append(selectAppend);
+                                            $('.select-qty').formSelect();
+                                            $('label[for="' + $('.select-qty').attr('id') + '"]').addClass('active-label');
+                                        }
+                                    });
+                                }, 500);
+                            });
+                        </script>
+                    }
+                </div>
+
+                <div class="input-field col s9">
+                    @{
+                        var addToCartText = "";
+                        if (Model.UpdatedShoppingCartItemId > 0 && Model.UpdateShoppingCartItemType.HasValue && Model.UpdateShoppingCartItemType.Value == ShoppingCartType.ShoppingCart)
+                        {
+                            addToCartText = T("ShoppingCart.AddToCart.Update").Text;
+                        }
+                        else
+                        {
+                            addToCartText = T("ShoppingCart.AddToCart").Text;
+                            if (Model.IsRental)
+                            {
+                                addToCartText = T("ShoppingCart.Rent").Text;
+                            }
+                            if (Model.AvailableForPreOrder)
+                            {
+                                addToCartText = T("ShoppingCart.PreOrder").Text;
+                            }
+                        }
+                        @if (Model.IsCustomizable)
+                        {
+                            <button type="button" id="add-to-cart-button-@Model.ProductId" class="waves-effect waves-light btn">
+                                @addToCartText
+                            </button>
+                            <script>
+                            function addProductToCartDetails() {
+                                AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.ProductId, shoppingCartTypeId = (int) ShoppingCartType.ShoppingCart})', '#product-details-form');
+                                return false;
+                            }
+                            </script>
+                        }
+                        else
+                        {
+                            <button type="button" id="add-to-cart-button-@Model.ProductId" class="waves-effect waves-light btn" onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.ProductId, shoppingCartTypeId = (int) ShoppingCartType.ShoppingCart})', '#product-details-form');return false;">
+                                @addToCartText
+                            </button>
+                        }
+                    }
+                </div>
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_add_info", additionalData = Model.ProductId })
+    </div>
+}

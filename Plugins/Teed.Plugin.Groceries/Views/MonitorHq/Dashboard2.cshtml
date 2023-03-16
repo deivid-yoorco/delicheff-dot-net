@@ -1,0 +1,700 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Teed.Plugin.Groceries.Utils
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.DashboardHq1");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Order";
+}
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/confetti.js"></script>
+<script src="~/Plugins/Teed.Plugin.Groceries/src/js/oms.min.js"></script>
+<style>
+    .dashboard-red {
+        background-color: #ffdada;
+        color: #b53a2b;
+        border-color: #dc0c0c;
+    }
+
+    .dashboard-yellow {
+        background-color: #ffffbd;
+        color: #af7212;
+        border-color: #e2e200;
+    }
+
+    .dashboard-green {
+        background-color: #bfffbf;
+        color: green;
+        border-color: green;
+    }
+
+    .small-box .inner {
+        text-align: center;
+    }
+
+    #map {
+        height: 650px !important;
+    }
+
+    .small-box-value {
+        font-size: 25px !important;
+    }
+
+    .big-box-value {
+        font-size: 50px !important;
+    }
+
+    .bg-color-1 {
+        color: #333 !important;
+        background-color: #A7C356 !important
+    }
+
+    .bg-color-2 {
+        color: #333 !important;
+        background-color: #C58243 !important
+    }
+
+    .bg-color-3 {
+        color: #333 !important;
+        background-color: #B2D8F0 !important
+    }
+
+    .bg-color-4 {
+        color: #333 !important;
+        background-color: #E2B14D !important
+    }
+
+    [class*='glosary'] {
+        font-weight: bold;
+        font-size: 30px !important;
+        vertical-align: middle;
+        display: flex;
+        margin-left: 30%;
+    }
+</style>
+@if (!Model)
+{
+    <style>
+        .panel-body {
+            height: 2129px;
+        }
+
+        #map {
+            height: 1935px !important;
+        }
+
+        body {
+            font-size: 37px;
+            cursor: none !important;
+        }
+
+        .content-header > h1 {
+            font-size: 60px;
+        }
+
+        h3 {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .main-table-data {
+            font-size: 35px !important;
+            font-weight: bold;
+        }
+
+        .small-box-value {
+            font-size: 50px !important;
+        }
+
+        .big-box-value {
+            font-size: 100px !important;
+        }
+
+        .dynamic-data {
+            font-size: 27px !important;
+        }
+
+        #corcel-table table, #corcel-table tr, #corcel-table td, #corcel-table th {
+            position: relative;
+            text-align: center;
+        }
+
+        .vertical-text {
+            transform-origin: 0 50%;
+            transform: rotate(270deg);
+            white-space: nowrap;
+            display: block;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+        }
+    </style>
+    <script>
+        setTimeout(function () {
+            $(".navbar").hide();
+            $(".main-header").hide();
+            $(".main-sidebar").hide();
+            $(".main-footer").hide();
+            $(".content-wrapper").css("margin-left", 0);
+            $("#map").css("height", 1015);
+        }, 500);
+    </script>
+}
+<canvas id="confetti-holder" style="position:absolute;z-index:9"></canvas>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="col-lg-6">
+                    <div class="content-header clearfix" style="margin-bottom: 50px">
+                        <h1 style="text-align: center; font-weight: bold">
+                            Ventas por región - @(DateTime.Now.AddDays(1).ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-MX")))
+                        </h1>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="small-box bg-color-1">
+                                <div class="inner">
+                                    <strong>Objetivo del día</strong><br />
+                                    <strong class="small-box-value" id="resume-daily">-</strong><br />
+                                    <strong>Pedidos actuales</strong><br />
+                                    <strong class="small-box-value" id="resume-pedidos">-</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small-box bg-color-2">
+                                <div class="inner">
+                                    <strong>Pedidos actuales / Objetivos del día</strong><br />
+                                    <strong class="big-box-value" id="resume-percentaje">-</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small-box bg-color-3">
+                                <div class="inner">
+                                    <strong>Objetivo a <strong class="control-time">-</strong></strong><br />
+                                    <strong class="small-box-value" id="resume-daily-region">-</strong><br />
+                                    <strong>Pedidos actuales</strong><br />
+                                    <strong class="small-box-value" id="resume-pedidos-region">-</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small-box bg-color-4">
+                                <div class="inner">
+                                    <strong>Pedidos actuales / Objetivo a <strong class="control-time">-</strong></strong><br />
+                                    <strong class="big-box-value" id="resume-percentaje-region">-</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-hover main-table">
+                                <tr>
+                                    <th></th>
+                                    <th>Ventas actuales</th>
+                                    <th>Objetivo de ventas</th>
+                                </tr>
+                                <tr id="time-1-row">
+                                    <td class="main-table-data">13:00 - 15:00</td>
+                                    <td class="main-table-data" id="orders-time-1"></td>
+                                    <td class="main-table-data" id="orders-time-1-limit"></td>
+                                </tr>
+                                <tr id="time-2-row">
+                                    <td class="main-table-data">15:00 - 17:00</td>
+                                    <td class="main-table-data" id="orders-time-2"></td>
+                                    <td class="main-table-data" id="orders-time-2-limit"></td>
+                                </tr>
+                                <tr id="time-3-row">
+                                    <td class="main-table-data">17:00 - 19:00</td>
+                                    <td class="main-table-data" id="orders-time-3"></td>
+                                    <td class="main-table-data" id="orders-time-3-limit"></td>
+                                </tr>
+                                <tr id="time-4-row">
+                                    <td class="main-table-data">19:00 - 21:00</td>
+                                    <td class="main-table-data" id="orders-time-4"></td>
+                                    <td class="main-table-data" id="orders-time-4-limit"></td>
+                                </tr>
+                                <tr id="time-total-row">
+                                    <td class="main-table-data" style="font-weight: bold;">TOTAL</td>
+                                    <td class="main-table-data" id="orders-total" style="font-weight: bold;"></td>
+                                    <td class="main-table-data" id="orders-total-limit" style="font-weight: bold;"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="margin: 1em; margin-bottom: 5px !important; margin-top: 5px !important;">
+                            <h3 style="margin-top: 0px;">Ventas por región</h3>
+                            <div class="table-responsive">
+                                <table class="table" id="region-table">
+                                    <tr>
+                                        <th>Región</th>
+                                        <th>13:00 - 15:00</th>
+                                        <th>15:00 - 17:00</th>
+                                        <th>17:00 - 19:00</th>
+                                        <th>19:00 - 21:00</th>
+                                        <th>TOTAL</th>
+                                        <th>Meta a <span class="control-time">-</span></th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="margin: 1em; margin-top: 5px !important;">
+                            <h3 style="margin-top: 0px;">Nuevos clientes semanales CORCEL</h3>
+                            <div class="table-responsive text-nowrap">
+                                <table class="table" id="corcel-table" style="font-size: 25px !important;">
+                                    <thead>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="map"></div>
+                    <div class="row">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <tr>
+                                    <td class="main-table-data">
+                                        <div class="glosary-1">
+                                            $0.00 a $215.00&nbsp;<span class="glosary-1-data" style="margin: 0 !important;"></span>
+                                        </div>
+                                    </td>
+                                    <td class="main-table-data">
+                                        <div class="glosary-4">
+                                            $865.01 a $1,385.00&nbsp;<span class="glosary-2-data" style="margin: 0 !important;"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="main-table-data">
+                                        <div class="glosary-2">
+                                            $215.01 a $525.00&nbsp;<span class="glosary-3-data" style="margin: 0 !important;"></span>
+                                        </div>
+                                    </td>
+                                    <td class="main-table-data">
+                                        <div class="glosary-5">
+                                            $1,385.01 a $2,605.00&nbsp;<span class="glosary-4-data" style="margin: 0 !important;"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="main-table-data">
+                                        <div class="glosary-3">
+                                            $525.01 a $865.00&nbsp;<span class="glosary-5-data" style="margin: 0 !important;"></span>
+                                        </div>
+                                    </td>
+                                    <td class="main-table-data">
+                                        <div class="glosary-6">
+                                            $2,605.01 o más&nbsp;<span class="glosary-6-data" style="margin: 0 !important;"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    var regionColorMap = [];
+    let markers = [];
+    let oms;
+    var doneWithPins = false;
+
+    var glosary1 = 'FF0000'
+    var glosary2 = 'FF7F00'
+    var glosary3 = 'FFFF00'
+    var glosary4 = '00FF00'
+    var glosary5 = '0000FF'
+    var glosary6 = '4B0082'
+
+    var glosary1Data = 0;
+    var glosary2Data = 0;
+    var glosary3Data = 0;
+    var glosary4Data = 0;
+    var glosary5Data = 0;
+    var glosary6Data = 0;
+    var totalData = 0;
+
+    var firstHtml = '<div style="width:20px;height:20px;background:#';
+    var lastHtml = ';margin-top: 12px;margin-right: 20px;"></div>';
+
+    function initMap() {
+        $('.glosary-1').prepend(firstHtml + glosary1 + lastHtml);
+        $('.glosary-2').prepend(firstHtml + glosary2 + lastHtml);
+        $('.glosary-3').prepend(firstHtml + glosary3 + lastHtml);
+        $('.glosary-4').prepend(firstHtml + glosary4 + lastHtml);
+        $('.glosary-5').prepend(firstHtml + glosary5 + lastHtml);
+        $('.glosary-6').prepend(firstHtml + glosary6 + lastHtml);
+        loadTableData();
+    }
+
+    setInterval(function () {
+        loadTableData();
+    }, 300000)
+
+    function loadTableData() {
+        $.ajax({
+            url: '/Admin/Order/GetDashboard2Data',
+            method: 'GET',
+            success: function (data) {
+                console.log("GetDhasboard1Data", data);
+
+                $("#orders-time-1").text(formatCurrency(data.OrdersTime1));
+                $("#orders-time-1-limit").text(formatCurrency(data.OrdersTime1Limit));
+                $("#time-1-row").removeClass();
+                $("#time-1-row").addClass(data.OrdersTime1Color);
+
+
+                $("#orders-time-2").text(formatCurrency(data.OrdersTime2));
+                $("#orders-time-2-limit").text(formatCurrency(data.OrdersTime2Limit));
+                $("#time-2-row").removeClass();
+                $("#time-2-row").addClass(data.OrdersTime2Color);
+
+                $("#orders-time-3").text(formatCurrency(data.OrdersTime3));
+                $("#orders-time-3-limit").text(formatCurrency(data.OrdersTime3Limit));
+                $("#time-3-row").removeClass();
+                $("#time-3-row").addClass(data.OrdersTime3Color);
+
+                $("#orders-time-4").text(formatCurrency(data.OrdersTime4));
+                $("#orders-time-4-limit").text(formatCurrency(data.OrdersTime4Limit));
+                $("#time-4-row").removeClass();
+                $("#time-4-row").addClass(data.OrdersTime4Color);
+
+                $("#orders-total").text(formatCurrency(data.OrdersTotal));
+                $("#resume-pedidos").text(formatCurrency(data.OrdersTotal));
+                $("#orders-total-limit").text(formatCurrency(data.OrdersTotalLimit));
+                $("#resume-daily").text(formatCurrency(data.OrdersTotalLimit));
+                $("#resume-percentaje").text(Math.round((data.OrdersTotal / data.OrdersTotalLimit) * 100) + '%');
+
+                $("#time-total-row").removeClass();
+                $("#time-total-row").addClass(data.OrdersTimeTotalColor);
+
+                $.each($(".control-time"), function (index, value) {
+                    $(value).text(data.CurrentTime);
+                });
+
+                let goalTime = Math.round(data.OrdersTotalLimit * (data.TimePercentaje / 100));
+                $("#resume-daily-region").text(formatCurrency(goalTime));
+                $("#resume-pedidos-region").text(formatCurrency(data.OrdersTotal));
+                $("#resume-percentaje-region").text(Math.round((data.OrdersTotal / goalTime) * 100) + '%');
+
+                //if (data.OrdersTimeTotalColor.includes('green')) {
+                //    var confettiSettings = { "target": "confetti-holder", "max": "200", "size": "1", "animate": true, "props": ["square", "triangle", "line", { "type": "svg", "src": "/Plugins/Teed.Plugin.Groceries/src/js/aguacate.svg", "size": 25, "weight": 0.2 }], "colors": [[165, 104, 246], [230, 61, 135], [0, 199, 228], [253, 214, 126]], "clock": "25", "rotate": true, "width": "1920", "height": "1080", "start_from_edge": false, "respawn": true };
+                //    var confetti = new ConfettiGenerator(confettiSettings);
+                //    confetti.render();
+                //}
+
+                buildRegionTable(data);
+                buildCorcelTable(data);
+            }
+        });
+    }
+
+    function buildRegionTable(serverData) {
+        $("#region-table").find(".dynamic-data").remove();
+        let allGoals = [];
+        regionColorMap = [];
+
+        $.each(serverData.Regions, function (index, value) {
+            let tableRow = "<tr class='dynamic-data " + value.RegionGoalColor + "'>";
+            let percentaje = Math.round((value.OrdersTotal / value.OrdersTotalLimit) * 100);
+            let percentajeGoal = Math.round((value.OrdersTotal / value.RegionGoal) * 100);
+            tableRow += "<td>" + value.RegionName + "</td>";
+            tableRow += "<td>" + formatCurrency(value.OrdersTime1) + " / " + formatCurrency(value.OrdersTime1Limit) + "</td>";
+            tableRow += "<td>" + formatCurrency(value.OrdersTime2) + " / " + formatCurrency(value.OrdersTime2Limit) + "</td>";
+            tableRow += "<td>" + formatCurrency(value.OrdersTime3) + " / " + formatCurrency(value.OrdersTime3Limit) + "</td>";
+            tableRow += "<td>" + formatCurrency(value.OrdersTime4) + " / " + formatCurrency(value.OrdersTime4Limit) + "</td>";
+            tableRow += "<td>" + formatCurrency(value.OrdersTotal) + " / " + formatCurrency(value.OrdersTotalLimit) + " (" + percentaje + "%)" + "</td>";
+            tableRow += "<td>" + formatCurrency(value.OrdersTotal) + " / " + formatCurrency(value.RegionGoal) + " (" + percentajeGoal + "%)" + "</td>";
+            tableRow += "</tr>";
+            $("#region-table").append(tableRow);
+
+            allGoals.push(value.RegionGoal);
+            regionColorMap.push({ regionId: value.RegionId, colorClass: value.RegionGoalColor });
+        });
+
+        let total1 = serverData.Regions.map(x => x.OrdersTime1).reduce((a, b) => a + b, 0);
+        let total1Limit = serverData.Regions.map(x => x.OrdersTime1Limit).reduce((a, b) => a + b, 0);
+        let total2 = serverData.Regions.map(x => x.OrdersTime2).reduce((a, b) => a + b, 0);
+        let total2Limit = serverData.Regions.map(x => x.OrdersTime2Limit).reduce((a, b) => a + b, 0);
+        let total3 = serverData.Regions.map(x => x.OrdersTime3).reduce((a, b) => a + b, 0);
+        let total3Limit = serverData.Regions.map(x => x.OrdersTime3Limit).reduce((a, b) => a + b, 0);
+        let total4 = serverData.Regions.map(x => x.OrdersTime4).reduce((a, b) => a + b, 0);
+        let total4Limit = serverData.Regions.map(x => x.OrdersTime4Limit).reduce((a, b) => a + b, 0);
+        let total = total1 + total2 + total3 + total4;
+        let totalAll = total1Limit + total2Limit + total3Limit + total4Limit;
+        let totalPercentaje = Math.round((total / totalAll) * 100);
+        let allGoalsTotalValue = allGoals.reduce((a, b) => a + b, 0);
+        let allGoalsTotal = formatCurrency(allGoalsTotalValue);
+        let totalGoalPercentaje = Math.round((total / allGoalsTotalValue) * 100);
+
+        let totalRow = "<tr class='dynamic-data " + serverData.AllRegionsGoalColor + "'>";;
+        totalRow += "<td style='font-weight: bold'>TOTAL</td>";
+        totalRow += "<td style='font-weight: bold'>" + formatCurrency(total1) + " / " + formatCurrency(total1Limit) + "</td>";
+        totalRow += "<td style='font-weight: bold'>" + formatCurrency(total2) + " / " + formatCurrency(total2Limit) + "</td>";
+        totalRow += "<td style='font-weight: bold'>" + formatCurrency(total3) + " / " + formatCurrency(total3Limit) + "</td>";
+        totalRow += "<td style='font-weight: bold'>" + formatCurrency(total4) + " / " + formatCurrency(total4Limit) + "</td>";
+        totalRow += "<td style='font-weight: bold'>" + formatCurrency(total) + " / " + formatCurrency(totalAll) + " (" + totalPercentaje + "%)" + "</td>";
+        totalRow += "<td style='font-weight: bold'>" + formatCurrency(total) + " / " + allGoalsTotal + " (" + totalGoalPercentaje + "%)" + "</td>";
+        totalRow += "</tr>";
+
+        $("#region-table").append(totalRow);
+
+        doneWithPins = false;
+        glosary1Data = 0;
+        glosary2Data = 0;
+        glosary3Data = 0;
+        glosary4Data = 0;
+        glosary5Data = 0;
+        glosary6Data = 0;
+        totalData = 0;
+        if (serverData.OrderPins.length < 1)
+            doneWithPins = true;
+        $.each(serverData.OrderPins, function (i, e) {
+            setTimeout(function () {
+                var pinColor = getColorByTotal(e.OrdersTotal);
+                var pinNumber = getNumberByTime(e.SelectedShippingTime);
+                var pinImage = new google.maps.MarkerImage("https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=" + pinNumber + "|" + pinColor + "|" +
+                    (pinColor == glosary5 || pinColor == glosary6 ? "FFFFFF" : "000000"),
+                    null, /* size is determined at runtime */
+                    null, /* origin is 0,0 */
+                    null, /* anchor is bottom center of the scaled image */
+                    new google.maps.Size(40, 75));
+                var marker = new google.maps.Marker({
+                    position: { lat: parseFloat(e.Latitude), lng: parseFloat(e.Longitude) },
+                    animation: 0,
+                    icon: pinImage,
+                    id: e.OrderIds
+                });
+                markers.push(marker);
+                if (pinColor == glosary1)
+                    glosary1Data += 1
+                else if (pinColor == glosary2)
+                    glosary2Data += 1
+                else if (pinColor == glosary3)
+                    glosary3Data += 1
+                else if (pinColor == glosary4)
+                    glosary4Data += 1
+                else if (pinColor == glosary5)
+                    glosary5Data += 1
+                else if (pinColor == glosary6)
+                    glosary6Data += 1
+                totalData += 1;
+                if (i == serverData.OrderPins.length - 1)
+                    doneWithPins = true;
+            }, i * 200);
+        });
+
+        createMap();
+    }
+
+    function formatCurrency(value) {
+        return '$' + Math.round(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,').replace(/\.00/g, '');
+    }
+
+    function buildCorcelTable(serverData) {
+        $("#corcel-table").find(".dynamic-data").remove();
+        let weeksHeaders = "<tr class='dynamic-data'>";
+        let tableRow = "<tr class='dynamic-data'>";
+        let totalsRow = "<tr class='dynamic-data'>";
+        var count = serverData.WeeklyCorcelCustomers.AmountOfCustomers;
+        $.each(serverData.WeeklyCorcelCustomers.WeeklyCorcelCustomersInfos, function (index, value) {
+            weeksHeaders += "<th><span class='vertical-text'>" + value.StartOfWeek + " - " + value.EndOfWeek + "</span></th>";
+            tableRow += "<td>" + value.AmountOfNewCustomers + "</td>";
+            count += value.AmountOfNewCustomers;
+            totalsRow += "<td>" + count + "</td>";
+        });
+        tableRow += "</tr>";
+        weeksHeaders += "</tr>";
+        totalsRow += "</tr>";
+        $("#corcel-table thead").append(weeksHeaders);
+        $("#corcel-table tbody").append(tableRow);
+        $("#corcel-table tbody").append(totalsRow);
+
+        setTimeout(function () {
+            var header_height = 0;
+            $('#corcel-table th span').each(function () {
+                if ($(this).outerWidth() > header_height) header_height = $(this).outerWidth();
+            });
+
+            $('#corcel-table th').height(header_height);
+        }, 200);
+    }
+
+    function createMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 19.3170078, lng: -99.2090609 },
+            disableDefaultUI: true,
+            zoomControl: true,
+            zoom: 13
+        });
+        map.set('styles', myStyle);
+        map.data.loadGeoJson('/shippingarea/GetGeoJson');
+
+        oms = new OverlappingMarkerSpiderfier(map, {
+            markersWontMove: true,
+            markersWontHide: true,
+            basicFormatEvents: true,
+            keepSpiderfied: true,
+            nearbyDistance: 5
+        });
+
+        // zoom to show all the features
+        $.ajax({
+            url: '/Admin/ShippingRegion/GetDashboardRegions',
+            method: 'GET',
+            success: function (data) {
+                console.log(data);
+
+                var bounds = new google.maps.LatLngBounds();
+                map.data.addListener('addfeature', function (e) {
+                    var feature = e.feature.j;
+                    if (typeof feature == 'undefined')
+                        feature = e.feature.h;
+                    var current = data.find(x => x.Pcs.includes(feature.d_cp));
+                    e.feature.setProperty("id", current.RegionId);
+                    processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+                    map.fitBounds(bounds);
+                    //map.setZoom(map.getZoom() + 1);
+                });
+
+                map.data.setStyle(function (feature) {
+                    var fillColor = '#919191';
+                    var strokeColor = '#919191'
+
+                    if (typeof feature.getProperty('id') != 'undefined' &&
+                        feature.getProperty('id') != '' &&
+                        feature.getProperty('id') != null) {
+
+                        var elementIndex = regionColorMap.map(x => x.regionId).indexOf(feature.getProperty('id'));
+                        if (elementIndex > -1) {
+                            let elementClass = regionColorMap[elementIndex].colorClass;
+                            if (elementClass) {
+                                fillColor = $("." + elementClass).css("border-color");
+                                strokeColor = $("." + elementClass).css("border-color");
+                            }
+                        };
+                    }
+                    return ({
+                        fillColor: fillColor,
+                        strokeColor: strokeColor,
+                        strokeWeight: 3
+                    });
+                });
+
+                map.data.addListener("mouseover", (event) => {
+                    var f = event.feature;
+                    map.data.revertStyle();
+                    map.data.forEach(function (feature) {
+                        if (f.getProperty('id') == feature.getProperty('id')) {
+                            map.data.overrideStyle(feature, { strokeWeight: 8 });
+                        }
+                    });
+                });
+                map.data.addListener("mouseout", (event) => {
+                    map.data.revertStyle();
+                });
+
+                var refreshIntervalId = window.setInterval(function () {
+                    if (doneWithPins) {
+                        clearInterval(refreshIntervalId);
+                        $.each(markers, function (i, marker) {
+                            oms.addMarker(marker);
+                        });
+                        $('.glosary-1-data').html('(' + glosary1Data + ' - ' + (totalData > 0 ? ((glosary1Data * 100) / totalData).toFixed(2) : 0) + '%)');
+                        $('.glosary-2-data').html('(' + glosary2Data + ' - ' + (totalData > 0 ? ((glosary2Data * 100) / totalData).toFixed(2) : 0) + '%)');
+                        $('.glosary-3-data').html('(' + glosary3Data + ' - ' + (totalData > 0 ? ((glosary3Data * 100) / totalData).toFixed(2) : 0) + '%)');
+                        $('.glosary-4-data').html('(' + glosary4Data + ' - ' + (totalData > 0 ? ((glosary4Data * 100) / totalData).toFixed(2) : 0) + '%)');
+                        $('.glosary-5-data').html('(' + glosary5Data + ' - ' + (totalData > 0 ? ((glosary5Data * 100) / totalData).toFixed(2) : 0) + '%)');
+                        $('.glosary-6-data').html('(' + glosary6Data + ' - ' + (totalData > 0 ? ((glosary6Data * 100) / totalData).toFixed(2) : 0) + '%)');
+                    }
+                }, 200);
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+    }
+
+    function getNumberByTime(time) {
+        switch (time) {
+            case "1:00 PM - 3:00 PM":
+                return 1;
+            case "3:00 PM - 5:00 PM":
+                return 2;
+            case "5:00 PM - 7:00 PM":
+                return 3;
+            case "7:00 PM - 9:00 PM":
+                return 4;
+            default:
+                return 0;
+        }
+    };
+
+    function getColorByTotal(total) {
+        if (0 <= total && total <= 215)
+            // RED
+            return glosary1;
+        else if (215.01 <= total && total <= 525)
+            // ORANGE
+            return glosary2;
+        else if (525.01 <= total && total <= 865)
+            // YELLOW
+            return glosary3;
+        else if (865.01 <= total && total <= 1385)
+            // GREEN
+            return glosary4;
+        else if (1385.01 <= total && total <= 2605)
+            // BLUE
+            return glosary5;
+        else if (2605.01 <= total)
+            // PURPLE
+            return glosary6;
+        else
+            // PURPLE
+            return glosary6;
+    };
+
+    function processPoints(geometry, callback, thisArg) {
+        if (geometry instanceof google.maps.LatLng) {
+            callback.call(thisArg, geometry);
+        } else if (geometry instanceof google.maps.Data.Point) {
+            callback.call(thisArg, geometry.get());
+        } else {
+            geometry.getArray().forEach(function (g) {
+                processPoints(g, callback, thisArg);
+            });
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap"
+        async defer></script>

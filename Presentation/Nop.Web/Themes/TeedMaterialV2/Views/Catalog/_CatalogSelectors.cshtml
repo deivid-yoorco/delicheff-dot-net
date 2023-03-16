@@ -1,0 +1,109 @@
+﻿@model CatalogPagingFilteringModel
+<script>
+    $(document).ready(function () {
+        $('.modal').modal();
+    });
+
+</script>
+<div class="row" style="background: white;padding-bottom: 2%;">
+    @*sorting*@
+    @if (Model.AllowProductSorting)
+    {
+        <style>
+            .select-wrapper input.select-dropdown {
+                position: relative;
+                cursor: pointer;
+                background-color: transparent;
+                outline: 0;
+                height: 2rem;
+                line-height: 1rem;
+                width: 100%;
+                font-size: 14px;
+                margin: 0 0 0px 0;
+                padding: 0;
+                display: block;
+                user-select: none;
+                z-index: 1;
+            }
+        </style>
+        var url = Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path + Context.Request.QueryString;
+        <div class="hide-on-med-and-down">
+            <label>Ordenar por:</label>
+            <select id="ddlViewBy" onchange="setLocation(this.value);">
+                @foreach (var option in Model.AvailableSortOptions)
+                {
+                    if (option.Value == url)
+                    {
+                        <option value="@option.Value" selected>@(option.Text)</option>
+                    }
+                    else
+                    {
+                        <option value="@option.Value">@(option.Text)</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <!-- Modal Trigger -->
+        <a class="waves-effect waves-light btn-flat modal-trigger teed-primary-text hide-on-large-only modal-btn" href="#modal1"><i class="material-icons" id="sorticon">import_export</i>Ordenar</a>
+    }
+</div>
+<!-- Modal Structure -->
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <h5>Ordenar por</h5>
+        <div class="collection">
+            <style>
+                .btn-flat {
+                    display: block;
+                    text-align: center;
+                    /*height: 29px;*/
+                }
+
+                #sorticon {
+                    position: relative;
+                    font-size: 1.2em;
+                    top: 5px;
+                    left: 0px;
+                }
+
+                .modal-btn {
+                    /*margin-left: 1em!important;*/
+                    background-color: #FFF;
+                    text-transform: none;
+                    font-size: 16px;
+                    box-shadow: none;
+                    /*padding-bottom: 1em !important;*/
+                }
+
+                .modal .collection .collection-item {
+                    line-height: 3rem;
+                }
+
+                .url-selected {
+                    border-left: 0.5em solid !important;
+                    font-weight: bold;
+                    padding-left: 1em !important;
+                }
+
+                .modal {
+                    background-color: #FFFFFF;
+                }
+            </style>
+            @{ 
+                var Url = Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path + Context.Request.QueryString;
+            }
+            @foreach (var option in Model.AvailableSortOptions)
+            {
+                if (option.Value == Url)
+                {
+                    <a href="@(option.Value)" class="collection-item teed-primary-text url-selected">@(option.Text)</a>
+                }
+                else
+                {
+                    <a href="@(option.Value)" class="collection-item teed-primary-text">@(option.Text)</a>
+                }
+            }
+        </div>
+    </div>
+</div>

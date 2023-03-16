@@ -1,0 +1,427 @@
+﻿@model ProductDetailsModel
+@using Microsoft.AspNetCore.Http.Extensions
+@using Nop.Core.Domain.Seo;
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@inject SeoSettings seoSettings
+@inject CatalogSettings catalogSettings
+@inject IWorkContext workContext
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts(!string.IsNullOrEmpty(Model.MetaTitle) ? Model.MetaTitle : Model.Name);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-product-details-page");
+
+    //canonical URL
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var productUrl = Url.RouteUrl("Product", new { SeName = Model.SeName }, this.Url.ActionContext.HttpContext.Request.Scheme);
+        Html.AddCanonicalUrlParts(productUrl, seoSettings.QueryStringInCanonicalUrlsEnabled);
+    }
+
+    //open graph META tags
+    if (seoSettings.OpenGraphMetaTags)
+    {
+        Html.AddHeadCustomParts("<meta property=\"og:type\" content=\"product\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:title\" content=\"" + Html.Encode(Model.Name) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:description\" content=\"" + Html.Encode(Nop.Core.Html.HtmlHelper.StripTags(Model.MetaDescription)) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:image\" content=\"" + Model.DefaultPictureModel.ImageUrl + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:url\" content=\"" + this.Url.ActionContext.HttpContext.Request.GetEncodedUrl() + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:site_name\" content=\"" + Html.Encode(Model.CurrentStoreName) + "\" />");
+    }
+
+    //Twitter META tags
+    if (seoSettings.TwitterMetaTags)
+    {
+        Html.AddHeadCustomParts("<meta property=\"twitter:card\" content=\"summary\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:site\" content=\"" + Html.Encode(Model.CurrentStoreName) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:title\" content=\"" + Html.Encode(Model.Name) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:description\" content=\"" + Html.Encode(Nop.Core.Html.HtmlHelper.StripTags(Model.MetaDescription)) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:image\" content=\"" + Model.DefaultPictureModel.ImageUrl + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:url\" content=\"" + this.Url.ActionContext.HttpContext.Request.GetEncodedUrl() + "\" />");
+    }
+
+    //prepare "Add to cart" AJAX link
+    var addtocartlink = "";
+    var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+    var quantity = 1;
+    if (Model.ProductOverview.ProductPrice.ForceRedirectionAfterAddingToCart)
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = false });
+    }
+    else
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity });
+    }
+}
+<!--product breadcrumb-->
+@section Breadcrumb
+    {
+    @await Html.PartialAsync("_ProductBreadcrumb", Model.Breadcrumb)
+}
+@await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_after_breadcrumb", additionalData = Model.Id })
+
+<script>
+    $(document).ready(function () {
+        //if ($(window).width() < 600) {
+        $('.product-page').parent().attr('style', 'width: 100%!important; overflow: hidden;');
+        //$('body').attr('style', 'overflow-x: hidden;');
+        //} else {
+        //    $('.product-page').parent().attr('style', 'width: 100%!important; margin: 0 0 0 0!important;;');
+        //}
+    });
+</script>
+
+<div class="product-page">
+    @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_top", additionalData = Model.Id })
+    <form asp-route="Product" asp-route-sename="@Model.SeName" method="post" id="product-details-form">
+        <div itemscope itemtype="http://schema.org/Product" data-productid="@Model.Id">
+            <section class="row product-essential">
+                <div class="col s12 m12 product-imgs">
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_before_pictures", additionalData = Model.Id })
+                    @if (Model.Customizable)
+                    {
+                        @await Html.PartialAsync("_ProductCustomizePictures", Model)
+                    }
+                    else
+                    {
+                        <!--product pictures-->
+                        @await Html.PartialAsync("_ProductDetailsPictures", Model)
+                    }
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_after_pictures", additionalData = Model.Id })
+                    <div class="col s12 m12 special-edition-imgs hide-on-small-only">
+                        <style>
+                            .special-edition-imgs {
+                                text-align: right;
+                            }
+
+                            .special-edition-img {
+                                margin: 0 5px 0 5px;
+                            }
+                        </style>
+                        <img src="/Themes/TeedLamy/Content/images/Awards/brandofthecentury.png" alt="#" id="" class="special-edition-img" style="display: none;" />
+
+                        <img src="/Themes/TeedLamy/Content/images/Awards/designpreis.png" alt="#" id="GERMAN-DESIGN-AWARD-SPECIAL-MENTION" class="special-edition-img" style="display: none;" />
+                        <img src="/Themes/TeedLamy/Content/images/Awards/designpreis_1.png" alt="#" id="DESIGNPRIS-DER-BUNDESREPUBLIK-DEUTSCHLAND" class="special-edition-img" style="display: none;" />
+
+                        <img src="/Themes/TeedLamy/Content/images/Awards/germanbrandaward17.png" alt="#" id="" class="special-edition-img" style="display: none;" />
+
+                        <img src="/Themes/TeedLamy/Content/images/Awards/gooddesign.png" alt="#" id="GOOD-DESIGN" class="special-edition-img" style="display: none;" />
+                        <img src="/Themes/TeedLamy/Content/images/Awards/if.png" alt="#" id="DESIGN-AWARD-2016" class="special-edition-img" style="display: none;" />
+                        <img src="/Themes/TeedLamy/Content/images/Awards/if.png" alt="#" id="PRODUCT-DESIGN-AWARD" class="special-edition-img" style="display: none;" />
+                        <img src="/Themes/TeedLamy/Content/images/Awards/plusx.png" alt="#" id="PLUS-X-AWARD-HIGH-QUALITY-ERGONOMIE" class="special-edition-img" style="display: none;" />
+                        <img src="/Themes/TeedLamy/Content/images/Awards/reddot.png" alt="#" id="REDOT" class="special-edition-img" style="display: none;" />
+                    </div>
+                </div>
+                <div class="col s12 m12 product-info" style="width: 980px; margin: auto!important; float: none; margin-top: 10px;">
+                    <div class="overview">
+                        @await Html.PartialAsync("_Discontinued", Model)
+                        <div class="col s12 m8">
+                            <h1 class="product-name">
+                                <span class="special-edition special-edition-text" style="display: none; vertical-align: bottom;">SPECIAL EDITION</span>
+                                <span class="new-edition special-edition-text" style="display: none; vertical-align: bottom;">NEW</span>
+                                <img src="/Themes/TeedLamy/Content/images/Products/lamy-logo-small.png" alt="Alternate Text" />
+                                @Model.Name
+                                @if (Model.ProductSpecifications.Where(x => x.SpecificationAttributeName.ToLower() == "complemento").Any())
+                                {
+                                    @Html.Raw(Model.ProductSpecifications.Where(x => x.SpecificationAttributeName.ToLower() == "complemento").Select(x => x.ValueRaw).FirstOrDefault())
+                                }
+                            </h1>
+                        </div>
+                        <div class="col s12 m4 share-buttons">
+                            @await Html.PartialAsync("_ShareButton", Model)
+                        </div>
+                        <div class="row">
+                            <div class="col s12 m7">
+                                <!--attributes-->
+                                @{
+                                    var dataDictAttributes = new ViewDataDictionary(ViewData);
+                                    dataDictAttributes.TemplateInfo.HtmlFieldPrefix = $"attributes_{Model.Id}";
+                                    @await Html.PartialAsync("_ProductAttributes", Model.ProductAttributes, dataDictAttributes)
+                                }
+                            </div>
+                            <div class="col s12 m5">
+                                <div class="col s12 m6">
+                                    <!--price-->
+                                    @{
+                                        var dataDictPrice = new ViewDataDictionary(ViewData);
+                                        dataDictPrice.TemplateInfo.HtmlFieldPrefix = $"price_{Model.Id}";
+                                        @await Html.PartialAsync("_ProductPrice", Model.ProductPrice, dataDictPrice)
+
+                                        @await Html.PartialAsync("_ProductTierPrices", Model.TierPrices)
+                                    }
+                                </div>
+                                <!--add to cart-->
+                                <div class="col s12 m6">
+                                    @{
+                                        var dataDictAddToCart = new ViewDataDictionary(ViewData);
+                                        dataDictAddToCart.TemplateInfo.HtmlFieldPrefix = $"addtocart_{Model.Id}";
+                                        @await Html.PartialAsync("_AddToCart", Model.AddToCart, dataDictAddToCart)
+                                    }
+                                    <!--<div style="margin-top:3%;vertical-align:middle;">
+                <img src="~/images/Pagos_PayPal_250px.png" alt="" width="170" style="vertical-align:middle;">
+                <img src="~/images/Pagos_RapidSSL_250px.png" alt="" width="70" style="vertical-align:middle;">
+            </div>-->
+                                    <!--wishlist, compare, email a friend-->
+                                    <div class="overview-buttons" style="display: none;">
+                                        @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_inside_overview_buttons_before", additionalData = Model.Id })
+                                        @{
+                                            var dataDictAddToWishlist = new ViewDataDictionary(ViewData);
+                                            dataDictAddToWishlist.TemplateInfo.HtmlFieldPrefix = $"addtocart_{Model.Id}";
+                                            @await Html.PartialAsync("_AddToWishlist", Model.AddToCart, dataDictAddToWishlist)
+                                        }
+                                        @await Html.PartialAsync("_CompareProductsButton", Model)
+                                        @await Html.PartialAsync("_ProductEmailAFriendButton", Model)
+                                        @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_inside_overview_buttons_after", additionalData = Model.Id })
+                                    </div>
+                                </div>
+                                @if (Model.ShippingTextEnable)
+                                {
+                                    <p style="margin-top:-4%;">Tiempo de entrega: @(Model.ShippingText != null ? Model.ShippingText : "2 a 5 días hábiles")</p>
+                                }
+                                <div id="providers-images-product" style="vertical-align:middle;"></div>
+                                <script type="text/javascript" asp-location="Footer">
+                                    var originalHeight = 0;
+                                    $(document).ready(function () {
+                                        var $productImages = $('.product-imgs');
+                                        $('.product-imgs').remove();
+                                        $('.product-page').parent().before($productImages);
+
+                                        $('#add-to-cart-button-' + $('div[data-productid]').data('productid')).removeClass('disabled');
+                                        $('#mobil-add-to-cart-button-' + $('div[data-productid]').data('productid')).removeClass('disabled');
+                                        setTimeout(function () {
+                                            var selectedAttr = window.location.search;
+                                            if (selectedAttr != "") {
+                                                var Id = selectedAttr.substring(selectedAttr.indexOf('Id=') + 3, selectedAttr.indexOf('&'));
+                                                var attrId = selectedAttr.substring(selectedAttr.indexOf('attrId=') + 7, selectedAttr.length);
+                                                $('.attribute-square-container').removeClass('selected-color');
+                                                $('#product_attribute_' + Id + '_' + attrId).prev().addClass('selected-color');
+                                                $('#product_attribute_' + Id + '_' + attrId).prop("checked", true).click();
+                                                checkSpecialEdition($('#product_attribute_' + Id + '_' + attrId).prev());
+                                            }
+                                        }, 200);
+                                        $('.attribute-square-container').first().addClass('selected-color');
+                                        $('.attribute-square-container').on('click', function () {
+                                            $('.attribute-square-container').removeClass('selected-color');
+                                            $(this).addClass('selected-color');
+                                            checkSpecialEdition(this);
+                                        });
+                                        setTimeout(
+                                            function () {
+                                                if ($("#product-desc").height() > 155) {
+                                                    originalHeight = $("#product-desc").height();
+                                                    $("#product-desc").css("overflow-y", "hidden");
+                                                    $("#product-desc").css("height", "155px");
+                                                    $(".show_hide").show();
+                                                    $(".show_hide").on("click", function (event) {
+                                                        event.preventDefault();
+                                                        $("#product-desc").animate({
+                                                            height: originalHeight + $(".show_hide").height()
+                                                        }, 350);
+                                                        $(".show_hide").fadeOut("fast");
+                                                    });
+                                                } else {
+                                                    $(".show_hide").hide();
+                                                }
+                                            }, 400);
+                                        if ($('.attribute-square-container.selected-color').length > 0)
+                                            checkSpecialEdition($('.attribute-square-container.selected-color'));
+
+                                        // If there is only one attribute color click on it for default pricing
+                                        if ($('.attribute-square-container').length == 1) {
+                                            setTimeout(function () {
+                                                $('input[id*="product_attribute_"]').first().click();
+                                            }, 500);
+                                        }
+                                    });
+
+                                    function checkSpecialEdition(element) {
+                                        $('.special-edition-img').hide();
+                                        $('.special-edition').hide();
+                                        $('.new-edition').hide();
+                                        var id = $(element).parent().attr('for');
+                                        var isSpecialEdition = $('#' + id + '_' + 'SpecialEdition').val() == "True" ? true : false;
+                                        var isNew = $('#' + id + '_' + 'New').val() == "True" ? true : false;
+                                        var ProductRewards = $('#' + id + '_' + 'ProductAwards').val();
+                                        console.log(isSpecialEdition);
+                                        console.log(ProductRewards);
+                                        if (isNew)
+                                            $('.new-edition').show();
+                                        else if (isSpecialEdition)
+                                            $('.special-edition').show();
+                                        $.each(ProductRewards.split(','), function (i, e) {
+                                            if (e != "" && typeof e != 'undefined') {
+                                                e = e.replace(/\ /g, '-');
+                                                $('#' + e).show();
+                                            }
+                                        });
+                                    }
+                                </script>
+                                @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_overview_bottom", additionalData = Model.Id })
+                            </div>
+                        </div>
+                        <div class="col s12 m12">
+                            <div class="product-footer-bar"></div>
+                        </div>
+                        <div class="col s12 m6">
+                            <div id="product-desc">
+                                @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                                {
+                                    <h4 class="short-description">
+                                        @Html.Raw(Model.ShortDescription)
+                                    </h4>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.FullDescription))
+                                {
+                                    <style>
+                                        .full-description ~ p {
+                                            margin-bottom: 15px;
+                                            margin-top: -10px !important;
+                                        }
+                                    </style>
+                                    <p class="full-description">
+                                        @Html.Raw(Model.FullDescription)
+                                    </p>
+                                }
+                            </div>
+                            <a href="#" class="show_hide" data-content="toggle-text">Más...</a>
+                            @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_overview_top", additionalData = Model.Id })
+                            <!--product reviews-->
+                            @await Html.PartialAsync("_ProductReviewOverview", Model.ProductReviewOverview)
+                            <!--manufacturers-->
+                            @await Html.PartialAsync("_ProductManufacturers", Model.ProductManufacturers)
+                            <!--availability-->
+                            @await Html.PartialAsync("_Availability", Model)
+                            <!--SKU, MAN, GTIN, vendor-->
+                            @await Html.PartialAsync("_SKU_Man_GTIN_Ven", Model)
+                            <!--delivery-->
+                            @await Html.PartialAsync("_DeliveryInfo", Model)
+                            <!--sample download-->
+                            @await Html.PartialAsync("_DownloadSample", Model)
+                            <!--gift card-->
+                            @{
+                                var dataDictGiftCard = new ViewDataDictionary(ViewData);
+                                dataDictGiftCard.TemplateInfo.HtmlFieldPrefix = $"giftcard_{Model.Id}";
+                                @await Html.PartialAsync("_GiftCardInfo", Model.GiftCard, dataDictGiftCard)
+                            }
+                            <!--rental info-->
+                            @{
+                                var dataDictRental = new ViewDataDictionary(ViewData);
+                                dataDictRental.TemplateInfo.HtmlFieldPrefix = $"rental_{Model.Id}";
+                                @await Html.PartialAsync("_RentalInfo", Model, dataDictRental)
+                            }
+                        </div>
+                        <div class="col s12 m6">
+                            @await Component.InvokeAsync("ProductsAlsoPurchased", new { productId = Model.Id })
+                            @await Component.InvokeAsync("RelatedProducts", new { productId = Model.Id })
+                        </div>
+                        @*<div class="col s12 m12">
+                                @await Component.InvokeAsync("CrossSellProducts")
+                            </div>*@
+                    </div>
+
+                </div>
+            </section>
+            <section class="product-collateral" style="width: 980px; margin: auto!important;">
+                @*@await Html.PartialAsync("_ProductSpecifications", Model.ProductSpecifications)
+                    @await Html.PartialAsync("_ProductTags", Model.ProductTags)*@
+                <div class="product-footer-bar"></div>
+            </section>
+            <section class="product-collateral" style="width: 980px; margin: auto!important;">
+                @* Similar Products *@
+                <div class="col s12 m12">
+                    @await Component.InvokeAsync("CrossSellProducts", new { isForSimilarProducts = true, productId = Model.Id })
+                </div>
+            </section>
+            <style>
+                @@media (max-width: 600px) {
+                    .margin-mobile {
+                        margin: -2%;
+                    }
+                }
+            </style>
+        </div>
+        <style>
+            @@media (max-width: 600px) {
+                .fix-bar {
+                    position: fixed;
+                    bottom: 0;
+                    z-index: 998;
+                    width: 100%;
+                    height: 8%;
+                    left: 0;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .btn-fix-bar {
+                    width: 80%;
+                    word-wrap: break-word;
+                    font-size: 0.74em;
+                    line-height: 1.5em;
+                    padding-top: 2px;
+                }
+
+                .price-fix-bar {
+                    color: white;
+                    font-size: 1.5em;
+                }
+
+                .zopim {
+                    bottom: 9% !important;
+                }
+
+                .call-us-container {
+                    bottom: 6.5% !important;
+                }
+            }
+        </style>
+        <div class="show-on-small hide-on-med-and-up row">
+            <div class="fix-bar teed-primary">
+                <div class="col s6" style="text-align:center;margin-top: -0.12em;">
+                    <span class="price-fix-bar">
+                        @if (Model.ProductPrice.PriceValue > 0)
+                        {
+                            @if (!string.IsNullOrEmpty(Model.ProductPrice.PriceWithDiscount))
+                            {
+                                <strong>@Model.ProductPrice.PriceWithDiscount</strong>
+                            }
+                            else
+                            {
+                                <strong>@Model.ProductPrice.Price</strong>
+                            }
+                        }
+                    </span>
+                </div>
+                <div class="col s6" style="text-align:center;">
+                    @{
+                        var addToCartText = T("ShoppingCart.AddToCart").Text;
+                        if (Model.ProductOverview.ProductPrice.IsRental)
+                        {
+                            addToCartText = T("ShoppingCart.Rent").Text;
+                        }
+                        if (Model.ProductOverview.ProductPrice.AvailableForPreOrder)
+                        {
+                            addToCartText = T("ShoppingCart.PreOrder").Text;
+                        }
+                    }
+                    <button type="button" id="add-to-cart-button-@Model.Id" class="waves-effect waves-light btn" style="font-size: smaller;background-color:#b5b5b5" onclick="AjaxCart.addproducttocart_details('@Url.RouteUrl("AddProductToCart-Details", new {productId = Model.Id, shoppingCartTypeId = (int) ShoppingCartType.ShoppingCart})', '#product-details-form');return false;">
+                        @addToCartText
+                    </button>
+                    @*<button class="btn btn-fix-bar teed-primary darken-4" style="background-color:#ffbe4a;">Agregar al carrito</button>*@
+                </div>
+            </div>
+        </div>
+    </form>
+    @await Component.InvokeAsync("Widget", new { widgetZone = "productdetails_bottom", additionalData = Model.Id })
+</div>
+<div id="modal-attr-@Model.Id" class="modal row">
+    @await Html.PartialAsync("_ModalAttribute", Model.ProductOverview)
+</div>

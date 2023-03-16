@@ -1,0 +1,109 @@
+﻿@model IList<ProductOverviewModel>
+@if (Model.Count > 0)
+{
+    <div class="section">
+        <h4 class="bold-title">@T("HomePage.Products")</h4>
+
+        <div class="row">
+            <div class="favorites-slick">
+                @foreach (var item in Model)
+                {
+                    <div>
+                        <div class="main-product-container" style="margin-top:25px">
+                            <div class="center-content-card card-action" style="padding:0 !important;height: auto!important;">
+                                <div class="col s12 module line-clamp teed-primary-text left" style="min-height: 44px;padding:0!important;padding-left:5px !important;margin-right:auto;">
+                                    <a href="@Url.RouteUrl("Product", new { SeName = item.SeName })" title="@item.Name">
+                                        <div class="center product-line-img" style="background-image: url(@item.DefaultPictureModel.ImageUrl);">
+                                        </div>
+                                        <div class="center" style="font-size: 15px;">
+                                            <p style="margin: auto; color: black;">
+                                                LAMY @item.Name
+                                                @if (item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Any())
+                                                {
+                                                    if (!string.IsNullOrEmpty(item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Select(x => x.CustomValue).FirstOrDefault()))
+                                                    {
+                                                        @Html.Raw(item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Select(x => x.CustomValue).FirstOrDefault())
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.Raw(item.Product.ProductSpecificationAttributes.Where(x => x.ShowOnProductPage).Select(x => x.SpecificationAttributeOption.Name).FirstOrDefault())
+                                                    }
+                                                }
+                                            </p>
+                                            <p style="margin: auto;color: black;font-size: 20px;">
+                                                MXN <span class="fav-price-@(item.Id)">@(item.ProductPrice.PriceValue)</span>
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <style>
+        .slick-prev {
+            left: -8%;
+        }
+
+        .slick-next {
+            right: -8%;
+        }
+    </style>
+}
+
+<script>
+    var doneLoop = false;
+    $(document).ready(function () {
+                $('.favorites-slick').slick({
+                    slidesToShow: 3,
+                    draggable: false,
+                    dots: false,
+                    infinite: true,
+                    arrows: true,
+                    responsive: [
+                        {
+                            breakpoint: 600,
+                            settings: {
+                                slidesToShow: 2
+                            }
+                        }
+                    ]
+                });
+
+        $('span[class*="fav-price-"]').each(function (i, e) {
+            var id = $(e).attr('class').split('-').pop();
+            if ($(e).text() == '0') {
+                $.ajax({
+                    cache: false,
+                    url: '@Url.Action("GetAttributesModels", "Product")?productId=' + id + "&notOnlyColors=true",
+                    type: 'GET',
+                    success: function (data) {
+                        var price = 0;
+                        try {
+                        price =
+                            data.find(x => x.Values).Values.find(x => x.IsPreSelected == true).PriceAdjustmentValue;
+                        } catch (e) {
+                        price =
+                            data.find(x => x.Values).Values.find(x => x.IsPreSelected == false).PriceAdjustmentValue;
+                        }
+                        $('.fav-price-' + id).text(formatCurrencyWithoutMxn(price));
+                },
+                error: function (err) {
+                        console.log('Error getting attributes of product: ' + id);
+                }
+                });
+            }
+        });
+    });
+    function formatCurrencyWithoutMxn(total) {
+            var neg = false;
+            if(total < 0) {
+                neg = true;
+                total = Math.abs(total);
+            }
+            return parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
+        }
+</script>

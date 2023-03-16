@@ -1,0 +1,98 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.ShippingVehicleRoute");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "ShippingVehicle";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Asignar vehículos a rutas
+    </h1>
+    <div class="pull-right">
+        <a asp-action="AssignVehicles" asp-route-date="@(DateTime.Now.ToString("dd-MM-yyyy"))" class="btn bg-blue">
+            Asignar los vehículos de hoy
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<span id="popupNotification"></span>
+<script>
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("VehicleRouteListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @defaultGridPageSize,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Fecha",
+                },
+                {
+                    field: "Pending",
+                    title: "Estatus",
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        if (dataItem.Pending) {
+                            return '<span class="grid-report-item red">Pendientes por asignar</span>';
+                        }
+                        else {
+                            return '<span class="grid-report-item green">Todos asignados</span>';
+                        }
+                        
+                    }
+                },
+                {
+                    field: "SimpleDate",
+                    title: "Asignar",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: '<a class="btn btn-default" href="AssignVehicles?date=#=SimpleDate#"><i class="fa fa-pencil"></i>Asignar vehículos</a>'
+                }
+            ]
+        });
+    });
+</script>

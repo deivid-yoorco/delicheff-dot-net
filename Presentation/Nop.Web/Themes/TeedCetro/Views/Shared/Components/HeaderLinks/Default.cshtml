@@ -1,0 +1,204 @@
+﻿@model HeaderLinksModel
+@using System.Text.Encodings.Web
+
+@await Component.InvokeAsync("Widget", new { widgetZone = "header_links_before" })
+@{
+    string viewRouteValue = Url.RouteUrl(ViewContext.RouteData.Values);
+}
+
+@if (viewRouteValue != "/onepagecheckout")
+{
+    <li>
+        <a class="modal-trigger" href="#search-modal">
+            <i class="material-icons">search</i>
+        </a>
+    </li>
+
+    @if (Model.CompareProductsEnabled)
+    {
+        <li>
+            <a href="@Url.RouteUrl("compareproducts")" class="tooltipped hide-on-med-and-down" data-position="bottom"
+               data-tooltip="@Model.CompareProducstItems">
+                <i class="material-icons">compare</i>
+            </a>
+
+            <a href="@Url.RouteUrl("compareproducts")" class="show-on-med-and-down">
+                <i class="material-icons">compare</i>
+            </a>
+        </li>
+    }
+
+    @if (Model.WishlistEnabled)
+    {
+        <li>
+            <a href="@Url.RouteUrl("Wishlist")" class="tooltipped hide-on-med-and-down" data-position="bottom"
+               data-tooltip="@Model.WishlistItems">
+                <i class="material-icons">favorite_border</i>
+            </a>
+            <a href="@Url.RouteUrl("Wishlist")" class="show-on-med-and-down">
+                <i class="material-icons">favorite_border</i>
+            </a>
+        </li>
+    }
+
+    @if (Model.ShoppingCartEnabled)
+    {
+        if (Model.ShoppingCartItems > 9)
+        {
+            <style>
+                #pop-cart {
+                    margin-left: -4px;
+                }
+            </style>
+        }
+
+
+        <li id="topcartlink">
+            <a href="@Url.RouteUrl("ShoppingCart")" @*class="tooltipped" data-position="bottom"
+            data-tooltip="@Model.ShoppingCartItems" *@>
+                <i class="material-icons">shopping_cart</i>
+                <div class="notify-bubble center white">
+                    <div id="pop-cart" style="margin-top: -24px; color: black;">
+                        @(Model.ShoppingCartItems)
+                    </div>
+                </div>
+            </a>
+        </li>
+        <style>
+            .notify-bubble {
+                height: 15px;
+                width: 15px;
+                position: absolute;
+                top: 30px;
+                margin-left: 1em;
+                padding: 0px 5px 0px 6px;
+                color: white;
+                font-size: 0.75em;
+                border-radius: 50%;
+                box-shadow: 1px 1px 1px grey;
+                display: none;
+            }
+
+            @@media only screen and (max-width: 601px) {
+                .notify-bubble {
+                    top: 13px !important;
+                }
+
+                #pop-cart {
+                    margin-top: -7px !important;
+                }
+            }
+        </style>
+    }
+
+    @if (Model.AllowPrivateMessages)
+    {
+        <li>
+            <a href="@Url.RouteUrl("PrivateMessages", new { tab = "" })" class="tooltipped hide-on-med-and-down"
+               data-position="bottom" data-tooltip="@Model.UnreadPrivateMessages">
+                <i class="material-icons">chat</i>
+            </a>
+
+            <a href="@Url.RouteUrl("PrivateMessages", new { tab = "" })" class="show-on-med-and-down">
+                <i class="material-icons">chat</i>
+            </a>
+        </li>
+    }
+}
+@if (Model.IsAuthenticated)
+{
+    <li>
+        <a href="@Url.RouteUrl("CustomerInfo")" class="tooltipped hide-on-med-and-down" data-position="bottom"
+           data-tooltip="@T("Account.MyAccount")">
+            <i class="material-icons">person</i>
+        </a>
+
+        <a href="@Url.RouteUrl("CustomerInfo")" class="hide-on-large-only">
+            <i class="material-icons">person</i>
+        </a>
+    </li>
+
+    @if (viewRouteValue.Contains("/customer/") || viewRouteValue == "/order/history")
+    {
+        <script>
+            $(document).ready(function () {
+                if ($('.block-account-navigation ul').length > 0) {
+                    $('.block-account-navigation ul').append(`<li class="log-out collection-item">
+                            <a href="@Url.RouteUrl("Logout")" class="inactive">@T("Account.Logout")</a>
+                        </li>`);
+                }
+            });
+        </script>
+    }
+    @* <li>
+        <a href="@Url.RouteUrl("Logout")" class="tooltipped hide-on-med-and-down" data-position="bottom"
+        data-tooltip="@T("Account.Logout")">
+        <i class="material-icons">exit_to_app</i>
+        </a>
+
+        <a href="@Url.RouteUrl("Logout")" class="hide-on-large-only">
+        <i class="material-icons">exit_to_app</i>
+        </a>
+        </li> *@
+}
+else
+{
+    <li>
+        <a href="@Url.RouteUrl("Login")" class="tooltipped hide-on-med-and-down" data-position="bottom"
+           data-tooltip="@T("Account.Login")">
+            <i class="material-icons">person</i>
+            @if (viewRouteValue == "/onepagecheckout")
+            {
+                <span>Iniciar sesión</span>
+                <style>
+                    nav [class*=mdi-],
+                    nav [class^=mdi-],
+                    nav i,
+                    nav i.material-icons {
+                        display: inline-flex;
+                        vertical-align: top;
+                    }
+                </style>
+            }
+        </a>
+        <a href="@Url.RouteUrl("Login")" class="show-on-med-and-down hide-on-large-only">
+            <i class="material-icons">person</i>
+
+        </a>
+    </li>
+}
+<script type="text/javascript" asp-location="Footer">
+    $(function () {
+        $('.notify-bubble').show(400);
+    });
+</script>
+@await Component.InvokeAsync("Widget", new { widgetZone = "header_links_after" })
+
+@if (Model.AllowPrivateMessages && !string.IsNullOrEmpty(Model.AlertMessage))
+{
+    <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+            Materialize.toast('@Html.Raw(JavaScriptEncoder.Default.Encode(Model.AlertMessage))', 8000)
+        });
+    </script>
+}
+
+@if (Model.ShoppingCartEnabled)
+{
+    <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+            $('.header').on('mouseenter', '#topcartlink', function () {
+                $('#flyout-cart').addClass('active');
+            });
+            $('.header').on('mouseleave', '#topcartlink', function () {
+                $('#flyout-cart').removeClass('active');
+            });
+            $('.header').on('mouseenter', '#flyout-cart', function () {
+                $('#flyout-cart').addClass('active');
+            });
+            $('.header').on('mouseleave', '#flyout-cart', function () {
+                $('#flyout-cart').removeClass('active');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,525 @@
+﻿<style>
+    @@charset "US-ASCII";
+    @@import "http://fonts.googleapis.com/css?family=Lato:300,400,700";
+
+    #confirm-button-disable {
+        margin-top: 15px;
+    }
+
+    .bkng-tb-cntnt {
+        float: left;
+    }
+
+        .bkng-tb-cntnt a.button {
+            color: #fff;
+            float: right;
+            font-size: 18px;
+            padding: 5px 20px;
+        }
+
+            .bkng-tb-cntnt a.button.o {
+                background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+                color: #e51f04;
+                border: 1px solid #e51f04;
+            }
+
+            .bkng-tb-cntnt a.button i {
+                color: #fff;
+            }
+
+            .bkng-tb-cntnt a.button.o i {
+                color: #e51f04;
+            }
+
+            .bkng-tb-cntnt a.button.right i {
+                float: right;
+                margin: 2px 0 0 10px;
+            }
+
+            .bkng-tb-cntnt a.button.left {
+                float: left;
+            }
+
+            .bkng-tb-cntnt a.button.disabled.o {
+                border-color: #ccc;
+                color: #ccc;
+            }
+
+                .bkng-tb-cntnt a.button.disabled.o i {
+                    color: #ccc;
+                }
+
+    .pymnts {
+        float: left;
+    }
+
+        .pymnts * {
+            float: left;
+        }
+
+    .sctn-row {
+        margin-bottom: 35px;
+    }
+
+    .sctn-col input {
+        border: 1px solid #ccc;
+        font-size: 18px;
+        line-height: 24px;
+        padding: 10px 12px;
+    }
+
+    .sctn-col label {
+        font-size: 24px;
+        line-height: 24px;
+        margin-bottom: 10px;
+    }
+
+    .sctn-col.x3 a {
+        float: right;
+    }
+
+    .pymnt-itm {
+        margin: 0 0 3px;
+    }
+
+        .pymnt-itm h2 {
+            background-color: #e9e9e9;
+            font-size: 24px;
+            line-height: 24px;
+            margin: 0;
+            padding: 28px 0 28px 20px;
+        }
+
+        .pymnt-itm.active h2 {
+            color: black;
+            cursor: default;
+        }
+
+        .pymnt-itm div.pymnt-cntnt {
+            display: none;
+        }
+
+        .pymnt-itm.active div.pymnt-cntnt {
+            background-color: #f7f7f7;
+            display: block;
+            padding: 0 0 30px;
+        }
+
+    .pymnt-cntnt div.sctn-row {
+        margin: 20px 30px 0;
+    }
+
+        .pymnt-cntnt div.sctn-row div.sctn-col.half.l {
+            float: left;
+        }
+
+        .pymnt-cntnt div.sctn-row div.sctn-col.cvv {
+            background-image: url("/Plugins/Payments.OpenPay/src/images/cvv.png");
+            background-position: 156px center;
+            background-repeat: no-repeat;
+            padding-bottom: 30px;
+        }
+
+    .openpay {
+        float: right;
+        height: auto;
+        margin: 10px 30px 0 0;
+    }
+
+        .openpay div.logo {
+            background-image: url("/Plugins/Payments.OpenPay/src/images/openpay.png");
+            background-position: center;
+            background-repeat: no-repeat;
+            font-size: 12px;
+            font-weight: 400;
+            height: 60px;
+            padding: 15px 20px 0 0;
+            width: inherit;
+            background-size: cover;
+        }
+
+        .openpay div.shield {
+            background-image: url("/Plugins/Payments.OpenPay/src/images/security.png");
+            background-position: left bottom;
+            background-repeat: no-repeat;
+            font-size: 12px;
+            font-weight: 400;
+            padding: 20px 0 0 40px;
+            width: inherit;
+            height: 40px;
+            background-position-x: center;
+        }
+
+        .openpay .col {
+            justify-items: center;
+            display: grid;
+        }
+
+    .card-expl {
+        float: left;
+        height: 80px;
+        margin: 20px 0;
+        width: 100%;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+        .card-expl div {
+            background-position: left 45px;
+            background-repeat: no-repeat;
+            height: 70px;
+            padding-top: 10px;
+        }
+
+            .card-expl div.debit {
+                background-size: contain;
+                background-image: url("/Plugins/Payments.OpenPay/src/images/cards2.png");
+                margin-left: 20px;
+            }
+
+            .card-expl div.credit {
+                background-position: bottom;
+                background-image: url("/Plugins/Payments.OpenPay/src/images/cards1.png");
+                border-right: 1px solid #ccc;
+                margin-left: 30px;
+            }
+
+        .card-expl h4 {
+            font-weight: 400;
+            margin: 0;
+        }
+
+    @@media only screen and (max-width: 600px) {
+        .openpay {
+            width: 100% !important;
+            float: none !important;
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+            margin: 0 0 0 0 !important;
+        }
+
+            .openpay > .col {
+                border-bottom: 1px solid #ccc !important;
+                border-right: none !important;
+                margin-top: 20px !important;
+            }
+
+                .openpay > .col ~ .col {
+                    border: none !important;
+                    margin-top: auto !important;
+                }
+
+        .card-expl div.credit {
+            background-size: contain;
+        }
+
+        .openpay .col {
+            padding: 10px 20px 10px 20px !important;
+        }
+
+        .sctn-row {
+            margin: 20px 10px 0 !important;
+        }
+
+        .sctn-col.cvv {
+            background-position: bottom !important;
+        }
+
+        .openpay div.logo {
+            background-size: contain;
+        }
+    }
+</style>
+<div class="bkng-tb-cntnt openpay-payment" style="display: none;margin-bottom: 15px;">
+    <div class="pymnts">
+        <form action="#" method="POST" id="openpay-payment-form">
+            <input type="hidden" name="token_id" id="token_id">
+            <div class="pymnt-itm card active">
+                <h2 style="width: 100%; color: black;">Tarjeta de crédito o débito</h2>
+                <div class="pymnt-cntnt">
+                    <div class="card-expl row">
+                        <div class="credit col s6"><span>Tarjetas de crédito</span></div>
+                        <div class="debit col s6"><span>Tarjetas de débito</span></div>
+                    </div>
+                    <div class="sctn-row row">
+                        <div class="sctn-col l col s12">
+                            <label>Nombre del titular</label>
+                        </div>
+                        <div class="col s12">
+                            <div class="col s12 m6">
+                                <label>Nombre/s del titular</label><input type="text" placeholder="Nombre/s" autocomplete="off" class="first-names">
+                            </div>
+                            <div class="col s12 m6">
+                                <label>Apellidos del titular</label><input type="text" placeholder="Apellidos" autocomplete="off" class="last-names">
+                            </div>
+                            <input style="display:none;" type="text" placeholder="Como aparece en la tarjeta" autocomplete="off" data-openpay-card="holder_name" class="complete-name">
+                        </div>
+                        <div class="sctn-col col s12" style="margin-top: 20px;">
+                            <label>Número de tarjeta</label>
+                            <div class="col s12">
+                                <input type="text" autocomplete="off" data-openpay-card="card_number" maxlength="16" class="openpay_card_number">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sctn-row row">
+                        <div class="sctn-col l col s12">
+                            <div class="col s12">
+                                <label>Fecha de expiración</label>
+                            </div>
+                            <div class="col s12 m6">
+                                <input type="text" placeholder="Mes" data-openpay-card="expiration_month" maxlength="2" class="openpay_expiration_month">
+                            </div>
+                            <div class="col s12 m6">
+                                <input type="text" placeholder="Año" data-openpay-card="expiration_year" maxlength="2" class="openpay_expiration_year">
+                            </div>
+                        </div>
+                        <div class="sctn-col cvv col s12" style="margin-top: 20px;">
+                            <label>Código de seguridad</label>
+                            <div class="sctn-col half l col s12"><input type="password" placeholder="3 o 4 dígitos" autocomplete="off" data-openpay-card="cvv2" maxlength="4" class="openpay_cvv2"></div>
+                        </div>
+                    </div>
+                    <div class="openpay row">
+                        <div class="col s12 m6" style="border-right: 1px solid #ccc;">
+                            <div>Transacciones realizadas vía:</div>
+                            <div class="logo"></div>
+                        </div>
+                        <div class="col s12 m6" style="padding-right: 24px;">
+                            <div>Tus pagos se realizan de forma segura con encriptación de 256 bits.</div>
+                            <div class="shield"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    var deviceDataId = OpenPay.deviceData.setup("formId");
+    var doneConfig = false;
+    var deviceSessionId;
+    var merchantId;
+    var orderTotal;
+    var orderId;
+    $(document).ready(function () {
+        $.fn.inputFilter = function (inputFilter) {
+            return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                } else {
+                    this.value = "";
+                }
+            });
+        };
+        $('.first-names, .last-names').on('keyup', function () {
+            $('.complete-name')
+                .val($('.first-names').val() + ($('.first-names').val() == "" ? "" : " ") + $('.last-names').val());
+        });
+        $(".openpay_card_number, .openpay_expiration_month, .expiration_year, .openpay_cvv2").inputFilter(function (value) {
+            return /^\d*$/.test(value);    // Allow digits only, using a RegExp
+        });
+    });
+    const buildOpenPayForm = () => {
+        $('#confirm-button-disable').addClass('disabled');
+        if (!doneConfig) {
+            $.ajax({
+                url: '/Admin/PaymentOpenPay/GetPaymentData',
+                type: 'GET',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    OpenPay.setId(data.merchantId);
+                    OpenPay.setApiKey(data.publicKey);
+                    OpenPay.setSandboxMode(data.sandboxMode);
+                    merchantId = data.merchantId;
+                    deviceSessionId = OpenPay.deviceData.setup("payment-form", "deviceIdHiddenFieldName");
+                    $('#confirm-button-disable').removeClass('disabled');
+                    doneConfig = true;
+                    $('.openpay-payment').show();
+                },
+                error: function (err) {
+                    console.log(err);
+                    create_error_callbak(null, err.description, err.error_code + "-" + err.http_code);
+                },
+            });
+        } else {
+            $('#confirm-button-disable').removeClass('disabled');
+            $('.openpay-payment').show();
+        }
+    };
+    var pay_openpay = function (nOrderTotal) {
+        $('#confirm-button-disable').addClass('disabled');
+        var allInputsFilled = $(".pymnt-cntnt input").filter(function () {
+            return $.trim($(this).val()).length == 0
+        }).length == 0;
+        var cardFullLength = $('.openpay_card_number').val().length >= 15;
+        var dateFullLength = $('.openpay_expiration_month').val().length == 2 && $('.openpay_expiration_year').val().length == 2;
+        var cvvFullLength = $('.openpay_cvv2').val().length >= 3;
+        var cardTypeMatchCvv = cardMachCvvType($('.openpay_card_number').val(), $('.openpay_cvv2').val());
+        if (allInputsFilled && cardFullLength && dateFullLength && cvvFullLength && cardTypeMatchCvv) {
+            $('.pymnt-cntnt input').prop('disabled', true);
+            $('#loading-confirm').addClass('active');
+            orderTotal = nOrderTotal;
+            /*OpenPay.token.extractFormAndCreate('openpay-payment-form', success_callbak, error_callbak);*/
+            var payment = $('#payment-method-select-container').val();
+            var points = false;
+            var url = 'Checkout/SelectPaymentMethodNew?paymentmethod=' + payment + '&UseRewardPoints=' + points;
+            if (typeof orderId == 'undefined')
+                $.ajax({
+                    cache: false,
+                    url: url,
+                    type: 'POST',
+                    success: function () {
+                        // PLACE ORDER
+                        var placeOrderBody = {
+                            messagegift: $('#message-gift').val(),
+                            signsgift: $('#name-signs-gift').val()
+                        };
+                        $.ajax({
+                            cache: false,
+                            url: 'Checkout/CreateOrderV2/',
+                            data: placeOrderBody,
+                            type: 'post',
+                            success: function (response) {
+                                if (response.error) {
+                                    return;
+                                }
+                                orderId = response.orderId;
+                                doPayment();
+                            },
+                            error: function (err) {
+                                $('.pymnt-cntnt input').prop('disabled', false);
+                                console.log(err);
+                                $('#confirm-button-disable').removeClass('disabled');
+                            }
+                        });
+                    },
+                    error: function (err) {
+                        $('.pymnt-cntnt input').prop('disabled', false);
+                        console.log(err);
+                        $('#confirm-button-disable').removeClass('disabled');
+                    }
+                });
+            else
+                doPayment();
+        } else {
+            $('#loading-confirm').removeClass('active');
+            if (!allInputsFilled)
+                alert("Favor de ingresar todos los campos del formulario para poder continuar con el pago.");
+            else if (!cardFullLength)
+                alert("Favor de verificar que el número de la tarjeta ingresado sea de 15 o 16 dígitos (depende del tipo de tarjeta).");
+            else if (!dateFullLength)
+                alert("Favor de ingresar el mes y año de la tarjeta completos (dos dígitos para el mes y año).");
+            else if (!cvvFullLength)
+                alert("Favor de verificar que el número de seguridad de la tarjeta (cvv o cvv2) ingresado sea de 3 o 4 dígitos (depende del tipo de tarjeta).");
+            else if (!cardTypeMatchCvv)
+                alert("Favor de verificar que el número de seguridad de la tarjeta (cvv o cvv2) y el número de la tarjeta sean correcto.");
+            $('#confirm-button-disable').removeClass('disabled');
+        }
+    };
+    var doPayment = function (use3ds = false) {
+        var tokenModel = {
+            email: formatFormVariable($('.current-billing-email').text()),
+            phone: formatFormVariable($('.current-billing-phoneNumber').text()),
+            card_number: $('.openpay_card_number').val(),
+            first_names: formatFormVariable($('.first-names').val()),
+            last_names: formatFormVariable($('.last-names').val()),
+            holder_name: formatFormVariable($('.complete-name').val()),
+            expiration_year: $('.openpay_expiration_year').val(),
+            expiration_month: $('.openpay_expiration_month').val(),
+            cvv2: $('.openpay_cvv2').val(),
+            city: formatFormVariable($('.current-billing-countryName').text()),
+            country_code: 'MX',
+            postal_code: formatFormVariable($('.current-billing-zipPostalCode').text()),
+            line1: formatFormVariable($('.current-billing-address1').text()),
+            line2: formatFormVariable($('.current-billing-city').text()),
+            line3: '',
+            state: formatFormVariable($('.current-billing-stateProvinceName').text()),
+            deviceId: deviceDataId,
+            orderId: orderId,
+            use3ds: use3ds
+        };
+        var formData = new FormData();
+        $.each(tokenModel, function (name, value) {
+            formData.append(name, value);
+        });
+
+        $.ajax({
+            url: '/Admin/PaymentOpenPay/ProcessPayment',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                if (data.redoWith3ds)
+                    doPayment(true);
+                else if (data.redirect)
+                    window.location.href = data.url;
+                else
+                    window.location.href = OrderConfirm.successUrl;
+            },
+            error: function (err) {
+                console.log(err);
+                if (typeof err.responseJSON != 'undefined' && err.responseJSON != null)
+                    create_error_callbak(null, err.responseJSON.description, err.responseJSON.error_code + "-" + err.responseJSON.http_code);
+                else
+                    create_error_callbak(null, "Ocurrió un error con el servicio de pago, por favor inténtalo mas tarde o contáctanos.", 0 + "-" + 0);
+            },
+        });
+    };
+    var create_error_callbak = function (error, desc, status) {
+        var response = new Object();
+        response.data = new Object();
+        if (error != null) {
+            response.data.description = error.responseJSON.description;
+            response.status = error.responseJSON.error_code;
+            response.message = error.responseJSON.description;
+        } else {
+            response.data.description = desc;
+            response.status = status;
+            response.message = desc;
+        }
+        error_callbak(response);
+    };
+    var error_callbak = function (response) {
+        var desc = response.data.description != undefined ?
+            response.data.description : response.message;
+        $("#openpay-payment-form").prop("disabled", false);
+        $('.pymnt-cntnt input').prop('disabled', false);
+        $("#confirm-button-disable").removeClass("disabled");
+        $('#loading-confirm').removeClass('active');
+        alert("ERROR [" + response.status + "] " + desc);
+    };
+
+    function cardMachCvvType(number, cvv) {
+        var type = creditCardTypeFromNumber(number);
+        if (type == 'AmEx')
+            return cvv.length == 4
+        else
+            return cvv.length == 3
+    }
+
+    function creditCardTypeFromNumber(num) {
+        // first, sanitize the number by removing all non-digit characters.
+        num = num.replace(/[^\d]/g, '');
+        // now test the number against some regexes to figure out the card type.
+        if (num.match(/^5[1-5]\d{14}$/)) {
+            return 'MasterCard';
+        } else if (num.match(/^4\d{15}/) || num.match(/^4\d{12}/)) {
+            return 'Visa';
+        } else if (num.match(/^3[47]\d{13}/)) {
+            return 'AmEx';
+        } else if (num.match(/^6011\d{12}/)) {
+            return 'Discover';
+        }
+        return 'UNKNOWN';
+    }
+
+    function formatFormVariable(string) {
+        return string.trim();
+    }
+</script>

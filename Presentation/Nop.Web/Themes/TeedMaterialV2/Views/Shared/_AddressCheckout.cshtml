@@ -1,0 +1,338 @@
+﻿@model AddressModel
+<script type="text/javascript" asp-location="Footer">
+    //we don't move this script to the footer as it's used in Ajax requests where footer is not available
+        $(document).ready(function () {
+            $("#@Html.IdFor(model => model.CountryId)").change(function () {
+            var selectedItem = $(this).val();
+            var ddlStates = $("#@Html.IdFor(model => model.StateProvinceId)");
+            var statesProgress = $("#states-loading-progress-new");
+            statesProgress.show();
+                $.ajax({
+                cache: false,
+                    type: "GET",
+                    url: "@(Url.RouteUrl("GetStatesByCountryId"))",
+                    data: { "countryId": selectedItem, "addSelectStateItem": "true" },
+                    success: function (data) {
+                    ddlStates.html('');
+                        $.each(data, function (id, option) {
+                        ddlStates.append($('<option></option>').val(option.id).html(option.name));
+                        });
+                        $('select').formSelect();
+                    statesProgress.hide();
+                },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Failed to retrieve states.');
+                    statesProgress.hide();
+                }
+            });
+        });
+        });
+</script>
+
+<input asp-for="Id" type="hidden" id="input-Checkout-Id" />
+<div class="edit-address row" style="margin-top:2%;">
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.FirstName)</label>
+        <input asp-for="FirstName" id="input-Checkout-FirstName" />
+        <span class="helper-text red-text" id="first-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.LastName)</label>
+        <input asp-for="LastName" id="input-Checkout-LastName" />
+        <span class="helper-text red-text" id="last-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+    </div>
+    <div class="inputs col s12 m6">
+        <label>*@Html.DisplayNameFor(m => m.Email)</label>
+        <input asp-for="Email" id="input-Checkout-Email" />
+        <span class="helper-text red-text" id="email-field-teed" style="display:none;">Este campo es obligatorio</span>
+        <span class="helper-text red-text" id="validate-email-field-teed" style="display:none;">Debes ingresar un correo electrónico válido</span>
+    </div>
+    @{ string phoneReq = Model.PhoneRequired ? "*" : ""; }
+    <div class="inputs col s12 m6">
+        <label>@Html.Raw(phoneReq)@Html.DisplayNameFor(m => m.PhoneNumber)</label>
+        <input disabled=@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? false : true) asp-for="PhoneNumber" id="input-Checkout-Phone" />
+        <span class="helper-text red-text" id="phone-field-teed" style="display:none;">Ingrese un número de teléfono válido (10 dígitos)</span>
+    </div>
+    @if (Model.CompanyEnabled)
+    {
+        string companyReq = Model.CompanyRequired ? "*" : "";
+        <div class="inputs col s12 m12">
+            <label>@Html.Raw(companyReq)@Html.DisplayNameFor(m => m.Company)</label>
+            <input asp-for="Company" id="input-Checkout-Company" />
+            <span class="helper-text red-text" asp-validation-for="Company"></span>
+        </div>
+    }
+    <div class="inputs col s12 m12" style="margin: 2em 0 10px 0">
+        <h5>Ingresa y selecciona la dirección de entrega</h5>
+        <input id="google-map-address" placeholder="Ingresa calle y número del domicilio" />
+        <span style="font-weight:bold;color:red;display:none" id="address-error">Por el momento no estamos realizando entregas en la dirección seleccionada.</span>
+        <span style="font-weight:bold;color:red;display:none" id="postal-code-error">No logramos encontrar la dirección. Por favor busca utilizando la calle y número exterior del domicilio de entrega.</span>
+    </div>
+    <div style="text-align:center">
+        <div class="preloader-wrapper small verifying-address" style="margin:0 auto;display: none">
+            <div class="spinner-layer">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div><div class="gap-patch">
+                    <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="newDirTXT">
+        <div id="newDirTextDom">
+        </div>
+    </div>
+    <div class="inputs col s12 m6" style="display:none;">
+        <label>*@Html.DisplayNameFor(m => m.StateProvinceId)</label>
+        <input asp-for="StateProvinceName" id="state-form" disabled style="display:none;" />
+        <span class="helper-text red-text" id="stateId-field-teed" style="display:none;">Este campo es obligatorio</span>
+        @*<span class="helper-text blue-text" id="states-loading-progress-new" style="display: none;"></span>*@
+    </div>
+    @{
+        string cityReq = Model.CityRequired ? "*" : "";
+        <div class="inputs col s12 m6" style="display:none;">
+            <label>@Html.Raw(cityReq)@Html.DisplayNameFor(m => m.City)</label>
+            <input asp-for="City" id="input-Checkout-City" disabled style="display:none;" />
+            <span class="helper-text red-text" id="city-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        string add1Req = Model.StreetAddressRequired ? "*" : "";
+        <div class="inputs col s12 m6" style="display:none;">
+            <label>@Html.Raw(add1Req)@Html.DisplayNameFor(m => m.Address1)</label>
+            <input asp-for="Address1" id="input-Checkout-Address1" disabled />
+            <span class="helper-text red-text" id="address1-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+        
+        <div id="address-extra-data" style="display: none">
+            <div id="newDom" class="inputs col s12 m12" style="margin-top: -30px">
+                <span class="helper-text red-text" id="ext-number-field-teed" style="display:none;">Este campo es obligatorio</span>
+            </div>
+
+            <div class="inputs col s12 m12">
+                <div id="numInt">
+                    <label style="color:black">Número interior</label>
+                    <input id="input-Checkout-Interior" />
+                    <span class="helper-text red-text" id="int-number-field-teed" style="display:none;">Este campo es obligatorio</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col s12 m12">
+                    <form action="#">
+                        <p>
+                            <label>
+                                <input id="checkNunInt" type="checkbox" />
+                                <span>No tiene número interior</span>
+                            </label>
+                        </p>
+                    </form>
+                </div>
+            </div>
+            @if (Model.CustomAddressAttributes.Count > 0)
+            {
+                <div class="inputs col s12 m12">
+                    @await Html.PartialAsync("_AddressAttributes", Model.CustomAddressAttributes)
+                </div>
+            }
+        </div>
+
+        string add2Req = Model.StreetAddress2Required ? "*" : "";
+        <div class="inputs col s12 m6" disabled style="display:none;">
+            <label>@Html.Raw(add2Req)@Html.DisplayNameFor(m => m.Address2)</label>
+            <input asp-for="Address2" id="input-Checkout-Address2" />
+            <span class="helper-text red-text" asp-validation-for="Address2"></span>
+        </div>
+
+        string zipReq = Model.ZipPostalCodeRequired ? "*" : "";
+        <div class="inputs col s12 m6" disabled style="display:none;">
+            <label>@Html.Raw(zipReq)@Html.DisplayNameFor(m => m.ZipPostalCode)</label>
+            <input asp-for="ZipPostalCode" id="input-Checkout-ZCP" />
+            <span class="helper-text red-text" id="zcp-field-teed" style="display:none;">Este campo es obligatorio</span>
+        </div>
+
+        <div class="inputs col s12 m6" style="display: none">
+            <label>Latitude</label>
+            <input id="input-Latitude" disabled />
+        </div>
+
+        <div class="inputs col s12 m6" style="display: none">
+            <label>Longitude</label>
+            <input id="input-Longitude" disabled />
+        </div>
+    }
+</div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&libraries=places&callback=initAutocomplete"
+        async defer></script>
+<script>
+    function initAutocomplete() {
+        var options = {
+            componentRestrictions: { country: 'mx' }
+        };
+        var input = document.getElementById('google-map-address');
+        searchBox = new google.maps.places.Autocomplete(input, options);
+        searchBox.addListener('place_changed', this.onPlaceChanged);
+    }
+
+    function onPlaceChanged() {
+        $("#postal-code-error").hide();
+        $("#state-form").val("");
+        $('#input-Checkout-Address2').val("");
+        $('#input-Checkout-City').val("");
+        $("#input-Checkout-ZCP").val("");
+        $("#input-Checkout-Address1").val("");
+
+        var place = searchBox.getPlace();
+        var postalCode = getPostalCodeInPlace(place);
+        if (postalCode != "") {
+            $(".verifying-address").show();
+            $(".verifying-address").addClass("active");
+            $("#address-error").hide();
+
+            $.ajax({
+                cache: false,
+                url: '/api/app/VerifyPostalCodeRegion?postalcode=' + postalCode,
+                type: 'GET',
+                success: function (data) {
+                    console.log("resultado de verificacion", data);
+                    $(".verifying-address").hide();
+                    $(".verifying-address").removeClass("active");
+
+                    if (data) {
+                        console.log('lat', place.geometry.location.lat());
+                        $("#address-extra-data").show();
+                        $("#address-error").hide();
+                        for (var i = 0; i < place.address_components.length; i++) {
+                            if (place.address_components[i].types.indexOf('administrative_area_level_1') >= 0) {
+                                $("#state-form").val(place.address_components[i].long_name);
+                            }
+                            if (place.address_components[i].types.indexOf('sublocality') >= 0) {
+                                $('#input-Checkout-Address2').val(place.address_components[i].long_name);
+                            }
+                            if (place.address_components[i].types.indexOf('locality') >= 0) {
+                                $('#input-Checkout-City').val(place.address_components[i].long_name);
+                            }
+                            if (place.address_components[i].types.indexOf('postal_code') >= 0) {
+                                $("#input-Checkout-ZCP").val(place.address_components[i].long_name);
+                            }
+                        }
+                        $("#input-Checkout-Address1").val(place.formatted_address.split(",")[0]);
+                        $('#input-Latitude').val(place.geometry.location.lat());
+                        $('#input-Longitude').val(place.geometry.location.lng());
+
+                        $('#newDirTextDom').empty();
+                        var newDirTextDom = "";
+                        var stateId = $('#state-form').val();
+                        var city = $('#input-Checkout-City').val();
+                        var address1 = $('#input-Checkout-Address1').val();
+                        var address2 = $('#input-Checkout-Address2').val();
+                        var zcp = $('#input-Checkout-ZCP').val();
+                        newDirTextDom = '<div id="newDirTextDom">' +
+                            '<strong>Calle: </strong><span style="color: black;">' + address1 + '</span><br />' +
+                            '<strong>Colonia: </strong><span style="color: black;">' + address2 + '</span><br />' +
+                            '<strong>Ciudad, Municipio o delegación: </strong><span style="color: black;">' + city + '</span><br />' +
+                            '<strong>Estado/Provincia: </strong><span style="color: black;">' + stateId + '</span><br />' +
+                            '<strong>Código Postal: </strong><span style="color: black;">' + zcp + '</span><br /><br />' +
+                            '</div>';
+                        document.getElementById("newDirTXT").insertAdjacentHTML("afterbegin", newDirTextDom);
+                    }
+                    else if ($("#postal-code-error").is(":hidden")) {
+                        $("#address-error").show();
+                    }
+                },
+                error: function () {
+                    $(".verifying-address").hide();
+                    $(".verifying-address").removeClass("active");
+                    alert('Error de conexión');
+                }
+            })
+        }
+        else {
+            $("#postal-code-error").show();
+        }
+    }
+
+    //function isAddressValid(place) {
+    //    var route = "";
+    //    var streetNumber = "";
+    //    var postalCode = getPostalCodeInPlace(place);
+
+    //    for (var i = 0; i < place.address_components.length; i++) {
+    //        var routeIndex = place.address_components[i].types.indexOf('route');
+    //        if (routeIndex >= 0 && !route) {
+    //            route = place.address_components[i].long_name;
+    //        }
+
+    //        var streetNumberIndex = place.address_components[i].types.indexOf('street_number');
+    //        if (streetNumberIndex >= 0 && !streetNumber) {
+    //            streetNumber = place.address_components[i].long_name;
+    //        }
+    //    }
+
+    //    let selectedAddress = route + streetNumber;
+
+    //    return checkAddress(selectedAddress, postalCode);
+    //}
+
+    function getPostalCodeInPlace(place) {
+        var postalCode = "";
+        for (var i = 0; i < place.address_components.length; i++) {
+            var index = place.address_components[i].types.indexOf('postal_code');
+            if (index >= 0) {
+                postalCode = place.address_components[i].long_name;
+            }
+        }
+        return postalCode;
+    }
+
+
+    function NewTextDir() {
+        var stateId = $('.input-Checkout-State').val();
+        var city = $('#input-Checkout-City').val();
+        var address1 = $('#google-map-address').val();
+        var address2 = $('#input-Checkout-Address2').val();
+        var zcp = $('#input-Checkout-ZCP').val();
+
+        var newDirTextDom = "<div>" +
+            "<label>Calle y número:</label><span>" + address1 + "</span>" +
+            "<label>Colonia:</label><span>" + address2 + "</span>" +
+            "<label>Ciudad, Municipio o delegación:</label><span>" + city + "</span>" +
+            "<label>Estado/Provincia:</label><span>" + stateId + "</span>" +
+            "<label>Código Postal:</label><span>" + zcp + "</span>" +
+            "</div>";
+
+        document.getElementById("newDirTXT").insertAdjacentElement("afterbegin", newDirTextDom)
+
+    }
+
+    function on() {
+        $("#numInt").hide();
+        $("#input-Checkout-Interior").val("S/N");
+    }
+
+    function off() {
+        $("#numInt").show();
+        $("#input-Checkout-Interior").val("");
+    }
+
+    var checkBox = document.querySelector('#checkNunInt');
+    checkBox.addEventListener('change', verificarEstado, false);
+
+    function verificarEstado(e) {
+        if (e.target.checked) {
+            on();
+        } else {
+            off();
+        }
+    }
+
+    function changePosNumberExt() {
+        var numberNextDom = document.getElementById("Número exterior");
+        document.getElementById("newDom").insertAdjacentElement("afterbegin", numberNextDom)
+    }
+
+    $(document).ready(changePosNumberExt);
+</script>

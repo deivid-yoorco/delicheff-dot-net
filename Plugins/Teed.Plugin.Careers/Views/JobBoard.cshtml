@@ -1,0 +1,72 @@
+﻿@model Teed.Plugin.Careers.Models.CareersPostulationModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    Html.AddTitleParts("Bolsa de trabajo");
+    @await Component.InvokeAsync("StoreScopeConfiguration")
+}
+<form asp-controller="CareersPublicView" asp-action="JobBoard" method="post" enctype="multipart/form-data">
+    <div class="page shopping-cart-page section">
+        @Html.Raw(Model.Body)
+        <div class="panel panel-default">
+            <div class="form-group">
+                <div class="label-wrapper">
+                    <label class="control-label">Nombre completo</label>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="FullName" />
+                    <span asp-validation-for="FullName"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label-wrapper">
+                    <label class="control-label">Correo electrónico</label>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="Email" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label-wrapper">
+                    <label class="control-label">Número de contacto</label>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="PhoneNumber" />
+                    <span asp-validation-for="PhoneNumber"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <label class="control-label">Currículum Vitae en formato PDF</label>
+                    <nop-override-store-checkbox asp-for="CVFile" asp-input="CVFile" />
+                </div>
+                <div class="col-md-9" style="margin-top: 30px;">
+                    <input asp-for="CVFile" accept="application/pdf" type="file" />
+                    <span asp-validation-for="CVFile"></span>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:  30px;">
+                <div class="label-wrapper">
+                    <label class="control-label">¿En qué área estás interesad@@?</label>
+                </div>
+                <div class="col-md-9" style="margin-top: 30px;">
+                    <nop-editor asp-for="Subject" />
+                    <span asp-validation-for="Subject"></span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3" style="margin-top: 40px;">
+                        <input type="submit" class="btn bg-blue" value="Enviar" /><br /><br /><br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Masa)
+{
+    <img src="~/Plugins/Careers/src/unete_masa.png" alt="Únete al equipo" style="max-width: 100%" />
+}

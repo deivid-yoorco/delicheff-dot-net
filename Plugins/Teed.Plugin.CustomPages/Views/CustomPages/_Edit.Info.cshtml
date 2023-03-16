@@ -1,0 +1,72 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Nombre</label>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group" style="width:100%">
+                    <input class="form-control" asp-for="Name" />
+                    <span asp-validation-for="Name"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color primario (HEX)</label>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group" style="width:100%">
+                    <input class="form-control" asp-for="PrimaryColor" />
+                    <span asp-validation-for="PrimaryColor"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color de pestaña (HEX)</label>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group" style="width:100%">
+                    <input class="form-control" asp-for="TabColor" />
+                    <span asp-validation-for="TabColor"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Orden de visualización</label>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group" style="width:100%">
+                    <input type="number" class="form-control" asp-for="DisplayOrder" />
+                    <span asp-validation-for="DisplayOrder"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Ocultar barra de título</label>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group" style="width:100%">
+                    <nop-editor asp-for="HideNavBar" />
+                    <span asp-validation-for="HideNavBar"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Publicada</label>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group" style="width:100%">
+                    <nop-editor asp-for="Published" />
+                    <span asp-validation-for="Published"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

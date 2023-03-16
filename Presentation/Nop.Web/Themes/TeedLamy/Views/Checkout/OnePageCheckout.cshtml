@@ -1,0 +1,520 @@
+﻿@model OnePageCheckoutModel
+@using Nop.Core
+@using Nop.Services.Security
+@using Nop.Services
+@inject IWebHelper webHelper
+@inject IPermissionService permissionService
+@{
+    Layout = "_ColumnsOne";
+
+    //scripts
+    Html.AddScriptParts(ResourceLocation.Footer, "~/js/public.accordion.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "~/js/public.onepagecheckout.js");
+
+    var storeLocation = webHelper.GetStoreLocation();
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Checkout").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-checkout-page");
+
+    string canAccessToAdminPanel = permissionService.Authorize(StandardPermissionProvider.AccessAdminPanel) ? "true" : "";
+}
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/jquery.inputmask.bundle.js"></script>
+<style>
+    .opc .section {
+        margin: 0 0 0px;
+    }
+</style>
+<input type="hidden" id="show-replacement-payment-method" value="@canAccessToAdminPanel" />
+<div class="row">
+    <div class="col s12 m7">
+        <ul class="opc">
+            <li class="tab-section allow collection-item" id="content-billing-new">
+                <div class="step-title teed-primary" onclick="returnAddress()">
+                    <h2 class="title">1/3 @T("Checkout.ShippingAddress")</h2>
+                </div>
+                @if (Model.BillingAddress.ExistingAddresses.Count > 0)
+                {
+                    <div class="section select-billing-address first-step-checkout">
+                        <label for="billing-address-select">@T("Checkout.SelectBillingAddressOrEnterNewOne")</label>
+                        <div>
+                            <select name="billing_address_id" id="billing-address-select-new" class="address-select"
+                                    title="" onchange="newAddress(!this.value)">
+                                @foreach (var address in Model.ShippingAddress.ExistingAddresses)
+                                {
+                                    var addressLine = "";
+                                    addressLine += address.FirstName;
+                                    addressLine += " " + address.LastName;
+                                    if (address.StreetAddressEnabled && !string.IsNullOrEmpty(address.Address1))
+                                    {
+                                        addressLine += ", " + address.Address1;
+                                    }
+                                    if (address.CityEnabled && !string.IsNullOrEmpty(address.City))
+                                    {
+                                        addressLine += ", " + address.City;
+                                    }
+                                    if (address.StateProvinceEnabled && !string.IsNullOrEmpty(address.StateProvinceName))
+                                    {
+                                        addressLine += ", " + address.StateProvinceName;
+                                    }
+                                    if (address.ZipPostalCodeEnabled && !string.IsNullOrEmpty(address.ZipPostalCode))
+                                    {
+                                        addressLine += " " + address.ZipPostalCode;
+                                    }
+                                    if (address.CountryEnabled && !string.IsNullOrWhiteSpace(address.CountryName))
+                                    {
+                                        addressLine += ", " + address.CountryName;
+                                    }
+                                    //how should we render "FormattedCustomAddressAttributes" here?
+                                    <option value="@(address.Id)">@(addressLine)</option>
+                                }
+                                <option value="" selected="@Model.ShippingAddress.NewAddressPreselected">@T("Checkout.NewAddress")</option>
+                            </select>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <script type="text/javascript" asp-location="Footer">
+                        $(document).ready(function () {
+                            $('#billing-new-address-form-new').show();
+                            $('#btn-continue-checkout').hide();
+                            $.event.trigger({ type: "onepagecheckout_billing_address_new" });
+                        });
+                    </script>
+                    <style>
+                        .first-step-checkout {
+                            margin-top: 5%;
+                        }
+                    </style>
+                }
+                <script>
+                    function resetSelectedAddress() {
+                        var selectElement = $('#billing-address-select-new');
+                        if (selectElement) {
+                            selectElement.val('');
+                        }
+                        $.event.trigger({ type: "onepagecheckout_billing_address_reset" });
+                    }
+                    function newAddress(isNew) {
+                        if (isNew) {
+                            resetSelectedAddress();
+                            $('#billing-new-address-form-new').show();
+                            $('#btn-continue-checkout').hide();
+                        } else {
+                            $('#billing-new-address-form-new').hide();
+                            $('#btn-continue-checkout').show();
+                        }
+                        $.event.trigger({ type: "onepagecheckout_billing_address_new" });
+                    }
+                    function returnAddress() {
+                        $('.first-step-checkout').show();
+                        if ($('#billing-address-select-new').val() != 0) {
+                            $('#billing-new-address-form-new').hide();
+                            $('#btn-continue-checkout').show();
+                            $('#shipping-method-buttons-container').hide();
+                            $('#payment-method-buttons-container').hide();
+                            $('#option-shipping-container').empty();//.html(' ');
+                            $('#payment-method-select-container').empty();//.html(' ');
+                            $('#next-button-disable').removeClass('disabled');
+                            $('#shipping-button-disable').removeClass('disabled');
+                        } else {
+                            $('#btn-continue-checkout').hide();
+                            $('#shipping-method-buttons-container').hide();
+                            $('#payment-method-buttons-container').hide();
+                            $('#option-shipping-container').empty();//.html(' ');
+                            $('#payment-method-select-container').empty();//.html(' ');
+                            $('#nextForm-button-disable').removeClass('disabled');
+                            $('#shipping-button-disable').removeClass('disabled');
+                        }
+                    }
+                    function returnShipping() {
+                        if ($('#option-shipping-container').html() == "") {
+                            return false;
+                        }
+                        $('#shipping-method-buttons-container').show();
+                        $('#payment-method-buttons-container').hide();
+                        $('#shipping-button-disable').removeClass('disabled');
+                        //if ($('#billing-address-select-new').val() != 0) {
+                        //    $('#billing-new-address-form-new').hide();
+                        //    $('#btn-continue-checkout').show();
+                        //    $('#shipping-method-buttons-container').hide();
+                        //    $('#payment-method-buttons-container').hide();
+                        //    $('#option-shipping-container').empty().html(' ');
+                        //    $('#payment-method-select-container').empty().html(' ');
+                        //} else {
+                        //    $('#btn-continue-checkout').hide();
+                        //    $('#shipping-method-buttons-container').hide();
+                        //    $('#payment-method-buttons-container').hide();
+                        //    $('#option-shipping-container').empty().html(' ');
+                        //    $('#payment-method-select-container').empty().html(' ');
+                        //}
+                    }
+                </script>
+                @if (Model.CartModel.ShowIsGift)
+                {
+                    <div class="col s12 m12 first-step-checkout" style="margin-bottom:2%;">
+                        <label>
+                            <input type="checkbox" id="checkbox-gift" />
+                            <span>¿Esta compra es un regalo?</span>
+                        </label>
+                    </div>
+                    <script>
+                        $('#checkbox-gift').change(function () {
+                            if ($('#checkbox-gift').is(':checked')) {
+                                $('#text-gift').show();
+                            } else {
+                                $('#text-gift').hide();
+                            }
+                        });
+                    </script>
+                    <div id="text-gift" style="display:none;margin-top:2%;margin-bottom:2%;">
+                        <div class="inputs">
+                            <label>Nombre de quien firma</label>
+                            <input id="name-signs-gift" type="text" class="validate">
+                        </div>
+                        <div class="inputs">
+                            <label for="message-gift">Mensaje en tarjeta de regalo</label>
+                            <textarea id="message-gift" class="materialize-textarea" rows="4" cols="50"></textarea>
+                        </div>
+                    </div>
+                }
+                <div class="page account-page address-edit-page first-step-checkout" id="billing-new-address-form-new" style="display:none;">
+                    <h5>Información de la persona que recibe el pedido</h5>
+                    <div class="page-body">
+                        <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                        <form id="validateMyForm" name="validateMyForm" method="get" action="">
+                            @{
+                                var dataDictAddress = new ViewDataDictionary(ViewData);
+                                dataDictAddress.TemplateInfo.HtmlFieldPrefix = "Address";
+                                @await Html.PartialAsync("_AddressCheckout", Model.ShippingAddress.ShippingNewAddress, dataDictAddress)
+                            }
+                            <div class="button center-align">
+                                <input type="button" class="btn save-address-button" value="Continuar" id="nextForm-button-disable" onclick="saveAddress.nextForm()" style="margin-bottom:4%;" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="button center-align first-step-checkout" id="btn-continue-checkout">
+                    <input type="button" class="btn save-address-button" value="Continuar" id="next-button-disable" onclick="selectAddress.next()" style="margin-bottom:4%;" />
+                </div>
+            </li>
+            <li class="tab-section allow collection-item">
+                <div class="step-title teed-primary" onclick="returnShipping()">
+                    <h2 class="title">2/3 @T("Checkout.ShippingMethod")</h2>
+                </div>
+                <div id="checkout-step-shipping-method" class="a-item center">
+                    <div class="buttons" id="shipping-method-buttons-container" style="display:none;">
+                        <div class="section shipping-method col s12 m12">
+                            <ul id="option-shipping-container" style="margin-top:5%;"></ul>
+                            @if (TeedCommerceStores.CurrentStore == TeedStores.InkStudio)
+                            {
+                                <div style="margin-bottom: 3%;">
+                                    <label>Nuestro tiempo de entrega habitual es de 2 a 5 días hábiles, sin embargo, debido a dificultades ocasionadas por la contingencia sanitaria actual, tuvimos que extenderlo a 5 a 10 días hábiles. Agradecemos tu comprensión y preferencia.</label>
+                                </div>
+                            }
+                        </div>
+                        <button type="button" class="waves-effect waves-light btn" id="shipping-button-disable" onclick="ShippingOptions.save()" style="margin-bottom:5%;">
+                            @T("Common.Continue")
+                        </button>
+                    </div>
+                </div>
+            </li>
+            <li id="opc-payment_method" class="tab-section allow collection-item">
+                <div class="step-title teed-primary">
+                    <h2 class="title">3/3 @T("Checkout.PaymentMethod")</h2>
+                </div>
+                <div id="checkout-step-payment-method" class="step a-item" style="display: none;">
+                    <div class="buttons" id="payment-method-buttons-container">
+                        @*<div class="section shipping-method col s12 m12">
+                                <ul id="option-payment-container"></ul>
+                            </div>*@
+                        <div class="input-field col s12">
+                            <select onchange="PaymentAlert.paymentAlert()" class="payment-methods" id="payment-method-select-container" name="payment-method-select-container"></select>
+                            <label>Selecciona el tipo de pago</label>
+                        </div>
+                        <div id="PaymentAlert" style="display:none;"></div>
+                        <div class="section third-step-select-billing-address third-step-checkout" id="third-step-select-billing-address" style="display:none">
+                            <br />
+                            @if (Model.BillingAddress.ExistingAddresses.Count > 0)
+                            {
+                                <h5 style="text-align: left; font-weight: bold" for="third-step-billing-address-select">Selecciona o ingresa la dirección de facturación relacionada con tu tarjeta</h5>
+                                <div>
+                                    <select name="third-step-billing_address_id" id="third-step-billing-address-select-new" class="address-select browser-default"
+                                            title="" onchange="thirdStepNewAddress(!this.value)">
+                                        @foreach (var address in Model.BillingAddress.ExistingAddresses)
+                                        {
+                                            var addressLine = "";
+                                            addressLine += address.FirstName;
+                                            addressLine += " " + address.LastName;
+                                            if (address.StreetAddressEnabled && !string.IsNullOrEmpty(address.Address1))
+                                            {
+                                                addressLine += ", " + address.Address1;
+                                            }
+                                            if (address.CityEnabled && !string.IsNullOrEmpty(address.City))
+                                            {
+                                                addressLine += ", " + address.City;
+                                            }
+                                            if (address.StateProvinceEnabled && !string.IsNullOrEmpty(address.StateProvinceName))
+                                            {
+                                                addressLine += ", " + address.StateProvinceName;
+                                            }
+                                            if (address.ZipPostalCodeEnabled && !string.IsNullOrEmpty(address.ZipPostalCode))
+                                            {
+                                                addressLine += " " + address.ZipPostalCode;
+                                            }
+                                            if (address.CountryEnabled && !string.IsNullOrWhiteSpace(address.CountryName))
+                                            {
+                                                addressLine += ", " + address.CountryName;
+                                            }
+                                            //how should we render "FormattedCustomAddressAttributes" here?
+                                            <option data-firstName="@(address.FirstName)"
+                                                    data-lastName="@(address.LastName)"
+                                                    data-email="@address.Email"
+                                                    data-countryName="@(address.CountryName)"
+                                                    data-stateProvinceName="@(address.StateProvinceName)"
+                                                    data-address1="@(address.Address1)"
+                                                    data-city="@(address.City)"
+                                                    data-zipPostalCode="@(address.ZipPostalCode)"
+                                                    data-phoneNumber="@(address.PhoneNumber)"
+                                                    value="@(address.Id)">
+                                                @(addressLine)
+                                            </option>
+                                        }
+                                        <option value="" selected="@Model.BillingAddress.NewAddressPreselected">@T("Checkout.NewAddress")</option>
+                                    </select>
+                                    <div id="address-info-container" style="margin-top: 1em; background-color: #f6f6f6; padding: 1em">
+
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <script type="text/javascript" asp-location="Footer">
+                                    $(document).ready(function () {
+                                        $('#third-step-billing-new-address-form-new').show();
+                                        $('#btn-continue-checkout').hide();
+                                        $.event.trigger({ type: "onepagecheckout_billing_address_new" });
+                                    });
+                                </script>
+                                <style>
+                                    .first-step-checkout {
+                                        margin-top: 5%;
+                                    }
+                                </style>
+                            }
+                            <script>
+                                function resetThirdStepSelectedAddress() {
+                                    var selectElement = $('#third-step-billing-address-select-new');
+                                    if (selectElement) {
+                                        selectElement.val('');
+                                    }
+                                    $.event.trigger({ type: "onepagecheckout_billing_address_reset" });
+                                }
+
+                                function thirdStepNewAddress(isNew) {
+                                    if (isNew) {
+                                        hidePaymentElements();
+                                        $("#address-info-container").hide();
+                                        resetThirdStepSelectedAddress();
+                                        $('#third-step-billing-new-address-form').show();
+                                        $('#confirm-button-disable').hide();
+                                    } else {
+                                        PaymentAlert.paymentAlert();
+                                        $("#address-info-container").show();
+                                        let selectedId = $("#third-step-billing-address-select-new").val();
+                                        $(".billing-address-block-info").each((index, element) => {
+                                            $(element).hide();
+                                        });
+                                        $("#address-info-" + selectedId).show();
+                                        $('#third-step-billing-new-address-form').hide();
+                                        $('#confirm-button-disable').show();
+
+                                        createAddressBox();
+                                    }
+                                    $.event.trigger({ type: "onepagecheckout_billing_address_new" });
+                                }
+
+                                function requireThirdStepBillingAddress() {
+                                    $("#address-info-container").show();
+                                    $('#third-step-select-billing-address').show();
+                                    createAddressBox();
+                                }
+                            </script>
+
+                            <div class="page account-page address-edit-page third-step-checkout" id="third-step-billing-new-address-form" style="display:none;">
+                                <div class="page-body">
+                                    <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                                    <form id="validateMyForm" name="validateMyForm" method="get" action="">
+                                        @{
+                                            var dataDictNewAddress = new ViewDataDictionary(ViewData);
+                                            dataDictNewAddress.TemplateInfo.HtmlFieldPrefix = "Address";
+                                            @await Html.PartialAsync("_AddressBillingCheckout", Model.BillingAddress.BillingNewAddress, dataDictNewAddress)
+                                        }
+                                        <div class="button center-align">
+                                            <input type="button" class="btn save-address-button" value="Guardar datos" id="third-step-billingForm-button-disable" onclick="thirdStepValidateAddressBilling.formBillingAddress()" style="margin-bottom:4%;" />
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @await Component.InvokeAsync("Widget", new { widgetZone = "stripe-form" })
+                        @await Component.InvokeAsync("Widget", new { widgetZone = "netPay-form" })
+                        <div id="pay-card" style="display:none;">
+                            <label>
+                                <input type="checkbox" id="checkbox-billing" checked />
+                                <span>Usar la dirección de envío como dirección de la tarjeta</span>
+                            </label>
+                            <style>
+                                [type=checkbox]:checked, [type=checkbox]:not(:checked) {
+                                    position: relative;
+                                    pointer-events: all;
+                                }
+                            </style>
+                            <script>
+                                $('#checkbox-billing').change(function () {
+                                    if ($('#checkbox-billing').is(':checked')) {
+                                        $('.billing-address').hide();
+                                    } else {
+                                        $('.billing-address').show();
+                                    }
+                                });
+                            </script>
+                            @*<div class="col s12 m12">
+                                    <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                                    <form id="validateMyFormB" name="validateMyForm" method="get" action="">
+                                        <div class="billing-address">
+                                            @{
+                                                var dataCardAddress = new ViewDataDictionary(ViewData);
+                                                dataCardAddress.TemplateInfo.HtmlFieldPrefix = "Address";
+                                                @await Html.PartialAsync("_AddressBillingCheckout", Model.BillingAddress.BillingNewAddress, dataCardAddress)
+                                            }
+                                        </div>
+                                        <div class="row">
+                                            <h5>Datos de la tarjeta</h5>
+                                            <div class="inputs col s12 m6">
+                                                <label>Nombre que aparece en la tarjeta</label>
+                                                <input id="input-name" type="text" />
+                                                <span class="helper-text red-text" id="name-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                            </div>
+                                            <div class="inputs col s12 m6">
+                                                <label>Número de la tarjeta</label>
+                                                <input id="input-card" type="text" data-inputmask="'mask': '9999 9999 9999 9999'" style="text-align:center;" />
+                                                <span class="helper-text red-text" id="card-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                            </div>
+                                            <div class="inputs col m4">
+                                                <label>Mes</label>
+                                                <select id="input-month"></select>
+                                                <span class="helper-text red-text" id="month-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                            </div>
+                                            <div class="inputs col m4">
+                                                <label>Año</label>
+                                                <select id="input-year"></select>
+                                                <span class="helper-text red-text" id="year-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                            </div>
+                                            <div class="inputs col m4">
+                                                <label>CVV</label>
+                                                <input id="input-cvv" type="password" data-inputmask="'mask': '999'" style="text-align:center;" />
+                                                <span class="helper-text red-text" id="first-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                            </div>
+                                            <script>
+                                                $("#input-card").inputmask();
+                                                $("#input-cvv").inputmask();
+                                            </script>
+                                            <style>
+                                                .select-dropdown {
+                                                    text-align: center;
+                                                }
+                                            </style>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        var month = '';
+                                        for (var i = 1; i < 13; i++) {
+                                            if (i < 10) {
+                                                month += '<option value="0' + i + '">0' + i + '</option>';
+                                            }
+                                            else {
+                                                month += '<option value="' + i + '">' + i + '</option>';
+                                            }
+                                        }
+                                        $('#input-month').append(month);
+
+                                        var min = new Date().getFullYear();
+                                        var s = min.toString().substr(2, 2)
+                                        min = parseInt(s);
+
+                                        var str = '';
+                                        for (var i = min; i < min + 6; i++) {
+                                            str += '<option value="' + i + '">' + i + '</option>';
+                                        }
+                                        $('#input-year').append(str);
+
+                                    </script>
+                                    <style>
+                                        input::-webkit-outer-spin-button,
+                                        input::-webkit-inner-spin-button {
+                                            /* display: none; <- Crashes Chrome on hover */
+                                            -webkit-appearance: none;
+                                            margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+                                        }
+                                    </style>
+                                </div>*@
+                        </div>
+                        <div class="preloader-wrapper small" id="loading-confirm">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div><div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div><div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <button type="button" class="waves-effect waves-light btn" id="confirm-button-disable" onclick="SavePayment.save()">
+                            @T("Checkout.ConfirmButton")
+                        </button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <style>
+        .select-dropdown {
+            text-align: center;
+        }
+        .select-dropdown li img {
+            margin: 5px 15px;
+            float: left;
+            vertical-align: middle;
+            height: 1.5em;
+            width: auto;
+            margin-top: 14px;
+        }
+
+        .shipping-method .method-list li {
+            display: inline-block;
+            width: 25%;
+            margin: 20px 2%;
+            vertical-align: top;
+        }
+
+        .shipping-method .method-list {
+            margin: 0 auto 30px;
+            overflow: hidden;
+            text-align: center;
+            font-size: 0;
+        }
+    </style>
+    <div class="col s12 m5">
+        <h5>Detalles del pedido</h5>
+        @await Html.PartialAsync("_OrderResumeCheckout")
+    </div>
+</div>
+<script src="/js/checkout.help.js"></script>
+<script>
+    OrderConfirm.init('Checkout/OpcConfirmOrderNew/', 'Checkout/completed/');
+</script>

@@ -1,0 +1,818 @@
+﻿@model CategoryModel
+@using Nop.Core.Domain.Common
+@using Nop.Core.Domain.Seo
+@inject SeoSettings seoSettings
+@inject CommonSettings commonSettings
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    Html.AddTitleParts(!string.IsNullOrEmpty(Model.MetaTitle) ? Model.MetaTitle : Model.Name);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-category-page");
+
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var categoryUrl = Url.RouteUrl("Category", new { SeName = Model.SeName }, this.Url.ActionContext.HttpContext.Request.Scheme);
+        Html.AddCanonicalUrlParts(categoryUrl, seoSettings.QueryStringInCanonicalUrlsEnabled);
+    }
+
+    var breadcrumbDelimiter = commonSettings.BreadcrumbDelimiter;
+
+
+    var notFilteredItemsGroups = Model.PagingFilteringContext.SpecificationFilter.NotFilteredItems.GroupBy(x => x.SpecificationAttributeName);
+    var alreadyFilteredItemsGroups = Model.PagingFilteringContext.SpecificationFilter.AlreadyFilteredItems.GroupBy(x => x.SpecificationAttributeName);
+}
+<style>
+    @@media (max-width: 801px) {
+        .filtered-items {
+            display: inline-block;
+        }
+    }
+
+    @@media screen and (min-width: 800px) {
+        .left-container {
+            width: 238px !important;
+            position: absolute !important;
+            right: auto !important;
+        }
+
+        .product-filters .collapsible-header {
+            display: initial !important;
+            padding: 0;
+            background-color: #b49759;
+            border-bottom: none;
+        }
+
+        .product-filters a {
+            color: #ffffff;
+        }
+
+        .filter-body {
+            color: #ffffff !important;
+        }
+
+            .filter-body a {
+                color: #ffffff;
+            }
+
+            .filter-body ul {
+                line-height: 25px;
+                margin: -3px 0 0 15px !important;
+            }
+
+            .filter-body:before {
+                content: "";
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent transparent transparent #dd042b;
+            }
+
+            .filter-body:after {
+                content: "";
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent transparent transparent #dd042b;
+            }
+    }
+
+    #quickshop .refinehead,
+    #refinefurther .refinehead {
+        position: relative;
+        background: #b49759;
+        padding: 10px 0 10px 20px !important;
+        color: #fff;
+        font-size: 1.1em;
+        margin: 0;
+        z-index: 2;
+    }
+
+        #quickshop .refinehead:before,
+        #refinefurther .refinehead:before {
+            position: absolute;
+            content: "";
+            right: 0;
+            bottom: 100%;
+            border-style: solid;
+            border-width: 8px 0 0 216px;
+            border-color: transparent transparent transparent #b49759;
+        }
+
+        #quickshop .refinehead span:after,
+        #refinefurther .refinehead span:after {
+            position: absolute;
+            content: "";
+            right: 0;
+            top: 100%;
+            border-style: solid;
+            border-width: 0 0 8px 216px;
+            border-color: transparent transparent transparent #b49759;
+        }
+
+        #quickshop .refinehead span:before, #refinefurther .refinehead span:before {
+            position: absolute;
+            content: "";
+            right: 100%;
+            top: -8px;
+            border-style: solid;
+            border-width: 0 0 60px 8px;
+            border-color: transparent transparent #b49759;
+        }
+
+    .pop-cart {
+        margin-top: -24px !important;
+    }
+</style>
+
+@*category breadcrumb*@
+@section Breadcrumb
+    {
+    @if (Model.DisplayCategoryBreadcrumb)
+    {
+        <nav class="white z-depth-0 grey-text">
+            <div class="nav-wrapper container">
+                <div class="col s12 grey-text">
+                    <style>
+                        nav {
+                            width: 100%;
+                            height: auto;
+                            line-height: 56px;
+                        }
+
+                        .breadcrumb {
+                            font-size: 14px;
+                        }
+                    </style>
+                    <a class="breadcrumb" href="@Url.RouteUrl("HomePage")" title="@T("Categories.Breadcrumb.Top")">@T("Categories.Breadcrumb.Top")</a>
+
+                    @foreach (var cat in Model.CategoryBreadcrumb)
+                    {
+                        var isLastCategory = cat.Id == Model.Id;
+                        @if (isLastCategory)
+                        {
+                            <span class="breadcrumb" title="@cat.Name">@cat.Name</span>
+                        }
+                        else
+                        {
+                            <a class="breadcrumb" href="@Url.RouteUrl("Category", new { SeName = cat.SeName })" title="@cat.Name">@cat.Name</a>
+                        }
+                    }
+                </div>
+            </div>
+        </nav>
+        @await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_after_breadcrumb", additionalData = Model.Id })
+    }
+}
+
+<div id="content-wrapper" class="section col s12 m12 l12">
+    @if (string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <h4 class="category-page-title"><p>@Model.Name</p></h4>
+        <script>
+                $(document).ready(function () {
+                    $('.row.container').first().before('<div class="title-select-container row"></div>');
+                    var $desc = $('.category-page-title').addClass('col').addClass('m6').addClass('s12');
+                    $('.category-page-title').remove();
+                    $('.title-select-container').append($desc);
+
+                    var $select = $('#ddlViewBy').parentsUntil('.row').last()
+                        .removeClass('float-right').removeClass('m4').addClass('m2')
+                        .attr('style',
+                        'margin-right: auto !important;margin-left: initial !important;margin-bottom: auto;margin-top: auto;padding-bottom: 10px;');
+                    $('#ddlViewBy').parentsUntil('.row').last().remove();
+                    $('.title-select-container').append($select);
+                    @*$('.category-page-title')
+                        .children().last()
+                        .append(': @Model.Products.Count() productos');*@
+
+                    var $modal = $('a[href="#modal1"]');
+                    $('a[href="#modal1"]').remove();
+                    $('.title-select-container').append($modal);
+                });
+        </script>
+        <style>
+            .category-page-title {
+                text-align: left !important;
+                font-size: 2.444em !important;
+            }
+
+            @@media only screen and (min-width: 600px) {
+                /*.category-page-title {
+                    padding-right: 10em !important;
+                }*/
+            }
+
+            @@media only screen and (max-width: 600px) {
+                .category-page-title p {
+                    margin-left: initial !important;
+                    font-size: 25px !important;
+                }
+
+                .title-select-container {
+                    display: block !important;
+                }
+
+                    .title-select-container .modal-btn {
+                        background-color: transparent;
+                        text-align: left;
+                        margin-bottom: 10px;
+                    }
+            }
+
+            .title-select-container {
+                display: flex;
+                align-items: center;
+                background-color: #EEEFF1;
+            }
+        </style>
+    }
+
+    <div class="category-page-body">
+        <style>
+            @@media (max-width: 600px) {
+                .category-page-body {
+                    margin: -7%;
+                    margin-top: 0px;
+                }
+                /*.card-action {
+                        height: 5.3em;
+                    }*/
+            }
+        </style>
+
+        @await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_top", additionalData = Model.Id })
+
+        @*description*@
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <style>
+                .cat-custom-description img {
+                    max-width: 100% !important;
+                    height: auto;
+                }
+
+                .cat-custom-description {
+                    text-align: left !important;
+                    font-size: 2.444em !important;
+                }
+
+                @@media only screen and (min-width: 600px) {
+                    /*.cat-custom-description {
+                        padding-right: 10em !important;
+                    }*/
+                }
+
+                @@media only screen and (max-width: 600px) {
+                    .cat-custom-description p {
+                        margin-left: initial !important;
+                        font-size: 25px !important;
+                    }
+
+                    .title-select-container {
+                        display: block !important;
+                    }
+
+                        .title-select-container .modal-btn {
+                            background-color: transparent;
+                            text-align: left;
+                            margin-bottom: 10px;
+                        }
+                }
+
+                .title-select-container {
+                    display: flex;
+                    align-items: center;
+                    background-color: #EEEFF1;
+                }
+            </style>
+            <div class="cat-custom-description" style="font-weight: bold;">
+                <h4>@Html.Raw(Model.Description)</h4>
+            </div>
+            <script>
+                $(document).ready(function () {
+                    $('.row.container').first().before('<div class="title-select-container row"></div>');
+                    var $desc = $('.cat-custom-description').addClass('col').addClass('m6').addClass('s12');
+                    $('.cat-custom-description').remove();
+                    $('.title-select-container').append($desc);
+
+                    var $select = $('#ddlViewBy').parentsUntil('.row').last()
+                        .removeClass('float-right').removeClass('m4').addClass('m2')
+                        .attr('style',
+                        'margin-right: auto !important;margin-left: initial !important;margin-bottom: auto;margin-top: auto;padding-bottom: 10px;');
+                    $('#ddlViewBy').parentsUntil('.row').last().remove();
+                    $('.title-select-container').append($select);
+                    @*$('.cat-custom-description')
+                        .children().last()
+                        .children().last()
+                        .append(': @Model.Products.Count() productos');*@
+
+                    var $modal = $('a[href="#modal1"]');
+                    $('a[href="#modal1"]').remove();
+                    $('.title-select-container').append($modal);
+                });
+            </script>
+        }
+
+        @await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_before_subcategories", additionalData = Model.Id })
+        @*subcategories*@
+        @*@if (Model.SubCategories.Count > 0)
+            {
+                <div class="section row">
+                    @foreach (var item in Model.SubCategories)
+                    {
+                        <div class="col s6 m4">
+                            <div class="card">
+                                <div class="card-image">
+                                    <a href="@Url.RouteUrl("Category", new { SeName = item.SeName })" title="@item.PictureModel.Title">
+                                        <img alt="@item.PictureModel.AlternateText" src="@item.PictureModel.ImageUrl" title="@item.PictureModel.Title">
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <a href="@Url.RouteUrl("Category", new { SeName = item.SeName })" title="@item.PictureModel.Title">
+                                        @item.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }*@
+        @await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_before_featured_products", additionalData = Model.Id })
+        @*featured products*@
+        @if (Model.FeaturedProducts.Count > 0)
+        {
+            <div class="section">
+                <h4>@T("HomePage.Products")</h4>
+
+                <div class="row">
+                    @foreach (var item in Model.FeaturedProducts)
+                    {
+                        <div class="col s6 m4">
+                            @await Html.PartialAsync("_ProductBox", item)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @**sorting*@
+
+        @await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_after_featured_products", additionalData = Model.Id })
+
+        @if (Model.SubCategories.Count > 0 && Model.Products.Count > 0)
+        {
+            @*<div class="col s12 m12">
+                    <h4>Productos en esta categoría</h4>
+                </div>*@
+        }
+        <div class="product-filters col s6 m6 hide-on-large-only" style="background: white;padding-bottom: 1%;">
+            @*filtering*@
+            @if (Model.PagingFilteringContext.PriceRangeFilter.Enabled)
+            {
+                @await Html.PartialAsync("_FilterPriceBox", Model.PagingFilteringContext.PriceRangeFilter)
+            }
+            @*filtering*@
+            @if (Model.PagingFilteringContext.SpecificationFilter.Enabled)
+            {
+                @await Html.PartialAsync("_FilterSpecsBox", Model)
+            }
+        </div>
+        @if (Model.Products.Count > 0)
+        {
+            <div class="col s6 m6 l12">
+                @await Html.PartialAsync("_CatalogSelectors", Model.PagingFilteringContext)
+            </div>
+        }
+
+        @if (Model.Products.Count > 0)
+        {
+            @if (Model.PagingFilteringContext.SpecificationFilter.AlreadyFilteredItems.Count > 0)
+            {
+                <div class="filtered-items teed-primary" style="color:white;padding: 1em;margin-bottom: 1em;">
+                    <ul>
+                        <li class="title" style="margin-top:1%;">
+                            @*@T("Filtering.SpecificationFilter.CurrentlyFilteredBy")*@
+                            Se están mostrando productos con las siguientes características:
+                        </li>
+                        @foreach (var group in alreadyFilteredItemsGroups)
+                        {
+                            <li class="item margin-li">
+                                <strong>@group.First().SpecificationAttributeName</strong>:
+                                @group.ToList().Aggregate(string.Empty, (current, next) =>
+                                $"{(string.IsNullOrEmpty(current) ? string.Empty : $"{current} {T("Filtering.SpecificationFilter.Separator")}")}{next.SpecificationAttributeOptionName}")
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <style>
+                    .margin-li {
+                        margin-left: 5%;
+                        margin-top: 1%;
+                    }
+                </style>
+                <div class="remove-filter" style="margin-bottom:1%;margin-top: -1%;">
+                    <a href="@Model.PagingFilteringContext.SpecificationFilter.RemoveFilterUrl">Quitar los filtros</a>
+                </div>
+            }
+
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "product-list" : "product-grid")">
+                <div class="row">
+                    @foreach (var item in Model.Products)
+                    {
+                        <div class="col s12 m12" style="margin-top:2% !important;">
+                            @await Html.PartialAsync("_ProductLine", item)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            @if (Model.PagingFilteringContext.SpecificationFilter.AlreadyFilteredItems.Count > 0)
+            {
+                <div class="filtered-items">
+                    <ul>
+                        <li class="title">
+                            @*@T("Filtering.SpecificationFilter.CurrentlyFilteredBy")*@
+                            No se encontraron productos con las siguientes características:
+                        </li>
+                        @foreach (var group in alreadyFilteredItemsGroups)
+                        {
+                            <li class="item margin-li">
+                                <strong>@group.First().SpecificationAttributeName</strong>:
+                                @group.ToList().Aggregate(string.Empty, (current, next) =>
+                                $"{(string.IsNullOrEmpty(current) ? string.Empty : $"{current} {T("Filtering.SpecificationFilter.Separator")}")}{next.SpecificationAttributeOptionName}")
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <style>
+                    .margin-li {
+                        margin-left: 5%;
+                        margin-top: 1%;
+                    }
+                </style>
+                <div class="remove-filter" style="margin-bottom: 1%;margin-top: -1%;">
+                    <a href="@Model.PagingFilteringContext.SpecificationFilter.RemoveFilterUrl">Quitar los filtros</a>
+                </div>
+            }
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_bottom", additionalData = Model.Id })
+    </div>
+</div>
+@await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_before_filters", additionalData = Model.Id })
+<div id="product" class="product-filters col s12 m12 pull-l9 l3 show-on-large hide-on-med-and-down left-container">
+    @if (Model.SubCategories.Count > 0)
+    {
+        <div id="refinefurther" class="refineblock hide-on-med-and-down">
+            <div class="refineBrands refineblock irRefHidden">
+                <div class="refinehead irRefClick irRefClose"><span>Filtrar por categoría</span></div>
+            </div>
+        </div>
+        <div class="teed-primary filter-body">
+            <ul>
+                @foreach (var item in Model.SubCategories)
+                {
+                    <li>
+                        <a href="@Url.RouteUrl("Category", new { SeName = item.SeName })" title="@item.PictureModel.Title">
+                            @item.Name
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @*filtering*@
+    @if (Model.PagingFilteringContext.PriceRangeFilter.Enabled)
+    {
+        @await Html.PartialAsync("_FilterPriceBox", Model.PagingFilteringContext.PriceRangeFilter)
+    }
+    @*filtering*@
+    @if (Model.PagingFilteringContext.SpecificationFilter.Enabled)
+    {
+        @await Html.PartialAsync("_FilterSpecsBox", Model)
+    }
+
+    @*@await Html.PartialAsync("_FilterPriceSlider")*@
+</div>
+@await Component.InvokeAsync("Widget", new { widgetZone = "categorydetails_before_product_list", additionalData = Model.Id })
+<script type="text/javascript">
+    var t = null;
+    $(window).scroll(function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+            var extra = 0;
+            var objectTop = $("#product").position().top;
+            var objectHeight = ($("#product").outerHeight());
+            var windowScrollTop = $(window).scrollTop();
+            var windowHeight = $(window).height();
+            var footer = ($(".page-footer").position()).top;
+            var result = 0.20 * footer;
+            footer = footer - result;
+
+            if ($("#products li.active").length > 0)
+                extra = (($("#product .collapsible-header").length) / 2) * 50;
+
+            if (windowHeight >= 900) {
+                if (windowScrollTop > objectTop) {
+                    if (windowScrollTop <= footer) {
+                        $("#product").animate({ 'top': (windowScrollTop + 200) + 'px' }, 100);
+                    }
+                    else {
+                        $("#product").animate({ 'top': footer + 'px' }, 100);
+                    }
+                }
+                else if ((windowScrollTop + windowHeight) < (objectTop + objectHeight)) {
+                    if (windowScrollTop >= 300) {
+                        $("#product").animate({ 'top': ((windowScrollTop + 200) - 40) + 'px' }, 100);
+                    } else {
+                        $("#product").animate({ 'top': '300px' }, 100);
+                    }
+                }
+            } else {
+                if (windowScrollTop < footer) {
+                    if ((windowScrollTop - extra) > objectTop) {
+                        if (windowScrollTop <= footer) {
+                            $("#product").animate({ 'top': ((windowScrollTop + 200) - 40) + 'px' }, 100);
+                        }
+                        else {
+                            $("#product").animate({ 'top': windowScrollTop + 'px' }, 100);
+                        }
+                    }
+                    else if (((windowScrollTop + windowHeight) + extra) < (objectTop + objectHeight)) {
+                        if (windowScrollTop >= 300) {
+                            $("#product").animate({ 'top': ((windowScrollTop + 200) - 40) + 'px' }, 100);
+                        } else {
+                            $("#product").animate({ 'top': '300px' }, 100);
+                        }
+                    }
+                }
+                else {
+                    $("#product").animate({ 'top': footer + 'px' }, 100);
+                }
+            }
+
+        }, 100);
+    });
+</script>
+<script>
+                        Array.prototype.where = function (filter) {
+
+                            var collection = this;
+
+                            switch (typeof filter) {
+
+                                case 'function':
+                                    return $.grep(collection, filter);
+
+                                case 'object':
+                                    for (var property in filter) {
+                                        if (!filter.hasOwnProperty(property))
+                                            continue; // ignore inherited properties
+
+                                        collection = $.grep(collection, function (item) {
+                                            return item[property] === filter[property];
+                                        });
+                                    }
+                                    return collection.slice(0); // copy the array
+                                // (in case of empty object filter)
+
+                                default:
+                                    throw new TypeError('func must be either a' +
+                                        'function or an object of properties and values to filter by');
+                            }
+                        };
+
+                        Array.prototype.firstOrDefault = function (func) {
+                            return this.where(func)[0] || null;
+                        };
+
+                        function checkIfFirstIsSpecial($productColors) {
+                            setTimeout(function () {
+                                if (typeof $productColors != 'undeifned') {
+                                    var $selectedColor =
+                                        $productColors.find('li .selected-color')
+                                            .parent().first();
+                                    var classes = $productColors.attr('class').split(/\s+/);
+                                    var id = classes[0].substring(classes[0].lastIndexOf('-') + 1, classes[0].length);
+                                    if ($selectedColor.data('special'))
+                                        $('.special-edition-' + id).show();
+                                    else {
+                                        $('.special-edition-' + id).hide();
+                                        if ($selectedColor.data('new'))
+                                            $('.new-edition-' + id).show();
+                                        else
+                                            $('.new-edition-' + id).hide();
+                                    }
+                                }
+                            }, 500);
+                        }
+                        function priceChange(element) {
+                            //// Pricing
+                            var parent = $(element).parent();
+                            var productId = parent.data('product-id');
+                            var attribute = parent.data('attribute');
+                            var originalPrice = 0.00;
+                            var attributePrice = 0.00;
+
+                            $.ajax({
+                                cache: false,
+                                url: '@Url.Action("ProductDetails_AttributePrice", "ShoppingCart")?productId=' + productId +
+                                    '&attributeData=' + attribute,
+                                type: 'GET',
+                                success: function (data) {
+                                    if (data.includes('$'))
+                                        data = data.replace('$', '').replace(/,/g, '');
+                                    var ajaxPrice = formatCurrency(parseFloat(data));
+                                    var attributePrice = parseFloat($(element).attr('data-price'));
+                                    if($('#price-original-' + productId).data('originalprice') == 0)
+                                        originalPrice = formatCurrency(parseFloat($(element).data('price')).toFixed(2));
+                                    else
+                                        originalPrice = formatCurrency(parseFloat($(element).data('price') + attributePrice).toFixed(2));
+                                    if (ajaxPrice != originalPrice && originalPrice != "MXN 0.00" &&
+                                        attributePriceBelowOriginal(data, attributePrice)) {
+                                        if ($('#price-left-' + productId + ' .price-text-big').length > 0) {
+                                            $('#price-left-' + productId + ' .price-text-big').text(ajaxPrice);
+                                            hidingCheckPrices(productId);
+                                            $('#price-left-' + productId + ' .price-text-big').text(ajaxPrice);
+                                            $('#price-original-' + productId).show();
+                                            $('#price-left-' + productId + ' .price-orignal-text').show();
+                                            $('.product-texts-' + productId).addClass('price-several-texts');
+                                            $('#price-original-' + productId + ' .price-original-big').text(originalPrice);
+                                        }
+                                        else {
+                                            $('#price-left-' + productId + ' .text-red').text(ajaxPrice);
+                                            hidingCheckPrices(productId);
+                                            $('#price-original-' + productId).show();
+                                            $('#price-left-' + productId + ' .price-orignal-text').show();
+                                            $('.product-texts-' + productId).addClass('price-several-texts');
+                                            $('#price-original-' + productId + ' .price-original-big').text(originalPrice);
+                                        }
+                                    } else {
+                                        $('#price-left-' + productId + ' .old-price').show();
+                                        $('#price-original-' + productId).hide();
+                                        $('#price-left-' + productId + ' .price-orignal-text').hide();
+                                        $('.product-texts-' + productId).removeClass('price-several-texts');
+                                        if ($('#price-left-' + productId + ' .price-text-big').length > 0)
+                                            $('#price-left-' + productId + ' .price-text-big').text(ajaxPrice);
+                                        else
+                                            $('#price-left-' + productId + ' .text-red').text(ajaxPrice);
+                                        if ($('#price-left-' + productId + ' .old-price-text').is(":visible"))
+                                            $('#price-left-' + productId + ' .price-orignal-text').show();
+                                    }
+                                },
+                                error: function (e) {
+                                    $('#price-original-' + productId).hide();
+                                    $('#price-left-' + productId + ' .price-orignal-text').hide();
+                                    $('.product-texts-' + productId).removeClass('price-several-texts');
+                                    console.log('Error getting price of attributes ' + attribute + ' from product ' + productId + ':');
+                                    console.log(e);
+                                    console.log('----- applying normal price');
+                                    var productId = $(element).parentsUntil('.center-content-card').last().attr('class').match(/product-colors-\d+/)[0].split('-')[2];
+                                    hidingCheckPrices(productId);
+                                    if (typeof $("#price-left-" + productId).attr('data-originalprice') != 'undefined' && $("#price-left-" + productId).attr('data-originalprice') != '')
+                                        originalPrice = parseFloat($("#price-left-" + productId).attr('data-originalprice'));
+                                    if(typeof $(element).attr('data-price') != 'undefined' && $(element).attr('data-price') != '')
+                                        attributePrice = parseFloat($(element).attr('data-price'));
+
+                                    if (attributePrice > 0) {
+                                        if ($('#price-left-' + productId + ' .price-text-big').length > 0)
+                                            $('#price-left-' + productId + ' .price-text-big').text(formatCurrency(originalPrice + attributePrice));
+                                        else
+                                            $('#price-left-' + productId + ' .text-red').text(formatCurrency(originalPrice + attributePrice));
+                                    }
+                                }
+                            });
+                        }
+                        function formatCurrency(total) {
+                            var neg = false;
+                            if(total < 0) {
+                                neg = true;
+                                total = Math.abs(total);
+                            }
+                            return "MXN " + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
+                        }
+                        function hidingCheckPrices(productId) {
+                            if ($('#price-left-' + productId + ' .old-price').is(":visible")) {
+                                $('#price-left-' + productId + ' .old-price').hide();
+                                $('#price-left-' + productId + ' .old-price-text').hide();
+                                if ($('#price-left-' + productId + ' .old-price').next().is('br'))
+                                    $('#price-left-' + productId + ' .old-price').next().hide();
+                            }
+                        }
+                        function attributePriceBelowOriginal(newPrice, oldPrice) {
+                            var newNum = parseFloat(newPrice).toFixed(2);
+                            if (newNum > oldPrice)
+                                return false;
+                            else
+                                return true;
+                        }
+</script>
+@*=== ATTRIBUTES ===*@
+<script>
+    var productIds = [];
+    @foreach (var item in Model.Products)
+    {
+        @:productIds.push(@item.Id)
+    }
+    console.log(productIds);
+    let body = {
+        productIds: productIds
+    };
+    $.ajax({
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        cache: false,
+        url: '@Url.Action("GetAttributesModels", "Product")',
+        type: 'POST',
+        data: JSON.stringify(body),
+        success: function (result) {
+            console.log(result);
+            if (result.length == 0) return;
+            $.each(result, (index, data) => {
+                if (data.length > 0) {
+                    $.each(data, function (i, e) {
+                        var colorPreSelected = "";
+                        var colorsList = '<div id="product_attribute_input_' + e.Id + '" class="input-field col s12" style="display: flex;"><div class="">' +
+                            '<ul class="option-list attribute-squares color-squares" id="color-squares-' + e.Id + '" style="margin:0;">';
+                        var valuesWithNoCombinations = e.Values.where({ NumberOfCombinations: 0 });
+                        if (valuesWithNoCombinations.length > 0) {
+                            $.each(valuesWithNoCombinations, function (ind, elm) {
+                                var indexOfValue = e.Values.findIndex(x => x.Id === elm.Id);
+                                e.Values.splice(indexOfValue, 1);
+                            });
+                        }
+                        if (e.Values.firstOrDefault({ IsPreSelected: true }) == null) {
+                            e.Values[0].IsPreSelected = true;
+                        }
+                        $.each(e.Values, function (ii, ee) {
+                            if (ee.NumberOfCombinations > 0) {
+                                if (colorPreSelected == "")
+                                    colorPreSelected = ee.IsPreSelected == true ? ee.Name : "";
+                                colorsList += '<li>' +
+                                    '<label for="product_attribute_' + e.Id + '_' + ee.Id + '" data-attribute="' + e.Id + '-' + ee.Id + '" data-product-id="' + e.ProductId + '">' +
+                                    '<a href="/productos/' + e.ProductSeName + '?Id=' + e.Id + '&attrId=' + ee.Id + '" data-name="' + ee.Name + '" data-imgcolor="' + ee.PictureId + '" data-price="' + ee.PriceAdjustmentValue + '" data-special="' + ee.IsSpecialEdition + '" data-new="' + ee.IsNew + '">' +
+                                    '<span class="attribute-square-container' + (ee.IsPreSelected == true ? " selected-color" : "") + '" title="' + ee.Name + '">' +
+                                    '<span class="attribute-square" style="background-color:' + ee.ColorSquaresRgb + ';">' +
+                                    '&nbsp;&nbsp;&nbsp;&nbsp;' +
+                                    '</span>' +
+                                    '</span></a>' +
+                                    '<input id="product_attribute_' + e.Id + '_' + ee.Id + '" type="radio" name="product_attribute_' + e.Id + '" value="' + ee.Id + '">' +
+                                    '</label>' +
+                                    '</li>';
+                            }
+                        });
+                        colorsList += '</ul></div><div class="align-center product-text-container"><text class="product-text-main" style="width: 150px;display: flex;vertical-align: middle;margin-left:5px;"><i class="material-icons tiny" style="align-self: center;vertical-align: middle;">keyboard_arrow_right</i><text class="selected-color-' + e.ProductId + '" style="vertical-align: middle;">' + colorPreSelected + '</text></text></div></div>';
+                        $('.product-colors-' + e.ProductId + '').append(colorsList);
+                        $('a .selected-color').each(function (i, e) {
+                            priceChange($(e).parent());
+                        });
+                        //if ($('.attribute-square-container.selected-color').parent().data('special'))
+                        //    $('.special-edition-' + e.ProductId + '').show();
+                        //else if ($('.attribute-square-container.selected-color').parent().data('new'))
+                        //    $('.new-edition-' + e.ProductId + '').show();
+                    });
+
+                    let productId = data[0].ProductId;
+                    $('.product-colors-' + productId + ' a').on("mouseenter", function () {
+                        $('.new-edition-' + productId + '').hide();
+                        $('.special-edition-' + productId + '').hide();
+                        $(this).parentsUntil('div[id^="product_attribute_input"]')
+                            .last().find('.attribute-square-container').removeClass('selected-color');
+                        $(this).find('.attribute-square-container').addClass('selected-color');
+                        $(this).parentsUntil('.product-colors-' + productId + '').last().find('.selected-color-' + productId + '').text($(this).data('name'));
+                        $(this).parentsUntil('.main-product-container')
+                            .last().prev().find('.product-line-img').css('background-image', 'url(/product/GetImage/' + $(this).data('imgcolor') + ')');
+                        if ($(this).data('special'))
+                            $('.special-edition-' + productId + '').show();
+                        else if ($(this).data('new'))
+                            $('.new-edition-' + productId + '').show();
+                        priceChange(this);
+                    });
+                    checkIfFirstIsSpecial($(".product-colors-" + productId + ""));
+
+                } else {
+                    @*if($('#price-left-@Model.Id .price-text-big').text().trim() == "")
+                        $('#price-left-@Model.Id .price-no-colors').show();*@
+                }
+            });
+        },
+        error: function (err) {
+                console.log('Error getting attributes of product', err);
+        }
+    });
+</script>

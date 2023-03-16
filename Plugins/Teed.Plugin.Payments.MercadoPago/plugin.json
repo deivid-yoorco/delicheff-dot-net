@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "MercadoPago",
+  "SystemName": "Payments.MercadoPago",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "Teed Innovación Tecnológica",
+  "DisplayOrder": 1,
+  "FileName": "Teed.Plugin.Payments.MercadoPago.dll",
+  "Description": "Payment Method MercadoPago"
+}

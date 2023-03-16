@@ -1,0 +1,477 @@
+﻿@model ProductOverviewModel
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@inject CatalogSettings catalogSettings
+@inject IWorkContext workContext
+@{
+    //prepare "Add to cart" AJAX link
+    var addtocartlink = "";
+    var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+    var quantity = 1;
+    if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = false/*Model.ProductPrice.ForceRedirectionAfterAddingToCart */});
+    }
+    else
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity });
+    }
+
+    var addtowishlistlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist, quantity = quantity });
+    var addtocomparelink = Url.RouteUrl("AddProductToCompare", new { productId = Model.Id });
+}
+
+<style>
+    @@media (max-width: 600px) {
+        .size-btn-em {
+            width: 1.8em;
+            height: 1.8em;
+        }
+
+        .search-results {
+            margin: -2%;
+        }
+
+        .product-title-size {
+            font-size: 13px;
+        }
+
+        .product-card .btn-floating.halfway-fab {
+            right: 1.4em !important;
+        }
+
+        .product-card .compare {
+            margin-right: 2.5em;
+        }
+
+        .product-card .shopping-cart {
+            margin-right: 5em;
+        }
+
+        .btn-floating i {
+            font-size: 1.3rem;
+            line-height: 1em;
+            vertical-align: top;
+            margin-top: 28%;
+        }
+
+        .product-card a.price {
+            float: none;
+        }
+
+        .center-card {
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="main-product-container" style="margin-top:25px">
+    <div class="center-content-card card-action" style="padding:0 !important;height: auto!important;display: flex;">
+        <div class="col s12 m9 module line-clamp teed-primary-text left" style="position: relative;margin-right: 85px;min-height: 44px;padding-left:145px;margin-left: 0;">
+            <span class="special-edition special-edition-@Model.Product.Id" style="display: none;"><div style="vertical-align: super; display: inline-grid; text-align: center;"><text>SPECIAL</text><text class="special-edition-text">&nbsp;EDITION&nbsp;</text></div></span>
+            <span class="new-edition new-edition-@Model.Product.Id" style="display: none;"><div style="vertical-align: super; display: inline-grid; text-align: center;"><text class="special-edition-text">NEW</text></div></span>
+            @{string newStyle = "";}
+            @if (Nop.Services.TeedCommerceStores.CurrentStore == Nop.Services.TeedStores.Kromtek)
+            {
+                newStyle = "class=\"teed-secondary-text\"";
+            }
+            else
+            {
+                newStyle = "";
+            }
+            <a href="@Url.RouteUrl("Product", new { SeName = Model.SeName })" id="name-@Model.Id" title="@Model.Name" @Html.Raw(newStyle) style="text-transform:none;color:black;">
+                <img class="" src="/Themes/TeedLamy/Content/images/Products/lamy-logo-small.png" alt="Alternate Text" />
+                <text style="font-size: 1.3em;">@Model.Name</text>
+            </a>
+        </div>
+    </div>
+    <a href="@Url.RouteUrl("Product", new { SeName = Model.SeName })" title="@Model.Name">
+        <div class="center product-line-img" style="
+    background-image: url(@Model.DefaultPictureModel.ImageUrl);">
+            @if (Model.StockAvailability)
+            {
+                if (Model.Quantity > 1)
+                {
+                    <span id="text-availability" style="color:red;position: absolute;z-index: 1;margin-top: -2.3em;right:2em;">¡Sólo quedan @Model.Quantity!</span>
+                }
+                else
+                {
+                    <span id="text-availability" style="color:red;position: absolute;z-index: 1;margin-top: -2.3em;right:2em;">¡Sólo queda @Model.Quantity!</span>
+                }
+                <style>
+                    @@media (max-width: 400px) {
+                        #text-availability {
+                            right: 0 !important;
+                            width: 100%;
+                        }
+                    }
+                </style>
+            }
+            @*@if (!Model.ProductPrice.DisableAddToCompareListButton)
+                {
+                    <a href="javascript:void(0)" title="@T("ShoppingCart.AddToCompareList")" onclick="AjaxCart.addproducttocomparelist('@addtocomparelink');return false;" class="btn-floating halfway-fab waves-effect waves-light compare size-btn-em">
+                        <i class="material-icons">compare</i>
+                    </a>
+                }*@
+        </div>
+    </a>
+    <div class="center-content-card card-action float-right" style="position: relative;padding: 0 !important;
+        text-align: center;
+        height: auto !important;
+        position: relative;">
+        <!--attributes-->
+        <div class="product-colors-@Model.Product.Id product-colors-container" style="margin-right: auto;        position: absolute;
+        right: 265px;">
+        </div>
+        <div class="col s12 m4 product-texts product-texts-@Model.Id" style="display: grid;right: 0px;position: absolute;padding:0 !important;margin-right:auto;width: auto;margin-left: inherit;">
+
+            <a href="@Url.RouteUrl("Product", new {SeName=Model.SeName})" id="price-original-@Model.Id" data-originalprice="@Model.ProductPrice.Price.Replace("$", "")" title="@Model.Name" style="display: none;">
+                Precio regular:<del style="color: red;"><span class="price-original-big"></span></del>
+            </a>
+            @if (Model.Product.Price != Model.ProductPrice.PriceValue)
+            {
+                <a href="@Url.RouteUrl("Product", new {SeName=Model.SeName})" id="price-left-@Model.Id" data-originalprice="@Model.ProductPrice.Price.Replace("$", "")" title="@Model.Name">
+                    @if (!string.IsNullOrEmpty(Model.ProductPrice.BasePricePAngV))
+                    {
+                        @Html.Raw(Model.ProductPrice.BasePricePAngV)
+                    }
+                    <span class="old-price-text">Precio regular:</span><del style="color: red;">
+                        <span class="old-price price-black-color">MXN @(Model.Product.Price.ToString("#.00"))</span>
+                    </del><br />
+                    <span class="price-orignal-text">Precio especial:</span><span class="text-red price-black-color">@(Model.ProductPrice.Price == "$0.00" ? "" : Model.ProductPrice.Price.Replace("$", "MXN "))</span>
+                </a>
+            }
+            else if (!string.IsNullOrEmpty(Model.ProductPrice.OldPrice))
+            {
+                <a href="@Url.RouteUrl("Product", new {SeName=Model.SeName})" id="price-left-@Model.Id" data-originalprice="@Model.ProductPrice.Price.Replace("$", "")" title="@Model.Name">
+                    @if (!string.IsNullOrEmpty(Model.ProductPrice.BasePricePAngV))
+                    {
+                        @Html.Raw(Model.ProductPrice.BasePricePAngV)
+                    }
+                    @*<span class="text-red old-price">@Model.ProductPrice.OldPrice</span><br />*@
+                    <span class="price-orignal-text" style="display: none;">Precio especial:</span><span class="price-text-big">@(Model.ProductPrice.Price == "$0.00" ? "" : Model.ProductPrice.Price.Replace("$", "MXN "))</span>
+                </a>
+            }
+            else
+            {
+                <a href="@Url.RouteUrl("Product", new {SeName=Model.SeName})" id="price-left-@Model.Id" data-originalprice="@Model.ProductPrice.Price.Replace("$", "")" title="@Model.Name">
+                    @if (!string.IsNullOrEmpty(Model.ProductPrice.BasePricePAngV))
+                    {
+                        @Html.Raw(Model.ProductPrice.BasePricePAngV)
+                    }
+                    <span class="price-orignal-text" style="display: none;">Precio especial:</span>
+                    <span class="price-text-big">
+                        @(Model.ProductPrice.Price == "$0.00" ? "" : Model.ProductPrice.Price.Replace("$", "MXN "))
+                    </span>
+                    <span class="price-no-colors" style="display:none;">
+                        @Model.Product.ProductAttributeMappings.FirstOrDefault()?.ProductAttributeValues.FirstOrDefault()?.PriceAdjustment.ToString("C").Replace("$", "MXN ")
+                    </span>
+                </a>
+            }
+            <script>
+                var src = "@Model.ProductPrice.Price";
+                if (src.length > 9) {
+                    $('#price-left-@Model.Id').css("margin-left", "-2px");
+                }
+            </script>
+        </div>
+    </div>
+
+    <script type="text/javascript" asp-location="Footer">
+        $(document).ready(function () {
+        @*$.ajax({
+                cache: false,
+                url: '@Url.Action("GetAttributesModels", "Product")?productId=@Model.Product.Id',
+                type: 'GET',
+            success: function (data) {
+                if (data.length > 0) {
+                    $.each(data, function (i, e) {
+                        var colorPreSelected = "";
+                        var colorsList = '<div id="product_attribute_input_' + e.Id + '" class="input-field col s12" style="display: flex;"><div class="">' +
+                            '<ul class="option-list attribute-squares color-squares" id="color-squares-' + e.Id + '" style="margin:0;">';
+                        var valuesWithNoCombinations = e.Values.where({ NumberOfCombinations: 0 });
+                        if (valuesWithNoCombinations.length > 0) {
+                            $.each(valuesWithNoCombinations, function (ind, elm) {
+                                var indexOfValue = e.Values.findIndex(x => x.Id === elm.Id);
+                                e.Values.splice(indexOfValue, 1);
+                            });
+                        }
+                        if (e.Values.firstOrDefault({ IsPreSelected: true }) == null) {
+                            e.Values[0].IsPreSelected = true;
+                        }
+                        $.each(e.Values, function (ii, ee) {
+                            if (ee.NumberOfCombinations > 0) {
+                                if (colorPreSelected == "")
+                                    colorPreSelected = ee.IsPreSelected == true ? ee.Name : "";
+                                colorsList += '<li>' +
+                                    '<label for="product_attribute_' + e.Id + '_' + ee.Id + '" data-attribute="' + e.Id + '-' + ee.Id + '" data-product-id="@Model.Product.Id">' +
+                                    '<a href="' + '@Url.RouteUrl("Product", new { SeName = Model.SeName })?Id=' + e.Id + '&attrId=' + ee.Id + '" data-name="' + ee.Name + '" data-imgcolor="' + ee.ImageSquaresPictureModel.ImageUrl + '" data-price="' + ee.PriceAdjustmentValue + '" data-special="' + ee.IsSpecialEdition + '" data-new="' + ee.IsNew + '">' +
+                                    '<span class="attribute-square-container' + (ee.IsPreSelected == true ? " selected-color" : "") + '" title="' + ee.Name + '">' +
+                                    '<span class="attribute-square" style="background-color:' + ee.ColorSquaresRgb + ';">' +
+                                    '&nbsp;&nbsp;&nbsp;&nbsp;' +
+                                    '</span>' +
+                                    '</span></a>' +
+                                    '<input id="product_attribute_' + e.Id + '_' + ee.Id + '" type="radio" name="product_attribute_' + e.Id + '" value="' + ee.Id + '">' +
+                                    '</label>' +
+                                    '</li>';
+                            }
+                        });
+                        colorsList += '</ul></div><div class="align-center product-text-container"><text class="product-text-main" style="width: 150px;display: flex;vertical-align: middle;margin-left:5px;"><i class="material-icons tiny" style="align-self: center;vertical-align: middle;">keyboard_arrow_right</i><text class="selected-color-' + @Model.Product.Id + '" style="vertical-align: middle;">' + colorPreSelected + '</text></text></div></div>';
+                        $('.product-colors-@Model.Product.Id').append(colorsList);
+                        $('a .selected-color').each(function (i, e) {
+                            priceChange($(e).parent());
+                        });
+                        if ($('.attribute-square-container.selected-color').parent().data('new'))
+                            $('.new-edition-@Model.Product.Id').show();
+                        else if ($('.attribute-square-container.selected-color').parent().data('special'))
+                            $('.special-edition-@Model.Product.Id').show();
+                    });
+                    $('.product-colors-@Model.Product.Id a').on("mouseenter", function () {
+                        $('.new-edition-@Model.Product.Id').hide();
+                        $('.special-edition-@Model.Product.Id').hide();
+                        $(this).parentsUntil('div[id^="product_attribute_input"]')
+                            .last().find('.attribute-square-container').removeClass('selected-color');
+                        $(this).find('.attribute-square-container').addClass('selected-color');
+                        $(this).parentsUntil('.product-colors-@Model.Product.Id').last().find('.selected-color-@Model.Product.Id').text($(this).data('name'));
+                        $(this).parentsUntil('.main-product-container')
+                            .last().prev().find('.product-line-img').css('background-image', 'url(' + $(this).data('imgcolor') + ')');
+                        if ($(this).data('new'))
+                            $('.new-edition-@Model.Product.Id').show();
+                        else if ($(this).data('special'))
+                            $('.special-edition-@Model.Product.Id').show();
+                        priceChange(this);
+                    });
+                    checkIfFirstIsSpecial($(".product-colors-@Model.Product.Id"));
+                } else {
+                    if($('#price-left-@Model.Id .price-text-big').text().trim() == "")
+                        $('#price-left-@Model.Id .price-no-colors').show();
+                }
+            },
+            error: function (err) {
+                    console.log('Error getting attributes of product: ' + '@Model.Product.Name');
+            }
+            });*@
+            $('#btnCart-@Model.Id').click(function () {
+                setTimeout(function () {
+                    $.ajax({
+                    cache: false,
+                    url: '@Url.Action("CartAjax", "ShoppingCart")',
+                    type: 'get',
+                    success: function (data) {
+                        $('.pop-cart').hide();
+                        $('.pop-cart').empty();
+                        $('.pop-cart').append(data);
+                        $('.pop-cart').show(400);
+                    }
+                });
+                    //$('#flyout-cart').addClass('active');
+                }, 800);
+            });
+        });
+    </script>
+    <style>
+        .btn-space {
+            padding: 0 !important;
+        }
+
+        .btn-width {
+            width: 100% !important;
+        }
+
+        .btn-favorite {
+            width: 80% !important;
+            padding: 0 !important;
+        }
+
+        .center-content-card {
+            height: 85px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .module {
+            overflow: hidden;
+        }
+
+        .line-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        @@media only screen and (max-width: 1366px) {
+            .btn-width {
+                font-size: 0.8em;
+            }
+
+            .small-cart.text-small-cart {
+                font-size: smaller;
+            }
+
+            .pop-cart {
+                margin-top: -24px !important;
+            }
+        }
+
+        @@media only screen and (max-width: 437px) {
+            .btn-width {
+                font-size: 2.5vw;
+                font-weight: bold;
+                word-wrap: break-word;
+                line-height: 1.5em;
+                padding-top: 3%;
+            }
+        }
+
+        @@media only screen and (max-width: 374px) {
+            .btn-width {
+                padding-top: 4%;
+            }
+        }
+
+        @@media only screen and (max-width: 345px) {
+            .btn-width {
+                padding-top: 6%;
+            }
+        }
+        /*
+        @@media only screen and (max-width: 689px) {
+            .old-price {
+                font-size: 0.9em !important;
+            }
+
+            .btn-width {
+                font-size: 0.75em;
+            }
+        }
+
+        @@media only screen and (max-width: 634px) {
+            .btn-width {
+                font-size: 0.65em;
+            }
+        }
+
+        @@media only screen and (max-width: 600px) {
+            #ifavorite {
+                font-size: 1rem;
+            }
+
+            .btn-width {
+                font-size: 0.80em;
+            }
+        }
+
+        @@media only screen and (max-width: 513px) {
+            .btn-width {
+                font-size: 0.80em;
+            }
+        }
+
+        @@media only screen and (max-width: 445px) {
+            .btn-width {
+                font-size: 0.7em;
+                font-weight: bold;
+                word-wrap: break-word;
+                line-height: 1.5em;
+                padding-top: 3%;
+            }
+        }
+
+        @@media only screen and (max-width: 410px) {
+            .btn-width {
+                font-size: 0.6em;
+            }
+        }
+
+        @@media only screen and (max-width: 392px) {
+            .center-content-card {
+                font-size: 0.9em;
+            }
+        }
+
+        @@media only screen and (max-width: 320px) {
+            .center-content-card {
+                font-size: 0.8em;
+            }
+        }
+
+        @@media only screen and (max-width: 285px) {
+            .btn-width {
+                font-size: 0.6em;
+                padding-top: 7%;
+            }
+        }
+
+        @@media only screen and (max-width: 264px) {
+            .btn-width {
+                font-size: 0.55em;
+            }
+        }*/
+    </style>
+</div>
+<div class="center-card btn-cards-product-box row" id="btn-small" style="margin-top:-3%;">
+    <div class="col s10 m2 btn-space cart-wishlist-btns">
+        @if (!Model.ProductPrice.DisableBuyButton)
+        {
+            var addToCartText = T("ShoppingCart.AddToCart").Text;
+            if (Model.ProductPrice.IsRental)
+            {
+                addToCartText = T("ShoppingCart.Rent").Text;
+            }
+            if (Model.ProductPrice.AvailableForPreOrder)
+            {
+                addToCartText = T("ShoppingCart.PreOrder").Text;
+            }
+            @*if (Model.AttributeProduct.Count > 0)
+                {
+                    <a href="#modal-@Model.Id" title="@(addToCartText)" onclick="addCart(@Model.Id)" class="modal-trigger waves-effect waves-light btn btn-width">
+                        <span class="small-cart text-small-cart">AGREGAR AL CARRITO</span>
+                    </a>
+                }
+                else
+                {
+                    <a href="javascript:void(0)" title="@(addToCartText)" id="btnCart-@Model.Id" onclick="AjaxCart.addproducttocart_catalog('@addtocartlink');return false;" class="waves-effect waves-light btn btn-width">
+                        <span class="small-cart text-small-cart">AGREGAR AL CARRITO</span>
+                    </a>
+                }*@
+        }
+    </div>
+    @*<div class="col s2 m1 btn-space cart-wishlist-btns">
+            @if (!Model.ProductPrice.DisableWishlistButton)
+            {
+                if (Model.AttributeProduct.Count > 0)
+                {
+                    <a href="#modal-@Model.Id" title="@T("ShoppingCart.AddToWishlist")" onclick="addWish(@Model.Id)" class="modal-trigger halfway-fab wishlist waves-effect waves-light btn btn-favorite">
+                        <i id="ifavorite" class="material-icons">favorite</i>
+                    </a>
+                }
+                else
+                {
+                    <a href="javascript:void(0)" title="@T("ShoppingCart.AddToWishlist")" onclick="AjaxCart.addproducttocart_catalog('@addtowishlistlink');return false;" id="small-favorite" class="halfway-fab wishlist waves-effect waves-light btn btn-favorite">
+                        <i id="ifavorite" class="material-icons">favorite</i>
+                    </a>
+                }
+            }
+        </div>*@
+</div>
+<script>
+    function addWish(id) {
+        $('#add-to-wish-button-' + id).show();
+        $('#mobil-add-to-wish-button-' + id).show();
+        $('#add-to-cart-button-' + id).hide();
+        $('#mobil-add-to-cart-button-' + id).hide();
+    }
+
+    function addCart(id) {
+        $('#add-to-wish-button-' + id).hide();
+        $('#mobil-add-to-wish-button-' + id).hide();
+        $('#add-to-cart-button-' + id).show();
+        $('#mobil-add-to-cart-button-' + id).show();
+    }
+</script>
+<div id="modal-@Model.Id" class="modal">
+    @await Html.PartialAsync("_ModalAttribute", Model)
+</div>

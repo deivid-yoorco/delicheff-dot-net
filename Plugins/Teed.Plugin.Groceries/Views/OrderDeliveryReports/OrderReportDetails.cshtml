@@ -1,0 +1,644 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderDeliveryReports.OrderReportDetailsViewModel
+@using Nop.Services.Helpers;
+@using Teed.Plugin.Groceries.Domain.OrderReports;
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var deliveryDate = Model.OrderShippigDate.ToString("dd-MM-yyyy");
+    var countProducts = 0;
+    var controllerName = "OrderDeliveryReports";
+    bool.TryParse(Context.Request.Query["btnEneableOrderFolio"].ToString(), out bool btnEneableOrderFolio);
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Liquidación  por productos @Model.BuyerName: @Model.DayOfWeek @deliveryDate
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="OrderReportStatus" asp-route-id="@(Model.OrderShippigDate.ToString("dd-MM-yyyy"))">Regresar a: Liquidación de compradores @Model.DayOfWeek @deliveryDate</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            @if (!btnEneableOrderFolio)
+            {
+                <button type="submit" asp-action="OrderReportDetails" asp-route-date="@deliveryDate" asp-route-btnEneableOrderFolio="true" class="btn bg-blue">
+                    Ordenar por folio
+                </button>
+            }
+            else
+            {
+                <button type="submit" asp-action="OrderReportDetails" asp-route-date="@deliveryDate" class="btn btn-danger">
+                    Quitar orden por folio
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @if (ViewBag.mensaje != null)
+                        {
+                            <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                @ViewBag.mensaje
+                            </h2>
+                        }
+                        <div>
+                            <div class="table-responsive">
+                                <table class="table-responsive" style="width:100%">
+                                    <tr>
+                                        <td style="background-color:khaki"></td>
+                                        <td style="background-color:khaki">Nombre</td>
+                                        <td style="background-color:khaki;width:300px;text-align:center">Costo por unidad (pz/kg)</td>
+                                        <td style="background-color:khaki;width:170px;text-align:center">Costo total del producto</td>
+                                        <td style="background-color:khaki;width:140px;text-align:center">Cantidad total comprada</td>
+                                        <td style="background-color:khaki;width:300px;text-align:center">Bodega</td>
+                                        <td style="background-color:khaki;width:150px;text-align:center">Razón de no compra</td>
+                                        <td style="background-color:khaki;width:100px;text-align:center">Folio</td>
+                                        @*<td style="background-color:khaki;width:150px;text-align:center">Comprobante</td>*@
+                                    </tr>
+                                    @foreach (var item in Model.Products)
+                                    {
+                                        var bgColorClass = item.ProductCostKgPz * item.ProductQuantity != item.ProductAmountTotal ? "bg-red" : "";
+                                        <tr class="@bgColorClass">
+                                            <td hidden><input hidden id="productId-@countProducts" value="@item.ProductId" /></td>
+                                            <td hidden><input hidden id="productName-@countProducts" value="@item.ProductName" /> </td>
+                                            <td style="text-align:center">
+                                                <input type="checkbox">
+                                            </td>
+                                            <td style="text-align:left">
+                                                <strong>  @item.ProductName</strong><br />
+                                                <small>
+                                                    Producto en @item.NumberOrders órdenes |
+                                                    @(item.RequestedQuantity < 1 ? item.RequestedQuantity * 1000 : item.RequestedQuantity)
+                                                    @(item.RequestedUnit == "kg" && item.RequestedQuantity < 1 ? "gr" : item.RequestedUnit)
+                                                </small>
+                                            </td>
+                                            <td style="text-align:left;width:170px">
+                                                @*<input style="width:110px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || !string.IsNullOrEmpty(item.NoBuyedReazon) || item.SentToSuperMarket)" id="productUnitCost-@countProducts" value="@item.ProductCostKgPz" type="number" min="0" data-maxcost="@item.MaxCost" />*@
+                                                $<input style="width:110px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || item.SentToSuperMarket)" id="productUnitCost-@countProducts" value="@item.ProductCostKgPz" type="number" min="0" /><br />
+                                                <small style="text-align:right">Valor original reportado: @item.ProductCostKgPzOriginal.ToString("C")</small><br />
+                                                <small style="font-weight: bold">Últimos costos reportados:</small><br />
+                                                @if (item.PreviousCostList.Count > 0)
+                                                {
+                                                    foreach (var cost in item.PreviousCostList)
+                                                    {
+                                                        <small>- @Html.Raw(cost)</small><br />
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <small>No se ha reportado ningún costo anteriormente.</small>
+                                                }
+                                            </td>
+                                            <td style="text-align:left;width:140px">
+                                                $<input style="width:110px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || item.SentToSuperMarket)" id="productRequestCost-@countProducts" value="@item.ProductAmountTotal" type="number" min="0" />
+                                                <small style="text-align:right">Valor original reportado: @item.ProductAmountTotalOriginal.ToString("C")</small>
+
+                                                <div class="row">
+                                                    @foreach (var boughtType in Enum.GetValues(typeof(BoughtType)).Cast<BoughtType>())
+                                                    {
+                                                        <div class="col-md-12">
+                                                            <input disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || item.SentToSuperMarket)" @if ((int)boughtType == item.BoughtTypeId) { <text>checked</text> } type="radio" id="boughtType-selection-@countProducts-@((int)boughtType)" name="boughtType-selection-@countProducts" value="@((int)boughtType)">
+                                                            <label for="boughtType-selection-@countProducts-@((int)boughtType)">@boughtType.GetDisplayName()</label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td style="text-align:left;width:140px">
+                                                <input style="width:110px;text-align:right" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || item.SentToSuperMarket)" id="productQuantity-@countProducts" value="@item.ProductQuantity" type="number" min="0" />
+                                                <small style="text-align:right">Valor original reportado: @item.ProductQuantityOriginal</small>
+                                            </td>
+                                            <td style="text-align:center">
+                                                <select style="width:290px;text-align:right" onchange="showInputShoppingId(@countProducts)" id="productManufacturer-@countProducts" class="productManufacturerId" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || item.SentToSuperMarket)">
+                                                    @if (item.ManufacturerId == -1)
+                                                    {
+                                                        <option selected value="-1">Otro</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="-1">Otro</option>
+                                                    }
+                                                    @if (Model.Manufacturers != null && Model.Manufacturers.Count() > 0)
+                                                    {
+                                                        @foreach (var manufacturer in Model.Manufacturers)
+                                                        {
+                                                            @if (item.ManufacturerId == int.Parse(manufacturer.Value))
+                                                            {
+                                                                <option selected value="@manufacturer.Value">@manufacturer.Text</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@manufacturer.Value">@manufacturer.Text</option>
+                                                            }
+                                                        }
+                                                    }
+                                                </select>
+                                                <input style="margin-top:5px;width:290px;display:none" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)" id="shoppingId-@countProducts" value="@item.Manufacturer" class="shoppingStoreId" placeholder="Bodega..." />
+                                            </td>
+                                            <td style="text-align:center">
+                                                <textarea style="width:140px;" disabled="@(Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed || item.SentToSuperMarket)" id="productNoBuyedReazon-@countProducts" type="text">
+                                                    @if (item.SentToSuperMarket)
+                                                    {
+                                                        @("Enviado a supermercado");
+                                                    }
+                                                    else
+                                                    {
+                                                        @item.NoBuyedReazon
+                                                    }
+                                                </textarea>
+                                            </td>
+                                            <td style="text-align:center">
+                                                <strong>@item.Invoice</strong>
+                                            </td>
+                                            @*<td style="text-align:center">
+                                                    @if (item.File == null)
+                                                    {
+                                                        <span>Sin comprobante</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="@(item.File.FileUrl)" target="_blank" style="align-self:center" class="btn btn-info"><i class="fa fa-file"></i></a>
+                                                    }
+                                                </td>*@
+                                            <span style="color:red" id="valueRegisterCeroOrEmpty-@countProducts"></span>
+                                        </tr>
+                                        countProducts++;
+                                    }
+                                </table>
+                            </div>
+                            <hr />
+                            <h4>Cantidad de productos modificados: @Model.TotalProductsUpdated</h4>
+                            <hr />
+                            <div>
+                                <h2>Transferencias solicitadas por este comprador</h2>
+                                <div class="table-responsive">
+                                    <table class="table-responsive" style="width:100%">
+                                        <tr style="background-color:#95d8ff">
+                                            <th>
+                                                Fecha y hora de solicitud de pago
+                                            </th>
+                                            <th>Bodega</th>
+                                            <th>Monto solicitado</th>
+                                            <th>Recibo</th>
+                                            <th>Comprobante de pago (admin)</th>
+                                            <th>Estatus de pago (admin)</th>
+                                            <th>Factura</th>
+                                        </tr>
+                                        @foreach (var item in Model.BuyerPayments)
+                                        {
+                                            <tr>
+                                                <td>@(item.RequestedAmount == 0 ? item.Date.ToString("dd/MM/yyyy") : item.CreationDate.ToString("dd/MM/yyyy HH:mm"))</td>
+                                                <td>@(item.ManufacturerName)</td>
+                                                <td>@(item.RequestedAmount == 0 ? "-" : item.RequestedAmount.ToString("C"))</td>
+                                                @if (item.TicketBuyerFileIds.Count > 0)
+                                                {
+                                                    <td>
+                                                        <ul>
+                                                            @for (int i = 0; i < item.TicketBuyerFileIds.Count; i++)
+                                                            {
+                                                                <li>
+                                                                    <a class="btn bg-blue" target="_blank" href="/admin/buyerPayment/GetPicture?id=@(item.TicketBuyerFileIds[i])">Ticket @(i + 1)</a>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>-</td>
+                                                }
+                                                @if (item.PaymentFileId > 0)
+                                                {
+                                                    <td style="text-align: center;">
+                                                        <a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.PaymentFileId })">Descargar</a>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                }
+                                                @if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Payed)
+                                                {
+                                                    <td style="text-align:center">
+                                                        <span class="grid-report-item green">
+                                                            @(item.PaymentStatus.GetDisplayName())
+                                                        </span>
+                                                    </td>
+                                                }
+                                                else if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Unauthorized)
+                                                {
+                                                    <td style="text-align:center">
+                                                        <span class="grid-report-item red">
+                                                            @(item.PaymentStatus.GetDisplayName())
+                                                        </span>
+                                                    </td>
+                                                }
+                                                else if (item.PaymentStatus == Teed.Plugin.Groceries.Domain.BuyerPayments.BuyerPaymentStatus.Pending && item.TicketBuyerFileIds.Count > 0)
+                                                {
+                                                    <td style="text-align:center">
+                                                        <span class="grid-report-item orange">
+                                                            @(item.PaymentStatus.GetDisplayName())
+                                                        </span>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="text-align:center">
+                                                        -
+                                                    </td>
+                                                }
+                                                @if (item.InvoiceFileXmlId > 0 && item.InvoiceFilePdfId > 0)
+                                                {
+                                                    <td>
+                                                        <ul>
+                                                            <li><a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.InvoiceFileXmlId })">XML</a></li>
+                                                            <li><a class="btn bg-blue" href="@Url.Action("GetByteFile", "BuyerPayment", new { id = item.InvoiceFilePdfId })">PDF</a></li>
+                                                        </ul>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>-</td>
+
+                                                }
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h2>Totales</h2>
+                            <div class="table-responsive">
+                                <table class="table-responsive" style="width:100%">
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total comprado: </label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.AmountTotalSpent.ToString("C")</strong></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total pagado con transferencia:</label> </td>
+                                        <td style="text-align:right;width:130px">$ <input style="width:100px;text-align:right" asp-for="AmountTotalTransfer" type="number" min="0" /></td>
+                                        <td style="text-align:center;width:130px"><input style="text-align:center" asp-for="InputFileTransfer" type="file" /></td>
+                                        <td hidden><input asp-for="OrderReportTransferId" /></td>
+                                        <td style="text-align:center;width:130px">
+                                            @if (Model.FileTransferB64 != null)
+                                            {
+                                                <a asp-action="ShowFileTransfer" asp-route-id="@(Model.OrderReportTransferId)" target="_blank" style="align-self:center" class="btn btn-info"><i class="fa fa-file"></i></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Total pagado con efectivo: </label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.AmountTotalInCash.ToString("C")</strong></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Dinero recibido por el comprador en efectivo:</label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.BuyerCashAmountString</strong></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Monto pagado con tarjeta:</label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@Model.BuyerCardAmountString</strong></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left;width:130px"><label>Cambio a devolver por el comprador:  </label> </td>
+                                        <td style="text-align:left;width:130px"><strong class="pull-right">@(Model.AmountTotalReturned > 0 ? Model.AmountTotalReturned.ToString("C") : Model.AmountTotalReturned.ToString())</strong></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                        <td style="text-align:left;width:130px"></td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                        </div>
+                        <hr />
+                        <br />
+                        @*<h2>Comprobantes</h2>
+                            <ul class="images">
+                                @foreach (var file in Model.Files)
+                                {
+                                    <li>
+                                        <a href="@(file.FileUrl)" target="_blank">
+                                            <img style="width: 150px;height: 200px;" alt="@(file.FileName)" src="@(file.FileUrl)" />
+                                        </a>
+                                    </li>
+                                }
+                            </ul>*@
+                    </div>
+                    <input id="JsonData" asp-for="JsonData" type="hidden" />
+                    <input id="AuthorizeData" asp-for="AuthorizeData" type="hidden" />
+                    <input asp-for="BuyerId" type="hidden" />
+                    <input asp-for="OrderShippigDate" type="hidden" />
+                    @if (Model.CurrentStatus != Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)
+                    {
+                        <div style="text-align: right;margin-bottom: 15px;">
+                            <span style="color:red; text-align:right">Al autorizar la liquidación, yo <strong>@Model.CurrentUserName</strong> asumo total responsabilidad de la liquidación de las compras de <strong>@Model.BuyerName</strong>.<br /> <i>Recuerda que cuando autorices la liquidación no se podrá modificar</i>.</span>
+                        </div>
+                    }
+                    @if (Model.CurrentStatus == Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Pending)
+                    {
+                        <div class="pull-right">
+                            <button type="submit" asp-action="UpdateReportsOrder" onclick="return createOrderReportJson(false)" class="btn bg-blue">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    }
+                    @if (Model.CurrentStatus != Teed.Plugin.Groceries.Domain.OrderReports.ReportStatusType.Closed)
+                    {
+                        <div class="pull-right" style="margin-right:10px">
+                            <button type="submit" asp-action="UpdateReportsOrder" onclick="return createOrderReportJson(true)" class="btn bg-red">
+                                Guardar y autorizar liquidación
+                            </button>
+                        </div>
+                        @*<div class="pull-right" >
+                                <a class="btn btn-danger" onclick="confirmOrderReportAlert(@Model.BuyerId, '@Model.BuyerName', '@(Model.OrderShippigDate.ToString("dd-MM-yyyy"))', '@Model.CurrentUserName')">Autorizar liquidación</a>
+                            </div>*@
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </div>
+</form>
+<style>
+    ul.images {
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+        ul.images li {
+            display: inline-block;
+            width: 160px;
+            height: 210px;
+        }
+
+    .max-cost {
+        background-color: #ffb8b8;
+        color: #ff0000;
+    }
+</style>
+<script>
+     $(document).ready(function () {
+        for (var i = 0; i < @countProducts; i++) {
+            showInputShoppingId(i);
+         }
+         //$('[data-maxcost]').on("change keyup", function () {
+         //    var $input = $(this);
+         //    var maxCost = parseFloat($input.data('maxcost'));
+         //    if (maxCost > 0) {
+         //        if (maxCost < $input.val())
+         //            $input.addClass('max-cost');
+         //        else
+         //            $input.removeClass('max-cost');
+         //    }
+         //});
+     });
+
+    function createExpenseJson() {
+        var expenseData = [];
+        if (countClick != 0) {
+
+            for (var i = 0; i < countClick; i++) {
+                var expenseAmount = 0
+                if (document.getElementById('amountExpense' + i).value != "") {
+                    expenseAmount = document.getElementById('amountExpense' + i).value;
+                }
+                var expenseDescription = document.getElementById('descriptionExpense' + i).value;
+                var Data = {
+                    ExpenseAmount: expenseAmount,
+                    ExpenseDescription : expenseDescription
+
+                }
+                expenseData.push(Data);
+            }
+            var expenseDataTypeJson = JSON.stringify(expenseData);
+            console.log(expenseDataTypeJson);
+            DataExpenseJson(expenseDataTypeJson);
+        }
+    }
+
+    function DataExpenseJson(dataJsonExpense) {
+        var jsonExpense = dataJsonExpense;
+        document.getElementById('ExpenseJsonData').value = jsonExpense;
+
+    }
+
+    function createOrderReportJson(authorize) {
+        var productReportData = [];
+
+        for (var i = 0; i < @countProducts; i++) {
+            var productId = document.getElementById('productId-' + i).value;
+            var productUnitCost = document.getElementById('productUnitCost-' + i).value;
+            var productRequestCost = document.getElementById('productRequestCost-' + i).value;
+            var productQuantity = document.getElementById('productQuantity-' + i).value;
+            var productManufacturer = $("#productManufacturer-" + i).val();
+            var shoppingId = $("#shoppingId-" + i).val();
+            var boughtTypeId = $('[name="boughtType-selection-' + i + '"]:checked').val();
+            if (productManufacturer != "-1") {
+                shoppingId = $("#productManufacturer-" + i).find('option:selected').text();
+            }
+
+            var noBuyedRazon = $("#productNoBuyedReazon-" + i).val();
+
+            //if (productUnitCost != "") {
+            //    if (productUnitCost == "0") {
+            //        document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "No puedes registrar 0's en el producto " + document.getElementById('productName-' + i).value + ". ";
+            //        alert('[Alerta] Registraste algun cero en el producto: ' + document.getElementById('productName-' + i).value + '.');
+            //        return false;
+            //    } else {
+            //        document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "";
+            //    }
+            //}
+            //else {
+            //    document.getElementById('valueRegisterCeroOrEmpty-' + i).innerHTML = "Todos los campos deben ser llenados en el producto " + document.getElementById('productName-' + i).value + ". ";
+            //    alert('[Alerta] Dejaste campos vacios en el producto: ' + document.getElementById('productName-' + i).value + '.');
+            //    return false;
+            //}
+
+            var Data = {
+                ProductId: productId,
+                ProductUnitCost: productUnitCost,
+                ProductRequestCost: productRequestCost,
+                ProductQuantity: productQuantity,
+                ManufacturerId: productManufacturer,
+                ShoppingStoreId: shoppingId,
+                NoBuyedRazon: noBuyedRazon,
+                BoughtTypeId: boughtTypeId
+            }
+            productReportData.push(Data);
+        }
+
+        var productsReportJson = JSON.stringify(productReportData);
+        console.log(productsReportJson);
+        document.getElementById('AuthorizeData').value = authorize;
+        document.getElementById('JsonData').value = productsReportJson;
+        //updateDataProducts(productsReportJson);
+    };
+
+    function updateDataProducts(jsonProductsData) {
+        var body = {
+            BuyerId: '@Model.BuyerId',
+            Date: '@deliveryDate',
+            ProductsJson: jsonProductsData,
+        }
+
+        console.log(body);
+
+        $.ajax({
+            url:"@Html.Raw(Url.Action("UpdateReportsOrder", controllerName))",
+            type: 'Post',
+            data: body,
+            success: function (data) {
+                $("#success-message").html("Se actualizaron correctamente los reportes, por favor espere...");
+                $("#success-message").show();
+                location.reload();
+            },
+            error: function (e) {
+                $("#error-message").html(e.responseText);
+                $("#error-message").show();
+            }
+        });
+
+    }
+
+    function DataJson(Json) {
+        var jsonData = Json;
+        document.getElementById('JsonData').value = jsonData;
+    }
+
+    var countClick = 0;
+    function countClickAdd() {
+        countClick += 1;
+        console.log(countClick);
+    }
+    function countClickRest() {
+        countClick -= 1;
+        console.log(countClick);
+    }
+
+    function addNewExpense() {
+        createNewExpense(countClick);
+        countClickAdd();
+    }
+
+    function createNewExpense(currentClickExpense) {
+        var currentExpense = currentClickExpense;
+        $('#tablesExpenseContainer').append(
+            '<table id="tableExpense' + currentExpense + '" class="tableExpense" style = "width:100%" >'
+                + '<tr>'
+                    + '<td class="tdExpense" style="width:30%; text-align:right;">Monto Gastado: $ <input id="amountExpense' + currentExpense + '" class="amountExpense" type="number" min="0" style="width:65%; text-align:center" placeholder="Ingresa la cantidad del gasto..." /> </td>'
+                        + '<td class="tdExpense" style="text-align:right; width:8%">Descripción: </td>'
+                        + '<td class="tdExpense" style="width:30%"><textarea id="descriptionExpense' + currentExpense + '" class="descriptionExpense" style="width:100%" placeholder="Registra el concepto del gasto..."></textarea></td>'
+                    + '<td class="tdExpense" style="width:12%"><button id="deleteExpense' + currentExpense + '" class="deleteExpense btn btn-danger"  type="button" onclick="deleteTableAndReorderIds(this)">Borrar gasto</button></td>'
+                +'</tr>'
+            +'</table >'
+        );
+    }
+
+    function deleteTableAndReorderIds(element) {
+
+        var idButton = element.id;
+        var numberTableId = idButton.substring(idButton.length - 1, idButton.length)
+        console.log(idButton);
+        console.log(numberTableId);
+
+
+        $('#tableExpense' + numberTableId).remove();
+        countClickRest();
+
+        var tableExpense = document.getElementsByClassName('tableExpense');
+        $.each(tableExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'tableExpense' + index);
+        });
+
+        var amountExpense = document.getElementsByClassName('amountExpense');
+        $.each(amountExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'amountExpense' + index);
+        });
+
+        var descriptionExpense = document.getElementsByClassName('descriptionExpense');
+        $.each(descriptionExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'descriptionExpense' + index);
+        });
+
+        var deleteExpense = document.getElementsByClassName('deleteExpense');
+        $.each(deleteExpense, function (index, element) {
+            $('#' + element.id).prop('id', 'deleteExpense' + index);
+        });
+
+    }
+
+    function confirmOrderReportAlert(buyerId, buyerName, date, currentUserName) {
+        var alert = confirm("Yo " + currentUserName + " asumo total responsabilidad de la liquidación de las compras de " + buyerName + ".\n\n Recuerda que una vez autorices la liquidación no se podrá modificar.\n\n ¿Seguro quieres liquidar la cuenta de " + buyerName + "?");
+        if (alert == true) {
+            $.ajax({
+            url: "@Html.Raw(Url.Action("ConfirmOrderReport", controllerName))?buyerId=" + buyerId + "&date=" + date,
+                type: 'Post',
+
+            success: function (data) {
+                $("#success-message").html("Se confirmó correctamente la cuenta, por favor espere...");
+                $("#success-message").show();
+                location.reload();
+            },
+            error: function (e) {
+                $("#error-message").html(e.responseText);
+                $("#error-message").show();
+            }
+        });
+        }
+    }
+
+    function showInputShoppingId(number) {
+        if ($("#productManufacturer-" + number).val() == "-1") {
+            $("#shoppingId-" + number).show();
+        }
+        else {
+            $("#shoppingId-" + number).hide();
+        }
+    }
+
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    .tableExpense {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tdExpense, .thExpense {
+        border: 1px solid #ffffff;
+        text-align: center;
+        padding: 8px;
+    }
+</style>

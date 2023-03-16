@@ -1,0 +1,31 @@
+﻿@model Teed.Nop.Plugin.Widgets.NivoSlider2.Models.ConfigurationModel
+@{
+
+    var tagsText = "Para que se muestren todas las tags, el valor de cantidad tags debe ser 0";
+ }
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Cantidad de tags
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TagsEnable_OverrideForStore" asp-input="TagsEnable" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Activado</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TagsEnable" />
+                <span asp-validation-for="TagsEnable"></span>
+            </div>
+            <div class="col-md-3 text-right">
+                <nop-override-store-checkbox asp-for="TagsQty_OverrideForStore" asp-input="TagsQty" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                <label>Cantidad de tags</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="TagsQty" />
+                <span asp-validation-for="TagsQty"></span>
+                <em>@tagsText</em>
+            </div>
+        </div>
+    </div>
+</div>

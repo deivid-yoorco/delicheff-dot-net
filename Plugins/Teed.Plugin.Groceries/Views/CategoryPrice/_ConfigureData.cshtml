@@ -1,0 +1,203 @@
+﻿<style>
+    .report-error {
+        text-align: center;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #ea6260;
+        color: white;
+        font-weight: bold;
+    }
+</style>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <p>Para generar estos datos, se consideran únicamente las órdenes que tengan reporte, y que estén marcadas como completadas.</p>
+            <label class="control-label col-sm-2 requiredField" for="dateini">
+                Fecha inicial
+            </label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar">
+                        </i>
+                    </div>
+                    <input class="form-control" id="dateini" name="dateini" placeholder="DD-MM-YYYY" type="text" />
+                </div>
+            </div>
+            <label class="control-label col-sm-3 requiredField" for="datefin">
+                Fecha final
+            </label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar">
+                        </i>
+                    </div>
+                    <input class="form-control" id="datefin" name="datefin" placeholder="DD-MM-YYYY" type="text" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group" style="margin-top: 1em;">
+            <div class="col-sm-12" style="text-align-last: center;">
+                <button class="btn btn-primary dateSubmit" name="submit" type="button" onclick="submitDate()">
+                    <i class="fa fa-search" aria-hidden="true"></i> Buscar por fecha
+                </button>
+                <button class="btn btn-primary dateSubmit" name="submit" type="button" onclick="resetSearch()">
+                    <i class="fa fa-times" aria-hidden="true"></i> Resetear busqueda
+                </button>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:1em" id="loading">
+            <i class="fa fa-circle-o-notch fa-pulse fa-3x fa-fw fa-circle-o-notch" style="padding:0!important"></i>
+            <span style="display:block;margin-top:10px">Cargando...</span>
+        </div>
+        <div class="col-md-12" style="font-size:1.9em;margin:1em 0;text-align:center;display:none" id="general-data">
+            <div class="col-md-4">
+                <div class="label-wrapper" style="float:none">
+                    <div title="Suma de precio de los productos de las órdenes completadas, canceladas, que tengan reporte de compra y que tengan la fecha de entrega dentro del período seleccionado." class="ico-help" style="font-size:1em;padding-right:20px">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                    <strong>Ventas totales: </strong><br />
+                    <span id="total-sales"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="label-wrapper" style="float:none">
+                    <div title="Suma de precio unitario declarado en los reportes de las órdenes utilizadas para calcular las ventas totales." class="ico-help" style="font-size:1em;padding-right:20px">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                    <strong>Costo total: </strong><br />
+                    <span id="total-cost"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="label-wrapper" style="float:none">
+                    <div title="1 - (costo total / ventas totales)" class="ico-help" style="font-size:1em;padding-right:20px">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                    <strong>Utilidad bruta: </strong><br />
+                    <span id="current-percentage"></span>
+                </div>
+            </div>
+        </div>
+        <table class="table table-hover"></table>
+        <div id="warnings" style="display:none">
+            <h4 style="color:red">Para garantizar la exactitud de la información, se deben corregir las siguientes condiciones:</h4>
+            <div id="warnings-list"></div>
+        </div>
+    </div>
+</div>
+<script>
+    var url = "";
+    var isFirstTime = true;
+    function resetSearch() {
+        SetOrgDates();
+
+        loadData();
+    }
+
+    function submitDate() {
+        $(".dateSubmit").attr("disabled", true);
+        var dateF = (($("#dateini").val()).toString());
+        var dateL = (($("#datefin").val()).toString());
+        var doTheSearch = true;
+
+        if (dateF) {
+            if (!dateF.includes("/")) {
+                doTheSearch = false;
+            }
+            if ((dateF.length) < 10 || (dateF.length) > 10) {
+                doTheSearch = false;
+            }
+        }
+        if (dateL) {
+            if (!dateL.includes("/")) {
+                doTheSearch = false;
+            }
+            if ((dateL.length) < 10 || (dateL.length) > 10) {
+                doTheSearch = false;
+            }
+        }
+
+        if (dateF.length < 2 && dateL.length < 2)
+            doTheSearch = false;
+
+        if (doTheSearch) {
+            loadData();
+        } else {
+            $(".dateSubmit").removeAttr("disabled");
+        }
+    }
+
+    function SetOrgDates() {
+        var dt = new Date();
+        var time =
+            ((dt.getDate() > 9) ? dt.getDate() : ('0' + dt.getDate())) + '/' + ((dt.getMonth() > 8) ? (dt.getMonth() + 1) : ('0' + (dt.getMonth() + 1))) + '/' + dt.getFullYear();
+
+        var dtl = new Date();
+        dtl.setDate(dt.getDate() - 30)
+        var timeLess =
+            ((dtl.getDate() > 9) ? dtl.getDate() : ('0' + dtl.getDate())) + '/' + ((dtl.getMonth() > 8) ? (dtl.getMonth() + 1) : ('0' + (dtl.getMonth() + 1))) + '/' + dtl.getFullYear();
+        $("#dateini").val(timeLess);
+        $("#datefin").val(time);
+    }
+
+    const loadData = () => {
+        if (isFirstTime) {
+            SetOrgDates();
+
+            isFirstTime = false;
+        }
+        if (($("#dateini").val() == "") && ($("#datefin").val() == "")) {
+            SetOrgDates();
+        }
+        url = '/Admin/Product/GetSalesData?from=' + ($("#dateini").val()).toString() + "&to=" + ($("#datefin").val()).toString();
+        $("#loading").show();
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: (data) => {
+                $("#loading").hide();
+                $("#general-data").show();
+                $("#total-sales").html(data.TotalSales.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }));
+                $("#total-cost").html(data.TotalCost.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }));
+                $("#current-percentage").html((Math.round(parseFloat(data.CurrentPercentage) * 100) / 100) + '%');
+                $("#current-percentage").css('color', data.CurrentPercentage >= 20 ? "green" : "red");
+
+                let table = "";
+                table += "<tr class='info'><th>Categoría</th><th>Ventas</th><th>Costo</th><th>% de ventas</th><th>Margen promedio</th><th>Ponderación</th><tr>";
+                $.each(data.Data, (i, val) => {
+                    table += "<tr>";
+                    table += "<td>" + val.CategoryName + "</td>";
+                    table += "<td>" + val.Sales.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) + "</td>";
+                    table += "<td>" + val.Cost.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) + "</td>";
+                    table += "<td>" + (Math.round(parseFloat(val.SalesPercentage * 100) * 100) / 100) + "%</td>";
+                    table += "<td>" + (Math.round(parseFloat(val.AverageMargin * 100) * 100) / 100) + "%</td>";
+                    table += "<td>" + (Math.round(parseFloat(val.FinalMargin * 100) * 100) / 100) + "%</td>";
+                    table += "</tr>";
+                });
+                $("table").html(table);
+
+                if (data.ErrorMessages.length > 0) {
+                    $("#warnings").show();
+                    let warnings = "<ul>";
+                    $.each(data.ErrorMessages, (i, val) => {
+                        warnings += "<li>" + val + "</li>";
+                    });
+                    warnings += "</ul>";
+                    $("#warnings-list").html(warnings);
+                }
+                else {
+                    $("#warnings").hide();
+                }
+            },
+            error: (error) => {
+                $("#loading").hide();
+                console.log(error);
+            }
+        });
+        $(".dateSubmit").removeAttr("disabled");
+    };
+
+    loadData();
+</script>

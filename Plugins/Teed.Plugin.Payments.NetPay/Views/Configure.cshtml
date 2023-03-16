@@ -1,0 +1,151 @@
+﻿@model Teed.Plugin.Payments.NetPay.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="UseSandbox" />
+                        <span asp-validation-for="UseSandbox"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="PublicKeyProduction_OverrideForStore" asp-input="PublicKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>PublicKey Producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="PublicKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="PublicKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SecretKeyProduction_OverrideForStore" asp-input="SecretKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>SecretKey Producción</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SecretKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SecretKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="PublicKeySandbox_OverrideForStore" asp-input="PublicKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>PublicKey Sandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="PublicKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="PublicKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SecretKeySandbox_OverrideForStore" asp-input="SecretKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>SecretKey Sandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SecretKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SecretKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Allow3Msi_OverrideForStore" asp-input="Allow3Msi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Permitir pagar a 3 meses sin intereses</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Allow3Msi" />
+                        <span asp-validation-for="Allow3Msi"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Allow6Msi_OverrideForStore" asp-input="Allow6Msi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Permitir pagar a 6 meses sin intereses</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Allow6Msi" />
+                        <span asp-validation-for="Allow6Msi"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Allow9Msi_OverrideForStore" asp-input="Allow9Msi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Permitir pagar a 9 meses sin intereses</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Allow9Msi" />
+                        <span asp-validation-for="Allow9Msi"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Allow12Msi_OverrideForStore" asp-input="Allow12Msi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Permitir pagar a 12 meses sin intereses</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Allow12Msi" />
+                        <span asp-validation-for="Allow12Msi"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="Allow18Msi_OverrideForStore" asp-input="Allow18Msi" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Permitir pagar a 18 meses sin intereses</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Allow18Msi" />
+                        <span asp-validation-for="Allow18Msi"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="MinimumMsiAmount_OverrideForStore" asp-input="MinimumMsiAmount" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Monto mínimo de compra para poder utilizar MSI (dejar en 0 si no hay monto mínimo)</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="MinimumMsiAmount" type="number" class="form-control" />
+                        <span asp-validation-for="MinimumMsiAmount" class="text-danger"></span>
+                    </div>
+                </div>
+                @*<div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <nop-override-store-checkbox asp-for="AdditionalFee_OverrideForStore" asp-input="AdditionalFee" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label>Aplicar comisión</label>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AdditionalFee" />
+                            <span asp-validation-for="AdditionalFee"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 text-right">
+                            <nop-override-store-checkbox asp-for="AdditionalFeePercentage_OverrideForStore" asp-input="AdditionalFeePercentage" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <label>¿La comisión es porcentaje?</label>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="AdditionalFeePercentage" />
+                            <span asp-validation-for="AdditionalFeePercentage"></span>
+                        </div>
+                    </div>*@
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

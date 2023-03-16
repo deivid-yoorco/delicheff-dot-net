@@ -1,0 +1,27 @@
+﻿@model Nop.Web.Areas.Admin.Models.Logging.ActivityLogTypeModel
+
+@{
+    //page title
+    ViewBag.Title = "Editar tipo de actividad";
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Activity types");
+}
+
+<form asp-controller="ActivityLog" asp-action="Create" method="post" id="badge-form">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar tipo de actividad
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="ListTypes">regresar a la lista de tipos de actividad</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    @await Html.PartialAsync("_CreateOrUpdate", Model)
+</form>

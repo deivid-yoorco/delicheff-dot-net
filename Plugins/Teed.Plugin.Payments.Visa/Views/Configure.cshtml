@@ -1,0 +1,111 @@
+﻿@model Teed.Plugin.Payments.Visa.Models.ConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+<form asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                Ingresa la información solicitada<br /><br />
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>Modo de prueba</label>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="UseSandbox" />
+                        <span asp-validation-for="UseSandbox"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="MerchantId_OverrideForStore" asp-input="MerchantId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>MerchantId</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="MerchantId" maxlength="256" class="form-control" />
+                        <span asp-validation-for="MerchantId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="ApiKeySandbox_OverrideForStore" asp-input="ApiKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>ApiKeySandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="ApiKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="ApiKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SharedSecretKeySandbox_OverrideForStore" asp-input="SharedSecretKeySandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>SharedSecretKeySandbox</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SharedSecretKeySandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SharedSecretKeySandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="ApiKeyProduction_OverrideForStore" asp-input="ApiKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>ApiKeyProduction</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="ApiKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="ApiKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="SharedSecretKeyProduction_OverrideForStore" asp-input="SharedSecretKeyProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <label>SharedSecretKeyProduction</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="SharedSecretKeyProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="SharedSecretKeyProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="OrganizationIdProduction_OverrideForStore" asp-input="OrganizationIdProduction" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <div class="label-wrapper">
+                            <label class="control-label">OrganizationIdProduction</label>
+                            <div title="Se utiliza para device fingerprint" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="OrganizationIdProduction" maxlength="256" class="form-control" />
+                        <span asp-validation-for="OrganizationIdProduction" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3 text-right">
+                        <nop-override-store-checkbox asp-for="OrganizationIdSandbox_OverrideForStore" asp-input="OrganizationIdSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <div class="label-wrapper">
+                            <label class="control-label">OrganizationIdSandbox</label>
+                            <div title="Se utiliza para device fingerprint" class="ico-help">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <input asp-for="OrganizationIdSandbox" maxlength="256" class="form-control" />
+                        <span asp-validation-for="OrganizationIdSandbox" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

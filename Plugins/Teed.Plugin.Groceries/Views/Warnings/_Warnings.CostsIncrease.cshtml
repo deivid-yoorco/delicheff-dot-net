@@ -1,0 +1,144 @@
+﻿@model Teed.Plugin.Groceries.Models.Warnings.IndexViewModel;
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+
+<div class="panel-group" style="margin:15px;margin-bottom: 0px">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <a data-toggle="collapse" href="#collapsePending" role="button" aria-expanded="false" aria-controls="collapsePending">
+                <h3 style="text-align: center; background-color: #f3f3f3; padding: 1em; margin-bottom: 1em;"> <i class="fa fa-caret-right" aria-hidden="true"></i>  Alertas pendientes por atender: @Model.CostsIncreaseWarnings.Count()</h3>
+            </a>
+            <div class="collapse" id="collapsePending" style="margin-bottom: 30px">
+                @foreach (var item in Model.CostsIncreaseWarnings.GroupBy(x => x.CreatedOn).OrderByDescending(x => x.Key))
+                {
+                    <strong>@item.Key.ToString("dd-MM-yyyy")</strong>
+                    <ul>
+                        @foreach (var warning in item)
+                        {
+                            <li><a target="_blank" href="/Admin/Warnings/CostIncreaseWarnings?date=@(warning.CreatedOn.ToString("dd-MM-yyyy"))">@warning.ProductName</a></li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div id="costs-grid"></div>
+
+            <script type="text/javascript">
+                    $(document).ready(function() {
+                        $("#costs-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("CostIncreaseDates", "Warnings"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    @*update: {
+                                        url: "@Html.Raw(Url.Action("EmployeeFileUpdate", "Warnings"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },*@
+                                    @*destroy: {
+                                        url: "@Html.Raw(Url.Action("EmployeeFileDelete", "PayrollEmployee"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }*@
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            Date: { editable: false, type: "string" },
+                                            Count: { editable: false, type: "string" },
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: false,
+                                serverFiltering: false,
+                                serverSorting: false
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            editable: {
+                                confirmation: "confirmar",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            columns: [
+                            //{
+                            //    field: "Id",
+                            //    template: "<span data-id='#=Id#'></span>",
+                            //    hidden: true
+                            //},
+                                {
+                                    field: "Date",
+                                    title: "Fecha",
+                                },
+                                {
+                                    field: "AttendedCount",
+                                    title: "Alertas atendidas",
+                                },
+                                {
+                                    field: "UnattendedCount",
+                                    title: "Alertas pendientes por atender",
+                                },
+                                {
+                                    field: "Date",
+                                    title: "Ver alertas",
+                                    width: 50,
+                                    headerAttributes: { style: "text-align:center" },
+                                    attributes: { style: "text-align:center" },
+                                    template: function (dataItem) {
+                                        return '<a class="btn btn-default" href="@Html.Raw(Url.Action("CostIncreaseWarnings", "Warnings"))?date=' + kendo.htmlEncode(dataItem.Date) + '"><i class="fa fa-eye"></i>Ver</a>';
+                                    }
+                                }
+                            //{
+                            //    command: [
+                            //    {
+                            //        name: "download",
+                            //        text: "Descargar",
+                            //        className: "download-file",
+                            //    }, {
+                            //        name: "edit",
+                            //        text: {
+                            //            edit: "Editar",
+                            //            update: "Actualizar",
+                            //            cancel: "Cancelar"
+                            //        }
+                            //    }, {
+                            //        name: "destroy",
+                            //        text: "Borrar"
+                            //    }
+                            //    ],
+                            //    width: 200
+                            //}
+                            ],
+                        });
+                    });
+            </script>
+        </div>
+    </div>
+</div>

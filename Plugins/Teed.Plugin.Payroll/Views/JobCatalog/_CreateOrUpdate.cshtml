@@ -1,0 +1,84 @@
+﻿@model Teed.Plugin.Payroll.Models.JobCatalog.JobCatalogData
+
+<input type="hidden" value="@Model.Id" />
+<div class="content">
+    <div class="form-horizontal">
+        <div class="raw clearfix">
+            <div class="col-md-12">
+                <div class="panel-group">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Información principal
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <div class="col-md-3">
+                                        <nop-label asp-for="Name" />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="Name" />
+                                        <span asp-validation-for="Name"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <nop-label asp-for="JobParentId" />
+                                </div>
+                                <div class="col-md-9">
+                                    <select asp-for="JobParentId" asp-items="@(Model.JobParents)"></select>
+                                    <span asp-validation-for="JobParentId"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="Description" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Description" asp-template="RichEditor" />
+                                    <span asp-validation-for="Description"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="DisplayOrder" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="DisplayOrder" />
+                                    <span asp-validation-for="DisplayOrder"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="SalaryMin" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SalaryMin" />
+                                    <span asp-validation-for="SalaryMin"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="SalaryMax" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SalaryMax" />
+                                    <span asp-validation-for="SalaryMax"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="SubjectToWorkingHours" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SubjectToWorkingHours" />
+                                    <span asp-validation-for="SubjectToWorkingHours"></span>
+                                </div>
+                            </div>
+                            @await Html.PartialAsync("~/Plugins/Teed.Plugin.Payroll/Views/JobCatalog/_WorkSchedule.cshtml", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

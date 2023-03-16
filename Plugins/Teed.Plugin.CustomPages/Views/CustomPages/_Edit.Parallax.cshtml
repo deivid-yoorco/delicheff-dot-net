@@ -1,0 +1,75 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var imageText = "Se recomienda que las imagenes cargadas sean del mismo tamaño. El tamaño recomendado es: 1200x1200 píxeles.";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Primera imagen parallax en Homepage
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ParallaxPicture1Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ParallaxPicture1Id" />
+                <span asp-validation-for="ParallaxPicture1Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ParallaxText1" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ParallaxText1" />
+                <span asp-validation-for="ParallaxText1"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ParallaxLink1" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ParallaxLink1" />
+                <span asp-validation-for="ParallaxLink1"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Segunda imagen parallax en Homepage
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ParallaxPicture2Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ParallaxPicture2Id" />
+                <span asp-validation-for="ParallaxPicture2Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ParallaxText2" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ParallaxText2" />
+                <span asp-validation-for="ParallaxText2"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ParallaxLink2" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ParallaxLink2" />
+                <span asp-validation-for="ParallaxLink2"></span>
+            </div>
+        </div>
+    </div>
+</div>

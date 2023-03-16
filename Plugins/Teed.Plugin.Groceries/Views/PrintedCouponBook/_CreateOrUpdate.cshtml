@@ -1,0 +1,341 @@
+﻿@model Teed.Plugin.Groceries.Models.PrintedCouponBook.PrintedCouponBookModel
+@using Teed.Plugin.Groceries.Domain.PrintedCouponBooks
+@using Nop.Services
+@using Nop.Services.Helpers;
+@{
+    var enums = Enum.GetValues(typeof(PrintedCouponBookType))
+    .Cast<PrintedCouponBookType>()
+    .Select(v => v)
+    .ToList();
+    var selectList = ((PrintedCouponBookType)Model.BookTypeId).ToSelectList();
+    foreach (var item in selectList)
+    {
+        var currentEnum = enums.Where(x => int.Parse(item.Value) == (int)x).FirstOrDefault();
+        item.Text = currentEnum.GetDisplayName();
+    }
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-6">
+                        <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input asp-for="Id" hidden />
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Imagen de referencia</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="ReferencePictureId" />
+                                <span asp-validation-for="ReferencePictureId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Nombre</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Esta activa</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Active" />
+                                <span asp-validation-for="Active"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>
+                                    Inventario
+                                    @if (Model.Id > 0)
+                                    {
+                                        <text>
+                                            / Disponible: @Model.InventoryAvailable
+                                        </text>
+                                    }
+                                </label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Inventory" />
+                                <span asp-validation-for="Inventory" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Fecha de inicio</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="StartDate" />
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Fecha de fin</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="EndDate" />
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3 text-right">
+                                <label>Tipo de cuponera</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-select asp-for="BookTypeId" asp-items="@(selectList)" />
+                                <span asp-validation-for="BookTypeId"></span>
+                            </div>
+                        </div>
+
+                        <input id="BookTypeValue" name="BookTypeValue" type="hidden" value="@Model.BookTypeValue" />
+
+                        <div class="form-group postals" style="display: none;">
+                            <div class="col-md-3 text-right">
+                                <label>Códigos postales</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group input-group-required">
+                                    <nop-select asp-for="SelectedZipCodes" asp-items="Model.AvailableZipCodes" asp-multiple="true" />
+                                </div>
+                                <script type="text/javascript">
+                                        $(document).ready(function() {
+                                            var buyersIdsInput = $('#@Html.IdFor(model => model.SelectedZipCodes)').data("kendoMultiSelect");
+                                            buyersIdsInput.setOptions({
+                                                buyersIdsInput: false,
+                                                filter: "contains"
+                                            });
+
+                                            @if (Model.AvailableZipCodes.Count == 0)
+                                            {
+                                                <text>
+                                                    buyersIdsInput.setOptions({
+                                                        enable: false,
+                                                        placeholder: 'No hay códigos postales disponibles'
+                                                    });
+                                                    buyersIdsInput._placeholder();
+                                                    buyersIdsInput._enable();
+                                                </text>
+                                            }
+                                        });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group clients" style="display: none;">
+                            <div class="col-md-3 text-right">
+                                <label>Códigos postales</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    <nop-select asp-for="SelectedCustomerIds" asp-items="Model.AvailableCustomers" asp-multiple="true" />
+                                    <div class="input-group-btn">
+                                        <button type="button" id="emails-clear" onclick="clearSelection('.emails-not-found', customerIdsInput, $('.dummy-element-not-used'))" class="btn btn-default">
+                                            Eliminar selección
+                                        </button>
+                                    </div>
+                                </div>
+                                <script type="text/javascript">
+                                var customerIdsInput;
+                                var $limitedInput;
+                                $(document).ready(function () {
+                                    customerIdsInput = $('#@Html.IdFor(model => model.SelectedCustomerIds)').data("kendoMultiSelect");
+                                    customerIdsInput.setOptions({
+                                        dataTextField: "name",
+                                        dataValueField: "id",
+                                        autoClose: false,
+                                        filter: "contains",
+                                        delay: 1000,
+                                        minLength: 3,
+                                    });
+                                    $limitedInput = $('[aria-owns="SelectedCustomerIds_taglist SelectedCustomerIds_listbox"]');
+                                    $limitedInput.on('keyup', function (e) {
+                                        if (e.which <= 90 && e.which >= 48 &&
+                                            GetCurrentText($limitedInput).length > 2 &&
+                                            !e.ctrlKey && !e.altKey) {
+                                            setTimeout(function () {
+                                                GetCustomers(GetCurrentText($limitedInput));
+                                            }, 200);
+                                        }
+                                    });
+                                    @if (Model.SelectedCustomerIds.Any())
+                                    {
+                                    <text>
+                                    GetCustomers('', '@(string.Join(",", Model.SelectedCustomerIds))');
+                                    </text>
+                                    }
+                                    $limitedInput.on('paste', function (evt) {
+                                        catchPaste(evt, this, function (clipData) {
+                                            if (clipData.includes(',')) {
+                                                var count = clipData.split(',').length;
+                                                if (confirm("Se buscarán y agregarán " + count + " emails, ¿Estás seguro de que deseas continuar? (Se sustituirán todos los emails que ya estaban ingresados)")) {
+                                                    GetCustomers(clipData);
+                                                }
+                                            } else {
+                                                GetCustomers(clipData);
+                                            }
+                                        });
+                                    });
+                                });
+                                function GetCurrentText($element) {
+                                    return $element.val();
+                                }
+                                function GetCustomers(text = '', ids = '') {
+                                    customerIdsInput.close();
+                                    var idsList = [];
+                                    var emailsList = [];
+                                    if (ids != '')
+                                        idsList = ids.includes(',') ? ids.split(',') : [ids];
+                                    if (text != '' && text.includes(',')) {
+                                        emailsList = text.split(',');
+                                        text = '';
+                                    }
+                                    var data = {
+                                        Text: text,
+                                        ByIds: idsList,
+                                        Texts: emailsList
+                                    }
+                                    addAntiForgeryToken(data);
+                                    $.ajax({
+                                        cache: false,
+                                        type: "POST",
+                                        url: "/Admin/Discount/GetCustomersFiltering",
+                                        data: data,
+                                        success: function (data) {
+                                            $('.emails-not-found').children().remove();
+                                            if (typeof data.setAll != 'undefined') {
+                                                if (data.setAll == true) {
+                                                    customerIdsInput.setDataSource(data.customers);
+                                                    var values = data.customers.map(x => x.id);
+                                                    customerIdsInput.value(values);
+                                                    if (data.notFound.length > 0) {
+                                                        var append = '<span style="display: block;margin-top: 20px;">No se encontraron los siguientes emails:</span><ul>';
+                                                        $.each(data.notFound, function (i, e) {
+                                                            append += '<li>' + e + '</li>';
+                                                        });
+                                                        append += '</ul>';
+                                                        $('.emails-not-found').append(append);
+                                                    }
+                                                }
+                                            }
+                                            else if (data.length > 0) {
+                                                customerIdsInput.setDataSource(data);
+                                                if (ids !== '') {
+                                                    var values = data.map(x => x.id);
+                                                    customerIdsInput.value(values);
+                                                }
+                                                else
+                                                    customerIdsInput.open();
+                                            }
+                                            setClearButtonHeight('#emails-clear', $('#emails-clear').parent().height() + 'px', '0 12px');
+                                        },
+                                        error: function (e) {
+                                            alert('Failed to retrieve customers.');
+                                            console.log(e);
+                                            setClearButtonHeight('#emails-clear', $('#emails-clear').parent().height() + 'px', '0 12px');
+                                        },
+                                    });
+                                }
+                                function clearSelection(clearElement, $listElement, $textElement) {
+                                    $(clearElement).children().remove();
+                                    $listElement.value([]);
+                                    setClearButtonHeight('#emails-clear', 'auto', '6px 12px');
+                                    $listElement.enable(true);
+                                    $listElement.options.enabled = true;
+                                    $textElement.val('');
+                                }
+                                function catchPaste(evt, elem, callback) {
+                                    if (navigator.clipboard && navigator.clipboard.readText) {
+                                        // modern approach with Clipboard API
+                                        navigator.clipboard.readText().then(callback);
+                                    } else if (evt.originalEvent && evt.originalEvent.clipboardData) {
+                                        // OriginalEvent is a property from jQuery, normalizing the event object
+                                        callback(evt.originalEvent.clipboardData.getData('text'));
+                                    } else if (evt.clipboardData) {
+                                        // used in some browsers for clipboardData
+                                        callback(evt.clipboardData.getData('text/plain'));
+                                    } else if (window.clipboardData) {
+                                        // Older clipboardData version for Internet Explorer only
+                                        callback(window.clipboardData.getData('Text'));
+                                    } else {
+                                        // Last resort fallback, using a timer
+                                        setTimeout(function () {
+                                            callback(elem.value)
+                                        }, 100);
+                                    }
+                                }
+                                function setClearButtonHeight(elm, height, padding) {
+                                    $(elm).attr('style', 'height: ' + height + '; padding: ' + padding + ';z-index: auto;');
+                                }
+                                </script>
+                                <span asp-validation-for="SelectedCustomerIds" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group subtotal" style="display: none;">
+                            <div class="col-md-3 text-right">
+                                <label>Monto de subtotal</label>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Subtotal" />
+                                <span asp-validation-for="Subtotal"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#BookTypeId').change(function () {
+            var val = $(this).val();
+            $('#BookTypeValue').val('');
+            $('.postals').hide();
+            $('.subtotal').hide();
+            $('.clients').hide();
+            if (val == 0)
+                $('.postals').show();
+            else if (val == 1)
+                $('.subtotal').show();
+            else if (val == 2)
+                $('.clients').show();
+        });
+        $('#BookTypeId').change();
+        $('#SelectedZipCodes').data("kendoMultiSelect").bind("change", function () {
+            var val = $('#SelectedZipCodes').val();
+            if (val.length > 1)
+                $('#BookTypeValue').val(val.join(","));
+            else if (val.length == 1)
+                $('#BookTypeValue').val(val[0]);
+            else
+                $('#BookTypeValue').val('');
+        });
+        @if (Model.Id > 0)
+        {
+            <text>
+        $("#StartDate").val("@Model.StartDate.ToString("M/d/yyyy hh:mm tt")");
+        $("#EndDate").val("@Model.EndDate.ToString("M/d/yyyy hh:mm tt")");
+            </text>
+        }
+        @if (Model.Id > 0 && !string.IsNullOrEmpty(Model.BookTypeValue))
+        {
+            <text>
+        var zips = $('#BookTypeValue').val().split(',');
+        $("#SelectedZipCodes").data("kendoMultiSelect").value(zips);
+            </text>
+        }
+    });
+</script>

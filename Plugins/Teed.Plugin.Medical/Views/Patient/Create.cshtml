@@ -1,0 +1,302 @@
+﻿@model Teed.Plugin.Medical.Models.Patients.PatientsModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("TeedMedical.Patients");
+    var now = Model.DateOfBirth == null ? DateTime.Now : Model.DateOfBirth.Value;
+}
+
+<form asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Agregar Paciente
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">regresar a la lista de pacientes</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div style="margin-bottom:3%" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="panel-body">
+                        <div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="FirstName">Nombre(s)*</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="FirstName" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="FirstName">Apellido(s)*</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="LastName" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Phone">Teléfono 1 *</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="Phone1" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="Phone1" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <br />
+
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Gender">@T("Account.Fields.Gender")</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <span class="male">
+                                        <input type="radio" asp-for="Gender" value="M" checked="@(Model.Gender == "M")" id="gender-male" />
+                                        <label class="forcheckbox" for="gender-male">@T("Account.Fields.Gender.Male")</label>
+                                    </span>
+                                    <span class="female">
+                                        <input type="radio" asp-for="Gender" value="F" checked="@(Model.Gender == "F")" id="gender-female" />
+                                        <label class="forcheckbox" for="gender-female">@T("Account.Fields.Gender.Female")</label>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Email">Correo electrónico</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="IsExistingUser" maxlength="256" type="hidden" class="form-control" />
+                                    @if (Model.IsExistingUser)
+                                    {
+                                        <input asp-for="Email" type="hidden" maxlength="256" class="form-control" />
+                                        <input value="@Model.Email" disabled maxlength="256" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="Email" maxlength="256" class="form-control" />
+                                    }
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>@T("Account.Fields.DateOfBirth"):</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="inputs date-of-birth">
+                                        <nop-date-picker asp-day-name="@Html.NameFor(x => x.DateOfBirthDay)"
+                                                         asp-month-name="@Html.NameFor(x => x.DateOfBirthMonth)"
+                                                         asp-year-name="@Html.NameFor(x => x.DateOfBirthYear)"
+                                                         asp-begin-year="@(now.Year - 110)"
+                                                         asp-end-year="@(now.Year)" />
+
+                                        <span asp-validation-for="DateOfBirthDay"></span>
+                                        <span asp-validation-for="DateOfBirthMonth"></span>
+                                        <span asp-validation-for="DateOfBirthYear"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Phone">Teléfono 2</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="Phone2" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="Phone2" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="Phone">Teléfono 3</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="Phone3" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="Phone3" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="StreetAddress">Línea de dirección 1</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="StreetAddress" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="StreetAddress" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="StreetAddress2">Línea de dirección 2</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="StreetAddress2" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="StreetAddress2" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="CountryId">País</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select asp-for="CountryId" asp-items="Model.AvailableCountries" />
+                                    <span asp-validation-for="CountryId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="StateProvinceId">Estado</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select asp-for="StateProvinceId" asp-items="Model.AvailableStates" />
+                                    <span asp-validation-for="StateProvinceId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="City">Municipio/Delegación</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="City" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="City" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="ZipPostalCode">Código Postal</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="ZipPostalCode" maxlength="256" class="form-control" />
+                                    <span asp-validation-for="ZipPostalCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="FamilyBackground">Antecedentes heredo familiares</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="FamilyBackground" class="form-control"></textarea>
+                                    <span asp-validation-for="FamilyBackground" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="PersonalPathologicalHistory">Antecedentes personales patológicos</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="PersonalPathologicalHistory" class="form-control"></textarea>
+                                    <span asp-validation-for="PersonalPathologicalHistory" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="PersonalNonPathologicalHistory">Antecedentes personales no patológicos</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="PersonalNonPathologicalHistory" class="form-control"></textarea>
+                                    <span asp-validation-for="PersonalNonPathologicalHistory" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label for="CurrentConditions">Padecimientos actuales</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="CurrentConditions" class="form-control"></textarea>
+                                    <span asp-validation-for="CurrentConditions" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Alergias</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Allergies" class="form-control"></textarea>
+                                    <span asp-validation-for="Allergies" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Comentario</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea asp-for="Commentary" class="form-control"></textarea>
+                                    <span asp-validation-for="Commentary" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3 text-right">
+                                    <label>Referido por:</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input asp-for="ReferdBy" type="hidden" id="ReferdBy" />
+                                    <input asp-for="ReferedByExternal" type="hidden" id="ReferedByExternal" />
+                                    <input id="customers" style="width: 100%;" />
+                                    <script>
+                                                $(document).ready(function () {
+                                                    $("#customers").kendoComboBox({
+                                                        placeholder: "Selecciona el usuario...",
+                                                        dataTextField: "Customer",
+                                                        dataValueField: "Id",
+                                                        filter: "contains",
+                                                        autoBind: true,
+                                                        minLength: 1,
+                                                        dataSource: {
+                                                            type: "json",
+                                                            transport: {
+                                                                read: {
+                                                                    url: "@Html.Raw(Url.Action("ReferedListData", "Patient"))",
+                                                                    type: "POST",
+                                                                    data: addAntiForgeryToken
+                                                                }
+                                                            }
+                                                        },
+                                                        dataBound: onDataBound,
+                                                        select: onSelect,
+                                                        change: onChange
+                                                    });
+                                                    function onDataBound(e) {
+                                                        if (@Model.ReferdBy != 0 && !$("#customers").data("kendoComboBox").value()) {
+                                                            $("#customers").data("kendoComboBox").value(@Model.ReferdBy);
+                                                            $("#customerId").val(@Model.ReferdBy);
+                                                        }
+                                                    };
+                                                    function onSelect(e) {
+                                                        $("#ReferdBy").val(this.dataItem(e.item.index()).Id);
+                                                        var id = this.dataItem(e.item.index()).Id;
+                                                        if (id == 0) {
+
+                                                            $("#ReferedByExternal").val(this.dataItem(e.item.index()).Customer);
+                                                        } else {
+
+                                                            $("#ReferedByExternal").val("");
+                                                        }
+
+                                                    };
+                                                    function onChange(e) {
+                                                        if (this.selectedIndex == -1) {
+                                                            $("#ReferedByExternal").val($("#customers").val());
+                                                            $("#customers").data("kendoComboBox").value("");
+                                                        }
+                                                    };
+                                                });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

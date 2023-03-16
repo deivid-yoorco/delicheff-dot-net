@@ -1,0 +1,73 @@
+﻿@model Teed.Plugin.Groceries.Models.UrbanPromoter.UrbanPromoterModel
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body" style="display: grid;">
+            <div id="account-status-grid"></div>
+
+            <script>
+                $(document).ready(function () {
+                    $("#account-status-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "@Html.Raw(Url.Action("ListPromoterAccountStatus", "UrbanPromoter"))?id=@Model.Id",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: null
+                                },
+                            },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors"
+                            },
+                            error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            pageSize: 10,
+                            serverPaging: false,
+                            serverFiltering: false,
+                            serverSorting: false
+                        },
+                        pageable: {
+                            refresh: true,
+                            pageSizes: [10],
+                            @await Html.PartialAsync("_GridPagerMessages")
+                        },
+                        editable: {
+                            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                            mode: "inline"
+                        },
+                        scrollable: false,
+                        columns: [
+                            {
+                                field: "Date",
+                                title: "Fecha",
+                            },
+                            {
+                                field: "Description",
+                                title: "Descripción",
+                            },
+                            {
+                                field: "Amount",
+                                title: "Monto",
+                            },
+                            {
+                                field: "Total",
+                                title: "Total",
+                            },
+                            {
+                                field: "Balance",
+                                title: "Saldo",
+                            },
+                        ]
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>

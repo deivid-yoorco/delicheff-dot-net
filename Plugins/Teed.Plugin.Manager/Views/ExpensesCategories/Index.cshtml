@@ -1,0 +1,142 @@
+﻿@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Manager.ExpensesCategories");
+}
+<style>
+    .add-category {
+        display: block;
+        margin-bottom: 1em;
+    }
+
+    .parent-category {
+        display: block;
+        margin-bottom: 1em;
+    }
+
+    .child-category {
+        display: block;
+        margin-top: 1em;
+        margin-left: 1em;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Categorías de gastos
+    </h1>
+    <div class="pull-right">
+        <button type="button" name="save" id="save" class="btn bg-blue" onclick="saveCategories()">
+            <i class="fa fa-floppy-o"></i>
+            @T("Admin.Common.Save")
+        </button>
+        <span style="display:none;color:red" id="error-msg">No se pudo guardar la información.</span>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="add-category">
+                        <button id="new-parent-button" onclick="newParent()" type="button" disabled>Nueva categoría padre</button>
+                    </div>
+                    <div class="parent-inputs">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var count = 0;
+
+    $(document).ready(function () {
+
+        $.ajax({
+            url: '/Admin/ExpensesCategories/GetCategories',
+            method: 'GET',
+            success: function (data) {
+                init(data.ExpensesCategories);
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        });
+
+        function init(categories) {
+            var elementCount = 0;
+            var newList = categories;
+            while (newList.length > 0) {
+                var elements = categories.filter(function (item) { return item.ParentCategoryId == elementCount; });
+                if (elementCount == 0) {
+                    for (var i = 0; i < elements.length; i++) {
+                        let parentElement = "<div class='parent-category category' data-parent='" + elements[i].ParentCategoryId + "' data-categoryid='" + elements[i].CategoryId + "'>";
+                        parentElement += "<input value='" + elements[i].Value + "' /><button type='button' onclick='newChild(this)'>+</button><button type='button' onclick='remove(this)'>-</button>";
+                        parentElement += "<input style='margin-left:1em' class='parent-title' value='" + elements[i].ValueTitle + "' />";
+                        parentElement += "</div>";
+                        $(".parent-inputs").append(parentElement);
+                    }
+                } else {
+                    for (var i = 0; i < elements.length; i++) {
+                        var parentElementId = $(".category").filter(function (index) { return $(this).data("categoryid") == elementCount });
+                        $(parentElementId).closest("div").append("<div class='child-category category' data-parent='" + elementCount + "' data-categoryid='" + elements[i].CategoryId + "'>∟<input value='" + elements[i].Value + "' /><button type='button' onclick='newChild(this)'>+</button><button type='button' onclick='remove(this)'>-</button></div>");
+                    }
+                }
+                newList = newList.filter(function (item) { return elements.map(x => x.CategoryId).indexOf(item.CategoryId) == -1 });
+                elementCount++;
+            }
+
+            var currentIdList = $(".parent-inputs div").map(function () { return $(this).data("categoryid"); }).get();
+            if (currentIdList.length > 0) {
+                count = Math.max.apply(Math, currentIdList);
+            }
+
+            $("#new-parent-button").attr('disabled', false);
+        }
+    });
+
+    function newParent() {
+        count++;
+        let parentElement = "<div class='parent-category category' data-parent='0' data-categoryid='" + count + "'>";
+        parentElement += "<input /><button type='button' onclick='newChild(this)'>+</button><button type='button' onclick='remove(this)'>-</button>";
+        parentElement += "<input style='margin-left:1em' class='parent-title' />";
+        parentElement += "</div>";
+        $(".parent-inputs").append(parentElement);
+    }
+
+    function newChild(element) {
+        count++;
+        var parentId = $(element).closest("div").data("categoryid");
+        $(element).closest("div").append("<div class='child-category category' data-parent='" + parentId + "' data-categoryid='" + count + "'>∟<input /><button type='button' onclick='newChild(this)'>+</button><button type='button' onclick='remove(this)'>-</button></div>");
+    }
+
+    function saveCategories() {
+        $("#save").prop('disabled', true);
+        var data = [];
+        $(".category").each(function (i, element) {
+            data.push({ CategoryId: $(element).data("categoryid"), ParentCategoryId: $(element).data("parent"), Value: $(element).find("input").val(), ValueTitle: $(element).find("input.parent-title").val() });
+        });
+
+        var body = {
+            ExpensesCategories: data
+        }
+
+        $.ajax({
+            url: '/Admin/ExpensesCategories/SaveCategories',
+            method: 'POST',
+            data: body,
+            success: function () {
+                location.reload();
+                $("#save").prop('disabled', false);
+            },
+            error: function (e) {
+                $("#error-msg").show();
+                $("#save").prop('disabled', false);
+                console.log(e);
+            }
+        });
+    }
+
+    function remove(element) {
+        $(element).closest("div").remove();
+    }
+</script>

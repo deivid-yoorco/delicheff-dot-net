@@ -1,0 +1,291 @@
+﻿@model Teed.Plugin.CustomPages.Models.CustomPages.EditViewModel
+@{
+    var imageText = "El tamaño recomendado es 1980x800 píxeles.";
+    var colorText = "El valor del texto debe ser escrito en código hexadecimal. Por ej: #C1C7C9";
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Imagen en fondo
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="CatPicture6Id" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatPicture6Id" />
+                <span asp-validation-for="CatPicture6Id"></span>
+                <em>@imageText</em>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatText6" />
+                <span asp-validation-for="CatText6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Color del texto</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextColor6" />
+                <span asp-validation-for="CatTextColor6"></span>
+                <em>@colorText</em>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 1
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown1" />
+                <span asp-validation-for="CatTextDropdown1"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown1" />
+                <span asp-validation-for="CatLinkDropdown1"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 2
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown2" />
+                <span asp-validation-for="CatTextDropdown2"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown2" />
+                <span asp-validation-for="CatLinkDropdown2"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 3
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown3" />
+                <span asp-validation-for="CatTextDropdown3"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown3" />
+                <span asp-validation-for="CatLinkDropdown3"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 4
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown4" />
+                <span asp-validation-for="CatTextDropdown4"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown4" />
+                <span asp-validation-for="CatLinkDropdown4"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 5
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown5" />
+                <span asp-validation-for="CatTextDropdown5"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown5" />
+                <span asp-validation-for="CatLinkDropdown5"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 6
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown6" />
+                <span asp-validation-for="CatTextDropdown6"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown6" />
+                <span asp-validation-for="CatLinkDropdown6"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 7
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown7" />
+                <span asp-validation-for="CatTextDropdown7"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown7" />
+                <span asp-validation-for="CatLinkDropdown7"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 8
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown8" />
+                <span asp-validation-for="CatTextDropdown8"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown8" />
+                <span asp-validation-for="CatLinkDropdown8"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 9
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown9" />
+                <span asp-validation-for="CatTextDropdown9"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown9" />
+                <span asp-validation-for="CatLinkDropdown9"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Opción 10
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>Título</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatTextDropdown10" />
+                <span asp-validation-for="CatTextDropdown10"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label>URL</label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="CatLinkDropdown10" />
+                <span asp-validation-for="CatLinkDropdown10"></span>
+            </div>
+        </div>
+    </div>
+</div>

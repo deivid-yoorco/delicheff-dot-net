@@ -1,0 +1,161 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderDeliveryReports.OrderReportStatusViewModel
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var deliveryDate = Model.Date.ToString("dd-MM-yyyy");
+    var countProducts = 0;
+    var controllerName = "OrderDeliveryReports";
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Liquidación de compradores: @Model.DayOfWeek @deliveryDate
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="DeliveryDateList">Regresar a: Liquidación de compradores</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <a class="btn btn-danger" asp-action="ValidityNewManufacturers" asp-route-date="@(Model.Date.ToString("dd-MM-yyyy"))">Revisar nuevos fabricantes</a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        @if (ViewBag.mensaje != null)
+                        {
+                            <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                @ViewBag.mensaje
+                            </h2>
+                        }
+                        <div>
+
+                            <div class="table-responsive">
+                                <table class="table-responsive" style="width:100%">
+                                    <tr>
+                                        <th style="background-color:khaki">Nombre</th>
+                                        <th style="background-color:khaki;text-align:center">Cuentas pendientes por liquidar</th>
+                                        <th style="background-color:khaki; align-self:center">Reporte</th>
+                                        <th style="background-color:khaki; align-self:center">Liquidación autorizada por</th>
+                                    </tr>
+                                    @foreach (var item in Model.Buyers)
+                                    {
+                                        <tr>
+                                            @if (item.HasReport)
+                                            {
+                                                <td style="align-self:center">@item.BuyerName</td>
+
+                                                @if (item.Status == 2)
+                                                {
+                                                    <td style="width:200px; align-self:center; text-align: center">
+                                                        Cuentas liquidadas
+                                                        <a onclick="return confirm('¿Confirmas que deseas permitir a este comprador enviar nuevamente sus cuentas?')" href="/Admin/OrderDeliveryReports/DeleteDeliveredReport?date=@(Model.Date.ToString("dd-MM-yyyy"))&buyerId=@(item.BuyerId)" class="btn btn-danger">
+                                                            Permitir enviar cuentas otra vez
+                                                        </a>
+                                                    </td>
+                                                    <td style="width:200px; align-self:center; text-align:center">
+                                                        <a style="align-self:center; background-color:gray" class="btn btn-info" asp-action="OrderReportDetails" asp-route-buyerId="@item.BuyerId" asp-route-date="@Model.Date.ToString("dd-MM-yyyy")"><i class="fa fa-eye"></i>Liquidar cuentas</a>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="width:200px; align-self:center; text-align: center">
+                                                        Cuentas pendientes de liquidar
+                                                        <a onclick="return confirm('¿Confirmas que deseas permitir a este comprador enviar nuevamente sus cuentas?')" href="/Admin/OrderDeliveryReports/DeleteDeliveredReport?date=@(Model.Date.ToString("dd-MM-yyyy"))&buyerId=@(item.BuyerId)" class="btn btn-danger">
+                                                            Permitir enviar cuentas otra vez
+                                                        </a>
+                                                    </td>
+                                                    <td style="width:200px; align-self:center; text-align:center">
+                                                        <a style="align-self:center" class="btn btn-info" asp-action="OrderReportDetails" asp-route-buyerId="@item.BuyerId" asp-route-date="@Model.Date.ToString("dd-MM-yyyy")"><i class="fa fa-eye"></i>Liquidar cuentas</a>
+                                                    </td>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td style="opacity:0.5; align-self:center">@item.BuyerName</td>
+                                                <td style="width:200px; opacity:0.5; align-self:center; text-align: center; color:red">
+                                                    Esperando cuentas
+                                                </td>
+                                                <td style="width:200px; opacity:0.5; align-self:center; text-align: center; color:red">
+                                                </td>
+                                            }
+                                            <td style="width:200px; align-self:center; text-align: center">
+                                                @item.NameConfirmReport
+                                            </td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td style="align-self:center">PRODUCTOS ENVIADOS A SUPER</td>
+                                        <td style="width:200px; align-self:center; text-align: center"></td>
+                                        <td style="width:200px; align-self:center; text-align:center">
+                                            <a style="align-self:center" class="btn btn-info" asp-action="OrderSuperReportDetails" asp-route-date="@Model.Date.ToString("dd-MM-yyyy")"><i class="fa fa-eye"></i>Liquidar cuentas</a>
+                                        </td>
+                                        <td style="width:200px; align-self:center; text-align: center">
+                                            @Model.LastUpdateSupermarketReportByUser
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="align-self:center">PRODUCTOS NO COMPRADOS</td>
+                                        <td style="width:200px; align-self:center; text-align: center"></td>
+                                        <td style="width:200px; align-self:center; text-align:center">
+                                            <a style="align-self:center" class="btn btn-info" asp-action="OrderNoBuyedReportDetails" asp-route-date="@Model.Date.ToString("dd-MM-yyyy")"><i class="fa fa-eye"></i>Liquidar cuentas</a>
+                                        </td>
+                                        <td style="width:200px; align-self:center; text-align: center">
+                                            @Model.UserNameLastUpdateOnReportNoBuyed
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="align-self:center">COORDINADOR</td>
+                                        <td style="width:200px; align-self:center; text-align: center"></td>
+                                        <td style="width:200px; align-self:center; text-align:center">
+                                            <a style="align-self:center" class="btn btn-info" asp-action="ManagerExpenses" asp-route-date="@Model.Date.ToString("dd-MM-yyyy")"><i class="fa fa-eye"></i>Liquidar cuentas</a>
+                                        </td>
+                                        <td style="width:200px; align-self:center; text-align: center">
+                                            @Model.ManagerNameConfirmExpensesReport
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <hr />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    .tableExpense {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tdExpense, .thExpense {
+        border: 1px solid #ffffff;
+        text-align: center;
+        padding: 8px;
+    }
+</style>

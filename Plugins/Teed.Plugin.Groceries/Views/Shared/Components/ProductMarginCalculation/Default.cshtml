@@ -1,0 +1,72 @@
+﻿@model List<string>
+<div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="control-label">Margen bruto</label>
+                <div title="Se indica el margen bruto del producto según el precio y costo ingresado." class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <span id="calculated-margin"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="control-label">Últimos 10 costos reportados</label>
+                <div title="Se muestra la lista de los 10 últimos costos unitarios reportados por los compradores." class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            @if (Model.Count > 0)
+            {
+                @foreach (var item in Model)
+                {
+                    <span>@Html.Raw(item)</span><br />
+                }
+            }
+            else
+            {
+                <span>No se han reportado costos para este producto.</span>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    calculateCurrentMargin();
+    function calculateCurrentMargin() {
+        const price = $("#Price").val();
+        const cost = $("#ProductCost").val();
+        let value = 0;
+        if (price > 0) {
+            value = 1 - (cost / price);
+        }
+        $("#calculated-margin").html((Math.round((value * 100) * 100) / 100) + '%');
+    };
+
+    $("#Price").keyup(function () {
+        calculateCurrentMargin();
+    });
+
+    $("#ProductCost").keyup(function () {
+        calculateCurrentMargin();
+    });
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Price").parent().find('.bootstrap-touchspin-up, .bootstrap-touchspin-down').click(function () {
+                calculateCurrentMargin();
+            });
+
+            $("#ProductCost").parent().find('.bootstrap-touchspin-up, .bootstrap-touchspin-down').click(function () {
+                calculateCurrentMargin();
+            });
+        }, 200);
+    });
+</script>

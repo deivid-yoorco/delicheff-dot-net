@@ -1,0 +1,8 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderOptionButtons.OrderOptionButtonsModel
+
+@if (!string.IsNullOrEmpty(Model.Date) && Model.FranchiseId > 0 && Model.VehicleId > 0)
+{
+    <a class="btn bg-red" style="margin-right: 3px;" asp-controller="Incidents" asp-action="Create" asp-route-date="@Model.Date" asp-route-franchiseId="@Model.FranchiseId" asp-route-vehicleId="@Model.VehicleId" asp-route-orderId="@Model.OrderId">
+        Crear incidencia para esta orden
+    </a>
+}

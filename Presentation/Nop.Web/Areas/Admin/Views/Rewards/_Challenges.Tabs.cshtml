@@ -1,0 +1,11 @@
+﻿@model Nop.Web.Areas.Admin.Models.Rewards.ChallengeModel
+
+<div asp-validation-summary="All"></div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="configuration-edit">
+            <nop-tab asp-name="tab-challenges" asp-title="Desafíos" asp-default="true">@await Html.PartialAsync("_Challenges.Main", Model)</nop-tab>
+        </nop-tabs>
+    </div>
+</div>

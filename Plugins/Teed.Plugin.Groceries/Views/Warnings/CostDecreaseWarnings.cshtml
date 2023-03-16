@@ -1,0 +1,219 @@
+﻿@model string
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.Warnings");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+}
+<style>
+    .ok {
+        /*text-align: center;
+            font-weight: bold;
+            #dff0d8
+        */
+        padding: 1em;
+        margin: 1em 0;
+        border-color: blue;
+        background-color: white;
+    }
+
+    .order-alert-danger {
+        margin-top: auto;
+        background-color: white;
+        border-radius: 5px;
+        border: solid 2px #3c8dbc;
+    }
+
+    .complete-list {
+        margin-top: auto;
+        font-size: 12px;
+        text-align: left;
+        padding: 1em;
+        margin: 1em 0;
+        background-color: #dff0d8;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Alertas de disminución de costos del @Model
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="Index">regresar a la lista de alertas</a>
+        </small>
+    </h1>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+
+        <div class="panel-group" style="margin:15px;margin-bottom: 0px">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="costs-grid"></div>
+
+                    <script type="text/javascript">
+                    $(document).ready(function() {
+                        $("#costs-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("CostDecreaseWarnings", "Warnings"))?date=" + @Model,
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("CostDecreaseUpdate", "Warnings"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            ProductName: { editable: false },
+                                            OldReportedCostDate: { editable: false },
+                                            OriginalOrderShippingDate: { editable: false },
+                                            OldCost: { editable: false },
+                                            NewCost: { editable: false },
+                                            Variation: { editable: false },
+                                            PercentageVariation: { editable: false },
+                                            ProductPrice: { editable: false },
+                                            GrossMargin: { editable: false },
+                                            Comment: { editable: true, type: "string" },
+                                            Attended: { editable: true, type: "boolean" },
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: false,
+                                serverFiltering: false,
+                                serverSorting: false
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            editable: {
+                                confirmation: "confirmar",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            dataBound: function (e) {
+                                initiateTextAreas();
+                                //reApplyTextArea();
+                            },
+                            columns: [{
+                                field: "Id",
+                                template: "<span data-id='#=Id#'></span>",
+                                hidden: true
+                            },
+                                {
+                                    field: "ProductName",
+                                    title: "Nombre del producto",
+                                    template: '<a href="/Admin/Product/Edit/#=ProductId#" target="_blank">#=ProductName#</a>'
+                                },
+                                {
+                                    field: "OldReportedCostDate",
+                                    title: "Fecha del costo reportado anterior",
+                                },
+                                {
+                                    field: "OriginalOrderShippingDate",
+                                    title: "Fecha de envío original",
+                                },
+                                {
+                                    field: "OldCost",
+                                    title: "Costo reportado anterior",
+                                },
+                                {
+                                    field: "NewCost",
+                                    title: "Nuevo costo reportado",
+                                },
+                                {
+                                    field: "Variation",
+                                    title: "Variación",
+                                },
+                                {
+                                    field: "PercentageVariation",
+                                    title: "Variación porcentual",
+                                },
+                                {
+                                    field: "ProductPrice",
+                                    title: "Precio del producto",
+                                },
+                                {
+                                    field: "GrossMargin",
+                                    title: "Margen bruto",
+                                },
+                                {
+                                    field: "Attended",
+                                    title: "Atendido",
+                                    headerAttributes: { style: "text-align:center" },
+                                    attributes: { style: "text-align:center" },
+                                    template: '# if(Attended) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #',
+                                },
+                                {
+                                    field: "Comment",
+                                    title: "Comentario",
+                                    width: 200,
+                                    template: '<textarea disabled oninput="auto_grow(this)">#=Comment#</textarea>',
+                                    editor: textareaEditor
+                                },
+                                {
+                                    command: [
+                                    {
+                                        name: "edit",
+                                        text: {
+                                            edit: "Editar",
+                                            update: "Actualizar",
+                                            cancel: "Cancelar"
+                                        }
+                                    },
+                                    ],
+                                    width: 200
+                                }
+                            ],
+                        });
+                    });
+                        function initiateTextAreas() {
+                            var areas = $("#costs-grid textarea");
+                            $.each(areas, function (index, element) {
+                                auto_grow(element);
+                            });
+                        }
+
+                        function auto_grow(element) {
+                            element.style.height = "5px";
+                            element.style.height = (element.scrollHeight) + "px";
+                        }
+
+                        function textareaEditor(container, options) {
+                            $('<textarea oninput="auto_grow(this)" name="' + options.field + '" data-bind="value: ' + options.field + '">' + options.model.Comment + '</textarea>')
+                                .appendTo(container);
+                            initiateTextAreas();
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

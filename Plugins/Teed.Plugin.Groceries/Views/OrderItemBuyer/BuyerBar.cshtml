@@ -1,0 +1,20 @@
+﻿@model Teed.Plugin.Groceries.Components.BuyerBarModel
+@if (Model.IsBuyer)
+{
+    <div class="navbar-fixed top-navbar">
+        <a href="#" onclick="openDatePicker()">
+            <nav class="black z-depth-0">
+                <div class="nav-wrapper container">
+                    <ul class="left">
+                        <li style="font-weight:bold">
+                            ¡Hola comprador! Da clic aqui para descargar tu lista de compras
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </a>
+    </div>
+    <input type="hidden" class="datepicker">
+    <input type="hidden" id="buyerId" value="@(Model.BuyerId)">
+    Html.AppendScriptParts(ResourceLocation.Footer, $"~/Plugins/Teed.Plugin.Groceries/src/js/custom.js");
+}

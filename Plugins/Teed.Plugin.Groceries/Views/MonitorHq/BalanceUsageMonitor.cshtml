@@ -1,0 +1,245 @@
+﻿@model Teed.Plugin.Groceries.Models.MonitorHq.BalanceUsageModel
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Teed.Plugin.Groceries.Utils
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.BalanceUsage");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "MonitorHq";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="box-body">
+            <div class="col-lg-6 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3 id="BalanceGivenToday">@Model.BalanceGivenToday.ToString("C")</h3>
+                        <p>Saldo dado hoy</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-social-usd"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3 id="BalanceGivenWeek">@Model.BalanceGivenWeek.ToString("C")</h3>
+                        <p>Saldo dado en los últimos 7 días</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-speedometer"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3 id="BalanceUsedToday">@Model.BalanceUsedToday.ToString("C")</h3>
+                        <p>Saldo usado hoy</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-social-usd"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3 id="BalanceUsedWeek">@Model.BalanceUsedWeek.ToString("C")</h3>
+                        <p>Saldo usado en los últimos 7 días</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-speedometer"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <h3 style="text-align: center; font-weight: bold;">Balances dados</h3>
+            <div id="balance-given-grid"></div>
+        </div>
+        <div class="box-body">
+            <h3 style="text-align: center; font-weight: bold;">Balance usado</h3>
+            <div id="balance-used-grid"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#balance-given-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "@Html.Raw(Url.Action("BalanceGiven", controllerName))",
+                            type: "POST",
+                            dataType: "json",
+                            data: addAntiForgeryToken
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors",
+                        model: {
+                            id: "Id"
+                        }
+                    },
+                    error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                pageable: {
+                    refresh: true,
+                        pageSizes: [@(gridPageSizes)],
+                        @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                dataBound: function (e) {
+                    getCurrentBalance();
+                },
+                detailInit: detailInit,
+                columns: [
+                    {
+                        field: "Date",
+                        title: "Fecha",
+                    },
+                    {
+                        field: "CustomerId",
+                        title: "Cliente",
+                        template: function (dataItem) {
+                            return '<a target="_blank" href="/Admin/Customer/Edit/' + dataItem.CustomerId + '">' + dataItem.Customer + "</a>";
+                        },
+                    },
+                    {
+                        field: "Amount",
+                        title: "Monto",
+                    },
+                    {
+                        field: "Comment",
+                        title: "Comentario",
+                        template: function (dataItem) {
+                            return dataItem.Comment;
+                        },
+                    },
+                    {
+                        field: "GivenByCustomerId",
+                        title: "Otorgado por",
+                        template: function (dataItem) {
+                            return '<a target="_blank" href="/Admin/Customer/Edit/' + dataItem.GivenByCustomerId + '">' + dataItem.GivenByCustomer + "</a>";
+                        },
+                    },
+                    {
+                        field: "Log",
+                        hidden: true,
+                    }
+                ]
+        });
+        $("#balance-used-grid").kendoGrid({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: {
+                            url: "@Html.Raw(Url.Action("BalanceUsed", controllerName))",
+                            type: "POST",
+                            dataType: "json",
+                            data: addAntiForgeryToken
+                        }
+                    },
+                    schema: {
+                        data: "Data",
+                        total: "Total",
+                        errors: "Errors",
+                        model: {
+                            id: "Id"
+                        }
+                    },
+                    error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                    pageSize: @(defaultGridPageSize),
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                pageable: {
+                    refresh: true,
+                        pageSizes: [@(gridPageSizes)],
+                        @await Html.PartialAsync("_GridPagerMessages")
+                },
+                editable: {
+                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                    mode: "inline"
+                },
+                scrollable: false,
+                dataBound: function (e) {
+                    getCurrentBalance();
+                },
+                columns: [
+                    {
+                        field: "CreatedOn",
+                        title: "Fecha",
+                    },
+                    {
+                        field: "CustomerId",
+                        title: "Cliente",
+                        template: function (dataItem) {
+                            return '<a target="_blank" href="/Admin/Customer/Edit/' + dataItem.CustomerId + '">' + dataItem.Customer + "</a>";
+                        },
+                    },
+                    {
+                        field: "Amount",
+                        title: "Monto",
+                    },
+                    {
+                        field: "Id",
+                        title: "# de la orden",
+                        template: function (dataItem) {
+                            return '<a target="_blank" href="/Admin/Order/Edit/' + dataItem.Id + '">#' + dataItem.Id + "</a>";
+                        },
+                    },
+                    {
+                        field: "SelectedShippingDate",
+                        title: "Fecha de la orden",
+                    }
+                ]
+            });
+    });
+    function getCurrentBalance() {
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetCurrentBalance", "MonitorHq", new { date = Model.SpecificDate })',
+            success: function (data) {
+                if (typeof data != 'undefined') {
+                    $('#BalanceGivenToday').html(data.BalanceGivenToday);
+                    $('#BalanceGivenWeek').html(data.BalanceGivenWeek);
+                    $('#BalanceUsedToday').html(data.BalanceUsedToday);
+                    $('#BalanceUsedWeek').html(data.BalanceUsedWeek);
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Failed to delete');
+            }
+        });
+    }
+    function detailInit(e) {
+        $(e.detailCell).children().remove();
+        $(e.detailCell).append(e.data.Log);
+    }
+</script>

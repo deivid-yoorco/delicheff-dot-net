@@ -1,0 +1,176 @@
+﻿@model bool
+@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Payroll.Bonus");
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var controllerName = "Bonus";
+}
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        Bonos
+    </h1>
+    <div class="pull-right">
+        <a href="/Admin/Bonus/Create" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="element-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var currentDeleteId = 0;
+    $(document).ready(function () {
+        $("#element-grid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: {
+                        url: "@Html.Raw(Url.Action("ListData", controllerName))",
+                        type: "POST",
+                        dataType: "json",
+                        data: null
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    errors: "Errors"
+                },
+                error: function(e) {
+                    display_kendoui_grid_error(e);
+                    // Cancel the changes
+                    this.cancelChanges();
+                },
+                pageSize: @(defaultGridPageSize),
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [@(gridPageSizes)],
+                @await Html.PartialAsync("_GridPagerMessages")
+            },
+            editable: {
+                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                mode: "inline"
+            },
+            scrollable: false,
+            columns: [
+                {
+                    field: "Name",
+                    title: "Nombre",
+                },
+                {
+                    field: "Jobs",
+                    title: "Puestos donde aplica el bono",
+                },
+                {
+                    field: "LastAmount",
+                    title: "Último monto registrado",
+                },
+                {
+                    field: "ConditionType",
+                    title: "Tipo de condición",
+                },
+                {
+                    field: "BonusType",
+                    title: "Tipo de bono",
+                },
+                {
+                    field: "FrequencyType",
+                    title: "Frecuencia de pago",
+                },
+                {
+                    field: "AuthorizationEmployee",
+                    title: "Empleado que autoriza",
+                },
+                //{
+                //    field: "IsActive",
+                //    title: "Activo",
+                //    headerAttributes: { style: "text-align:center" },
+                //    attributes: { style: "text-align:center" },
+                //    template: '# if(IsActive) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                //},
+                {
+                    field: "Id",
+                    title: "Autorización",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        if (dataItem.IsActive)
+                            return '<a class="btn btn-default" href="@controllerName/Authorize?Id=' + dataItem.Id + '"><i class="fa fa-pencil"></i>Autorizar</a>';
+                        else
+                            return '<a class="btn btn-default disabled" href="#"><i class="fa fa-pencil"></i>Bono no activo</a>';
+                    }
+                },
+            @if (Model)
+            {
+                <text>
+                {
+                    field: "Id",
+                    title: "Eliminar bono",
+                    width: 50,
+                    headerAttributes: { style: "text-align:center" },
+                    attributes: { style: "text-align:center" },
+                    template: function (dataItem) {
+                        return '<button onclick="setCurrentDeleteId(' + dataItem.Id + ')" type="button" class="btn bg-red" data-toggle="modal" data-target="#deletebonus-window">' +
+                            '<i class="fa fa-trash-o"></i>Eliminar' +
+                            '</button>';
+                    },
+                },
+                </text>
+            }
+            ]
+        });
+    });
+
+    function setCurrentDeleteId(id) {
+        currentDeleteId = id;
+    }
+    function deleteBonus() {
+        $.ajax({
+            type: "GET",
+            url: "/Admin/@controllerName/Delete?id=" + currentDeleteId,
+            success: function (data) {
+                $('#element-grid').data('kendoGrid').dataSource.read();
+            },
+            error: function (e) {
+                console.log(e);
+                $('#element-grid').data('kendoGrid').dataSource.read();
+            }
+        });
+    }
+</script>
+
+<div id="deletebonus-window" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deletebonus-window-title">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="deletebonus-window-title">Eliminiar bono</h4>
+            </div>
+            <div class="form-horizontal">
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar el bono seleccionado?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="deleteBonus()" class="btn btn-primary bg-red" data-dismiss="modal">
+                        Eliminar bono
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

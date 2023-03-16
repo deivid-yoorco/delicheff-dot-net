@@ -1,0 +1,736 @@
+﻿@model OnePageCheckoutModel
+@using Nop.Core
+@inject IWebHelper webHelper
+@{
+    Layout = "_ColumnsOne";
+
+    //scripts
+    Html.AddScriptParts(ResourceLocation.Footer, "~/js/public.accordion.js");
+    Html.AddScriptParts(ResourceLocation.Footer, "~/js/public.onepagecheckout.js");
+
+    var storeLocation = webHelper.GetStoreLocation();
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Checkout").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-checkout-page");
+}
+<script src="https://www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js" type="text/javascript"></script>
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/jquery.inputmask.bundle.js"></script>
+<style>
+    .opc .section {
+        margin: 0 0 0px;
+    }
+</style>
+<div class="row">
+    <div class="col s12 m7">
+        <ul class="opc">
+            <li class="tab-section allow collection-item" id="content-billing-new">
+                <div class="step-title teed-primary" onclick="returnAddress()">
+                    <h2 class="title">1/3 @T("Checkout.ShippingAddress")</h2>
+                </div>
+                @if (Model.BillingAddress.ExistingAddresses.Count > 0)
+                {
+                    <div class="section select-billing-address first-step-checkout">
+                        <form>
+                            @await Html.PartialAsync("OpcShippingAddress", Model.ShippingAddress)
+                        </form>
+
+                        <div id="shipping-address-selection">
+                            @if (Model.ShippingAddress.AllowPickUpInStore && Model.ShippingAddress.PickupPoints.Any() && !Model.ShippingAddress.PickUpInStoreOnly)
+                            {
+                                <div style="text-align:center;margin-bottom:2em">
+                                    - ó -
+                                </div>
+                            }
+                            <label for="billing-address-select">@T("Checkout.SelectBillingAddressOrEnterNewOne")</label>
+                            <div>
+                                <select name="billing_address_id" id="billing-address-select-new" class="address-select"
+                                        title="" onchange="newAddress(!this.value)">
+                                    @foreach (var address in Model.BillingAddress.ExistingAddresses)
+                                    {
+                                        var addressLine = "";
+                                        addressLine += address.FirstName;
+                                        addressLine += " " + address.LastName;
+                                        if (address.StreetAddressEnabled && !string.IsNullOrEmpty(address.Address1))
+                                        {
+                                            addressLine += ", " + address.Address1;
+                                        }
+                                        if (address.CityEnabled && !string.IsNullOrEmpty(address.City))
+                                        {
+                                            addressLine += ", " + address.City;
+                                        }
+                                        if (address.StateProvinceEnabled && !string.IsNullOrEmpty(address.StateProvinceName))
+                                        {
+                                            addressLine += ", " + address.StateProvinceName;
+                                        }
+                                        if (address.ZipPostalCodeEnabled && !string.IsNullOrEmpty(address.ZipPostalCode))
+                                        {
+                                            addressLine += " " + address.ZipPostalCode;
+                                        }
+                                        if (address.CountryEnabled && !string.IsNullOrWhiteSpace(address.CountryName))
+                                        {
+                                            addressLine += ", " + address.CountryName;
+                                        }
+                                        //how should we render "FormattedCustomAddressAttributes" here?
+                                        <option value="@(address.Id)">@(addressLine)</option>
+                                    }
+                                    <option value="" selected="@Model.BillingAddress.NewAddressPreselected">@T("Checkout.NewAddress")</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <script type="text/javascript" asp-location="Footer">
+                        $(document).ready(function () {
+                            $('#billing-new-address-form-new').show();
+                            $('#btn-continue-checkout').hide();
+                            $.event.trigger({ type: "onepagecheckout_billing_address_new" });
+                        });
+                    </script>
+                    <style>
+                        .first-step-checkout {
+                            margin-top: 5%;
+                        }
+                    </style>
+                }
+                <script>
+                    function resetSelectedAddress() {
+                        var selectElement = $('#billing-address-select-new');
+                        if (selectElement) {
+                            selectElement.val('');
+                        }
+                        $.event.trigger({ type: "onepagecheckout_billing_address_reset" });
+                    }
+                    function newAddress(isNew) {
+                        if (isNew) {
+                            resetSelectedAddress();
+                            $('#billing-new-address-form-new').show();
+                            $('#btn-continue-checkout').hide();
+                        } else {
+                            $('#billing-new-address-form-new').hide();
+                            $('#btn-continue-checkout').show();
+                        }
+                        $.event.trigger({ type: "onepagecheckout_billing_address_new" });
+                    }
+                    function returnAddress() {
+                        $('.first-step-checkout').show();
+                        if ($('#billing-address-select-new').val() != 0) {
+                            $('#billing-new-address-form-new').hide();
+                            $('#btn-continue-checkout').show();
+                            $('#shipping-method-buttons-container').hide();
+                            $('#payment-method-buttons-container').hide();
+                            $('#option-shipping-container').empty();//.html(' ');
+                            $('#payment-method-select-container').empty();//.html(' ');
+                            $('#next-button-disable').removeClass('disabled');
+                            $('#shipping-button-disable').removeClass('disabled');
+                        } else {
+                            $('#btn-continue-checkout').hide();
+                            $('#shipping-method-buttons-container').hide();
+                            $('#payment-method-buttons-container').hide();
+                            $('#option-shipping-container').empty();//.html(' ');
+                            $('#payment-method-select-container').empty();//.html(' ');
+                            $('#nextForm-button-disable').removeClass('disabled');
+                            $('#shipping-button-disable').removeClass('disabled');
+                        }
+                    }
+                    function returnShipping() {
+                        if ($('#option-shipping-container').html() == "") {
+                            return false;
+                        }
+                        $('#shipping-method-buttons-container').show();
+                        $('#payment-method-buttons-container').hide();
+                        $('#shipping-button-disable').removeClass('disabled');
+                        //if ($('#billing-address-select-new').val() != 0) {
+                        //    $('#billing-new-address-form-new').hide();
+                        //    $('#btn-continue-checkout').show();
+                        //    $('#shipping-method-buttons-container').hide();
+                        //    $('#payment-method-buttons-container').hide();
+                        //    $('#option-shipping-container').empty().html(' ');
+                        //    $('#payment-method-select-container').empty().html(' ');
+                        //} else {
+                        //    $('#btn-continue-checkout').hide();
+                        //    $('#shipping-method-buttons-container').hide();
+                        //    $('#payment-method-buttons-container').hide();
+                        //    $('#option-shipping-container').empty().html(' ');
+                        //    $('#payment-method-select-container').empty().html(' ');
+                        //}
+                    }
+                </script>
+                @if (Model.CartModel.ShowIsGift)
+                {
+                    <div class="col s12 m12 first-step-checkout" style="margin-bottom:2%;">
+                        <label>
+                            <input type="checkbox" id="checkbox-gift" />
+                            <span>¿Esta compra es un regalo?</span>
+                        </label>
+                    </div>
+                    <script>
+                        $('#checkbox-gift').change(function () {
+                            if ($('#checkbox-gift').is(':checked')) {
+                                $('#text-gift').show();
+                            } else {
+                                $('#text-gift').hide();
+                            }
+                        });
+                    </script>
+                    <div id="text-gift" style="display:none;margin-top:2%;margin-bottom:2%;">
+                        <div class="inputs">
+                            <label>Nombre de quien firma</label>
+                            <input id="name-signs-gift" type="text" class="validate">
+                        </div>
+                        <div class="inputs">
+                            <label for="message-gift">Mensaje en tarjeta de regalo</label>
+                            <textarea id="message-gift" class="materialize-textarea" rows="4" cols="50"></textarea>
+                        </div>
+                    </div>
+                }
+
+                <div class="first-step-checkout">
+                    @if (Model.BillingAddress.ExistingAddresses.Count == 0)
+                    {
+                        <form>
+                            @await Html.PartialAsync("OpcShippingAddress", Model.ShippingAddress)
+                        </form>
+                    }
+
+                    <div class="page account-page address-edit-page first-step-checkout" id="billing-new-address-form-new" style="display:none;">
+                        @if (Model.ShippingAddress.AllowPickUpInStore && Model.ShippingAddress.PickupPoints.Any() && !Model.ShippingAddress.PickUpInStoreOnly)
+                        {
+                            <div style="text-align:center;margin-bottom:2em">
+                                - ó -
+                            </div>
+                        }
+                        <h5>Ingresa la información de la persona que recibe el pedido</h5>
+                        <div class="page-body">
+                            <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                            <form id="validateMyForm" name="validateMyForm" method="get" action="">
+                                @{
+                                    var dataDictAddress = new ViewDataDictionary(ViewData);
+                                    dataDictAddress.TemplateInfo.HtmlFieldPrefix = "Address";
+                                    @await Html.PartialAsync("_AddressCheckout", Model.BillingAddress.BillingNewAddress, dataDictAddress)
+                                }
+                                <div class="button center-align">
+                                    <input type="button" class="btn save-address-button" value="Continuar" id="nextForm-button-disable" onclick="saveAddress.nextForm()" style="margin-bottom:4%;" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button center-align first-step-checkout" id="btn-continue-checkout">
+                    <input type="button" class="btn save-address-button" value="Continuar" id="next-button-disable" onclick="selectAddress.next()" style="margin-bottom:4%;" />
+                </div>
+            </li>
+            <li class="tab-section allow collection-item">
+                <div class="step-title teed-primary" onclick="returnShipping()">
+                    <h2 class="title">2/3 @T("Checkout.ShippingMethod")</h2>
+                </div>
+                <div id="checkout-step-shipping-method" class="a-item center">
+                    <div class="buttons" id="shipping-method-buttons-container" style="display:none;">
+                        <div class="section shipping-method col s12 m12">
+                            <ul id="option-shipping-container" style="margin-top:5%;"></ul>
+                        </div>
+                        <button type="button" class="waves-effect waves-light btn" id="shipping-button-disable" onclick="ShippingOptions.save()" style="margin-bottom:5%;">
+                            @T("Common.Continue")
+                        </button>
+                    </div>
+                </div>
+            </li>
+            <li id="opc-payment_method" class="tab-section allow collection-item">
+                <div class="step-title teed-primary">
+                    <h2 class="title">3/3 @T("Checkout.PaymentMethod")</h2>
+                </div>
+                <div id="checkout-step-payment-method" class="step a-item" style="display: none;">
+                    <div class="buttons" id="payment-method-buttons-container">
+                        @*<div class="section shipping-method col s12 m12">
+                                <ul id="option-payment-container"></ul>
+                            </div>*@
+                        <div class="input-field col s12">
+                            <select onchange="PaymentAlert.paymentAlert()" class="payment-methods" id="payment-method-select-container" name="payment-method-select-container"></select>
+
+                            <label>Selecciona el tipo de pago</label>
+                        </div>
+                        <div id="PaymentAlert" style="display:none;"></div>
+                        <div id="paypal-plus" style="display:none">
+                            <div style="margin:1em 0;display:none" id="payment-data-error">
+                                <span style="font-weight:bold;color:red;" id="payment-data-error-text"></span>
+                            </div>
+                            <div style="margin:1em 0;display:none" id="ppplusProccessing">
+                                <span style="font-weight:bold;color:green;">Estamos procesando tu pago, por favor espera.</span>
+                            </div>
+                            <div id="payment-data">
+                                <div class="row">
+                                    <h5>Datos de pago</h5>
+                                    <div class="inputs col s12 m6">
+                                        <label>Nombre del titular</label>
+                                        <input id="pplus-input-name" type="text" />
+                                    </div>
+                                    <div class="inputs col s12 m6">
+                                        <label>Apellido del titular</label>
+                                        <input id="pplus-input-lastname" type="text" />
+                                    </div>
+                                    <div class="inputs col s12 m6">
+                                        <label>Correo electrónico del titular</label>
+                                        <input id="pplus-input-email" type="email" />
+                                    </div>
+                                    <div class="inputs col s12 m6">
+                                        <label>Teléfono del titular</label>
+                                        <input id="pplus-input-phone" type="tel" />
+                                    </div>
+                                    <button type="button" id="pplus-payment-data-continue" style="margin-top:1em;" class="waves-effect waves-light btn">Continuar</button>
+                                </div>
+                            </div>
+                            <div style="display:none" id="ppplusDiv"></div>
+                            <div id="ppplusError" style="font-weight:bold;color:red;display:none;margin-top:1em">Ocurrió un problema, por favor intenta con otra forma de pago.</div>
+                            <input type="hidden" id="ppplus-payment-id" />
+                        </div>
+                        <div id="pay-card" style="display:none;">
+                            <label>
+                                <input type="checkbox" id="checkbox-billing" checked />
+                                <span>Usar la dirección de envío como dirección de la tarjeta</span>
+                            </label>
+                            <style>
+                                [type=checkbox]:checked, [type=checkbox]:not(:checked) {
+                                    position: relative;
+                                    pointer-events: all;
+                                }
+                            </style>
+                            <script>
+                                $('#checkbox-billing').change(function () {
+                                    if ($('#checkbox-billing').is(':checked')) {
+                                        $('.billing-address').hide();
+                                    } else {
+                                        $('.billing-address').show();
+                                    }
+                                });
+                            </script>
+                            <div class="col s12 m12">
+                                <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                                <form id="validateMyFormB" name="validateMyForm" method="get" action="">
+                                    <div class="billing-address">
+                                        @{
+                                            var dataCardAddress = new ViewDataDictionary(ViewData);
+                                            dataCardAddress.TemplateInfo.HtmlFieldPrefix = "Address";
+                                            @await Html.PartialAsync("_AddressBillingCheckout", Model.BillingAddress.BillingNewAddress, dataCardAddress)
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        <h5>Datos de la tarjeta</h5>
+                                        <div class="inputs col s12 m6">
+                                            <label>Nombre que aparece en la tarjeta</label>
+                                            <input id="input-name" type="text" />
+                                            <span class="helper-text red-text" id="name-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                        </div>
+                                        <div class="inputs col s12 m6">
+                                            <label>Número de la tarjeta</label>
+                                            <input id="input-card" type="text" data-inputmask="'mask': '9999 9999 9999 9999'" style="text-align:center;" />
+                                            <span class="helper-text red-text" id="card-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                        </div>
+                                        <div class="inputs col m4">
+                                            <label>Mes</label>
+                                            <select id="input-month"></select>
+                                            <span class="helper-text red-text" id="month-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                        </div>
+                                        <div class="inputs col m4">
+                                            <label>Año</label>
+                                            <select id="input-year"></select>
+                                            <span class="helper-text red-text" id="year-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                        </div>
+                                        <div class="inputs col m4">
+                                            <label>CVV</label>
+                                            <input id="input-cvv" type="password" data-inputmask="'mask': '999'" style="text-align:center;" />
+                                            <span class="helper-text red-text" id="first-name-field-teed" style="display:none;">Este campo es obligatorio</span>
+                                        </div>
+                                        <script>
+                                            $("#input-card").inputmask();
+                                            $("#input-cvv").inputmask();
+                                        </script>
+                                        <style>
+                                            .select-dropdown {
+                                                text-align: center;
+                                            }
+                                        </style>
+                                    </div>
+                                </form>
+                                <script>
+                                    var month = '';
+                                    for (var i = 1; i < 13; i++) {
+                                        if (i < 10) {
+                                            month += '<option value="0' + i + '">0' + i + '</option>';
+                                        }
+                                        else {
+                                            month += '<option value="' + i + '">' + i + '</option>';
+                                        }
+                                    }
+                                    $('#input-month').append(month);
+
+                                    var min = new Date().getFullYear();
+                                    var s = min.toString().substr(2, 2)
+                                    min = parseInt(s);
+
+                                    var str = '';
+                                    for (var i = min; i < min + 6; i++) {
+                                        str += '<option value="' + i + '">' + i + '</option>';
+                                    }
+                                    $('#input-year').append(str);
+
+                                </script>
+                                <style>
+                                    input::-webkit-outer-spin-button,
+                                    input::-webkit-inner-spin-button {
+                                        /* display: none; <- Crashes Chrome on hover */
+                                        -webkit-appearance: none;
+                                        margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+                                    }
+                                </style>
+                            </div>
+                        </div>
+                        <div class="preloader-wrapper small" style="margin:1em 0" id="loading-confirm">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div><div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div><div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <button type="button" class="waves-effect waves-light btn" id="confirm-button-disable" onclick="SavePayment.save()">
+                            @T("Checkout.ConfirmButton")
+                        </button>
+                        <button id="pplusContinueButton" class="waves-effect waves-light btn" style="display:none" onclick="pPlusContinueButtonClickHandler()">
+                            @T("Checkout.ConfirmButton")
+                        </button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <style>
+        .select-dropdown li img {
+            margin: 5px 15px;
+            float: left;
+            vertical-align: middle;
+            height: 1.5em;
+            width: auto;
+            margin-top: 14px;
+        }
+
+        .shipping-method .method-list li {
+            display: inline-block;
+            width: 25%;
+            margin: 20px 2%;
+            vertical-align: top;
+        }
+
+        .shipping-method .method-list {
+            margin: 0 auto 30px;
+            overflow: hidden;
+            text-align: center;
+            font-size: 0;
+        }
+    </style>
+    <div class="col s12 m5">
+        <h5>Detalles del pedido</h5>
+        @await Html.PartialAsync("_OrderResumeCheckout")
+    </div>
+</div>
+<script src="/Themes/TeedHamleys/Content/js/checkout.help.js"></script>
+<script>
+    OrderConfirm.init('Checkout/OpcConfirmOrderNew/', 'Checkout/completed/');
+</script>
+<script>
+    let ppp;
+
+    const pPlusContinueButtonClickHandler = () => {
+        $("#payment-data-error").hide();
+        ppp.doContinue();
+        return false;
+    }
+
+    const buildPPlusIframe = () => {
+        createPPlusListeners();
+        $("#confirm-button-disable").hide();
+        $("#paypal-plus").show();
+        $("#pplus-payment-data-continue").on('click', function () {
+            $("#payment-data-error").hide();
+            if (!$("#pplus-input-name").val() ||
+                !$("#pplus-input-lastname").val() ||
+                !$("#pplus-input-email").val() ||
+                !$("#pplus-input-phone").val()) {
+                $("#payment-data-error-text").html("Todos los campos son obligatorios");
+                $("#payment-data-error").show();
+            }
+            else if (!validateEmail($("#pplus-input-email").val())) {
+                $("#payment-data-error-text").html("Ingresa un correo electrónico válido");
+                $("#payment-data-error").show();
+            }
+            else {
+                getIframe();
+            }
+        });
+    };
+
+    const getIframe = () => {
+        $('#loading-confirm').addClass('active');
+        $("#payment-data-error").hide();
+        
+        let json = '@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(new { Items = Model.CartModel.Items.Select(x => { x.ProductName = x.ProductName.Replace("\"", ""); x.Picture.AlternateText = x.Picture.AlternateText.Replace("\"", ""); x.Picture.Title = x.Picture.Title.Replace("\"", ""); return x; }), Model.TotalModel }).Replace("'", ""))';
+        let data = JSON.parse(json);
+        if ($('#billing-address-select-new').val()) {
+            var AddressId = $('#billing-address-select-new').val();
+            data.AddressId = AddressId;
+        }
+        else {
+            let address = {
+                FirstName: $('#input-Checkout-FirstName').val(),
+                LastName: $('#input-Checkout-LastName').val(),
+                Address1: $('#google-map-address').val(),
+                Address2: "",
+                City: $('#input-Checkout-City').val(),
+                ZipPostalCode: $('#input-Checkout-ZCP').val(),
+                StateProvinceId: $('.input-Checkout-State').val(),
+                PhoneNumber: $('#input-Checkout-Phone').val(),
+            };
+            data.Address = address;
+        }
+
+        let pplusUserData = {
+            firstName: $("#pplus-input-name").val(),
+            lastName: $("#pplus-input-lastname").val(),
+            email: $("#pplus-input-email").val(),
+            phone: $("#pplus-input-phone").val()
+        };
+
+        $('#pplusContinueButton').addClass('disabled');
+        $("#payment-data").hide();
+
+        $.ajax({
+            cache: false,
+            url: '/Admin/PaymentPaypalPlus/GetPaymentData',
+            type: 'POST',
+            data: data,
+            success: function (data) {
+                $("#ppplusDiv").show();
+                $("#ppplus-payment-id").val(data.id);
+                let index = data.links.map(x => x.rel).indexOf("approval_url");
+                if (index >= -1) {
+                    ppp = PAYPAL.apps.PPP({
+                        approvalUrl: data.links[index].href,
+                        placeholder: "ppplusDiv",
+                        mode: "live",
+                        payerFirstName: pplusUserData.firstName,
+                        payerLastName: pplusUserData.lastName,
+                        payerEmail: pplusUserData.email,
+                        payerPhone: pplusUserData.phone,
+                        payerTaxId: "",
+                        payerTaxIdType: "",
+                        language: "es_MX",
+                        country: "MX",
+                        rememberedCards: data.rememberedCards,
+                        enableContinue: "pplusContinueButton",
+                        disableContinue: "pplusContinueButton"
+                    });
+                }
+                $('#pplusContinueButton').removeClass('disabled');
+                $('#loading-confirm').removeClass('active');
+            },
+            error: function () {
+                $("#ppplusError").show();
+                $('#loading-confirm').removeClass('active');
+            }
+        });
+    };
+
+    const validateEmail = (email) => {
+        var re = /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    const createPPlusListeners = () => {
+        if (window.addEventListener) {
+            window.addEventListener("message", messageListener, false);
+            console.log("addEventListener successful", "debug");
+        } else if (window.attachEvent) {
+            window.attachEvent("onmessage", messageListener);
+            console.log("attachEvent successful", "debug");
+        } else {
+            console.log("Could not attach message listener", "debug");
+            throw new Error("Can't attach message listener");
+        }
+    }
+
+    const messageListener = (event) => {
+        try {
+            var message = JSON.parse(event.data);
+
+            if (message['action'] === 'loaded') {
+                $("#pplusContinueButton").show();
+            }
+
+            $('#loading-confirm').removeClass('active');
+            $('#pplusContinueButton').removeClass('disabled');
+
+            if (typeof message['cause'] !== 'undefined') { //iFrame error handling
+                ppplusError = message['cause'].replace(/['"]+/g, ""); //log & attach this error into the order if possible
+
+                switch (ppplusError) {
+                    case "INTERNAL_SERVICE_ERROR": //javascript fallthrough
+                    case "SOCKET_HANG_UP": //javascript fallthrough
+                    case "socket hang up": //javascript fallthrough
+                    case "connect ECONNREFUSED": //javascript fallthrough
+                    case "connect ETIMEDOUT": //javascript fallthrough
+                    case "UNKNOWN_INTERNAL_ERROR": //javascript fallthrough
+                    case "fiWalletLifecycle_unknown_error": //javascript fallthrough
+                    case "Failed to decrypt term info": //javascript fallthrough
+                    case "RESOURCE_NOT_FOUND": //javascript fallthrough
+                    case "INTERNAL_SERVER_ERROR":
+                        //Internal error, reload the iFrame & make a new createPayment API and ask the costumer to try again, if the problem persists check your integration and / or contact your PayPal POC.
+                        //$("#payment-data-error").html("Ocurrió un problema al conectarse con el servicio. Por favor inténtalo de nuevo.");
+                        //$("#payment-data-error").show();
+                        //getIframe();
+                        break;
+                    case "RISK_N_DECLINE": //javascript fallthrough
+                    case "NO_VALID_FUNDING_SOURCE_OR_RISK_REFUSED": //javascript fallthrough
+                    case "TRY_ANOTHER_CARD": //javascript fallthrough
+                    case "NO_VALID_FUNDING_INSTRUMENT":
+                        //Payment declined by risk, inform the customer to contact PayPal or offer Express Checkout payment solution.
+                        //$("#payment-data-error-text").html("La transacción no fue aprobada. Por favor selecciona otra forma de pago.");
+                        $("#payment-data-error").show();
+                        $("#ppplusDiv").hide();
+                        break;
+                    case "CARD_ATTEMPT_INVALID":
+                        //03 maximum attempts with error reached, inform the customer to try againa and reload the iFrame.
+                        //$("#payment-data-error").html("No se pudo realizar la transacción. Por favor selecciona otra forma de pago.");
+                        //$("#payment-data-error").show();
+                        break;
+                    case "INVALID_OR_EXPIRED_TOKEN":
+                        //User session is expired, inform the customer to try again and reload the iFrame & make a new createPayment API.
+                        //$("#payment-data-error").html("La sesión ha expirado. Por favor inténtalo de nuevo.");
+                        //$("#payment-data-error").show();
+                        getIframe();
+                        break;
+                    case "CHECK_ENTRY":
+                        //Missing or invalid credit card information, inform your customer to check the inputs.
+                        break;
+                    default: //unknown error & reload payment flow
+                        //$("#payment-data-error").html("No fue posible realizar la transacción. Por favor selecciona otra forma de pago.");
+                        //$("#payment-data-error").show();
+                        break;
+                }
+            }
+
+            if (message['action'] == 'checkout') { //PPPlus session approved, do logic here
+                console.log(message);
+                var rememberedCard = null;
+                var payerId = null;
+                var paymentId = null;
+                var installmentsValue = null;
+                rememberedCard = message['result']['rememberedCards']; //save on user BD record
+                payerId = message['result']['payer']['payer_info']['payer_id']; //use it on executePayment API
+                paymentId = $("#ppplus-payment-id").val();
+
+                if ("term" in message) {
+                    installmentsValue = message['result']['term']['term']; //installments value
+                } else {
+                    installmentsValue = 1; //no installments
+                }
+                /* Next steps:
+                1) Save the rememberedCard value on the user record on your Database.
+                2) Save the installmentsValue value into the order (Optional).
+                3) Call executePayment API using payerID value to capture the payment.
+                */
+
+                $("#ppplusDiv").hide();
+                $("#ppplusProccessing").show();
+                completePayment(payerId, rememberedCard, paymentId);
+            }
+        } catch (e) { //treat exceptions here
+            console.log(e);
+        }
+    }
+
+    const completePayment = (payerId, rememberedCard, paymentId) => {
+        $('#pplusContinueButton').hide();
+        $('#loading-confirm').addClass('active');
+
+        var body = {
+            payerId,
+            rememberedCard,
+            paymentId
+        };
+
+        $.ajax({
+            cache: false,
+            url: '/Admin/PaymentPaypalPlus/CompletePayment',
+            type: 'POST',
+            data: body,
+            success: function (data) {
+                let orderNote = JSON.parse(data);
+                delete orderNote.rememberedCards;
+                delete orderNote.term;
+                delete orderNote.transactions.item_list;
+                SavePayment.save(JSON.stringify(orderNote));
+            },
+            error: function (error) {
+                $("#payment-data-error-text").html("No fue posible realizar la transacción. Por favor selecciona otra forma de pago.");
+                $("#payment-data-error").show();
+                $("#ppplusProccessing").hide();
+                $('#loading-confirm').removeClass('active');
+            }
+        });
+    }
+
+    const calculateNewTotal = (shipping) => {
+        let subtotal = $("#order-subtotal-value").val();
+        let discount = $("#order-discount-value").val() === undefined ? 0 : $("#order-discount-value").val();
+        return parseFloat(subtotal) + shipping - parseFloat(discount);
+    }
+
+    const shippingMethodSelected = (e) => {
+        $.ajax({
+            method: 'GET',
+            url: '/Checkout/UpdateTotalsByShipping?shippingOption=' + $(e).val(),
+            success: function (data) {
+                let newTotal = calculateNewTotal(data);
+                $("#calculate-shipping").html("$" + data.toFixed(2));
+                $("#calculate-total").html("$" + newTotal.toFixed(2));
+
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    const updatePickupInfo = (element) => {
+        $("#pickup-info").html($('option:selected', element).data('address'));
+        $("#schedule-data").html($('option:selected', element).data('schedule'));
+
+    }
+
+    const updatePickUpShippingFee = (e) => {
+        $.ajax({
+            method: 'GET',
+            url: '/Checkout/UpdateTotalsByPickupPoint?pickUpPoint=' + e,
+            success: function (data) {
+                let newTotal = calculateNewTotal(data);
+                $("#calculate-shipping").html("$" + data.toFixed(2));
+                $("#calculate-total").html("$" + newTotal.toFixed(2));
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    $("#pickup-points-select").on('change', function () {
+        updatePickupInfo(this);
+        updatePickUpShippingFee($(this).val());
+    });
+</script>

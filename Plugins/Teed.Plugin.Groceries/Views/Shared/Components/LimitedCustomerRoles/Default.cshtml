@@ -1,0 +1,71 @@
+﻿@model Teed.Plugin.Groceries.Components.LimitedCustomerRolesModel
+@if (Model.SholdDisplaySelect)
+{
+    <link href="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.css" rel="stylesheet">
+    <script src="~/Plugins/Teed.Plugin.Groceries/src/ui-choose/ui-choose.js"></script>
+    <div class="form-group">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="control-label">Perfil operativo</label>
+                <div title="Indica el perfil operativo." class="ico-help">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <select id="limited-select" class="ui-choose-limited" multiple>
+                @foreach (var item in Model.Roles)
+                {
+                    <option selected="@item.Selected" value="@item.Value">@item.Text</option>
+                }
+            </select>
+            <button type="button" id="submit-button" class="btn btn-info" onclick="saveLimitedRoles()">
+                <i class="fa fa-plus-save"></i>
+                Actualizar perfil operativo
+            </button>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.ui-choose-limited').ui_choose({
+                itemWidth: null,
+                skin: '',
+                multi: true,
+                active: 'selected',
+                full: false,
+                colNum: null,
+                dataKey: 'ui-choose',
+                change: function (data) {
+                    console.log(data);
+                },
+                click: null
+            });
+        });
+
+        const saveLimitedRoles = () => {
+            $("#submit-button").prop('disabled', true);
+            $("#submit-button").html("Guardando...");
+            const selectedRoles = $("#limited-select").val();
+
+            let body = {
+                selectedRoleIds: JSON.stringify(selectedRoles),
+                allowedRoleIds: '@(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Roles.Select(x => int.Parse(x.Value)).ToList()))',
+                customerId: @(Model.CustomerId),
+            };
+
+            addAntiForgeryToken(body);
+
+            $.ajax({
+                url: '/Admin/Customer/UpdateLimitedRoles',
+                method: 'POST',
+                data: body,
+                success: () => {
+                    window.location.reload();
+                },
+                error: () => {
+                    $("#submit-button").html("No fue posible guardar el perfil operativo.");
+                }
+            });
+        };
+    </script>
+} 

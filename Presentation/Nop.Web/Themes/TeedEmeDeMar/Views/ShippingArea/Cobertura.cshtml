@@ -1,0 +1,114 @@
+﻿@model Nop.Web.Models.ShippingAreas.CoberturaViewModel
+@{
+    Layout = "~/Themes/TeedZanaAlquimia/Views/Shared/_ColumnsOne.cshtml";
+    Html.AppendPageCssClassParts("html-topic-page");
+}
+<style>
+    h2 {
+        font-size: 2em;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    h3 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    #map {
+        height: 600px;
+    }
+</style>
+<div class="page topic-page" id="ph-topic">
+    <div class="page-title" id="ph-title">
+        <h1>Cobertura</h1>
+    </div>
+    <div class="page-body">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 m6 s12" style="margin-bottom: 2em">
+                    @foreach (var state in Model.AreasData.GroupBy(x => x.State))
+                    {
+                        <h2>@state.Key</h2>
+                        @foreach (var city in state.GroupBy(x => x.City))
+                        {
+                            <div style="margin: 1em 0 0 1em">
+                                <h3>@city.Key</h3>
+                                <p>@(string.Join(", ", city.Select(x => x.Suburbs)))</p>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="col l6 m6 s12">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var myStyle = [
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                { visibility: "off" }
+            ]
+        }
+    ];
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 19.3170078, lng: -99.2090609 },
+            disableDefaultUI: true,
+            zoomControl: true,
+            zoom: 13
+        });
+        map.set('styles', myStyle);
+        map.data.loadGeoJson('/shippingarea/GetGeoJson');
+        map.data.setStyle({
+            fillColor: 'green',
+            strokeColor: '#628226',
+            strokeWeight: 3
+        });
+
+        // zoom to show all the features
+        var bounds = new google.maps.LatLngBounds();
+        map.data.addListener('addfeature', function (e) {
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            map.fitBounds(bounds);
+        });
+
+        // zoom on click
+        map.data.addListener('click', function (e) {
+            var bounds = new google.maps.LatLngBounds();
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            map.fitBounds(bounds);
+        });
+    }
+    
+    function processPoints(geometry, callback, thisArg) {
+        if (geometry instanceof google.maps.LatLng) {
+            callback.call(thisArg, geometry);
+        } else if (geometry instanceof google.maps.Data.Point) {
+            callback.call(thisArg, geometry.get());
+        } else {
+            geometry.getArray().forEach(function (g) {
+                processPoints(g, callback, thisArg);
+            });
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUvh0c7WBIqAeMnpGnx09MKsYQOlHkJJw&callback=initMap"
+        async defer></script>

@@ -1,0 +1,181 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderDeliveryReports.ValidityManufacturers
+@{
+    Layout = "_AdminLayout";
+    Html.SetActiveMenuItemSystemName("Groceries.OrderDeliveryReports");
+    var deliveryDate = Model.Date.ToString("dd-MM-yyyy");
+    var countManufacturers = 0;
+    var controllerName = "OrderDeliveryReports";
+}
+    <form method="post" enctype="multipart/form-data">
+        <div class="content-header clearfix">
+            <h1 class="pull-left">
+                Nuevos fabricantes registrados de la fecha @deliveryDate
+                <small>
+                    <i class="fa fa-arrow-circle-left"></i>
+                    <a asp-action="OrderReportStatus" asp-route-id="@(Model.Date.ToString("dd-MM-yyyy"))">Regresar a la lista de compradores</a>
+                </small>
+            </h1>
+        </div>
+        <div class="content">
+            <div class="form-horizontal">
+                <div class="panel-group">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            @if (ViewBag.mensaje != null)
+                            {
+                                <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                    @ViewBag.mensaje
+                                </h2>
+                            }
+                            @if (Model.Manufactures.Count > 0)
+                            {
+                                <div>
+                                    <div class="table-responsive">
+
+                                        <table class="table-responsive" style="width:100%">
+                                            <tr>
+                                                <td style="background-color:khaki; width:70%">Fabricante</td>
+                                                <td style="background-color:khaki;text-align:center">Comprador</td>
+                                            </tr>
+                                            @foreach (var item in Model.Manufactures)
+                                            {
+                                                <tr>
+                                                    <td hidden><input hidden id="shoppingId-@countManufacturers" value="@item.ShoppingStoreId" /></td>
+                                                    <td hidden><input hidden id="buyerId-@countManufacturers" value="@item.BuyerId" /></td>
+                                                    <td style="width:70%">
+                                                        <input id="newShoppingId-@countManufacturers" value=" @item.NewShoppingStoreId" class="newShoppingId" placeholder="Bodega..." style="width:100%" />
+                                                    </td>
+                                                    <td style="text-align:center">
+                                                        @item.BuyerName
+                                                    </td>
+                                                    <span style="color:red" id="valueRegisterCeroOrEmpty-@countManufacturers"></span>
+                                                </tr>
+                                                countManufacturers++;
+                                            }
+                                        </table>
+
+                                    </div>
+                                    <hr />
+
+                                    <hr />
+                                    <input asp-for="ManufacturersJson" type="hidden" />
+                                    <input asp-for="DateString" type="hidden" />
+
+                                    <div class="pull-right">
+                                        <button type="submit" asp-action="ValidityNewManufacturers" onclick="return updateNewManufacturersReportJson()" class="btn bg-blue">
+                                            Guardar
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <h2 class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; color: red">
+                                    No se registraron nuevos fabricantes.
+                                </h2>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+<style>
+    ul.images {
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+        ul.images li {
+            display: inline-block;
+            width: 160px;
+            height: 210px;
+        }
+</style>
+<script>
+
+    function updateNewManufacturersReportJson() {
+        var newManufacturersReportData = [];
+
+        for (var i = 0; i < @countManufacturers; i++) {
+            var shoppingId = document.getElementById('shoppingId-' + i).value;
+            var newShoppingId = document.getElementById('newShoppingId-' + i).value;
+            var buyerId = document.getElementById('buyerId-' + i).value;
+
+            var Data = {
+                ShoppingStoreId: shoppingId,
+                NewShoppingStoreId: newShoppingId,
+                BuyerId: buyerId,
+            }
+            newManufacturersReportData.push(Data);
+        }
+
+        var manufacturersReportJson = JSON.stringify(newManufacturersReportData);
+        console.log(manufacturersReportJson);
+        document.getElementById('ManufacturersJson').value = manufacturersReportJson;
+        //updateDataManufacturers(productsReportJson);
+    };
+
+    function updateDataProducts(jsonManufacturersData) {
+        var body = {
+            DateString: '@deliveryDate',
+            ManufacturersJson: jsonManufacturersData,
+        }
+
+        console.log(body);
+
+        $.ajax({
+            url:"@Html.Raw(Url.Action("ValidityNewManufacturers", controllerName))",
+            type: 'Post',
+            data: body,
+            success: function (data) {
+                $("#success-message").html("Se actualizaron correctamente los fabricantes, por favor espere...");
+                $("#success-message").show();
+                location.reload();
+            },
+            error: function (e) {
+                $("#error-message").html(e.responseText);
+                $("#error-message").show();
+            }
+        });
+
+    }
+
+    function DataJson(Json) {
+        var jsonData = Json;
+        document.getElementById('JsonData').value = jsonData;
+    }
+
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+    .tableExpense {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tdExpense, .thExpense {
+        border: 1px solid #ffffff;
+        text-align: center;
+        padding: 8px;
+    }
+</style>

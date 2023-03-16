@@ -1,0 +1,14 @@
+﻿@model Teed.Plugin.Groceries.Models.OrderReport.EditOrderReportModel
+@using Nop.Services.Customers;
+<div class="form-horizontal">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @foreach (var log in Model.LogData)
+                {
+                    <span><strong>@log.Date.ToLocalTime().ToString("dd-MM-yyyy hh:mm tt")</strong> @log.Author.GetFullName(): @log.Log</span><br />
+                }
+            </div>
+        </div>
+    </div>
+</div>

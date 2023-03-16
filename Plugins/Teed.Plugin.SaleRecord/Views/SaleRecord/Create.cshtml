@@ -1,0 +1,32 @@
+﻿@model Teed.Plugin.SaleRecord.Models.SaleRecords.SaleRecordModel
+@{
+    Layout = "_AdminLayout";
+}
+<form method="post" enctype="multipart/form-data">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            Nueva venta
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">Ir a la lista de ventas</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <nop-tabs id="categories-price">
+                    <nop-tab asp-name="tab-expenseType" asp-title="Venta directa" asp-default="true">
+                        @await Html.PartialAsync("~/Plugins/Teed.Plugin.SaleRecord/Views/SaleRecord/_CreateOrUpdate.cshtml", Model)
+                    </nop-tab>
+                </nop-tabs>
+            </div>
+        </div>
+    </div>
+</form>
