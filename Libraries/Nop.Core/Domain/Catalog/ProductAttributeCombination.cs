@@ -53,7 +53,7 @@ namespace Nop.Core.Domain.Catalog
         /// <summary>
         /// Gets or sets if the combination should be pre selected when loading attributes for product
         /// </summary>
-        public bool? IsPreSelected { get; set; }
+        //public bool? IsPreSelected { get; set; }
 
         /// <summary>
         /// Gets the product

@@ -5062,7 +5062,6 @@ namespace Nop.Web.Areas.Admin.Controllers
                         Cost = x.Cost,
                         CustomerEntersQty = x.CustomerEntersQty,
                         Quantity = x.Quantity,
-                        IsPreSelected = x.IsPreSelected,
                         DisplayOrder = x.DisplayOrder,
                         PictureId = x.PictureId,
                         PictureThumbnailUrl = pictureThumbnailUrl
@@ -5628,8 +5627,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         ManufacturerPartNumber = x.ManufacturerPartNumber,
                         Gtin = x.Gtin,
                         OverriddenPrice = x.OverriddenPrice,
-                        NotifyAdminForQuantityBelow = x.NotifyAdminForQuantityBelow,
-                        IsPreSelected = x.IsPreSelected ?? false,
+                        NotifyAdminForQuantityBelow = x.NotifyAdminForQuantityBelow
                     };
                     //warnings
                     var warnings = _shoppingCartService.GetShoppingCartItemAttributeWarnings(_workContext.CurrentCustomer,
@@ -5681,7 +5679,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             combination.Gtin = model.Gtin;
             combination.OverriddenPrice = model.OverriddenPrice;
             combination.NotifyAdminForQuantityBelow = model.NotifyAdminForQuantityBelow;
-            combination.IsPreSelected = model.IsPreSelected;
+            //combination.IsPreSelected = model.IsPreSelected;
             _productAttributeService.UpdateProductAttributeCombination(combination);
 
             //quantity change history

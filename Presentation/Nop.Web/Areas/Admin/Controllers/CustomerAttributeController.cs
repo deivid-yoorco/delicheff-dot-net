@@ -359,7 +359,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 cav.Name = model.Name;
-                cav.IsPreSelected = model.IsPreSelected;
+                //cav.IsPreSelected = model.IsPreSelected;
                 cav.DisplayOrder = model.DisplayOrder;
                 _customerAttributeService.UpdateCustomerAttributeValue(cav);
 

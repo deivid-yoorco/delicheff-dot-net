@@ -983,8 +983,8 @@ namespace Nop.Web.Areas.Admin.Models.Catalog
             [NopResourceDisplayName("Admin.Catalog.Products.ProductAttributes.AttributeCombinations.Fields.NotifyAdminForQuantityBelow")]
             public int NotifyAdminForQuantityBelow { get; set; }
 
-            [NopResourceDisplayName("Admin.Catalog.Products.ProductAttributes.AttributeCombinations.Fields.IsPreSelected")]
-            public bool IsPreSelected { get; set; }
+            //[NopResourceDisplayName("Admin.Catalog.Products.ProductAttributes.AttributeCombinations.Fields.IsPreSelected")]
+            //public bool IsPreSelected { get; set; }
         }
 
         #region Stock quantity history

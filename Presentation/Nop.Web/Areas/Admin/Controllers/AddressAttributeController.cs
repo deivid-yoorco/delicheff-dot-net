@@ -258,7 +258,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                     Id = x.Id,
                     AddressAttributeId = x.AddressAttributeId,
                     Name = x.Name,
-                    IsPreSelected = x.IsPreSelected,
+                    //IsPreSelected = x.IsPreSelected,
                     DisplayOrder = x.DisplayOrder,
                 }),
                 Total = values.Count()

@@ -102,8 +102,7 @@
                             foreach (var item in Model.Items.Where(x => !x.IsExtraCartProduct).ToList())
                             {
                                 string quantityDisabled = null;
-                                if (item.RewardPointsRequired != 0 || item.GiftProductEnable || (item.IsRewardItem ?? false) ||
-                                    (!string.IsNullOrEmpty(item.AppliedByCodeByCoupon) && item.SubTotal == "$0.00"))
+                                if (item.RewardPointsRequired != 0 || item.GiftProductEnable || (item.IsRewardItem ?? false) || item.SubTotal == "$0.00")
                                 {
                                     quantityDisabled = "true";
                                 }
@@ -304,8 +303,7 @@
                                             </td>
                                         }*@
                                     <td class="subtotal">
-                                        @if (item.GiftProductEnable || (item.IsRewardItem ?? false) == true ||
-                                           (!string.IsNullOrEmpty(item.AppliedByCodeByCoupon) && item.SubTotal == "$0.00"))
+                                        @if (item.GiftProductEnable || (item.IsRewardItem ?? false) == true || item.SubTotal == "$0.00")
                                         {
                                             <span>GRATIS</span>
                                         }
@@ -368,8 +366,7 @@
                 @foreach (var item in Model.Items.Where(x => !x.IsExtraCartProduct).ToList())
                 {
                     string quantityDisabled = null;
-                    if (item.RewardPointsRequired != 0 || item.GiftProductEnable || (item.IsRewardItem ?? false) ||
-                        (!string.IsNullOrEmpty(item.AppliedByCodeByCoupon) && item.SubTotal == "$0.00"))
+                    if (item.RewardPointsRequired != 0 || item.GiftProductEnable || (item.IsRewardItem ?? false) || item.SubTotal == "$0.00")
                     {
                         quantityDisabled = "true";
                     }
@@ -510,8 +507,7 @@
                                         <div class="col s4">
                                             <strong>Precio: </strong>
                                             <span class="product-subtotal">
-                                                @if (item.GiftProductEnable || (item.IsRewardItem ?? false) == true ||
-                                                   (!string.IsNullOrEmpty(item.AppliedByCodeByCoupon) && item.SubTotal == "$0.00"))
+                                                @if (item.GiftProductEnable || (item.IsRewardItem ?? false) == true || item.SubTotal == "$0.00")
                                                 {
                                                     <text>
                                                         GRATIS

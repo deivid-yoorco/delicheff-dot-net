@@ -1582,7 +1582,7 @@ namespace Nop.Web.Controllers
                     {
                         var combinationValues = _productAttributeParser.ParseProductAttributeValues(combination.AttributesXml);
                         availableAttributes.AddRange(combinationValues.Where(x => x.Id != currentAttribute.Id)
-                            .Select(x => new AttributeCombinationInfo { Id = x.Id, IsPreSelected = combination.IsPreSelected ?? false }));
+                            .Select(x => new AttributeCombinationInfo { Id = x.Id, IsPreSelected = false }));
                     }
                 }
             }
